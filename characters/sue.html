@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUE — CHARAMARL</title>
+<style>
+  :root {
+    --bg: #0e0e14;
+    --surface: #1a1a26;
+    --accent: #f5c842;
+    --accent2: #a259ff;
+    --text: #f0f0f0;
+    --muted: #888;
+    --radius: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Arial, sans-serif; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    position: sticky; top: 0;
+    background: rgba(14,14,20,.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .logo {
+    font-size: 22px; font-weight: 900; letter-spacing: .12em;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-decoration: none;
+  }
+  .back { color: var(--muted); text-decoration: none; font-size: 13px; letter-spacing: .06em; }
+  .back:hover { color: var(--text); }
+
+  /* HERO */
+  .char-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 60px 32px;
+    align-items: center;
+  }
+  @media (max-width: 640px) {
+    .char-hero { grid-template-columns: 1fr; padding: 32px 20px; }
+  }
+
+  .char-visual {
+    background: linear-gradient(135deg, #1e1e2e, #2a1a3e);
+    border-radius: 24px;
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 120px;
+    position: relative;
+    overflow: hidden;
+  }
+  .char-visual img { width: 80%; height: 80%; object-fit: contain; }
+
+  .char-info .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tag {
+    background: rgba(255,255,255,.07); color: var(--muted);
+    font-size: 11px; padding: 4px 12px; border-radius: 12px; letter-spacing: .04em;
+  }
+  .char-info h1 { font-size: clamp(40px, 8vw, 64px); font-weight: 900; letter-spacing: .06em; margin-bottom: 8px; }
+  .char-creator { color: var(--muted); font-size: 13px; letter-spacing: .08em; margin-bottom: 20px; }
+  .char-desc { color: var(--muted); font-size: 14px; line-height: 1.8; margin-bottom: 32px; }
+
+  .colortap-btn {
+    display: inline-block;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #111; font-weight: 900; font-size: 14px;
+    padding: 14px 32px; border-radius: 32px;
+    text-decoration: none; letter-spacing: .08em;
+    transition: opacity .2s; margin-right: 12px;
+  }
+  .colortap-btn:hover { opacity: .85; }
+
+  /* PRODUCTS */
+  section { max-width: 1000px; margin: 0 auto; padding: 0 32px 60px; }
+  .section-title { font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+  .section-heading { font-size: clamp(20px, 4vw, 28px); font-weight: 900; margin-bottom: 28px; }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  .product-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,.06);
+    cursor: pointer;
+    transition: transform .2s, border-color .2s;
+    text-decoration: none; color: inherit;
+  }
+  .product-card:hover { transform: translateY(-3px); border-color: rgba(245,200,66,.3); }
+  .product-card.selected { border-color: var(--accent); }
+
+  .product-img {
+    width: 100%; aspect-ratio: 1;
+    border-radius: 10px; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; background: #111;
+  }
+  .product-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+
+  .color-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    margin: 0 auto 8px; border: 2px solid rgba(255,255,255,.15);
+  }
+  .product-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+  .product-price { font-size: 15px; font-weight: 900; color: var(--accent); }
+
+  /* BUY BAR */
+  .buy-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(14,14,20,.96); backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,.1);
+    padding: 16px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    z-index: 200;
+  }
+  .buy-bar-info { font-size: 13px; color: var(--muted); }
+  .buy-bar-info strong { color: var(--text); font-size: 16px; display: block; }
+  .buy-btn {
+    background: var(--accent); color: #111;
+    border: none; border-radius: 32px;
+    padding: 14px 40px; font-size: 15px; font-weight: 900;
+    cursor: pointer; letter-spacing: .06em;
+    transition: opacity .2s; text-decoration: none;
+  }
+  .buy-btn:hover { opacity: .85; }
+
+  footer {
+    border-top: 1px solid rgba(255,255,255,.08);
+    padding: 32px; text-align: center;
+    color: var(--muted); font-size: 12px;
+    margin-bottom: 80px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="../index.html">CHARAMARL</a>
+  <a class="back" href="../index.html">← キャラクター一覧</a>
+</header>
+
+<!-- CHARACTER HERO -->
+<div class="char-hero">
+  <div class="char-visual">
+    <span>🦕</span>
+  </div>
+  <div class="char-info">
+    <div class="tag-row">
+      <span class="tag">DinoRenny</span>
+      <span class="tag">アクキー</span>
+      <span class="tag">50mm</span>
+      <span class="tag">両面印刷</span>
+    </div>
+    <h1>SUE</h1>
+    <div class="char-creator">by DinoRenny (@dino_renny)</div>
+    <p class="char-desc">
+      ライブドローイングから生まれた恐竜キャラクター。<br>
+      6色展開のビビッドなアクリルキーホルダー。<br>
+      タップして色を選んで、お気に入りの1枚を。
+    </p>
+    <a class="colortap-btn" href="https://dinorenny-colortap.vercel.app/sue.html" target="_blank">
+      🎨 COLOR TAP で選ぶ
+    </a>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section>
+  <div class="section-title">PRODUCTS</div>
+  <div class="section-heading">カラーを選ぶ</div>
+  <div class="product-grid" id="colorGrid">
+
+    <div class="product-card" data-variant="55239639761187" data-name="BLAZE RED" onclick="selectColor(this)">
+      <div class="product-img">
+        <div class="color-dot" style="background:#ff2a2a; width:60px; height:60px;"></div>
+      </div>
+      <div class="product-name">BLAZE RED</div>
+      <div class="product-price">¥1,200</div>
+    </div>
+
+    <div class="product-card" data-variant="55239639793955" data-name="SUNNY YELLOW" onclick="selectColor(this)">
+      <div class="product-img">
+        <div class="color-dot" style="background:#ffe600; width:60px; height:60px;"></div>
+      </div>
+      <div class="product-name">SUNNY YELLOW</div>
+      <div class="product-price">¥1,200</div>
+    </div>
+
+    <div class="product-card" data-variant="55239639826723" data-name="SLIME GREEN" onclick="selectColor(this)">
+      <div class="product-img">
+        <div class="color-dot" style="background:#00ff44; width:60px; height:60px;"></div>
+      </div>
+      <div class="product-name">SLIME GREEN</div>
+      <div class="product-price">¥1,200</div>
+    </div>
+
+    <div class="product-card" data-variant="55239639859491" data-name="ICE CYAN" onclick="selectColor(this)">
+      <div class="product-img">
+        <div class="color-dot" style="background:#00e5ff; width:60px; height:60px;"></div>
+      </div>
+      <div class="product-name">ICE CYAN</div>
+      <div class="product-price">¥1,200</div>
+    </div>
+
+    <div class="product-card" data-variant="55239639892259" data-name="GALAXY BLUE" onclick="selectColor(this)">
+      <div class="product-img">
+        <div class="color-dot" style="background:#2255ff; width:60px; height:60px;"></div>
+      </div>
+      <div class="product-name">GALAXY BLUE</div>
+      <div class="product-price">¥1,200</div>
+    </div>
+
+    <div class="product-card" data-variant="55239639925027" data-name="NEON PINK" onclick="selectColor(this)">
+      <div class="product-img">
+        <div class="color-dot" style="background:#ff00cc; width:60px; height:60px;"></div>
+      </div>
+      <div class="product-name">NEON PINK</div>
+      <div class="product-price">¥1,200</div>
+    </div>
+
+  </div>
+</section>
+
+<footer>© 2026 CHARAMARL / DinoRenny. All rights reserved.</footer>
+
+<!-- BUY BAR -->
+<div class="buy-bar" id="buyBar">
+  <div class="buy-bar-info">
+    <strong id="selectedName">カラーを選んでください</strong>
+    SUE アクリルキーホルダー 50mm
+  </div>
+  <a class="buy-btn" id="buyBtn" href="#" onclick="return false;">購入する →</a>
+</div>
+
+<script>
+  const BASE_URL = "https://thedinorenny.online/products/%E6%81%90%E7%AB%9C-%E3%82%A2%E3%82%AF%E3%83%AA%E3%83%AB%E3%82%AD%E3%83%BC%E3%83%9B%E3%83%AB%E3%83%80%E3%83%BC-dinorenny-sue-%E5%85%A86%E8%89%B2-50mm";
+
+  function selectColor(card) {
+    document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    const variant = card.dataset.variant;
+    const name = card.dataset.name;
+    document.getElementById('selectedName').textContent = name;
+    const btn = document.getElementById('buyBtn');
+    btn.href = BASE_URL + "?variant=" + variant;
+    btn.onclick = null;
+  }
+</script>
+
+</body>
+</html>

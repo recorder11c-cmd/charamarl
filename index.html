@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHARAMARL — キャラクターセレクトショップ</title>
+<style>
+  :root {
+    --bg: #0e0e14;
+    --surface: #1a1a26;
+    --accent: #f5c842;
+    --accent2: #a259ff;
+    --text: #f0f0f0;
+    --muted: #888;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    position: sticky; top: 0;
+    background: rgba(14,14,20,.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: .08em;
+    margin-left: 28px;
+    transition: color .2s;
+  }
+  nav a:hover { color: var(--text); }
+
+  .cart-btn {
+    background: var(--accent);
+    color: #111;
+    border: none;
+    border-radius: 24px;
+    padding: 8px 20px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: .06em;
+    transition: opacity .2s;
+  }
+  .cart-btn:hover { opacity: .85; }
+
+  /* ===== HERO ===== */
+  .hero {
+    text-align: center;
+    padding: 80px 24px 60px;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(162,89,255,.18) 0%, transparent 70%);
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: rgba(162,89,255,.2);
+    color: var(--accent2);
+    border: 1px solid rgba(162,89,255,.4);
+    border-radius: 24px;
+    padding: 4px 16px;
+    font-size: 12px;
+    letter-spacing: .1em;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 8vw, 72px);
+    font-weight: 900;
+    letter-spacing: .04em;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+
+  /* ===== SECTION ===== */
+  section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 24px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .section-heading {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 900;
+    margin-bottom: 40px;
+  }
+
+  /* ===== CHARACTER GRID ===== */
+  .char-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .char-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    border: 1px solid rgba(255,255,255,.06);
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .char-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,.4);
+  }
+
+  .char-thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #1e1e2e, #2a1a3e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .char-thumb img {
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+  }
+
+  .char-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: var(--accent);
+    color: #111;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+
+  .char-info {
+    padding: 16px 20px 20px;
+  }
+
+  .char-name {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: .04em;
+    margin-bottom: 4px;
+  }
+
+  .char-creator {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: .06em;
+    margin-bottom: 12px;
+  }
+
+  .char-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: rgba(255,255,255,.07);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    letter-spacing: .04em;
+  }
+
+  /* ===== PRODUCT GRID ===== */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .product-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,.06);
+    cursor: pointer;
+    transition: transform .2s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .product-card:hover { transform: translateY(-3px); }
+
+  .product-img {
+    width: 100%;
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #1e1e2e, #2a1a3e);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    overflow: hidden;
+  }
+  .product-img img { width: 80%; height: 80%; object-fit: contain; }
+
+  .product-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .product-char {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .product-price {
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    border-top: 1px solid rgba(255,255,255,.08);
+    padding: 40px 32px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: .06em;
+  }
+
+  .footer-logo {
+    font-size: 18px;
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  /* ===== COMING SOON OVERLAY ===== */
+  .char-thumb.coming { filter: grayscale(.8) brightness(.5); }
+  .coming-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    color: rgba(255,255,255,.5);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CHARAMARL</div>
+  <nav>
+    <a href="#characters">CHARACTERS</a>
+    <a href="#new">NEW ARRIVALS</a>
+    <a href="#">ABOUT</a>
+  </nav>
+  <button class="cart-btn">🛒 カート</button>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">CHARACTER SELECT SHOP</div>
+  <h1>あのキャラを、<br><span>手のひらに。</span></h1>
+  <p>個性あふれるキャラクターたちのグッズが集まるセレクトショップ。<br>アクリルキーホルダー、ステッカーなど多数展開。</p>
+</div>
+
+<!-- CHARACTERS -->
+<section id="characters">
+  <div class="section-title">CHARACTERS</div>
+  <div class="section-heading">キャラクターを選ぶ</div>
+  <div class="char-grid">
+
+    <!-- SUE -->
+    <a class="char-card" href="./characters/sue.html">
+      <div class="char-thumb">
+        <span>🦕</span>
+        <div class="char-badge">NEW</div>
+      </div>
+      <div class="char-info">
+        <div class="char-name">SUE</div>
+        <div class="char-creator">by DinoRenny</div>
+        <div class="char-tags">
+          <span class="tag">アクキー</span>
+          <span class="tag">6色</span>
+          <span class="tag">50mm</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- COMING SOON 1 -->
+    <div class="char-card" style="cursor:default;">
+      <div class="char-thumb coming">
+        <span>✦</span>
+        <div class="coming-label">COMING SOON</div>
+      </div>
+      <div class="char-info">
+        <div class="char-name" style="color:var(--muted)">???</div>
+        <div class="char-creator">近日公開</div>
+        <div class="char-tags"><span class="tag">準備中</span></div>
+      </div>
+    </div>
+
+    <!-- COMING SOON 2 -->
+    <div class="char-card" style="cursor:default;">
+      <div class="char-thumb coming">
+        <span>✦</span>
+        <div class="coming-label">COMING SOON</div>
+      </div>
+      <div class="char-info">
+        <div class="char-name" style="color:var(--muted)">???</div>
+        <div class="char-creator">近日公開</div>
+        <div class="char-tags"><span class="tag">準備中</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- NEW ARRIVALS -->
+<section id="new" style="background:var(--surface); border-radius:24px; padding:48px 40px;">
+  <div class="section-title">NEW ARRIVALS</div>
+  <div class="section-heading">新着グッズ</div>
+  <div class="product-grid">
+
+    <a class="product-card" href="./characters/sue.html">
+      <div class="product-img"><span>🦕</span></div>
+      <div class="product-name">SUE アクリルキーホルダー（全6色）</div>
+      <div class="product-char">DinoRenny / SUE</div>
+      <div class="product-price">¥1,200</div>
+    </a>
+
+    <div class="product-card" style="cursor:default; opacity:.45;">
+      <div class="product-img"><span>🏷</span></div>
+      <div class="product-name">SUE ステッカー（準備中）</div>
+      <div class="product-char">DinoRenny / SUE</div>
+      <div class="product-price">Coming soon</div>
+    </div>
+
+    <div class="product-card" style="cursor:default; opacity:.45;">
+      <div class="product-img"><span>✦</span></div>
+      <div class="product-name">新キャラ（準備中）</div>
+      <div class="product-char">???</div>
+      <div class="product-price">Coming soon</div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">CHARAMARL</div>
+  <p>キャラクターセレクトショップ</p>
+  <p style="margin-top:8px;">© 2026 CHARAMARL. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
