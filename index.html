@@ -103,6 +103,62 @@
     font-size: 11px; font-weight: 700; color: rgba(255,255,255,.4); letter-spacing: .12em;
   }
 
+  /* COLOR TAP BANNER */
+  .colortap-banner {
+    margin: 20px 16px 0;
+    border-radius: 24px;
+    background: linear-gradient(120deg, #0a0a1a 0%, #1a0030 40%, #000d30 70%, #001a10 100%);
+    border: 1px solid rgba(162,89,255,.3);
+    overflow: hidden;
+    display: flex; align-items: center;
+    position: relative;
+    max-width: 1400px;
+    margin-left: auto; margin-right: auto;
+    margin-top: 20px;
+  }
+  .colortap-chars {
+    display: flex; align-items: flex-end;
+    gap: 0; flex-shrink: 0;
+    height: 160px; padding-left: 24px;
+  }
+  .colortap-chars img {
+    height: 140px; width: auto; object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(162,89,255,.6));
+    transition: filter .4s;
+  }
+  .colortap-chars img:nth-child(2) { filter: hue-rotate(120deg) saturate(2.5) drop-shadow(0 0 20px rgba(0,255,80,.5)); margin-left:-20px; }
+  .colortap-chars img:nth-child(3) { filter: hue-rotate(300deg) saturate(2.5) drop-shadow(0 0 20px rgba(255,0,200,.5)); margin-left:-20px; }
+  .colortap-body {
+    flex: 1; padding: 28px 32px;
+  }
+  .colortap-tag {
+    display: inline-block;
+    background: rgba(162,89,255,.2); color: var(--accent2);
+    border: 1px solid rgba(162,89,255,.4);
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    padding: 3px 12px; border-radius: 20px; margin-bottom: 10px;
+  }
+  .colortap-body h2 {
+    font-size: clamp(18px, 3vw, 28px); font-weight: 900; margin-bottom: 8px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .colortap-body p { color: var(--muted); font-size: 13px; line-height: 1.6; margin-bottom: 16px; }
+  .colortap-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #111; font-weight: 900; font-size: 13px;
+    padding: 10px 24px; border-radius: 24px; text-decoration: none;
+    letter-spacing: .06em; transition: opacity .2s;
+  }
+  .colortap-link:hover { opacity: .85; }
+  @media (max-width: 600px) {
+    .colortap-banner { flex-direction: column; padding-bottom: 20px; }
+    .colortap-chars { padding-left: 0; padding-top: 20px; height: 120px; }
+    .colortap-chars img { height: 100px; }
+    .colortap-body { padding: 16px 20px; }
+  }
+
   .bottom-nav {
     display: none; position: fixed; bottom: 0; left: 0; right: 0;
     background: rgba(17,17,24,.95); backdrop-filter: blur(16px);
@@ -127,6 +183,23 @@
     <div class="avatar">🦕</div>
   </div>
 </header>
+
+<!-- COLOR TAP BANNER -->
+<div class="colortap-banner">
+  <div class="colortap-chars">
+    <img src="./img/sue.png" alt="SUE">
+    <img src="./img/mossun.png" alt="モッサン">
+    <img src="./img/putti.png" alt="プッチィ">
+  </div>
+  <div class="colortap-body">
+    <div class="colortap-tag">CHARAMARL の売り</div>
+    <h2>🎨 COLOR TAP — タップで色を選ぶ</h2>
+    <p>キャラクターをタップするたびに色が変わる。<br>お気に入りのカラーを見つけて、そのままご購入。</p>
+    <a class="colortap-link" href="https://dinorenny-colortap.vercel.app/sue.html" target="_blank">
+      SUEのCOLOR TAPを試す →
+    </a>
+  </div>
+</div>
 
 <div class="tabs">
   <div class="tab active">すべて</div>
