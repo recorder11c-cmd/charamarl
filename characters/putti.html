@@ -8,11 +8,12 @@
   :root {
     --bg: #0e0e14;
     --surface: #1a1a26;
+    --card: #1f1f2e;
     --accent: #f5c842;
     --accent2: #a259ff;
     --text: #f0f0f0;
-    --muted: #888;
-    --radius: 16px;
+    --muted: #777;
+    --radius: 18px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Arial, sans-serif; }
@@ -22,12 +23,10 @@
     padding: 20px 32px;
     border-bottom: 1px solid rgba(255,255,255,.08);
     position: sticky; top: 0;
-    background: rgba(14,14,20,.92);
-    backdrop-filter: blur(12px);
-    z-index: 100;
+    background: rgba(14,14,20,.92); backdrop-filter: blur(12px); z-index: 100;
   }
   .logo {
-    font-size: 22px; font-weight: 900; letter-spacing: .12em;
+    font-size: 22px; font-weight: 900; letter-spacing: .1em;
     background: linear-gradient(90deg, var(--accent), var(--accent2));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     text-decoration: none;
@@ -35,96 +34,102 @@
   .back { color: var(--muted); text-decoration: none; font-size: 13px; letter-spacing: .06em; }
   .back:hover { color: var(--text); }
 
-  /* HERO */
+  /* ===== HERO ===== */
   .char-hero {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 48px;
     max-width: 1000px;
     margin: 0 auto;
-    padding: 60px 32px;
+    padding: 60px 32px 40px;
     align-items: center;
   }
-  @media (max-width: 640px) {
-    .char-hero { grid-template-columns: 1fr; padding: 32px 20px; }
-  }
+  @media (max-width: 640px) { .char-hero { grid-template-columns: 1fr; padding: 32px 20px 24px; } }
 
+  /* カラープレビューエリア */
   .char-visual {
-    background: linear-gradient(135deg, #1e1e2e, #2a1a3e);
     border-radius: 24px;
     aspect-ratio: 1;
     display: flex; align-items: center; justify-content: center;
-    font-size: 120px;
     position: relative;
     overflow: hidden;
+    transition: background .6s ease;
+    background: var(--preview-bg, linear-gradient(135deg, #1e1e2e, #2a1a3e));
   }
-  .char-visual img { width: 80%; height: 80%; object-fit: contain; }
+  .char-visual img {
+    width: 80%; height: 80%; object-fit: contain;
+    transition: filter .5s ease;
+    filter: var(--preview-filter, none) drop-shadow(0 12px 32px rgba(0,0,0,.5));
+  }
 
   .char-info .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
   .tag {
     background: rgba(255,255,255,.07); color: var(--muted);
     font-size: 11px; padding: 4px 12px; border-radius: 12px; letter-spacing: .04em;
   }
-  .char-info h1 { font-size: clamp(40px, 8vw, 64px); font-weight: 900; letter-spacing: .06em; margin-bottom: 8px; }
+  .char-info h1 { font-size: clamp(40px, 8vw, 64px); font-weight: 900; letter-spacing: .04em; margin-bottom: 8px; }
   .char-creator { color: var(--muted); font-size: 13px; letter-spacing: .08em; margin-bottom: 20px; }
-  .char-desc { color: var(--muted); font-size: 14px; line-height: 1.8; margin-bottom: 32px; }
+  .char-desc { color: var(--muted); font-size: 14px; line-height: 1.8; margin-bottom: 16px; }
 
-  .colortap-btn {
+  .selected-color-label {
     display: inline-block;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    color: #111; font-weight: 900; font-size: 14px;
-    padding: 14px 32px; border-radius: 32px;
-    text-decoration: none; letter-spacing: .08em;
-    transition: opacity .2s; margin-right: 12px;
+    background: rgba(245,200,66,.15);
+    border: 1px solid rgba(245,200,66,.4);
+    color: var(--accent);
+    font-size: 13px; font-weight: 700;
+    padding: 6px 16px; border-radius: 20px;
+    letter-spacing: .08em; margin-bottom: 24px;
+    min-width: 160px; text-align: center;
+    transition: all .3s;
   }
-  .colortap-btn:hover { opacity: .85; }
 
-  /* PRODUCTS */
+  /* ===== COLOR GRID ===== */
   section { max-width: 1000px; margin: 0 auto; padding: 0 32px 60px; }
   .section-title { font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
-  .section-heading { font-size: clamp(20px, 4vw, 28px); font-weight: 900; margin-bottom: 28px; }
+  .section-heading { font-size: clamp(20px, 4vw, 28px); font-weight: 900; margin-bottom: 24px; }
 
-  .product-grid {
+  .color-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
   }
 
-  .product-card {
-    background: var(--surface);
+  .color-card {
+    background: var(--card);
     border-radius: var(--radius);
-    padding: 16px;
-    border: 1px solid rgba(255,255,255,.06);
+    padding: 14px;
+    border: 2px solid transparent;
     cursor: pointer;
-    transition: transform .2s, border-color .2s;
-    text-decoration: none; color: inherit;
+    transition: transform .2s, border-color .3s;
+    text-align: center;
   }
-  .product-card:hover { transform: translateY(-3px); border-color: rgba(245,200,66,.3); }
-  .product-card.selected { border-color: var(--accent); }
+  .color-card:hover { transform: translateY(-3px); }
+  .color-card.selected { border-color: var(--accent); }
 
-  .product-img {
+  .color-preview {
     width: 100%; aspect-ratio: 1;
-    border-radius: 10px; margin-bottom: 12px;
+    border-radius: 12px;
+    background: #111;
+    margin-bottom: 10px;
     display: flex; align-items: center; justify-content: center;
-    overflow: hidden; background: #111;
+    overflow: hidden;
+    position: relative;
   }
-  .product-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-
-  .color-dot {
-    width: 36px; height: 36px; border-radius: 50%;
-    margin: 0 auto 8px; border: 2px solid rgba(255,255,255,.15);
+  .color-preview img {
+    width: 85%; height: 85%; object-fit: contain;
+    transition: filter .4s;
   }
-  .product-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
-  .product-price { font-size: 15px; font-weight: 900; color: var(--accent); }
 
-  /* BUY BAR */
+  .color-name { font-size: 12px; font-weight: 700; letter-spacing: .04em; margin-bottom: 4px; }
+  .color-price { font-size: 13px; font-weight: 900; color: var(--accent); }
+
+  /* ===== BUY BAR ===== */
   .buy-bar {
     position: fixed; bottom: 0; left: 0; right: 0;
     background: rgba(14,14,20,.96); backdrop-filter: blur(16px);
     border-top: 1px solid rgba(255,255,255,.1);
     padding: 16px 32px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
     z-index: 200;
   }
   .buy-bar-info { font-size: 13px; color: var(--muted); }
@@ -133,16 +138,15 @@
     background: var(--accent); color: #111;
     border: none; border-radius: 32px;
     padding: 14px 40px; font-size: 15px; font-weight: 900;
-    cursor: pointer; letter-spacing: .06em;
-    transition: opacity .2s; text-decoration: none;
+    cursor: pointer; letter-spacing: .06em; transition: opacity .2s;
   }
-  .buy-btn:hover { opacity: .85; }
+  .buy-btn:disabled { background: #333; color: var(--muted); cursor: default; }
+  .buy-btn:not(:disabled):hover { opacity: .85; }
 
   footer {
     border-top: 1px solid rgba(255,255,255,.08);
     padding: 32px; text-align: center;
-    color: var(--muted); font-size: 12px;
-    margin-bottom: 80px;
+    color: var(--muted); font-size: 12px; margin-bottom: 80px;
   }
 </style>
 </head>
@@ -153,10 +157,9 @@
   <a class="back" href="../index.html">← キャラクター一覧</a>
 </header>
 
-<!-- CHARACTER HERO -->
 <div class="char-hero">
-  <div class="char-visual">
-    <img src="../img/putti.png" alt="プッチィ">
+  <div class="char-visual" id="charVisual">
+    <img src="../img/putti.png" alt="プッチィ" id="charImg">
   </div>
   <div class="char-info">
     <div class="tag-row">
@@ -167,128 +170,110 @@
     </div>
     <h1>プッチィ</h1>
     <div class="char-creator">by DinoRenny (@dino_renny)</div>
-    <p class="char-desc">
-      ライブドローイングから生まれた翼竜キャラクター。<br>
-      6色展開のビビッドなアクリルキーホルダー。<br>
-      お気に入りのカラーを選んで。
-    </p>
+    <p class="char-desc">ライブドローイングから生まれた翼竜キャラクター。<br>6色展開のビビッドなアクリルキーホルダー。</p>
+    <div class="selected-color-label" id="selectedLabel">カラーを選んでください</div>
   </div>
 </div>
 
-<!-- PRODUCTS -->
 <section>
-  <div class="section-title">PRODUCTS</div>
+  <div class="section-title">COLOR SELECT</div>
   <div class="section-heading">カラーを選ぶ</div>
-  <div class="product-grid" id="colorGrid">
-
-    <div class="product-card" data-variant="55239639761187" data-name="BLAZE RED" onclick="selectColor(this)">
-      <div class="product-img">
-        <div class="color-dot" style="background:#ff2a2a; width:60px; height:60px;"></div>
-      </div>
-      <div class="product-name">BLAZE RED</div>
-      <div class="product-price">¥1,200</div>
-    </div>
-
-    <div class="product-card" data-variant="55239639793955" data-name="SUNNY YELLOW" onclick="selectColor(this)">
-      <div class="product-img">
-        <div class="color-dot" style="background:#ffe600; width:60px; height:60px;"></div>
-      </div>
-      <div class="product-name">SUNNY YELLOW</div>
-      <div class="product-price">¥1,200</div>
-    </div>
-
-    <div class="product-card" data-variant="55239639826723" data-name="SLIME GREEN" onclick="selectColor(this)">
-      <div class="product-img">
-        <div class="color-dot" style="background:#00ff44; width:60px; height:60px;"></div>
-      </div>
-      <div class="product-name">SLIME GREEN</div>
-      <div class="product-price">¥1,200</div>
-    </div>
-
-    <div class="product-card" data-variant="55239639859491" data-name="ICE CYAN" onclick="selectColor(this)">
-      <div class="product-img">
-        <div class="color-dot" style="background:#00e5ff; width:60px; height:60px;"></div>
-      </div>
-      <div class="product-name">ICE CYAN</div>
-      <div class="product-price">¥1,200</div>
-    </div>
-
-    <div class="product-card" data-variant="55239639892259" data-name="GALAXY BLUE" onclick="selectColor(this)">
-      <div class="product-img">
-        <div class="color-dot" style="background:#2255ff; width:60px; height:60px;"></div>
-      </div>
-      <div class="product-name">GALAXY BLUE</div>
-      <div class="product-price">¥1,200</div>
-    </div>
-
-    <div class="product-card" data-variant="55239639925027" data-name="NEON PINK" onclick="selectColor(this)">
-      <div class="product-img">
-        <div class="color-dot" style="background:#ff00cc; width:60px; height:60px;"></div>
-      </div>
-      <div class="product-name">NEON PINK</div>
-      <div class="product-price">¥1,200</div>
-    </div>
-
-  </div>
+  <div class="color-grid" id="colorGrid"></div>
 </section>
 
 <footer>© 2026 CHARAMARL / DinoRenny. All rights reserved.</footer>
 
-<!-- BUY BAR -->
-<div class="buy-bar" id="buyBar">
+<div class="buy-bar">
   <div class="buy-bar-info">
-    <strong id="selectedName">カラーを選んでください</strong>
-    SUE アクリルキーホルダー 50mm
+    <strong id="barName">カラーを選んでください</strong>
+    プッチィ アクリルキーホルダー 50mm
   </div>
-  <button class="buy-btn" id="buyBtn" onclick="checkout()" disabled>カラーを選んでください</button>
+  <button class="buy-btn" id="buyBtn" onclick="checkout()" disabled>購入する →</button>
 </div>
 
 <script>
-  let selectedCard = null;
+const colors = [
+  { name: "BLAZE RED",    hue: 0,   sat: 2.0, bri: 1.1,  bg: "linear-gradient(135deg,#3a0000,#1a0000)", glow: "rgba(255,40,40,.5)"   },
+  { name: "SUNNY YELLOW", hue: 50,  sat: 2.2, bri: 1.1,  bg: "linear-gradient(135deg,#2a1e00,#1a1000)", glow: "rgba(255,220,0,.4)"   },
+  { name: "SLIME GREEN",  hue: 120, sat: 2.5, bri: 1.05, bg: "linear-gradient(135deg,#002010,#001008)", glow: "rgba(0,255,80,.4)"    },
+  { name: "ICE CYAN",     hue: 175, sat: 2.5, bri: 1.05, bg: "linear-gradient(135deg,#00202a,#001018)", glow: "rgba(0,220,255,.4)"  },
+  { name: "GALAXY BLUE",  hue: 230, sat: 2.5, bri: 1.05, bg: "linear-gradient(135deg,#001040,#000820)", glow: "rgba(30,80,255,.5)"  },
+  { name: "NEON PINK",    hue: 300, sat: 2.5, bri: 1.0,  bg: "linear-gradient(135deg,#2a003a,#1a0026)", glow: "rgba(255,0,200,.5)"  },
+];
 
-  function selectColor(card) {
-    document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    selectedCard = card;
-    document.getElementById('selectedName').textContent = card.dataset.name;
-    const btn = document.getElementById('buyBtn');
-    btn.textContent = '購入する →';
-    btn.disabled = false;
-  }
+let selected = null;
 
-  async function checkout() {
-    if (!selectedCard) return;
-    const btn = document.getElementById('buyBtn');
-    btn.textContent = '処理中...';
-    btn.disabled = true;
+const grid = document.getElementById('colorGrid');
 
-    try {
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: [{
-            name: `プッチィ アクリルキーホルダー ${selectedCard.dataset.name}`,
-            price: 1200,
-            quantity: 1,
-            images: ['https://charamarl.vercel.app/img/putti.png'],
-          }],
-        }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert('エラーが発生しました: ' + (data.error || '不明なエラー'));
-        btn.textContent = '購入する →';
-        btn.disabled = false;
-      }
-    } catch (e) {
-      alert('通信エラーが発生しました');
+colors.forEach((c, i) => {
+  const filter = `hue-rotate(${c.hue}deg) saturate(${c.sat}) brightness(${c.bri})`;
+
+  const card = document.createElement('div');
+  card.className = 'color-card';
+  card.innerHTML = `
+    <div class="color-preview" style="background:${c.bg};">
+      <img src="../img/putti.png" alt="${c.name}" style="filter:${filter} drop-shadow(0 4px 12px ${c.glow});">
+    </div>
+    <div class="color-name">${c.name}</div>
+    <div class="color-price">¥1,200</div>
+  `;
+  card.addEventListener('click', () => selectColor(i, card));
+  grid.appendChild(card);
+});
+
+function selectColor(i, card) {
+  document.querySelectorAll('.color-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selected = colors[i];
+
+  const filter = `hue-rotate(${selected.hue}deg) saturate(${selected.sat}) brightness(${selected.bri})`;
+  const visual = document.getElementById('charVisual');
+  const img = document.getElementById('charImg');
+
+  visual.style.background = selected.bg;
+  img.style.filter = `${filter} drop-shadow(0 12px 32px ${selected.glow})`;
+
+  document.getElementById('selectedLabel').textContent = selected.name;
+  document.getElementById('barName').textContent = selected.name;
+
+  const btn = document.getElementById('buyBtn');
+  btn.textContent = '購入する →';
+  btn.disabled = false;
+}
+
+async function checkout() {
+  if (!selected) return;
+  const btn = document.getElementById('buyBtn');
+  btn.textContent = '処理中...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [{
+          name: `プッチィ アクリルキーホルダー ${selected.name}`,
+          price: 1200,
+          quantity: 1,
+          images: ['https://charamarl.vercel.app/img/putti.png'],
+        }],
+      }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('エラー: ' + (data.error || '不明'));
       btn.textContent = '購入する →';
       btn.disabled = false;
     }
+  } catch (e) {
+    alert('通信エラーが発生しました');
+    btn.textContent = '購入する →';
+    btn.disabled = false;
   }
+}
 </script>
 
 </body>
