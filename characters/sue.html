@@ -243,21 +243,54 @@
     <strong id="selectedName">カラーを選んでください</strong>
     SUE アクリルキーホルダー 50mm
   </div>
-  <a class="buy-btn" id="buyBtn" href="#" onclick="return false;">購入する →</a>
+  <button class="buy-btn" id="buyBtn" onclick="checkout()" disabled>カラーを選んでください</button>
 </div>
 
 <script>
-  const BASE_URL = "https://thedinorenny.online/products/%E6%81%90%E7%AB%9C-%E3%82%A2%E3%82%AF%E3%83%AA%E3%83%AB%E3%82%AD%E3%83%BC%E3%83%9B%E3%83%AB%E3%83%80%E3%83%BC-dinorenny-sue-%E5%85%A86%E8%89%B2-50mm";
+  let selectedCard = null;
 
   function selectColor(card) {
     document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
-    const variant = card.dataset.variant;
-    const name = card.dataset.name;
-    document.getElementById('selectedName').textContent = name;
+    selectedCard = card;
+    document.getElementById('selectedName').textContent = card.dataset.name;
     const btn = document.getElementById('buyBtn');
-    btn.href = BASE_URL + "?variant=" + variant;
-    btn.onclick = null;
+    btn.textContent = '購入する →';
+    btn.disabled = false;
+  }
+
+  async function checkout() {
+    if (!selectedCard) return;
+    const btn = document.getElementById('buyBtn');
+    btn.textContent = '処理中...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{
+            name: `SUE アクリルキーホルダー ${selectedCard.dataset.name}`,
+            price: 1200,
+            quantity: 1,
+            images: ['https://charamarl.vercel.app/img/sue.png'],
+          }],
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('エラーが発生しました: ' + (data.error || '不明なエラー'));
+        btn.textContent = '購入する →';
+        btn.disabled = false;
+      }
+    } catch (e) {
+      alert('通信エラーが発生しました');
+      btn.textContent = '購入する →';
+      btn.disabled = false;
+    }
   }
 </script>
 
