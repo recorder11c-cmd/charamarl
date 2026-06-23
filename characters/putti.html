@@ -17,8 +17,8 @@
   .back:hover{{color:var(--text);}}
   .char-hero{{display:grid;grid-template-columns:1fr 1fr;gap:48px;max-width:1000px;margin:0 auto;padding:60px 32px 40px;align-items:center;}}
   @media(max-width:640px){{.char-hero{{grid-template-columns:1fr;padding:32px 20px 24px;}}}}
-  .char-visual{{border-radius:24px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:background .4s ease;background:linear-gradient(135deg,#1e1e2e,#2a1a3e);}}
-  .char-visual img{{width:85%;height:85%;object-fit:contain;transition:opacity .3s ease;}}
+  .char-visual{{border-radius:24px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.4);transition:box-shadow .4s;}}
+  .char-visual img{{width:88%;height:88%;object-fit:contain;}}
   .char-info .tag-row{{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}}
   .tag{{background:rgba(255,255,255,.07);color:var(--muted);font-size:11px;padding:4px 12px;border-radius:12px;letter-spacing:.04em;}}
   .char-info h1{{font-size:clamp(40px,8vw,64px);font-weight:900;letter-spacing:.04em;margin-bottom:8px;}}
@@ -32,8 +32,8 @@
   .color-card{{background:var(--card);border-radius:var(--radius);padding:14px;border:2px solid transparent;cursor:pointer;transition:transform .2s,border-color .3s;text-align:center;}}
   .color-card:hover{{transform:translateY(-3px);}}
   .color-card.selected{{border-color:var(--accent);}}
-  .color-preview{{width:100%;aspect-ratio:1;border-radius:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;}}
-  .color-preview img{{width:90%;height:90%;object-fit:contain;}}
+  .color-preview{{width:100%;aspect-ratio:1;border-radius:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}}
+  .color-preview img{{width:92%;height:92%;object-fit:contain;}}
   .color-name{{font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:4px;}}
   .color-price{{font-size:13px;font-weight:900;color:var(--accent);}}
   .buy-bar{{position:fixed;bottom:0;left:0;right:0;background:rgba(14,14,20,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:200;}}
@@ -52,7 +52,7 @@
 </header>
 <div class="char-hero">
   <div class="char-visual" id="charVisual">
-    <img src="../img/colors/putti_red.png" alt="プッチィ" id="charImg">
+    <img src="../img/colors_nobg/putti_red.png" alt="プッチィ" id="charImg">
   </div>
   <div class="char-info">
     <div class="tag-row">
@@ -78,32 +78,29 @@
   <button class="buy-btn" id="buyBtn" onclick="checkout()">購入する →</button>
 </div>
 <script>
-const colors = [{"key": "red", "name": "BLAZE RED", "bg": "linear-gradient(135deg,#3a0000,#111)", "glow": "rgba(255,40,40,.6)"}, {"key": "yellow", "name": "SUNNY YELLOW", "bg": "linear-gradient(135deg,#2a1800,#111)", "glow": "rgba(255,180,0,.5)"}, {"key": "green", "name": "SLIME GREEN", "bg": "linear-gradient(135deg,#002010,#111)", "glow": "rgba(0,255,80,.5)"}, {"key": "cyan", "name": "ICE CYAN", "bg": "linear-gradient(135deg,#002030,#111)", "glow": "rgba(0,220,255,.5)"}, {"key": "blue", "name": "GALAXY BLUE", "bg": "linear-gradient(135deg,#001040,#111)", "glow": "rgba(30,80,255,.5)"}, {"key": "pink", "name": "NEON PINK", "bg": "linear-gradient(135deg,#2a003a,#111)", "glow": "rgba(255,0,200,.5)"}];
+const colors = [{"key": "red", "name": "BLAZE RED", "accent": "#ff2a2a"}, {"key": "yellow", "name": "SUNNY YELLOW", "accent": "#f5b500"}, {"key": "green", "name": "SLIME GREEN", "accent": "#19c819"}, {"key": "cyan", "name": "ICE CYAN", "accent": "#00c8dc"}, {"key": "blue", "name": "GALAXY BLUE", "accent": "#2a55ff"}, {"key": "pink", "name": "NEON PINK", "accent": "#e633c8"}];
 let selected = colors[0];
 const grid = document.getElementById('colorGrid');
 colors.forEach((c, i) => {{
   const card = document.createElement('div');
   card.className = 'color-card' + (i===0?' selected':'');
   card.innerHTML = `
-    <div class="color-preview" style="background:${{c.bg}};">
-      <img src="../img/colors/putti_${{c.key}}.png" alt="${{c.name}}">
+    <div class="color-preview">
+      <img src="../img/colors_nobg/putti_${{c.key}}.png" alt="${{c.name}}">
     </div>
-    <div class="color-name">${{c.name}}</div>
+    <div class="color-name" style="color:${{c.accent}}">${{c.name}}</div>
     <div class="color-price">¥1,200</div>
   `;
   card.addEventListener('click', () => {{
-    document.querySelectorAll('.color-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.color-card').forEach(x => x.classList.remove('selected'));
     card.classList.add('selected');
     selected = colors[i];
-    document.getElementById('charVisual').style.background = c.bg;
-    document.getElementById('charImg').src = `../img/colors/putti_${{c.key}}.png`;
+    document.getElementById('charImg').src = `../img/colors_nobg/putti_${{c.key}}.png`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
   }});
   grid.appendChild(card);
 }});
-// 初期背景
-document.getElementById('charVisual').style.background = colors[0].bg;
 async function checkout() {{
   if (!selected) return;
   const btn = document.getElementById('buyBtn');
@@ -111,7 +108,7 @@ async function checkout() {{
   try {{
     const res = await fetch('/api/checkout', {{
       method:'POST', headers:{{'Content-Type':'application/json'}},
-      body: JSON.stringify({{ items: [{{ name:`プッチィ アクリルキーホルダー ${{selected.name}}`, price:1200, quantity:1, images:[`https://charamarl.vercel.app/img/colors/putti_${{selected.key}}.png`] }}] }}),
+      body: JSON.stringify({{ items: [{{ name:`プッチィ アクリルキーホルダー ${{selected.name}}`, price:1200, quantity:1, images:[`https://charamarl.vercel.app/img/colors_nobg/putti_${{selected.key}}.png`] }}] }}),
     }});
     const data = await res.json();
     if (data.url) {{ window.location.href = data.url; }}
