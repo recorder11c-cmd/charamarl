@@ -101,9 +101,8 @@
     background:#fff; border:1px solid var(--line);
     display:flex; align-items:center; justify-content:center;
   }
-  .pin-img img { width:90%; height:auto; display:block; }
-  .pin-img.tall { aspect-ratio:3/4; }
-  .pin-img.square { aspect-ratio:1; }
+  .pin-img img { width:100%; height:auto; display:block; }       /* 行は自由（自然な高さ） */
+  .pin-img.prod img { width:88%; padding:6px 0; }                 /* 商品は余白付き */
 
   /* HOVER ACTION OVERLAY */
   .pin-actions {
@@ -124,6 +123,7 @@
   .act-buy  { top:10px; right:10px; background:var(--accent); color:#111; }
   .act-tap  { bottom:10px; left:10px; background:#fff; color:#111; }
   .act-share{ bottom:10px; right:10px; background:#fff; color:#111; width:38px; height:38px; padding:0; justify-content:center; border-radius:50%; font-size:15px; }
+  .act-visit{ top:10px; left:10px; background:#fff; color:#111; }
 
   /* ===== GALLERY ===== */
   .section-wrap { max-width:1400px; margin:0 auto; padding:8px 24px 0; }
@@ -256,14 +256,14 @@
 
 <div class="masonry" id="masonry">
 
-  <!-- SUE -->
+  <!-- SUE (商品) -->
   <div class="pin" data-char="sue" data-color="red">
-    <div class="pin-img tall">
+    <div class="pin-img prod">
       <img src="./img/colors_nobg/sue_red.png" alt="SUE">
       <div class="pin-actions">
-        <button class="act act-save" data-act="visit">↗ Visit Site</button>
-        <button class="act act-buy" data-act="buy">⚡ Buy Now</button>
-        <button class="act act-tap" data-act="tap">🎨 Color Tap</button>
+        <button class="act act-visit" data-act="visit">↗ Visit</button>
+        <button class="act act-buy" data-act="buy">⚡ Buy</button>
+        <button class="act act-tap" data-act="tap">🎨 Tap</button>
         <button class="act act-share" data-act="share" title="Share">↗</button>
       </div>
     </div>
@@ -274,14 +274,26 @@
     </div>
   </div>
 
-  <!-- PUTTI -->
+  <!-- COLOR TAP key art (ギャラリー) -->
+  <div class="pin art" data-site="https://dinorenny-colortap.vercel.app/sue.html" data-title="SUE COLOR TAP" data-creator="DinoRenny">
+    <div class="pin-img">
+      <img src="./img/gallery/colortap_key.png" alt="SUE COLOR TAP">
+      <div class="pin-actions">
+        <button class="act act-visit" data-act="visit">↗ Visit</button>
+        <button class="act act-share" data-act="share" title="Share">↗</button>
+      </div>
+    </div>
+    <div class="pin-body"><div class="pin-title">SUE COLOR TAP</div><div class="pin-sub">DinoRenny / artwork</div></div>
+  </div>
+
+  <!-- PUTTI (商品) -->
   <div class="pin" data-char="putti" data-color="yellow">
-    <div class="pin-img tall">
+    <div class="pin-img prod">
       <img src="./img/colors_nobg/putti_yellow.png" alt="プッチィ">
       <div class="pin-actions">
-        <button class="act act-save" data-act="visit">↗ Visit Site</button>
-        <button class="act act-buy" data-act="buy">⚡ Buy Now</button>
-        <button class="act act-tap" data-act="tap">🎨 Color Tap</button>
+        <button class="act act-visit" data-act="visit">↗ Visit</button>
+        <button class="act act-buy" data-act="buy">⚡ Buy</button>
+        <button class="act act-tap" data-act="tap">🎨 Tap</button>
         <button class="act act-share" data-act="share" title="Share">↗</button>
       </div>
     </div>
@@ -292,14 +304,26 @@
     </div>
   </div>
 
-  <!-- MOSSUN -->
+  <!-- URBAN ROAR (ギャラリー・横長) -->
+  <div class="pin art" data-site="https://thedinorenny.online" data-title="URBAN ROAR" data-creator="DinoRenny">
+    <div class="pin-img">
+      <img src="./img/gallery/urban_roar.png" alt="URBAN ROAR">
+      <div class="pin-actions">
+        <button class="act act-visit" data-act="visit">↗ Visit</button>
+        <button class="act act-share" data-act="share" title="Share">↗</button>
+      </div>
+    </div>
+    <div class="pin-body"><div class="pin-title">URBAN ROAR</div><div class="pin-sub">DinoRenny / lookbook</div></div>
+  </div>
+
+  <!-- MOSSUN (商品) -->
   <div class="pin" data-char="mossun" data-color="blue">
-    <div class="pin-img tall">
+    <div class="pin-img prod">
       <img src="./img/colors_nobg/mossun_blue.png" alt="モッスン">
       <div class="pin-actions">
-        <button class="act act-save" data-act="visit">↗ Visit Site</button>
-        <button class="act act-buy" data-act="buy">⚡ Buy Now</button>
-        <button class="act act-tap" data-act="tap">🎨 Color Tap</button>
+        <button class="act act-visit" data-act="visit">↗ Visit</button>
+        <button class="act act-buy" data-act="buy">⚡ Buy</button>
+        <button class="act act-tap" data-act="tap">🎨 Tap</button>
         <button class="act act-share" data-act="share" title="Share">↗</button>
       </div>
     </div>
@@ -310,59 +334,36 @@
     </div>
   </div>
 
-  <!-- COMING SOON ×5 -->
+  <!-- SUE artwork (ギャラリー) -->
+  <div class="pin art" data-site="https://thedinorenny.online" data-title="SUE artwork" data-creator="DinoRenny">
+    <div class="pin-img">
+      <img src="./img/gallery/sue_art02.png" alt="SUE artwork">
+      <div class="pin-actions">
+        <button class="act act-visit" data-act="visit">↗ Visit</button>
+        <button class="act act-share" data-act="share" title="Share">↗</button>
+      </div>
+    </div>
+    <div class="pin-body"><div class="pin-title">SUE artwork</div><div class="pin-sub">DinoRenny / artwork</div></div>
+  </div>
+
+  <!-- COMING SOON -->
   <div class="pin coming square"><div class="pin-img"><div class="coming-text">COMING SOON</div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
+
+  <!-- SUE sketch (ギャラリー) -->
+  <div class="pin art" data-site="https://thedinorenny.online" data-title="SUE sketch" data-creator="DinoRenny">
+    <div class="pin-img">
+      <img src="./img/gallery/sue_art01.png" alt="SUE sketch">
+      <div class="pin-actions">
+        <button class="act act-visit" data-act="visit">↗ Visit</button>
+        <button class="act act-share" data-act="share" title="Share">↗</button>
+      </div>
+    </div>
+    <div class="pin-body"><div class="pin-title">SUE sketch</div><div class="pin-sub">DinoRenny / artwork</div></div>
+  </div>
+
+  <!-- COMING SOON -->
   <div class="pin coming tall"><div class="pin-img"><div class="coming-text">COMING SOON</div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
   <div class="pin coming square"><div class="pin-img"><div class="coming-text">COMING SOON</div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
-  <div class="pin coming tall"><div class="pin-img"><div class="coming-text">COMING SOON</div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
-  <div class="pin coming square"><div class="pin-img"><div class="coming-text">COMING SOON</div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
-
-</div>
-
-<!-- GALLERY -->
-<div class="section-wrap">
-  <div class="section-head">
-    <h2>🖼 GALLERY</h2>
-    <span class="sub">提供キャラクターのPR・作品</span>
-  </div>
-</div>
-<div class="gallery" id="gallery">
-
-  <div class="gcard" data-site="https://dinorenny-colortap.vercel.app/sue.html" data-title="SUE COLOR TAP" data-creator="DinoRenny">
-    <img src="./img/gallery/colortap_key.png" alt="SUE COLOR TAP">
-    <div class="gcard-overlay">
-      <button class="gact gact-visit" data-act="visit">↗ Visit</button>
-      <button class="gact gact-share" data-act="share" title="Share">↗</button>
-      <div class="gcard-caption"><div class="t">SUE COLOR TAP</div><div class="c">DinoRenny</div></div>
-    </div>
-  </div>
-
-  <div class="gcard" data-site="https://thedinorenny.online" data-title="URBAN ROAR" data-creator="DinoRenny">
-    <img src="./img/gallery/urban_roar.png" alt="URBAN ROAR">
-    <div class="gcard-overlay">
-      <button class="gact gact-visit" data-act="visit">↗ Visit</button>
-      <button class="gact gact-share" data-act="share" title="Share">↗</button>
-      <div class="gcard-caption"><div class="t">URBAN ROAR</div><div class="c">DinoRenny</div></div>
-    </div>
-  </div>
-
-  <div class="gcard" data-site="https://thedinorenny.online" data-title="SUE artwork" data-creator="DinoRenny">
-    <img src="./img/gallery/sue_art02.png" alt="SUE artwork">
-    <div class="gcard-overlay">
-      <button class="gact gact-visit" data-act="visit">↗ Visit</button>
-      <button class="gact gact-share" data-act="share" title="Share">↗</button>
-      <div class="gcard-caption"><div class="t">SUE artwork</div><div class="c">DinoRenny</div></div>
-    </div>
-  </div>
-
-  <div class="gcard" data-site="https://thedinorenny.online" data-title="SUE sketch" data-creator="DinoRenny">
-    <img src="./img/gallery/sue_art01.png" alt="SUE sketch">
-    <div class="gcard-overlay">
-      <button class="gact gact-visit" data-act="visit">↗ Visit</button>
-      <button class="gact gact-share" data-act="share" title="Share">↗</button>
-      <div class="gcard-caption"><div class="t">SUE sketch</div><div class="c">DinoRenny</div></div>
-    </div>
-  </div>
 
 </div>
 
@@ -495,15 +496,15 @@
     pin.addEventListener('click', () => openModal(char, color));
   });
 
-  // ===== ギャラリー =====
-  document.querySelectorAll('.gcard').forEach(card => {
+  // ===== ギャラリー作品ピン =====
+  document.querySelectorAll('.pin.art').forEach(card => {
     const site = card.dataset.site, title = card.dataset.title, creator = card.dataset.creator;
     function shareArt(){
       const text = `${title} | ${creator} - CHARAMARL`;
       if(navigator.share){ navigator.share({ title:text, url:site }).catch(()=>{}); }
       else { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(site)}`, '_blank'); }
     }
-    card.querySelectorAll('.gact').forEach(btn => {
+    card.querySelectorAll('.act').forEach(btn => {
       btn.addEventListener('click', e => {
         e.preventDefault(); e.stopPropagation();
         if(btn.dataset.act==='visit') window.open(site, '_blank');
