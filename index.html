@@ -395,6 +395,17 @@
 </div>
 
 <script>
+  // フィードをシャッフル（列は揃え・順序はランダム）
+  (function shuffleFeed(){
+    const m = document.getElementById('masonry');
+    const pins = Array.from(m.children);
+    for(let i = pins.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [pins[i], pins[j]] = [pins[j], pins[i]];
+    }
+    pins.forEach(p => m.appendChild(p));
+  })();
+
   // タブ
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
