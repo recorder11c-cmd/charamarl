@@ -234,10 +234,10 @@
     <div class="pin-img tall">
       <img src="./img/colors_nobg/sue_red.png" alt="SUE">
       <div class="pin-actions">
-        <button class="act act-save" data-act="save">♡ 保存</button>
-        <button class="act act-buy" data-act="buy">⚡ 即購入</button>
-        <button class="act act-tap" data-act="tap">🎨 TAP</button>
-        <button class="act act-share" data-act="share" title="シェア">↗</button>
+        <button class="act act-save" data-act="visit">↗ Visit Site</button>
+        <button class="act act-buy" data-act="buy">⚡ Buy Now</button>
+        <button class="act act-tap" data-act="tap">🎨 Color Tap</button>
+        <button class="act act-share" data-act="share" title="Share">↗</button>
       </div>
     </div>
     <div class="pin-body">
@@ -252,10 +252,10 @@
     <div class="pin-img tall">
       <img src="./img/colors_nobg/putti_yellow.png" alt="プッチィ">
       <div class="pin-actions">
-        <button class="act act-save" data-act="save">♡ 保存</button>
-        <button class="act act-buy" data-act="buy">⚡ 即購入</button>
-        <button class="act act-tap" data-act="tap">🎨 TAP</button>
-        <button class="act act-share" data-act="share" title="シェア">↗</button>
+        <button class="act act-save" data-act="visit">↗ Visit Site</button>
+        <button class="act act-buy" data-act="buy">⚡ Buy Now</button>
+        <button class="act act-tap" data-act="tap">🎨 Color Tap</button>
+        <button class="act act-share" data-act="share" title="Share">↗</button>
       </div>
     </div>
     <div class="pin-body">
@@ -270,10 +270,10 @@
     <div class="pin-img tall">
       <img src="./img/colors_nobg/mossun_blue.png" alt="モッスン">
       <div class="pin-actions">
-        <button class="act act-save" data-act="save">♡ 保存</button>
-        <button class="act act-buy" data-act="buy">⚡ 即購入</button>
-        <button class="act act-tap" data-act="tap">🎨 TAP</button>
-        <button class="act act-share" data-act="share" title="シェア">↗</button>
+        <button class="act act-save" data-act="visit">↗ Visit Site</button>
+        <button class="act act-buy" data-act="buy">⚡ Buy Now</button>
+        <button class="act act-tap" data-act="tap">🎨 Color Tap</button>
+        <button class="act act-share" data-act="share" title="Share">↗</button>
       </div>
     </div>
     <div class="pin-body">
@@ -329,9 +329,9 @@
   });
 
   const PRODUCTS = {
-    sue:    { name:'SUE',     creator:'by DinoRenny (@dino_renny)', desc:'ライブドローイングから生まれた恐竜キャラクター。6色展開のビビッドなアクリルキーホルダー。', tap:'https://dinorenny-colortap.vercel.app/sue.html', page:'characters/sue.html' },
-    putti:  { name:'プッチィ', creator:'by DinoRenny (@dino_renny)', desc:'ライブドローイングから生まれた翼竜キャラクター。6色展開のビビッドなアクリルキーホルダー。', tap:'https://dinorenny-colortap.vercel.app/sue.html', page:'characters/putti.html' },
-    mossun: { name:'モッスン', creator:'by DinoRenny (@dino_renny)', desc:'ライブドローイングから生まれた恐竜キャラクター。6色展開のビビッドなアクリルキーホルダー。', tap:'https://dinorenny-colortap.vercel.app/sue.html', page:'characters/mossun.html' },
+    sue:    { name:'SUE',     creator:'by DinoRenny (@dino_renny)', desc:'ライブドローイングから生まれた恐竜キャラクター。6色展開のビビッドなアクリルキーホルダー。', tap:'https://dinorenny-colortap.vercel.app/sue.html', page:'characters/sue.html', site:'https://thedinorenny.online' },
+    putti:  { name:'プッチィ', creator:'by DinoRenny (@dino_renny)', desc:'ライブドローイングから生まれた翼竜キャラクター。6色展開のビビッドなアクリルキーホルダー。', tap:'https://dinorenny-colortap.vercel.app/sue.html', page:'characters/putti.html', site:'https://thedinorenny.online' },
+    mossun: { name:'モッスン', creator:'by DinoRenny (@dino_renny)', desc:'ライブドローイングから生まれた恐竜キャラクター。6色展開のビビッドなアクリルキーホルダー。', tap:'https://dinorenny-colortap.vercel.app/sue.html', page:'characters/mossun.html', site:'https://thedinorenny.online' },
   };
   const COLORS = [
     { key:'red',    name:'BLAZE RED',    hex:'#ff2a2a' },
@@ -389,14 +389,6 @@
     btn.textContent='購入する →'; btn.disabled=false;
   });
 
-  // 保存（localStorage）
-  function getSaved(){ try { return JSON.parse(localStorage.getItem('charamarl_saved')||'[]'); } catch(e){ return []; } }
-  function toggleSave(char){
-    let s = getSaved();
-    if(s.includes(char)) s = s.filter(x=>x!==char); else s.push(char);
-    localStorage.setItem('charamarl_saved', JSON.stringify(s));
-    return s.includes(char);
-  }
   function shareProduct(char){
     const p = PRODUCTS[char];
     const url = `https://charamarl.vercel.app/${p.page}`;
@@ -409,18 +401,12 @@
   document.querySelectorAll('.pin[data-char]').forEach(pin => {
     const char = pin.dataset.char, color = pin.dataset.color;
 
-    // 保存状態を反映
-    const saveBtn = pin.querySelector('[data-act="save"]');
-    if(getSaved().includes(char)){ saveBtn.classList.add('saved'); saveBtn.textContent='✓ 保存済'; }
-
     pin.querySelectorAll('.act').forEach(btn => {
       btn.addEventListener('click', e => {
         e.preventDefault(); e.stopPropagation();
         const act = btn.dataset.act;
-        if(act==='save'){
-          const saved = toggleSave(char);
-          btn.classList.toggle('saved', saved);
-          btn.textContent = saved ? '✓ 保存済' : '♡ 保存';
+        if(act==='visit'){
+          window.open(PRODUCTS[char].site, '_blank');
         } else if(act==='buy'){
           openModal(char, color);
         } else if(act==='tap'){
