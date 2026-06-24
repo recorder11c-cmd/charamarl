@@ -158,14 +158,43 @@
   .pin-price { font-size:14px; font-weight:900; color:var(--text); margin-top:6px; }
 
   /* COMING SOON */
-  .pin.coming .pin-img { background:#ececec; }
+  .pin.coming .pin-img {
+    background:linear-gradient(150deg,#f7f3ff 0%,#eef4ff 50%,#fff3f6 100%);
+    border:1px dashed #d6c9ee;
+  }
   .pin.coming .coming-text {
-    width:100%; aspect-ratio:1; display:flex; align-items:center; justify-content:center;
-    font-size:12px; font-weight:800; color:#aaa; letter-spacing:.12em;
+    width:100%; aspect-ratio:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:8px; padding:18px; text-align:center;
   }
   .pin.coming.tall .coming-text { aspect-ratio:3/4; }
+  .pin.coming .ct-icon {
+    width:46px; height:46px; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent2),#ff7eb6);
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+    box-shadow:0 6px 16px rgba(162,89,255,.3);
+  }
+  .pin.coming .ct-main { font-size:13px; font-weight:900; color:var(--accent2); letter-spacing:.08em; }
+  .pin.coming .ct-sub { font-size:11px; color:#9a8fb5; line-height:1.5; }
+  .pin.coming:hover .pin-img { border-color:var(--accent2); }
 
   /* BOTTOM NAV */
+  /* FOOTER */
+  .site-footer {
+    max-width:1400px; margin:0 auto; padding:48px 24px 90px; text-align:center;
+    border-top:1px solid var(--line);
+  }
+  .foot-logo {
+    font-size:20px; font-weight:900; letter-spacing:.12em; margin-bottom:8px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .foot-tag { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  .foot-links { display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+  .foot-links a { color:var(--text); font-size:13px; font-weight:700; text-decoration:none; }
+  .foot-links a:hover { color:var(--accent2); }
+  .foot-links span { color:#ccc; }
+  .foot-copy { color:#aaa; font-size:11px; letter-spacing:.04em; }
+
   .bottom-nav {
     display:none; position:fixed; bottom:0; left:0; right:0;
     background:rgba(255,255,255,.96); backdrop-filter:blur(16px);
@@ -360,7 +389,7 @@
   </div>
 
   <!-- COMING SOON -->
-  <div class="pin coming square"><div class="pin-img"><div class="coming-text">COMING SOON</div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
+  <div class="pin coming square"><div class="pin-img"><div class="coming-text"><div class="ct-icon">✨</div><div class="ct-main">COMING SOON</div><div class="ct-sub">次のキャラは君かも？<br>クリエイター募集中</div></div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
 
   <!-- SUE sketch (ギャラリー) -->
   <div class="pin art" data-site="https://thedinorenny.online" data-title="SUE sketch" data-creator="DinoRenny">
@@ -375,8 +404,8 @@
   </div>
 
   <!-- COMING SOON -->
-  <div class="pin coming tall"><div class="pin-img"><div class="coming-text">COMING SOON</div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
-  <div class="pin coming square"><div class="pin-img"><div class="coming-text">COMING SOON</div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
+  <div class="pin coming tall"><div class="pin-img"><div class="coming-text"><div class="ct-icon">✨</div><div class="ct-main">COMING SOON</div><div class="ct-sub">次のキャラは君かも？<br>クリエイター募集中</div></div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
+  <div class="pin coming square"><div class="pin-img"><div class="coming-text"><div class="ct-icon">✨</div><div class="ct-main">COMING SOON</div><div class="ct-sub">次のキャラは君かも？<br>クリエイター募集中</div></div></div><div class="pin-body"><div class="pin-title" style="color:var(--muted)">??? キャラクター</div><div class="pin-sub">近日公開</div></div></div>
 
 </div>
 
@@ -399,6 +428,19 @@
     </div>
   </div>
 </div>
+
+<footer class="site-footer">
+  <div class="foot-logo">CHARAMARL</div>
+  <p class="foot-tag">キャラクターセレクトショップ — あのキャラを、手のひらに。</p>
+  <div class="foot-links">
+    <a href="https://dinorenny-colortap.vercel.app/sue.html" target="_blank">COLOR TAP</a>
+    <span>·</span>
+    <a href="https://thedinorenny.online" target="_blank">DinoRenny</a>
+    <span>·</span>
+    <a href="#">クリエイター募集</a>
+  </div>
+  <p class="foot-copy">© 2026 CHARAMARL. All rights reserved.</p>
+</footer>
 
 <div class="bottom-nav">
   <div class="nav-item active"><span class="icon">🏠</span>ホーム</div>
