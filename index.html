@@ -160,6 +160,69 @@
     .colortap-body { padding: 16px 20px; }
   }
 
+  /* ===== MODAL (Pinterest popup) ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,.7); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center;
+    padding: 24px; opacity: 0; transition: opacity .25s;
+  }
+  .modal-overlay.open { display: flex; opacity: 1; }
+  .modal {
+    background: #16161f; border-radius: 28px; overflow: hidden;
+    width: 100%; max-width: 860px; max-height: 92vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+    transform: translateY(16px) scale(.98); transition: transform .25s;
+    position: relative;
+  }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+  @media (max-width: 720px) {
+    .modal { grid-template-columns: 1fr; max-height: 90vh; overflow-y: auto; }
+    .modal-overlay { padding: 0; align-items: flex-end; }
+    .modal { border-radius: 24px 24px 0 0; max-width: 100%; }
+  }
+  .modal-img {
+    background: #fff; display: flex; align-items: center; justify-content: center;
+    padding: 24px; min-height: 280px;
+  }
+  .modal-img img { width: 90%; height: auto; object-fit: contain; max-height: 420px; }
+  .modal-info { padding: 28px 28px 24px; overflow-y: auto; display: flex; flex-direction: column; }
+  .modal-close {
+    position: absolute; top: 14px; right: 14px; z-index: 10;
+    width: 36px; height: 36px; border-radius: 50%; border: none;
+    background: rgba(0,0,0,.5); color: #fff; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; line-height: 1;
+  }
+  .modal-close:hover { background: rgba(0,0,0,.75); }
+  .modal-info h2 { font-size: 28px; font-weight: 900; letter-spacing: .03em; margin-bottom: 4px; }
+  .modal-creator { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+  .modal-desc { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 16px; }
+  .modal-colorname { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 12px; }
+  .modal-swatches { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .swatch {
+    width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: transform .15s, border-color .2s;
+  }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch.selected { border-color: #fff; }
+  .modal-price { font-size: 22px; font-weight: 900; color: var(--accent); margin-bottom: 16px; }
+  .modal-actions { margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+  .modal-buy {
+    flex: 1; min-width: 160px; background: var(--accent); color: #111;
+    border: none; border-radius: 28px; padding: 14px; font-size: 15px; font-weight: 900;
+    cursor: pointer; letter-spacing: .04em; transition: opacity .2s;
+  }
+  .modal-buy:hover { opacity: .85; }
+  .modal-buy:disabled { background: #333; color: var(--muted); }
+  .modal-tap {
+    background: rgba(162,89,255,.15); border: 1px solid rgba(162,89,255,.4);
+    color: var(--accent2); border-radius: 28px; padding: 14px 20px;
+    font-size: 13px; font-weight: 800; text-decoration: none; letter-spacing: .04em;
+    display: flex; align-items: center; white-space: nowrap;
+  }
+  .modal-tap:hover { background: rgba(162,89,255,.25); }
+
   .bottom-nav {
     display: none; position: fixed; bottom: 0; left: 0; right: 0;
     background: rgba(17,17,24,.95); backdrop-filter: blur(16px);
@@ -370,6 +433,26 @@
 
 </div>
 
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">×</button>
+    <div class="modal-img"><img id="mImg" src="" alt=""></div>
+    <div class="modal-info">
+      <h2 id="mName"></h2>
+      <div class="modal-creator" id="mCreator"></div>
+      <div class="modal-desc" id="mDesc"></div>
+      <div class="modal-colorname" id="mColorName"></div>
+      <div class="modal-swatches" id="mSwatches"></div>
+      <div class="modal-price">¥1,200</div>
+      <div class="modal-actions">
+        <button class="modal-buy" id="mBuy">購入する →</button>
+        <a class="modal-tap" id="mTap" href="#" target="_blank">🎨 COLOR TAP</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="bottom-nav">
   <div class="nav-item active"><span class="icon">🏠</span>ホーム</div>
   <div class="nav-item"><span class="icon">🔍</span>検索</div>
@@ -378,10 +461,95 @@
 </div>
 
 <script>
+  // タブ切替
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
+    });
+  });
+
+  // ===== 商品データ =====
+  const PRODUCTS = {
+    sue:    { name:'SUE',     creator:'by DinoRenny (@dino_renny)', desc:'ライブドローイングから生まれた恐竜キャラクター。6色展開のビビッドなアクリルキーホルダー。', tap:'https://dinorenny-colortap.vercel.app/sue.html' },
+    putti:  { name:'プッチィ', creator:'by DinoRenny (@dino_renny)', desc:'ライブドローイングから生まれた翼竜キャラクター。6色展開のビビッドなアクリルキーホルダー。', tap:'https://dinorenny-colortap.vercel.app/sue.html' },
+    mossun: { name:'モッスン', creator:'by DinoRenny (@dino_renny)', desc:'ライブドローイングから生まれた恐竜キャラクター。6色展開のビビッドなアクリルキーホルダー。', tap:'https://dinorenny-colortap.vercel.app/sue.html' },
+  };
+  const COLORS = [
+    { key:'red',    name:'BLAZE RED',    hex:'#ff2a2a' },
+    { key:'yellow', name:'SUNNY YELLOW', hex:'#f5b500' },
+    { key:'green',  name:'SLIME GREEN',  hex:'#19c819' },
+    { key:'cyan',   name:'ICE CYAN',     hex:'#00c8dc' },
+    { key:'blue',   name:'GALAXY BLUE',  hex:'#2a55ff' },
+    { key:'pink',   name:'NEON PINK',    hex:'#e633c8' },
+  ];
+
+  const overlay = document.getElementById('modalOverlay');
+  let curChar = 'sue', curColor = 'red';
+
+  function renderModal() {
+    const p = PRODUCTS[curChar];
+    const c = COLORS.find(x => x.key === curColor);
+    document.getElementById('mImg').src = `./img/colors_nobg/${curChar}_${curColor}.png`;
+    document.getElementById('mName').textContent = p.name;
+    document.getElementById('mCreator').textContent = p.creator;
+    document.getElementById('mDesc').textContent = p.desc;
+    document.getElementById('mColorName').textContent = 'カラー: ' + c.name;
+    document.getElementById('mTap').href = p.tap;
+    const sw = document.getElementById('mSwatches');
+    sw.innerHTML = '';
+    COLORS.forEach(col => {
+      const d = document.createElement('div');
+      d.className = 'swatch' + (col.key === curColor ? ' selected' : '');
+      d.style.background = col.hex;
+      d.title = col.name;
+      d.addEventListener('click', () => { curColor = col.key; renderModal(); });
+      sw.appendChild(d);
+    });
+  }
+
+  function openModal(char, color) {
+    curChar = char; curColor = color;
+    renderModal();
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // 購入（Stripe）
+  document.getElementById('mBuy').addEventListener('click', async () => {
+    const btn = document.getElementById('mBuy');
+    const p = PRODUCTS[curChar];
+    const c = COLORS.find(x => x.key === curColor);
+    btn.textContent = '処理中...'; btn.disabled = true;
+    try {
+      const res = await fetch('/api/checkout', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ items: [{ name:`${p.name} アクリルキーホルダー ${c.name}`, price:1200, quantity:1, images:[`https://charamarl.vercel.app/img/colors_nobg/${curChar}_${curColor}.png`] }] }),
+      });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; }
+      else { alert('エラー: '+(data.error||'不明')); btn.textContent='購入する →'; btn.disabled=false; }
+    } catch(e) { alert('通信エラー'); btn.textContent='購入する →'; btn.disabled=false; }
+  });
+
+  // ピンをクリックでモーダル（COLOR TAP外部リンク・準備中は除外）
+  document.querySelectorAll('.pin').forEach(pin => {
+    const img = pin.querySelector('img');
+    if (!img) return;
+    if (pin.href && pin.href.includes('dinorenny-colortap')) return; // 外部リンクは維持
+    const m = img.getAttribute('src').match(/colors_nobg\/(\w+?)_(\w+)\.png/);
+    if (!m) return;
+    pin.addEventListener('click', e => {
+      e.preventDefault();
+      openModal(m[1], m[2]);
     });
   });
 </script>
