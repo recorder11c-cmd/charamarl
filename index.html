@@ -274,6 +274,19 @@
     </div>
   </div>
 
+  <!-- GMC (仮・MARUさん / COLOR TAP) -->
+  <div class="pin art" data-site="https://dinorenny-colortap.vercel.app/gmc.html" data-tap="https://dinorenny-colortap.vercel.app/gmc.html" data-title="GMC" data-creator="MARU">
+    <div class="pin-img prod">
+      <img src="./img/gallery/gmc.png" alt="GMC">
+      <div class="pin-actions">
+        <button class="act act-visit" data-act="visit">↗ Visit</button>
+        <button class="act act-tap" data-act="tap">🎨 Color Tap</button>
+        <button class="act act-share" data-act="share" title="Share">↗</button>
+      </div>
+    </div>
+    <div class="pin-body"><div class="pin-title">GMC <span style="color:var(--muted);font-weight:600">(準備中)</span></div><div class="pin-sub">MARU / COLOR TAP</div></div>
+  </div>
+
   <!-- COLOR TAP key art (ギャラリー) -->
   <div class="pin art" data-site="https://dinorenny-colortap.vercel.app/sue.html" data-title="SUE COLOR TAP" data-creator="DinoRenny">
     <div class="pin-img">
@@ -518,11 +531,13 @@
     card.querySelectorAll('.act').forEach(btn => {
       btn.addEventListener('click', e => {
         e.preventDefault(); e.stopPropagation();
-        if(btn.dataset.act==='visit') window.open(site, '_blank');
+        const act = btn.dataset.act;
+        if(act==='visit') window.open(site, '_blank');
+        else if(act==='tap') window.open(card.dataset.tap || site, '_blank');
         else shareArt();
       });
     });
-    card.addEventListener('click', () => window.open(site, '_blank'));
+    card.addEventListener('click', () => window.open(card.dataset.tap || site, '_blank'));
   });
 </script>
 </body>
