@@ -9,6 +9,9 @@ module.exports = async (req, res) => {
 
   const { items, successUrl, cancelUrl } = req.body;
 
+  // Origin が無いリクエストでも壊れないよう固定ベースURLをフォールバック
+  const base = req.headers.origin || "https://charamarl.vercel.app";
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -24,8 +27,8 @@ module.exports = async (req, res) => {
         quantity: item.quantity,
       })),
       mode: 'payment',
-      success_url: successUrl || `${req.headers.origin}/success.html`,
-      cancel_url: cancelUrl || `${req.headers.origin}/cancel.html`,
+      success_url: successUrl || `${base}/success.html`,
+      cancel_url: cancelUrl || `${base}/cancel.html`,
       shipping_address_collection: {
         allowed_countries: ['JP'],
       },
