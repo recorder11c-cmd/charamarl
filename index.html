@@ -248,61 +248,10 @@
   }
   .modal-tap:hover { background:rgba(162,89,255,.2); }
 
-  /* ===== CART ===== */
-  .cart-btn {
-    position:relative; width:40px; height:40px; border-radius:50%;
-    background:#f0f0f0; border:1px solid var(--line); cursor:pointer;
-    display:flex; align-items:center; justify-content:center; font-size:18px;
-    transition:background .2s;
-  }
-  .cart-btn:hover { background:#e6e6e6; }
-  .cart-count {
-    position:absolute; top:-4px; right:-4px; min-width:18px; height:18px; padding:0 4px;
-    background:var(--red); color:#fff; border-radius:9px; font-size:11px; font-weight:900;
-    display:flex; align-items:center; justify-content:center; line-height:1;
-  }
-  .cart-count.empty { display:none; }
-
-  .cart-overlay {
-    position:fixed; inset:0; z-index:600; background:rgba(0,0,0,.4);
-    opacity:0; visibility:hidden; transition:opacity .25s, visibility .25s;
-  }
-  .cart-overlay.open { opacity:1; visibility:visible; }
-  .cart-drawer {
-    position:fixed; top:0; right:0; bottom:0; width:min(400px,90vw); z-index:601;
-    background:#fff; box-shadow:-10px 0 40px rgba(0,0,0,.2);
-    transform:translateX(100%); transition:transform .28s cubic-bezier(.4,0,.2,1);
-    display:flex; flex-direction:column;
-  }
-  .cart-drawer.open { transform:translateX(0); }
-  .cart-head { display:flex; align-items:center; justify-content:space-between; padding:20px 22px; border-bottom:1px solid var(--line); }
-  .cart-head h3 { font-size:17px; font-weight:900; }
-  .cart-close { background:none; border:none; font-size:24px; cursor:pointer; color:#888; line-height:1; }
-  .cart-items { flex:1; overflow-y:auto; padding:8px 0; }
-  .cart-empty { text-align:center; color:var(--muted); font-size:14px; padding:60px 24px; }
-  .cart-item { display:flex; gap:12px; align-items:center; padding:14px 22px; border-bottom:1px solid #f2f2f2; }
-  .cart-item img { width:60px; height:60px; object-fit:contain; background:#f7f7f7; border-radius:10px; flex-shrink:0; }
-  .cart-item-info { flex:1; min-width:0; }
-  .cart-item-name { font-size:13px; font-weight:800; margin-bottom:2px; }
-  .cart-item-color { font-size:11px; color:var(--muted); margin-bottom:6px; }
-  .cart-item-price { font-size:13px; font-weight:900; color:var(--accent); }
-  .qty { display:flex; align-items:center; gap:8px; }
-  .qty button { width:24px; height:24px; border-radius:50%; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:14px; font-weight:900; color:#333; display:flex; align-items:center; justify-content:center; }
-  .qty button:hover { background:#f0f0f0; }
-  .qty span { font-size:13px; font-weight:800; min-width:18px; text-align:center; }
-  .cart-remove { background:none; border:none; color:#bbb; cursor:pointer; font-size:12px; margin-left:8px; }
-  .cart-remove:hover { color:var(--red); }
-  .cart-foot { border-top:1px solid var(--line); padding:18px 22px 24px; }
-  .cart-total { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; }
-  .cart-total .lbl { font-size:14px; font-weight:700; }
-  .cart-total .amt { font-size:22px; font-weight:900; }
-  .cart-checkout { width:100%; background:var(--accent); color:#111; border:none; border-radius:28px; padding:15px; font-size:15px; font-weight:900; cursor:pointer; }
-  .cart-checkout:hover { opacity:.88; }
-  .cart-checkout:disabled { background:#ccc; color:#888; }
-
   .modal-addcart { background:#fff; border:2px solid var(--accent); color:var(--accent); border-radius:28px; padding:13px 18px; font-size:14px; font-weight:900; cursor:pointer; white-space:nowrap; }
   .modal-addcart:hover { background:#fff8e8; }
 </style>
+<link rel="stylesheet" href="cart.css">
 </head>
 <body>
 
@@ -312,9 +261,7 @@
     <span class="search-icon">🔍</span>
     <input type="text" placeholder="キャラクターやグッズを検索...">
   </div>
-  <div class="header-actions">
-    <button class="cart-btn" id="cartBtn" aria-label="カート">🛍<span class="cart-count empty" id="cartCount">0</span></button>
-  </div>
+  <div class="header-actions"><span data-cart-mount></span></div>
 </header>
 
 <!-- COLOR TAP BANNER -->
@@ -487,19 +434,6 @@
   </div>
 </div>
 
-<!-- CART DRAWER -->
-<div class="cart-overlay" id="cartOverlay"></div>
-<aside class="cart-drawer" id="cartDrawer" aria-label="カート">
-  <div class="cart-head">
-    <h3>🛍 カート</h3>
-    <button class="cart-close" id="cartClose" aria-label="閉じる">×</button>
-  </div>
-  <div class="cart-items" id="cartItems"></div>
-  <div class="cart-foot" id="cartFoot" style="display:none;">
-    <div class="cart-total"><span class="lbl">合計</span><span class="amt" id="cartTotal">¥0</span></div>
-    <button class="cart-checkout" id="cartCheckout">まとめて購入する →</button>
-  </div>
-</aside>
 
 <footer class="site-footer">
   <div class="foot-logo">CHARAMARL</div>
@@ -602,90 +536,13 @@
     btn.textContent='今すぐ購入 →'; btn.disabled=false;
   });
 
-  // ===== カート =====
-  const PRICE = 1200;
-  function getCart(){ try { return JSON.parse(localStorage.getItem('charamarl_cart')||'[]'); } catch(e){ return []; } }
-  function setCart(c){ localStorage.setItem('charamarl_cart', JSON.stringify(c)); renderCart(); }
-  function cartId(char,color){ return char+'_'+color; }
-  function addToCart(char,color){
-    const p = PRODUCTS[char], c = COLORS.find(x=>x.key===color);
-    const cart = getCart(); const id = cartId(char,color);
-    const ex = cart.find(i=>i.id===id);
-    if(ex) ex.qty++;
-    else cart.push({ id, char, color, name:p.name, colorName:c.name, price:PRICE, qty:1, image:`./img/colors_nobg/${char}_${color}.png` });
-    setCart(cart);
-  }
-  function setQty(id, d){
-    let cart = getCart(); const it = cart.find(i=>i.id===id);
-    if(!it) return; it.qty += d;
-    if(it.qty<=0) cart = cart.filter(i=>i.id!==id);
-    setCart(cart);
-  }
-  function removeItem(id){ setCart(getCart().filter(i=>i.id!==id)); }
-
-  const cartItemsEl = document.getElementById('cartItems');
-  const cartCountEl = document.getElementById('cartCount');
-  function renderCart(){
-    const cart = getCart();
-    const count = cart.reduce((s,i)=>s+i.qty,0);
-    cartCountEl.textContent = count;
-    cartCountEl.classList.toggle('empty', count===0);
-    const foot = document.getElementById('cartFoot');
-    if(cart.length===0){
-      cartItemsEl.innerHTML = '<div class="cart-empty">カートは空です。<br>キャラクターを選んで追加してください。</div>';
-      foot.style.display='none'; return;
-    }
-    foot.style.display='block';
-    document.getElementById('cartTotal').textContent = '¥'+(cart.reduce((s,i)=>s+i.price*i.qty,0)).toLocaleString();
-    cartItemsEl.innerHTML = cart.map(i=>`
-      <div class="cart-item">
-        <img src="${i.image}" alt="${i.name}">
-        <div class="cart-item-info">
-          <div class="cart-item-name">${i.name} アクキー</div>
-          <div class="cart-item-color">${i.colorName}</div>
-          <div class="cart-item-price">¥${i.price.toLocaleString()}</div>
-        </div>
-        <div class="qty">
-          <button data-dec="${i.id}">−</button>
-          <span>${i.qty}</span>
-          <button data-inc="${i.id}">＋</button>
-        </div>
-        <button class="cart-remove" data-rm="${i.id}">削除</button>
-      </div>`).join('');
-  }
-  cartItemsEl.addEventListener('click', e=>{
-    const t=e.target;
-    if(t.dataset.inc) setQty(t.dataset.inc, 1);
-    else if(t.dataset.dec) setQty(t.dataset.dec, -1);
-    else if(t.dataset.rm) removeItem(t.dataset.rm);
-  });
-
-  const cartDrawer=document.getElementById('cartDrawer'), cartOv=document.getElementById('cartOverlay');
-  function openCart(){ renderCart(); cartDrawer.classList.add('open'); cartOv.classList.add('open'); document.body.style.overflow='hidden'; }
-  function closeCart(){ cartDrawer.classList.remove('open'); cartOv.classList.remove('open'); document.body.style.overflow=''; }
-  document.getElementById('cartBtn').addEventListener('click', openCart);
-  document.getElementById('cartClose').addEventListener('click', closeCart);
-  cartOv.addEventListener('click', closeCart);
-
+  // カートに追加（共有モジュール cart.js を使用）
   document.getElementById('mAddCart').addEventListener('click', ()=>{
-    addToCart(curChar, curColor);
+    const c = COLORS.find(x=>x.key===curColor);
+    window.CHARAMARL_CART.add(curChar, curColor, PRODUCTS[curChar].name, c.name, 1200);
     const b=document.getElementById('mAddCart'); const o=b.textContent;
     b.textContent='✓ 追加しました'; setTimeout(()=>b.textContent=o, 1200);
   });
-
-  document.getElementById('cartCheckout').addEventListener('click', async ()=>{
-    const cart=getCart(); if(cart.length===0) return;
-    const btn=document.getElementById('cartCheckout'); btn.textContent='処理中...'; btn.disabled=true;
-    try{
-      const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ items: cart.map(i=>({ name:`${i.name} アクリルキーホルダー ${i.colorName}`, price:i.price, quantity:i.qty, images:[`https://charamarl.vercel.app/img/colors_nobg/${i.char}_${i.color}.png`] })) })});
-      const data=await res.json();
-      if(data.url){ window.location.href=data.url; }
-      else { alert('エラー: '+(data.error||'不明')); btn.textContent='まとめて購入する →'; btn.disabled=false; }
-    }catch(e){ alert('通信エラー'); btn.textContent='まとめて購入する →'; btn.disabled=false; }
-  });
-
-  renderCart();  // 初期バッジ反映
 
   function shareProduct(char){
     const p = PRODUCTS[char];
@@ -739,5 +596,6 @@
     card.addEventListener('click', () => window.open(card.dataset.tap || site, '_blank'));
   });
 </script>
+<script src="cart.js"></script>
 </body>
 </html>

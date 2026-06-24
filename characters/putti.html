@@ -44,11 +44,15 @@
   .buy-btn:not(:disabled):hover{opacity:.85;}
   footer{border-top:1px solid rgba(255,255,255,.08);padding:32px;text-align:center;color:var(--muted);font-size:12px;margin-bottom:80px;}
 </style>
+<link rel="stylesheet" href="../cart.css">
 </head>
 <body>
 <header>
   <a class="logo" href="../index.html">CHARAMARL</a>
-  <a class="back" href="../index.html">← キャラクター一覧</a>
+  <div style="display:flex; align-items:center; gap:18px;">
+    <a class="back" href="../index.html">← キャラクター一覧</a>
+    <span data-cart-mount></span>
+  </div>
 </header>
 <div class="char-hero">
   <div class="char-visual" id="charVisual">
@@ -76,7 +80,10 @@
     <strong id="barName">BLAZE RED</strong>
     プッチィ アクリルキーホルダー 50mm
   </div>
-  <button class="buy-btn" id="buyBtn" onclick="checkout()">購入する →</button>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <button id="addCartBtn" style="background:#fff; border:2px solid var(--accent); color:var(--accent); border-radius:32px; padding:13px 22px; font-size:14px; font-weight:900; cursor:pointer; white-space:nowrap;">🛍 カートに追加</button>
+    <button class="buy-btn" id="buyBtn" onclick="checkout()">今すぐ購入 →</button>
+  </div>
 </div>
 <script>
 const colors = [{"key": "red", "name": "BLAZE RED", "accent": "#ff2a2a"}, {"key": "yellow", "name": "SUNNY YELLOW", "accent": "#f5b500"}, {"key": "green", "name": "SLIME GREEN", "accent": "#19c819"}, {"key": "cyan", "name": "ICE CYAN", "accent": "#00c8dc"}, {"key": "blue", "name": "GALAXY BLUE", "accent": "#2a55ff"}, {"key": "pink", "name": "NEON PINK", "accent": "#e633c8"}];
@@ -114,8 +121,13 @@ async function checkout() {
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
     else { alert('エラー: '+(data.error||'不明')); btn.textContent='購入する →'; btn.disabled=false; }
-  } catch(e) { alert('通信エラー'); btn.textContent='購入する →'; btn.disabled=false; }
+  } catch(e) { alert('通信エラー'); btn.textContent='今すぐ購入 →'; btn.disabled=false; }
 }
+document.getElementById('addCartBtn').addEventListener('click', function(){
+  window.CHARAMARL_CART.add('putti', selected.key, 'プッチィ', selected.name, 1200);
+  const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
+});
 </script>
+<script src="../cart.js"></script>
 </body>
 </html>
