@@ -125,6 +125,33 @@
   .act-tap  { bottom:10px; left:10px; background:#fff; color:#111; }
   .act-share{ bottom:10px; right:10px; background:#fff; color:#111; width:38px; height:38px; padding:0; justify-content:center; border-radius:50%; font-size:15px; }
 
+  /* ===== GALLERY ===== */
+  .section-wrap { max-width:1400px; margin:0 auto; padding:8px 24px 0; }
+  .section-head { display:flex; align-items:baseline; justify-content:space-between; margin:24px 0 4px; }
+  .section-head h2 { font-size:22px; font-weight:900; letter-spacing:.02em; }
+  .section-head .sub { font-size:12px; color:var(--muted); }
+  .gallery {
+    display:grid; grid-auto-flow:column; grid-auto-columns:240px; gap:14px;
+    overflow-x:auto; padding:14px 24px 8px; scroll-snap-type:x mandatory; scrollbar-width:none;
+    max-width:1400px; margin:0 auto;
+  }
+  .gallery::-webkit-scrollbar { display:none; }
+  @media(max-width:600px){ .gallery{ grid-auto-columns:180px; padding:12px 16px 8px; } }
+  .gcard { position:relative; border-radius:var(--radius); overflow:hidden; scroll-snap-align:start; background:#fff; border:1px solid var(--line); cursor:pointer; }
+  .gcard img { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+  .gcard-overlay {
+    position:absolute; inset:0; opacity:0; transition:opacity .2s; pointer-events:none;
+    background:linear-gradient(180deg, rgba(0,0,0,.3) 0%, transparent 35%, transparent 60%, rgba(0,0,0,.45) 100%);
+  }
+  .gcard:hover .gcard-overlay { opacity:1; pointer-events:auto; }
+  .gcard-caption { position:absolute; left:12px; bottom:12px; color:#fff; }
+  .gcard-caption .t { font-size:14px; font-weight:800; }
+  .gcard-caption .c { font-size:11px; opacity:.85; }
+  .gact { position:absolute; display:inline-flex; align-items:center; gap:5px; border:none; cursor:pointer; font-weight:800; font-size:12px; padding:7px 13px; border-radius:20px; box-shadow:0 4px 12px rgba(0,0,0,.25); transition:transform .15s; }
+  .gact:hover { transform:scale(1.05); }
+  .gact-visit { top:10px; left:10px; background:#fff; color:#111; }
+  .gact-share { top:10px; right:10px; background:#fff; color:#111; width:36px; height:36px; padding:0; justify-content:center; border-radius:50%; font-size:14px; }
+
   .pin-body { padding:8px 6px 4px; }
   .pin-title { font-size:14px; font-weight:800; margin-bottom:2px; }
   .pin-sub { font-size:12px; color:var(--muted); }
@@ -292,6 +319,53 @@
 
 </div>
 
+<!-- GALLERY -->
+<div class="section-wrap">
+  <div class="section-head">
+    <h2>🖼 GALLERY</h2>
+    <span class="sub">提供キャラクターのPR・作品</span>
+  </div>
+</div>
+<div class="gallery" id="gallery">
+
+  <div class="gcard" data-site="https://dinorenny-colortap.vercel.app/sue.html" data-title="SUE COLOR TAP" data-creator="DinoRenny">
+    <img src="./img/gallery/colortap_key.png" alt="SUE COLOR TAP">
+    <div class="gcard-overlay">
+      <button class="gact gact-visit" data-act="visit">↗ Visit</button>
+      <button class="gact gact-share" data-act="share" title="Share">↗</button>
+      <div class="gcard-caption"><div class="t">SUE COLOR TAP</div><div class="c">DinoRenny</div></div>
+    </div>
+  </div>
+
+  <div class="gcard" data-site="https://thedinorenny.online" data-title="URBAN ROAR" data-creator="DinoRenny">
+    <img src="./img/gallery/urban_roar.png" alt="URBAN ROAR">
+    <div class="gcard-overlay">
+      <button class="gact gact-visit" data-act="visit">↗ Visit</button>
+      <button class="gact gact-share" data-act="share" title="Share">↗</button>
+      <div class="gcard-caption"><div class="t">URBAN ROAR</div><div class="c">DinoRenny</div></div>
+    </div>
+  </div>
+
+  <div class="gcard" data-site="https://thedinorenny.online" data-title="SUE artwork" data-creator="DinoRenny">
+    <img src="./img/gallery/sue_art02.png" alt="SUE artwork">
+    <div class="gcard-overlay">
+      <button class="gact gact-visit" data-act="visit">↗ Visit</button>
+      <button class="gact gact-share" data-act="share" title="Share">↗</button>
+      <div class="gcard-caption"><div class="t">SUE artwork</div><div class="c">DinoRenny</div></div>
+    </div>
+  </div>
+
+  <div class="gcard" data-site="https://thedinorenny.online" data-title="SUE sketch" data-creator="DinoRenny">
+    <img src="./img/gallery/sue_art01.png" alt="SUE sketch">
+    <div class="gcard-overlay">
+      <button class="gact gact-visit" data-act="visit">↗ Visit</button>
+      <button class="gact gact-share" data-act="share" title="Share">↗</button>
+      <div class="gcard-caption"><div class="t">SUE sketch</div><div class="c">DinoRenny</div></div>
+    </div>
+  </div>
+
+</div>
+
 <!-- PRODUCT MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
@@ -419,6 +493,24 @@
 
     // ピン本体クリックで詳細モーダル
     pin.addEventListener('click', () => openModal(char, color));
+  });
+
+  // ===== ギャラリー =====
+  document.querySelectorAll('.gcard').forEach(card => {
+    const site = card.dataset.site, title = card.dataset.title, creator = card.dataset.creator;
+    function shareArt(){
+      const text = `${title} | ${creator} - CHARAMARL`;
+      if(navigator.share){ navigator.share({ title:text, url:site }).catch(()=>{}); }
+      else { window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(site)}`, '_blank'); }
+    }
+    card.querySelectorAll('.gact').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        if(btn.dataset.act==='visit') window.open(site, '_blank');
+        else shareArt();
+      });
+    });
+    card.addEventListener('click', () => window.open(site, '_blank'));
   });
 </script>
 </body>
