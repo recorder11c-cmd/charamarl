@@ -77,8 +77,9 @@
   .pin-img.color-bg {
     display: flex; align-items: center; justify-content: center;
     border-radius: var(--radius) var(--radius) 0 0; overflow: hidden;
+    background: #fff !important;
   }
-  .pin-img.color-bg img { width: 70%; height: auto; border-radius: 0; filter: drop-shadow(0 8px 24px rgba(0,0,0,.4)); }
+  .pin-img.color-bg img { width: 88%; height: auto; border-radius: 0; }
 
   .pin-overlay {
     position: absolute; inset: 0; background: rgba(0,0,0,.35); opacity: 0; transition: opacity .2s;
@@ -117,17 +118,17 @@
     margin-top: 20px;
   }
   .colortap-chars {
-    display: flex; align-items: flex-end;
-    gap: 0; flex-shrink: 0;
-    height: 160px; padding-left: 24px;
+    display: flex; align-items: center;
+    gap: 10px; flex-shrink: 0;
+    padding: 16px 0 16px 24px;
   }
   .colortap-chars img {
-    height: 140px; width: auto; object-fit: contain;
-    filter: drop-shadow(0 0 20px rgba(162,89,255,.6));
-    transition: filter .4s;
+    width: 96px; height: 96px; object-fit: contain;
+    background: #fff; border-radius: 16px; padding: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4);
   }
-  .colortap-chars img:nth-child(2) { filter: hue-rotate(120deg) saturate(2.5) drop-shadow(0 0 20px rgba(0,255,80,.5)); margin-left:-20px; }
-  .colortap-chars img:nth-child(3) { filter: hue-rotate(300deg) saturate(2.5) drop-shadow(0 0 20px rgba(255,0,200,.5)); margin-left:-20px; }
+  .colortap-chars img:nth-child(2) { margin-top: 20px; }
+  @media (max-width: 600px) { .colortap-chars img { width: 72px; height: 72px; } }
   .colortap-body {
     flex: 1; padding: 28px 32px;
   }
@@ -187,9 +188,9 @@
 <!-- COLOR TAP BANNER -->
 <div class="colortap-banner">
   <div class="colortap-chars">
-    <img src="./img/sue.png" alt="SUE">
-    <img src="./img/mossun.png" alt="モッスン">
-    <img src="./img/putti.png" alt="プッチィ">
+    <img src="./img/colors_nobg/sue_red.png" alt="SUE">
+    <img src="./img/colors_nobg/mossun_blue.png" alt="モッスン">
+    <img src="./img/colors_nobg/putti_yellow.png" alt="プッチィ">
   </div>
   <div class="colortap-body">
     <div class="colortap-tag">CHARAMARL の売り</div>
@@ -213,8 +214,8 @@
 
   <!-- SUE BLAZE RED tall -->
   <a class="pin" href="./characters/sue.html">
-    <div class="pin-img tall color-bg" style="background:linear-gradient(160deg,#3a0000,#1a0000);">
-      <img src="./img/sue.png" style="filter:hue-rotate(0deg) saturate(2) brightness(1.1) drop-shadow(0 8px 24px rgba(255,40,40,.5));" alt="SUE">
+    <div class="pin-img tall color-bg">
+      <img src="./img/colors_nobg/sue_red.png" alt="SUE">
     </div>
     <div class="pin-badge">NEW</div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
@@ -225,29 +226,29 @@
     </div>
   </a>
 
-  <!-- PUTTI square -->
+  <!-- PUTTI YELLOW square -->
   <a class="pin" href="./characters/putti.html">
-    <div class="pin-img square color-bg" style="background:linear-gradient(160deg,#1e1e00,#2a2a00);">
-      <img src="./img/putti.png" alt="プッチィ" style="drop-shadow(0 8px 24px rgba(200,200,0,.4));">
+    <div class="pin-img square color-bg">
+      <img src="./img/colors_nobg/putti_yellow.png" alt="プッチィ">
     </div>
     <div class="pin-badge">NEW</div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
     <div class="pin-body">
-      <div class="pin-title">プッチィ アクキー</div>
+      <div class="pin-title">プッチィ アクキー SUNNY YELLOW</div>
       <div class="pin-sub">DinoRenny</div>
       <div class="pin-price">¥1,200</div>
     </div>
   </a>
 
-  <!-- MOSSUN tall -->
+  <!-- MOSSUN BLUE tall -->
   <a class="pin" href="./characters/mossun.html">
-    <div class="pin-img tall color-bg" style="background:linear-gradient(160deg,#001040,#000820);">
-      <img src="./img/mossun.png" alt="モッスン" style="filter:drop-shadow(0 8px 24px rgba(30,80,255,.5));">
+    <div class="pin-img tall color-bg">
+      <img src="./img/colors_nobg/mossun_blue.png" alt="モッスン">
     </div>
     <div class="pin-badge">NEW</div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
     <div class="pin-body">
-      <div class="pin-title">モッスン アクキー</div>
+      <div class="pin-title">モッスン アクキー GALAXY BLUE</div>
       <div class="pin-sub">DinoRenny</div>
       <div class="pin-price">¥1,200</div>
     </div>
@@ -255,8 +256,8 @@
 
   <!-- SUE NEON PINK square -->
   <a class="pin" href="./characters/sue.html">
-    <div class="pin-img square color-bg" style="background:linear-gradient(160deg,#2a003a,#1a0026);">
-      <img src="./img/sue.png" style="filter:hue-rotate(300deg) saturate(2.5) brightness(1) drop-shadow(0 8px 24px rgba(255,0,200,.5));" alt="SUE">
+    <div class="pin-img square color-bg">
+      <img src="./img/colors_nobg/sue_pink.png" alt="SUE">
     </div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
     <div class="pin-body">
@@ -268,8 +269,8 @@
 
   <!-- PUTTI NEON PINK square -->
   <a class="pin" href="./characters/putti.html">
-    <div class="pin-img square color-bg" style="background:linear-gradient(160deg,#2a003a,#1a0026);">
-      <img src="./img/putti.png" style="filter:hue-rotate(300deg) saturate(2.5) brightness(1) drop-shadow(0 8px 24px rgba(255,0,200,.5));" alt="プッチィ">
+    <div class="pin-img square color-bg">
+      <img src="./img/colors_nobg/putti_pink.png" alt="プッチィ">
     </div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
     <div class="pin-body">
@@ -281,8 +282,8 @@
 
   <!-- COLOR TAP紹介 wide -->
   <a class="pin" href="https://dinorenny-colortap.vercel.app/sue.html" target="_blank">
-    <div class="pin-img wide color-bg" style="background:linear-gradient(135deg,#1a0030,#000d30,#001a00);">
-      <img src="./img/sue.png" style="filter:hue-rotate(175deg) saturate(2.5) brightness(1.05) drop-shadow(0 8px 32px rgba(0,200,255,.5)); width:55%;" alt="SUE">
+    <div class="pin-img wide color-bg">
+      <img src="./img/colors_nobg/sue_cyan.png" alt="SUE" style="width:60%;">
     </div>
     <div class="pin-overlay"><button class="save-btn">試してみる</button></div>
     <div class="pin-body">
@@ -293,8 +294,8 @@
 
   <!-- SUE GALAXY BLUE tall -->
   <a class="pin" href="./characters/sue.html">
-    <div class="pin-img tall color-bg" style="background:linear-gradient(160deg,#001040,#000820);">
-      <img src="./img/sue.png" style="filter:hue-rotate(230deg) saturate(2.5) brightness(1.05) drop-shadow(0 8px 24px rgba(30,80,255,.5));" alt="SUE">
+    <div class="pin-img tall color-bg">
+      <img src="./img/colors_nobg/sue_blue.png" alt="SUE">
     </div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
     <div class="pin-body">
@@ -306,8 +307,8 @@
 
   <!-- MOSSUN SLIME GREEN square -->
   <a class="pin" href="./characters/mossun.html">
-    <div class="pin-img square color-bg" style="background:linear-gradient(160deg,#002010,#001008);">
-      <img src="./img/mossun.png" style="filter:hue-rotate(120deg) saturate(2.5) brightness(1.05) drop-shadow(0 8px 24px rgba(0,255,80,.4));" alt="モッスン">
+    <div class="pin-img square color-bg">
+      <img src="./img/colors_nobg/mossun_green.png" alt="モッスン">
     </div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
     <div class="pin-body">
@@ -319,8 +320,8 @@
 
   <!-- SUE SLIME GREEN square -->
   <a class="pin" href="./characters/sue.html">
-    <div class="pin-img square color-bg" style="background:linear-gradient(160deg,#002010,#001008);">
-      <img src="./img/sue.png" style="filter:hue-rotate(120deg) saturate(2.5) brightness(1.05) drop-shadow(0 8px 24px rgba(0,255,80,.4));" alt="SUE">
+    <div class="pin-img square color-bg">
+      <img src="./img/colors_nobg/sue_green.png" alt="SUE">
     </div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
     <div class="pin-body">
@@ -343,8 +344,8 @@
 
   <!-- PUTTI GALAXY BLUE tall -->
   <a class="pin" href="./characters/putti.html">
-    <div class="pin-img tall color-bg" style="background:linear-gradient(160deg,#001040,#000820);">
-      <img src="./img/putti.png" style="filter:hue-rotate(230deg) saturate(2.5) brightness(1.05) drop-shadow(0 8px 24px rgba(30,80,255,.5));" alt="プッチィ">
+    <div class="pin-img tall color-bg">
+      <img src="./img/colors_nobg/putti_blue.png" alt="プッチィ">
     </div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
     <div class="pin-body">
@@ -356,8 +357,8 @@
 
   <!-- MOSSUN NEON PINK square -->
   <a class="pin" href="./characters/mossun.html">
-    <div class="pin-img square color-bg" style="background:linear-gradient(160deg,#2a003a,#1a0026);">
-      <img src="./img/mossun.png" style="filter:hue-rotate(300deg) saturate(2.5) brightness(1) drop-shadow(0 8px 24px rgba(255,0,200,.5));" alt="モッスン">
+    <div class="pin-img square color-bg">
+      <img src="./img/colors_nobg/mossun_pink.png" alt="モッスン">
     </div>
     <div class="pin-overlay"><button class="save-btn">購入する</button></div>
     <div class="pin-body">
