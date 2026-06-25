@@ -14,21 +14,21 @@
     },
     {
       "id": "putti",
-      "name": "プッチィ",
+      "name": "PUTTI",
       "creator": "DinoRenny (@dino_renny)",
       "tags": ["DinoRenny", "アクキー", "50mm", "両面印刷"],
       "desc": "空を自由に舞うプテラノドン「PUTTI」。<br>元気いっぱいの表情と鮮やかなカラーが魅力のキャラクターです。<br><br>全6色から選べる、ビビッドカラーのアクリルキーホルダー。お気に入りのカラーを見つけて、自分だけの一匹をコレクションしよう。",
-      "productLabel": "プッチィ アクリルキーホルダー 50mm",
+      "productLabel": "PUTTI アクリルキーホルダー 50mm",
       "price": 1200,
       "colortap": "https://dinorenny-colortap.vercel.app/putti.html"
     },
     {
       "id": "mossun",
-      "name": "モッスン",
+      "name": "MOSSUN",
       "creator": "DinoRenny (@dino_renny)",
       "tags": ["DinoRenny", "アクキー", "50mm", "両面印刷"],
       "desc": "海を泳ぐモササウルス「MOSSUN」。<br>クールな表情と力強い存在感が魅力のキャラクターです。<br><br>全6色から選べる、ビビッドカラーのアクリルキーホルダー。お気に入りのカラーを見つけて、自分だけの一匹をコレクションしよう。",
-      "productLabel": "モッスン アクリルキーホルダー 50mm",
+      "productLabel": "MOSSUN アクリルキーホルダー 50mm",
       "price": 1200,
       "colortap": "https://dinorenny-colortap.vercel.app/mossun.html"
     }
