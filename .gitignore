@@ -2,3 +2,7 @@
 node_modules/
 .env
 .env.local
+
+# 素材受け取りフォルダの中身は管理対象外（READMEのみ追跡）
+_inbox/*
+!_inbox/README.txt
