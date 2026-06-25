@@ -64,9 +64,9 @@
   .drop-price{font-size:18px;font-weight:900;margin:10px 0 12px;}
   .drop-price small{font-size:11px;color:var(--muted);font-weight:600;}
   .drop-btn{background:var(--black);color:#fff;border:none;border-radius:24px;padding:11px 22px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap;}
-  /* 実物キーホルダーを右に透過ではみ出し＋影 */
-  .drop-img{flex:0 0 auto;width:152px;max-width:none;margin:0 -54px 0 0;object-fit:contain;
-    filter:drop-shadow(8px 12px 12px rgba(0,0,0,.32));}
+  /* 実物キーホルダーをカード内に収め、右に倒す＋影 */
+  .drop-img{flex:0 0 auto;width:140px;max-width:none;margin:0 2px 0 0;object-fit:contain;
+    transform:rotate(15deg);filter:drop-shadow(6px 10px 10px rgba(0,0,0,.30));}
   .drop-btn:hover{background:#333;}
   .hero-dots{display:flex;gap:7px;justify-content:center;margin-top:16px;}
   .hero-dots span{width:7px;height:7px;border-radius:50%;background:#d2d2d2;cursor:pointer;transition:.2s;}
