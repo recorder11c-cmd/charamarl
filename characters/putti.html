@@ -91,6 +91,8 @@
 </div>
 <script>
 const CHAR_ID = "putti", CHAR_NAME = "プッチィ", PRICE = 1200;
+const IMG_DIR = "../img/colors_nobg";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
+const IMG_ROOT = "/img/colors_nobg";  // カート/決済用(ルート相対)
 const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];
 let selected = colors[0];
 const grid = document.getElementById('colorGrid');
@@ -99,14 +101,14 @@ colors.forEach((c, i) => {
   const card = document.createElement('div');
   card.className = 'color-card' + (i===0?' selected':'');
   card.innerHTML = `
-    <div class="color-preview"><img src="../img/colors_nobg/${CHAR_ID}_${c.key}.png" alt="${c.name}"></div>
+    <div class="color-preview"><img src="${IMG_DIR}/${CHAR_ID}_${c.key}.png" alt="${c.name}"></div>
     <div class="color-name" style="color:${c.accent}">${c.name}</div>
     <div class="color-price">${yen(PRICE)}</div>`;
   card.addEventListener('click', () => {
     document.querySelectorAll('.color-card').forEach(x => x.classList.remove('selected'));
     card.classList.add('selected');
     selected = colors[i];
-    document.getElementById('charImg').src = `../img/colors_nobg/${CHAR_ID}_${c.key}.png`;
+    document.getElementById('charImg').src = `${IMG_DIR}/${CHAR_ID}_${c.key}.png`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
   });
@@ -119,7 +121,7 @@ async function checkout() {
   try {
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.vercel.app/img/colors_nobg/${CHAR_ID}_${selected.key}.png`] }] }),
+      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.vercel.app${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`] }] }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
@@ -127,7 +129,7 @@ async function checkout() {
   } catch(e) { alert('通信エラー'); btn.textContent='今すぐ購入 →'; btn.disabled=false; }
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
-  window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE);
+  window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE, `${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
 </script>

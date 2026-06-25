@@ -53,7 +53,7 @@
     document.getElementById('cartTotal').textContent = '¥'+cart.reduce((s,i)=>s+i.price*i.qty,0).toLocaleString();
     itemsEl.innerHTML = cart.map(i=>`
       <div class="cart-item">
-        <img src="${img(i.char,i.color)}" alt="${i.name}">
+        <img src="${i.img || img(i.char,i.color)}" alt="${i.name}">
         <div class="cart-item-info">
           <div class="cart-item-name">${i.name} アクキー</div>
           <div class="cart-item-color">${i.colorName}</div>
@@ -84,7 +84,7 @@
     const btn=document.getElementById('cartCheckout'); btn.textContent='処理中...'; btn.disabled=true;
     try{
       const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ items: cart.map(i=>({ name:`${i.name} アクリルキーホルダー ${i.colorName}`, price:i.price, quantity:i.qty, images:[imgAbs(i.char,i.color)] })) })});
+        body:JSON.stringify({ items: cart.map(i=>({ name:`${i.name} アクリルキーホルダー ${i.colorName}`, price:i.price, quantity:i.qty, images:[i.img ? PROD_BASE+i.img : imgAbs(i.char,i.color)] })) })});
       const data=await res.json();
       if(data.url){ window.location.href=data.url; }
       else { alert('エラー: '+(data.error||'不明')); btn.textContent='まとめて購入する →'; btn.disabled=false; }
@@ -93,10 +93,10 @@
 
   // 公開API
   window.CHARAMARL_CART = {
-    add(char, color, name, colorName, price){
+    add(char, color, name, colorName, price, imgPath){
       const cart=get(); const id=char+'_'+color;
       const ex=cart.find(i=>i.id===id);
-      if(ex) ex.qty++; else cart.push({ id, char, color, name, colorName, price:price||1200, qty:1 });
+      if(ex) ex.qty++; else cart.push({ id, char, color, name, colorName, price:price||1200, qty:1, img:imgPath||null });
       save(cart);
     },
     open: openCart

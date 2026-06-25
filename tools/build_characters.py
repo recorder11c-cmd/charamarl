@@ -89,7 +89,7 @@ TEMPLATE = r"""<!DOCTYPE html>
 </header>
 <div class="char-hero">
   <div class="char-visual" id="charVisual">
-    <img src="../img/colors_nobg/@@ID@@_red.png" alt="@@NAME@@" id="charImg">
+    <img src="@@IMG_DIR@@/@@ID@@_red.png" alt="@@NAME@@" id="charImg">
   </div>
   <div class="char-info">
     <div class="tag-row">@@TAGS@@</div>
@@ -118,6 +118,8 @@ TEMPLATE = r"""<!DOCTYPE html>
 </div>
 <script>
 const CHAR_ID = "@@ID@@", CHAR_NAME = "@@NAME@@", PRICE = @@PRICE@@;
+const IMG_DIR = "@@IMG_DIR@@";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
+const IMG_ROOT = "@@IMG_ROOT@@";  // カート/決済用(ルート相対)
 const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];
 let selected = colors[0];
 const grid = document.getElementById('colorGrid');
@@ -126,14 +128,14 @@ colors.forEach((c, i) => {
   const card = document.createElement('div');
   card.className = 'color-card' + (i===0?' selected':'');
   card.innerHTML = `
-    <div class="color-preview"><img src="../img/colors_nobg/${CHAR_ID}_${c.key}.png" alt="${c.name}"></div>
+    <div class="color-preview"><img src="${IMG_DIR}/${CHAR_ID}_${c.key}.png" alt="${c.name}"></div>
     <div class="color-name" style="color:${c.accent}">${c.name}</div>
     <div class="color-price">${yen(PRICE)}</div>`;
   card.addEventListener('click', () => {
     document.querySelectorAll('.color-card').forEach(x => x.classList.remove('selected'));
     card.classList.add('selected');
     selected = colors[i];
-    document.getElementById('charImg').src = `../img/colors_nobg/${CHAR_ID}_${c.key}.png`;
+    document.getElementById('charImg').src = `${IMG_DIR}/${CHAR_ID}_${c.key}.png`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
   });
@@ -146,7 +148,7 @@ async function checkout() {
   try {
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.vercel.app/img/colors_nobg/${CHAR_ID}_${selected.key}.png`] }] }),
+      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.vercel.app${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`] }] }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
@@ -154,7 +156,7 @@ async function checkout() {
   } catch(e) { alert('通信エラー'); btn.textContent='今すぐ購入 →'; btn.disabled=false; }
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
-  window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE);
+  window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE, `${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
 </script>
@@ -168,6 +170,10 @@ def build():
     cfg = json.load(open(os.path.join(ROOT, "characters", "characters.json"), encoding="utf-8"))
     for ch in cfg["characters"]:
         tags = "".join(f'<span class="tag">{t}</span>' for t in ch["tags"])
+        # photos:true で実物写真(img/products)、未指定でイラスト(img/colors_nobg)
+        photos = ch.get("photos", False)
+        img_dir = "../img/products" if photos else "../img/colors_nobg"
+        img_root = "/img/products" if photos else "/img/colors_nobg"
         html = (TEMPLATE
                 .replace("@@ID@@", ch["id"])
                 .replace("@@NAME@@", ch["name"])
@@ -176,6 +182,8 @@ def build():
                 .replace("@@TAGS@@", tags)
                 .replace("@@PRODUCT_LABEL@@", ch["productLabel"])
                 .replace("@@COLORTAP@@", ch["colortap"])
+                .replace("@@IMG_DIR@@", img_dir)
+                .replace("@@IMG_ROOT@@", img_root)
                 .replace("@@PRICE@@", str(ch["price"])))
         out = os.path.join(ROOT, "characters", ch["id"] + ".html")
         with open(out, "w", encoding="utf-8") as f:

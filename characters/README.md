@@ -16,7 +16,11 @@ HTMLを直接いじる必要はありません。
 | `desc` | **詳細**文（`<br>`で改行可） | `"ライブドローイングから…<br>6色展開…"` |
 | `productLabel` | 下部バーの商品名 | `"SUE アクリルキーホルダー 50mm"` |
 | `price` | 価格（数値） | `1200` |
+| `photos` | **実物写真を使う**なら `true`（任意） | `true` → `img/products/<id>_<色>.png` を表示 |
 | `colortap` | COLOR TAP のURL | `"https://dinorenny-colortap.vercel.app/sue.html"` |
+
+> `photos: true` のときは **実物写真**（`img/products/<id>_<色>.png`）を商品画像・カート・決済に使用。
+> 省略 or `false` のときは**イラスト**（`img/colors_nobg/`）。TOPページは常にイラストのまま。
 
 > **商品画像**は `id` から自動参照されます（`img/colors_nobg/<id>_<色>.png`）。
 > 画像は別途 `recolor_character.py`（dinorenny-colortapリポジトリ）で6色生成して
