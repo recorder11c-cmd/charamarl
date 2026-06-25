@@ -1,0 +1,35 @@
+{
+  "_note": "ここを編集して tools/build_characters.py を実行すると characters/<id>.html が再生成されます。画像は img/colors_nobg/<id>_<色>.png（recolor_character.py で生成）。",
+  "characters": [
+    {
+      "id": "sue",
+      "name": "SUE",
+      "creator": "DinoRenny (@dino_renny)",
+      "tags": ["DinoRenny", "アクキー", "50mm", "両面印刷"],
+      "desc": "ライブドローイングから生まれた恐竜キャラクター。<br>6色展開のビビッドなアクリルキーホルダー。",
+      "productLabel": "SUE アクリルキーホルダー 50mm",
+      "price": 1200,
+      "colortap": "https://dinorenny-colortap.vercel.app/sue.html"
+    },
+    {
+      "id": "putti",
+      "name": "プッチィ",
+      "creator": "DinoRenny (@dino_renny)",
+      "tags": ["DinoRenny", "アクキー", "50mm", "両面印刷"],
+      "desc": "ライブドローイングから生まれた翼竜キャラクター。<br>6色展開のビビッドなアクリルキーホルダー。",
+      "productLabel": "プッチィ アクリルキーホルダー 50mm",
+      "price": 1200,
+      "colortap": "https://dinorenny-colortap.vercel.app/putti.html"
+    },
+    {
+      "id": "mossun",
+      "name": "モッスン",
+      "creator": "DinoRenny (@dino_renny)",
+      "tags": ["DinoRenny", "アクキー", "50mm", "両面印刷"],
+      "desc": "ライブドローイングから生まれた恐竜キャラクター。<br>6色展開のビビッドなアクリルキーホルダー。",
+      "productLabel": "モッスン アクリルキーホルダー 50mm",
+      "price": 1200,
+      "colortap": "https://dinorenny-colortap.vercel.app/mossun.html"
+    }
+  ]
+}

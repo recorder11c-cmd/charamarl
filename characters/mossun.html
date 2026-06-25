@@ -59,9 +59,7 @@
     <img src="../img/colors_nobg/mossun_red.png" alt="モッスン" id="charImg">
   </div>
   <div class="char-info">
-    <div class="tag-row">
-      <span class="tag">DinoRenny</span><span class="tag">アクキー</span><span class="tag">50mm</span><span class="tag">両面印刷</span>
-    </div>
+    <div class="tag-row"><span class="tag">DinoRenny</span><span class="tag">アクキー</span><span class="tag">50mm</span><span class="tag">両面印刷</span></div>
     <h1>モッスン</h1>
     <div class="char-creator">by DinoRenny (@dino_renny)</div>
     <p class="char-desc">ライブドローイングから生まれた恐竜キャラクター。<br>6色展開のビビッドなアクリルキーホルダー。</p>
@@ -86,24 +84,23 @@
   </div>
 </div>
 <script>
-const colors = [{"key": "red", "name": "BLAZE RED", "accent": "#ff2a2a"}, {"key": "yellow", "name": "SUNNY YELLOW", "accent": "#f5b500"}, {"key": "green", "name": "SLIME GREEN", "accent": "#19c819"}, {"key": "cyan", "name": "ICE CYAN", "accent": "#00c8dc"}, {"key": "blue", "name": "GALAXY BLUE", "accent": "#2a55ff"}, {"key": "pink", "name": "NEON PINK", "accent": "#e633c8"}];
+const CHAR_ID = "mossun", CHAR_NAME = "モッスン", PRICE = 1200;
+const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];
 let selected = colors[0];
 const grid = document.getElementById('colorGrid');
+const yen = n => '¥'+n.toLocaleString();
 colors.forEach((c, i) => {
   const card = document.createElement('div');
   card.className = 'color-card' + (i===0?' selected':'');
   card.innerHTML = `
-    <div class="color-preview">
-      <img src="../img/colors_nobg/mossun_${c.key}.png" alt="${c.name}">
-    </div>
+    <div class="color-preview"><img src="../img/colors_nobg/${CHAR_ID}_${c.key}.png" alt="${c.name}"></div>
     <div class="color-name" style="color:${c.accent}">${c.name}</div>
-    <div class="color-price">¥1,200</div>
-  `;
+    <div class="color-price">${yen(PRICE)}</div>`;
   card.addEventListener('click', () => {
     document.querySelectorAll('.color-card').forEach(x => x.classList.remove('selected'));
     card.classList.add('selected');
     selected = colors[i];
-    document.getElementById('charImg').src = `../img/colors_nobg/mossun_${c.key}.png`;
+    document.getElementById('charImg').src = `../img/colors_nobg/${CHAR_ID}_${c.key}.png`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
   });
@@ -116,15 +113,15 @@ async function checkout() {
   try {
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: [{ name:`モッスン アクリルキーホルダー ${selected.name}`, price:1200, quantity:1, images:[`https://charamarl.vercel.app/img/colors_nobg/mossun_${selected.key}.png`] }] }),
+      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.vercel.app/img/colors_nobg/${CHAR_ID}_${selected.key}.png`] }] }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
-    else { alert('エラー: '+(data.error||'不明')); btn.textContent='購入する →'; btn.disabled=false; }
+    else { alert('エラー: '+(data.error||'不明')); btn.textContent='今すぐ購入 →'; btn.disabled=false; }
   } catch(e) { alert('通信エラー'); btn.textContent='今すぐ購入 →'; btn.disabled=false; }
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
-  window.CHARAMARL_CART.add('mossun', selected.key, 'モッスン', selected.name, 1200);
+  window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
 </script>

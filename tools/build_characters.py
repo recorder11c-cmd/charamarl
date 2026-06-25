@@ -1,9 +1,36 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+"""
+CHARAMARL 商品ページ ビルダー
+================================
+characters/characters.json を編集して実行すると、各キャラの
+characters/<id>.html を自動生成します。
+
+使い方:
+  python3 tools/build_characters.py
+
+設定できる項目（characters.json の各キャラ）:
+  id           : ファイル名/画像名のキー（例 sue）。画像は img/colors_nobg/<id>_<色>.png
+  name         : 商品名（表示名）
+  creator      : by の後ろ（作者名）
+  tags         : タグ配列（DinoRenny / アクキー / 50mm など）
+  desc         : 詳細文（<br>で改行可）
+  productLabel : 下部バーの商品名（例 "SUE アクリルキーホルダー 50mm"）
+  price        : 価格（数値）
+  colortap     : COLOR TAP のURL
+
+※ 画像は recolor_character.py（dinorenny-colortapリポジトリ）で6色生成し、
+   img/colors_nobg/ に置く前提。
+"""
+import json, os
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+TEMPLATE = r"""<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>プッチィ — CHARAMARL</title>
+<title>@@NAME@@ — CHARAMARL</title>
 <style>
   :root {
     --bg:#0e0e14; --surface:#1a1a26; --card:#1f1f2e;
@@ -56,15 +83,15 @@
 </header>
 <div class="char-hero">
   <div class="char-visual" id="charVisual">
-    <img src="../img/colors_nobg/putti_red.png" alt="プッチィ" id="charImg">
+    <img src="../img/colors_nobg/@@ID@@_red.png" alt="@@NAME@@" id="charImg">
   </div>
   <div class="char-info">
-    <div class="tag-row"><span class="tag">DinoRenny</span><span class="tag">アクキー</span><span class="tag">50mm</span><span class="tag">両面印刷</span></div>
-    <h1>プッチィ</h1>
-    <div class="char-creator">by DinoRenny (@dino_renny)</div>
-    <p class="char-desc">ライブドローイングから生まれた翼竜キャラクター。<br>6色展開のビビッドなアクリルキーホルダー。</p>
+    <div class="tag-row">@@TAGS@@</div>
+    <h1>@@NAME@@</h1>
+    <div class="char-creator">by @@CREATOR@@</div>
+    <p class="char-desc">@@DESC@@</p>
     <div class="selected-color-label" id="selectedLabel">BLAZE RED</div>
-    <div><a href="https://dinorenny-colortap.vercel.app/putti.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(162,89,255,.12);border:1px solid rgba(162,89,255,.4);color:var(--accent2);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎨 COLOR TAP で遊ぶ</a></div>
+    <div><a href="@@COLORTAP@@" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(162,89,255,.12);border:1px solid rgba(162,89,255,.4);color:var(--accent2);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎨 COLOR TAP で遊ぶ</a></div>
   </div>
 </div>
 <section>
@@ -76,7 +103,7 @@
 <div class="buy-bar">
   <div class="buy-bar-info">
     <strong id="barName">BLAZE RED</strong>
-    プッチィ アクリルキーホルダー 50mm
+    @@PRODUCT_LABEL@@
   </div>
   <div style="display:flex; gap:10px; align-items:center;">
     <button id="addCartBtn" style="background:#fff; border:2px solid var(--accent); color:var(--accent); border-radius:32px; padding:13px 22px; font-size:14px; font-weight:900; cursor:pointer; white-space:nowrap;">🛍 カートに追加</button>
@@ -84,7 +111,7 @@
   </div>
 </div>
 <script>
-const CHAR_ID = "putti", CHAR_NAME = "プッチィ", PRICE = 1200;
+const CHAR_ID = "@@ID@@", CHAR_NAME = "@@NAME@@", PRICE = @@PRICE@@;
 const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];
 let selected = colors[0];
 const grid = document.getElementById('colorGrid');
@@ -128,3 +155,28 @@ document.getElementById('addCartBtn').addEventListener('click', function(){
 <script src="../cart.js"></script>
 </body>
 </html>
+"""
+
+
+def build():
+    cfg = json.load(open(os.path.join(ROOT, "characters", "characters.json"), encoding="utf-8"))
+    for ch in cfg["characters"]:
+        tags = "".join(f'<span class="tag">{t}</span>' for t in ch["tags"])
+        html = (TEMPLATE
+                .replace("@@ID@@", ch["id"])
+                .replace("@@NAME@@", ch["name"])
+                .replace("@@CREATOR@@", ch["creator"])
+                .replace("@@DESC@@", ch["desc"])
+                .replace("@@TAGS@@", tags)
+                .replace("@@PRODUCT_LABEL@@", ch["productLabel"])
+                .replace("@@COLORTAP@@", ch["colortap"])
+                .replace("@@PRICE@@", str(ch["price"])))
+        out = os.path.join(ROOT, "characters", ch["id"] + ".html")
+        with open(out, "w", encoding="utf-8") as f:
+            f.write(html)
+        print("generated:", os.path.relpath(out, ROOT))
+    print("done")
+
+
+if __name__ == "__main__":
+    build()
