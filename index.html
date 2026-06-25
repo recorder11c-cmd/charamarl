@@ -249,7 +249,7 @@
         <div class="drop-tag">NEW DROP</div>
         <div class="drop-name" id="dropName">SUE アクリルキーホルダー</div>
         <div class="drop-artist" id="dropArtist">DinoRenny</div>
-        <img class="drop-img" id="dropImg" src="./img/colors/sue_red.png" alt="">
+        <img class="drop-img" id="dropImg" src="./img/products/sue_red.png" alt="">
         <div class="drop-price">¥1,200 <small>(税込)</small></div>
         <button class="drop-btn" id="dropBtn">SHOP NOW →</button>
       </div>
@@ -455,7 +455,7 @@
 <script>
   // ===== HERO カルーセル =====
   const FEATURED = [
-    { id:'sue', name:'SUE', creator:'DinoRenny', desc:'人気キャラクターSUEのアクリルキーホルダーが新登場！', color:'red', page:'./characters/sue.html', drop:'SUE アクリルキーホルダー' },
+    { id:'sue', name:'SUE', creator:'DinoRenny', desc:'人気キャラクターSUEのアクリルキーホルダーが新登場！', color:'red', page:'./characters/sue.html', drop:'SUE アクリルキーホルダー', photos:true },
     { id:'putti', name:'プッチィ', creator:'DinoRenny', desc:'ライブドローイングから生まれた翼竜キャラクター。6色展開。', color:'yellow', page:'./characters/putti.html', drop:'プッチィ アクリルキーホルダー' },
     { id:'mossun', name:'モッスン', creator:'DinoRenny', desc:'迫力のモッスンが6色のビビッドカラーで登場。', color:'blue', page:'./characters/mossun.html', drop:'モッスン アクリルキーホルダー' },
   ];
@@ -471,7 +471,7 @@
     document.getElementById('heroShop').href=f.page;
     document.getElementById('dropName').textContent=f.drop;
     document.getElementById('dropArtist').textContent=f.creator;
-    document.getElementById('dropImg').src=`./img/colors/${f.id}_${f.color}.png`;
+    document.getElementById('dropImg').src = f.photos ? `./img/products/${f.id}_${f.color}.png` : `./img/colors/${f.id}_${f.color}.png`;
     document.getElementById('dropBtn').onclick=()=>location.href=f.page;
     [...dots.children].forEach((s,j)=>s.classList.toggle('on',j===hi));
   }
