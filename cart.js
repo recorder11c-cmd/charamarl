@@ -96,7 +96,7 @@
     add(char, color, name, colorName, price, imgPath){
       const cart=get(); const id=char+'_'+color;
       const ex=cart.find(i=>i.id===id);
-      if(ex) ex.qty++; else cart.push({ id, char, color, name, colorName, price:price||1200, qty:1, img:imgPath||null });
+      if(ex) ex.qty++; else cart.push({ id, char, color, name, colorName, price:price||1000, qty:1, img:imgPath||null });
       save(cart);
     },
     open: openCart
