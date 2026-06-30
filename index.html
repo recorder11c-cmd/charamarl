@@ -416,15 +416,19 @@
   // ===== HERO カルーセル =====
   const FEATURED = [
     { id:'sue', name:'SUE', creator:'DinoRenny', desc:'DinoRennyを代表するティラノサウルス「SUE」。力強い表情とポップなカラーが魅力の人気キャラクター。', color:'red', page:'./characters/sue.html', drop:'SUE アクリルキーホルダー', photos:true },
-    { id:'putti', name:'PUTTI', creator:'DinoRenny', desc:'空を自由に舞うプテラノドン「PUTTI」。元気いっぱいの表情と鮮やかなカラーが魅力。', color:'yellow', page:'./characters/putti.html', drop:'PUTTI アクリルキーホルダー' },
-    { id:'mossun', name:'MOSSUN', creator:'DinoRenny', desc:'海を泳ぐモササウルス「MOSSUN」。クールな表情と力強い存在感が魅力。', color:'blue', page:'./characters/mossun.html', drop:'MOSSUN アクリルキーホルダー' },
+    { id:'putti', name:'PUTTI', creator:'DinoRenny', desc:'空を自由に舞うプテラノドン「PUTTI」。元気いっぱいの表情と鮮やかなカラーが魅力。', color:'yellow', page:'./characters/putti.html', drop:'PUTTI アクリルキーホルダー', photos:true },
+    { id:'mossun', name:'MOSSUN', creator:'DinoRenny', desc:'海を泳ぐモササウルス「MOSSUN」。クールな表情と力強い存在感が魅力。', color:'blue', page:'./characters/mossun.html', drop:'MOSSUN アクリルキーホルダー', photos:true },
   ];
   let hi = 0;
   const dots = document.getElementById('heroDots');
   FEATURED.forEach((_,i)=>{ const s=document.createElement('span'); if(i===0)s.className='on'; s.addEventListener('click',()=>setHero(i)); dots.appendChild(s); });
   function setHero(i){
     hi=(i+FEATURED.length)%FEATURED.length; const f=FEATURED[hi];
-    document.getElementById('heroName').textContent=f.name;
+    const hn=document.getElementById('heroName');
+    hn.textContent=f.name;
+    hn.style.fontSize = f.name.length>=6 ? 'clamp(40px,6vw,76px)'
+                      : f.name.length>=5 ? 'clamp(48px,7.4vw,92px)'
+                      : 'clamp(56px,9vw,112px)';
     document.getElementById('heroBy').textContent='by '+f.creator;
     document.getElementById('heroDesc').textContent=f.desc;
     document.getElementById('heroImg').src=`./img/colors/${f.id}_${f.color}.png`;
