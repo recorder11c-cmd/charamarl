@@ -268,24 +268,7 @@
 <!-- FEATURED ARTIST -->
 <section class="blk" id="artist">
   <div class="sec-head"><div><div class="sec-eyebrow">FEATURED ARTIST</div><h2 class="sec-title">今週の注目アーティスト</h2></div></div>
-  <div class="artist-card">
-    <img class="artist-photo" src="./img/gallery/urban_roar.png" alt="DinoRenny">
-    <div>
-      <div class="artist-name">DinoRenny <span class="verified">✔</span></div>
-      <div class="artist-role">イラストレーター / キャラクターデザイナー</div>
-      <p class="artist-bio">恐竜のSUEを中心に、ポップで収集心をくすぐるキャラクターを制作。国内外でアパレルや雑貨、アートワークを展開中。</p>
-      <div class="artist-social">
-        <a href="#">𝕏</a><a href="#">📷</a><a href="#">🎵</a><a href="#">🌐</a>
-      </div>
-      <button class="btn-follow">フォローする</button>
-    </div>
-    <div class="artist-works">
-      <div class="w"><img src="./img/colors_nobg/sue_red.png" alt=""></div>
-      <div class="w"><img src="./img/colors_nobg/mossun_blue.png" alt=""></div>
-      <div class="w"><img src="./img/colors_nobg/putti_yellow.png" alt=""></div>
-      <a class="w more" href="https://thedinorenny.online" target="_blank">+12</a>
-    </div>
-  </div>
+  <div class="artist-card" id="artistCard"></div>
 </section>
 
 <!-- COLOR TAP LAB -->
@@ -414,6 +397,37 @@
 
 <script>
   // ===== HERO カルーセル =====
+  // ===== 注目アーティスト設定（tools/artist-form.html で生成したJSONをここに貼り替え）=====
+  const ARTIST = {
+    name: "DinoRenny",
+    verified: true,
+    role: "イラストレーター / キャラクターデザイナー",
+    bio: "恐竜のSUEを中心に、ポップで収集心をくすぐるキャラクターを制作。国内外でアパレルや雑貨、アートワークを展開中。",
+    photo: "./img/gallery/urban_roar.png",
+    social: { x:"", instagram:"", music:"", web:"https://thedinorenny.online" },
+    works: ["./img/colors_nobg/sue_red.png","./img/colors_nobg/mossun_blue.png","./img/colors_nobg/putti_yellow.png"],
+    moreCount: 12,
+    moreUrl: "https://thedinorenny.online"
+  };
+  (function renderArtist(){
+    const a=ARTIST, esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const soc=[['x','𝕏'],['instagram','📷'],['music','🎵'],['web','🌐']]
+      .filter(([k])=>a.social&&a.social[k])
+      .map(([k,ic])=>`<a href="${esc(a.social[k])}" target="_blank" rel="noopener">${ic}</a>`).join('');
+    const works=(a.works||[]).slice(0,3).map(w=>`<div class="w"><img src="${esc(w)}" alt=""></div>`).join('')
+      + (a.moreUrl?`<a class="w more" href="${esc(a.moreUrl)}" target="_blank">+${esc(a.moreCount||'')}</a>`:'');
+    document.getElementById('artistCard').innerHTML=`
+      <img class="artist-photo" src="${esc(a.photo)}" alt="${esc(a.name)}">
+      <div>
+        <div class="artist-name">${esc(a.name)} ${a.verified?'<span class="verified">✔</span>':''}</div>
+        <div class="artist-role">${esc(a.role)}</div>
+        <p class="artist-bio">${esc(a.bio)}</p>
+        <div class="artist-social">${soc}</div>
+        <button class="btn-follow">フォローする</button>
+      </div>
+      <div class="artist-works">${works}</div>`;
+  })();
+
   const FEATURED = [
     { id:'sue', name:'SUE', creator:'DinoRenny', desc:'DinoRennyを代表するティラノサウルス「SUE」。力強い表情とポップなカラーが魅力の人気キャラクター。', color:'red', page:'./characters/sue.html', drop:'SUE アクリルキーホルダー', photos:true },
     { id:'putti', name:'PUTTI', creator:'DinoRenny', desc:'空を自由に舞うプテラノドン「PUTTI」。元気いっぱいの表情と鮮やかなカラーが魅力。', color:'yellow', page:'./characters/putti.html', drop:'PUTTI アクリルキーホルダー', photos:true },

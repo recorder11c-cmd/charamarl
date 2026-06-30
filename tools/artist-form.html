@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>注目アーティスト入力フォーム — CHARAMARL</title>
+<style>
+  :root{--orange:#FF8A00;--purple:#A855F7;--line:#e7e7ee;--muted:#999;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f5f5fa;color:#1a1a26;padding:24px;line-height:1.5;}
+  .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media(max-width:880px){.wrap{grid-template-columns:1fr;}}
+  h1{font-size:22px;font-weight:900;margin-bottom:4px;}
+  .sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;}
+  label{display:block;font-size:12px;font-weight:800;margin:14px 0 5px;color:#444;}
+  label:first-of-type{margin-top:0;}
+  input,textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;}
+  input:focus,textarea:focus{outline:none;border-color:var(--purple);}
+  textarea{resize:vertical;min-height:70px;}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .chk{display:flex;align-items:center;gap:8px;margin-top:14px;}
+  .chk input{width:auto;}
+  .hint{font-size:11px;color:var(--muted);margin-top:3px;}
+  .btns{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+  button{border:none;border-radius:24px;padding:12px 22px;font-size:13px;font-weight:800;cursor:pointer;}
+  .b-json{background:#1a1a26;color:#fff;}
+  .b-copy{background:var(--orange);color:#fff;}
+  .ok{color:#1a9d4b;font-size:12px;font-weight:800;align-self:center;}
+  pre{background:#0e0e14;color:#d7e3ff;padding:14px;border-radius:12px;font-size:12px;overflow:auto;margin-top:14px;max-height:260px;white-space:pre-wrap;word-break:break-all;}
+  /* プレビュー(index.htmlのartist-cardを再現) */
+  .pv-head{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--orange);text-transform:uppercase;margin-bottom:10px;}
+  .artist-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;}
+  .artist-photo{width:96px;height:96px;border-radius:50%;object-fit:cover;background:#eee;}
+  .artist-name{font-size:21px;font-weight:900;display:flex;align-items:center;gap:8px;}
+  .verified{color:var(--purple);font-size:15px;}
+  .artist-role{font-size:12px;color:var(--muted);margin:4px 0 10px;}
+  .artist-bio{font-size:13px;color:#555;line-height:1.7;margin-bottom:12px;}
+  .artist-social{display:flex;gap:8px;margin-bottom:14px;}
+  .artist-social a{width:30px;height:30px;border-radius:50%;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:13px;color:#555;text-decoration:none;}
+  .artist-works{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .artist-works .w{aspect-ratio:1;border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
+  .artist-works .w img{width:86%;height:86%;object-fit:contain;}
+  .artist-works .w.more{background:#111;color:#fff;font-weight:900;font-size:15px;text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1>注目アーティスト 入力フォーム</h1>
+    <p class="sub">入力すると右側にプレビューが反映されます。最後に「JSONをコピー」して、<b>index.html</b> の <code>const ARTIST = {…}</code> を貼り替えてください。</p>
+    <div class="card">
+      <label>アーティスト名</label>
+      <input id="name" value="DinoRenny">
+      <div class="chk"><input type="checkbox" id="verified" checked><label style="margin:0;">認証バッジ ✔ を表示</label></div>
+      <label>肩書き / 役割</label>
+      <input id="role" value="イラストレーター / キャラクターデザイナー">
+      <label>自己紹介（bio）</label>
+      <textarea id="bio">恐竜のSUEを中心に、ポップで収集心をくすぐるキャラクターを制作。国内外でアパレルや雑貨、アートワークを展開中。</textarea>
+      <label>プロフィール画像のパス / URL</label>
+      <input id="photo" value="./img/gallery/urban_roar.png">
+      <div class="hint">例: ./img/gallery/urban_roar.png または https://…</div>
+
+      <label>SNSリンク（空欄はアイコン非表示）</label>
+      <div class="row">
+        <div><input id="s_x" placeholder="X (Twitter) URL"><div class="hint">𝕏</div></div>
+        <div><input id="s_instagram" placeholder="Instagram URL"><div class="hint">📷</div></div>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <div><input id="s_music" placeholder="TikTok / 音楽 URL"><div class="hint">🎵</div></div>
+        <div><input id="s_web" value="https://thedinorenny.online" placeholder="Web URL"><div class="hint">🌐</div></div>
+      </div>
+
+      <label>代表作の画像 3点（パス / URL）</label>
+      <input id="w0" value="./img/colors_nobg/sue_red.png" style="margin-bottom:8px;">
+      <input id="w1" value="./img/colors_nobg/mossun_blue.png" style="margin-bottom:8px;">
+      <input id="w2" value="./img/colors_nobg/putti_yellow.png">
+
+      <div class="row" style="margin-top:14px;">
+        <div><label style="margin-top:0;">「+N」の数字</label><input id="moreCount" value="12"></div>
+        <div><label style="margin-top:0;">もっと見るリンク</label><input id="moreUrl" value="https://thedinorenny.online"></div>
+      </div>
+
+      <div class="btns">
+        <button class="b-json" onclick="copyJson()">JSONをコピー</button>
+        <span class="ok" id="okMsg" style="display:none;">✓ コピーしました</span>
+      </div>
+      <pre id="out"></pre>
+    </div>
+  </div>
+
+  <div>
+    <div class="pv-head">プレビュー</div>
+    <div class="artist-card" id="pv"></div>
+  </div>
+</div>
+
+<script>
+  const $=id=>document.getElementById(id);
+  const fields=['name','role','bio','photo','s_x','s_instagram','s_music','s_web','w0','w1','w2','moreCount','moreUrl'];
+  function model(){
+    return {
+      name:$('name').value, verified:$('verified').checked, role:$('role').value, bio:$('bio').value,
+      photo:$('photo').value,
+      social:{x:$('s_x').value,instagram:$('s_instagram').value,music:$('s_music').value,web:$('s_web').value},
+      works:[$('w0').value,$('w1').value,$('w2').value].filter(Boolean),
+      moreCount:$('moreCount').value, moreUrl:$('moreUrl').value
+    };
+  }
+  const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  function render(){
+    const a=model();
+    const soc=[['x','𝕏'],['instagram','📷'],['music','🎵'],['web','🌐']].filter(([k])=>a.social[k])
+      .map(([k,ic])=>`<a href="${esc(a.social[k])}" target="_blank">${ic}</a>`).join('');
+    const works=a.works.slice(0,3).map(w=>`<div class="w"><img src="${esc(w)}" alt=""></div>`).join('')
+      + (a.moreUrl?`<a class="w more" href="${esc(a.moreUrl)}" target="_blank">+${esc(a.moreCount)}</a>`:'');
+    $('pv').innerHTML=`
+      <img class="artist-photo" src="${esc(a.photo)}" alt="">
+      <div>
+        <div class="artist-name">${esc(a.name)} ${a.verified?'<span class="verified">✔</span>':''}</div>
+        <div class="artist-role">${esc(a.role)}</div>
+        <p class="artist-bio">${esc(a.bio)}</p>
+        <div class="artist-social">${soc}</div>
+        <button style="background:var(--orange);color:#fff;border:none;border-radius:22px;padding:9px 18px;font-weight:800;font-size:12px;">フォローする</button>
+      </div>
+      <div class="artist-works">${works}</div>`;
+    $('out').textContent='const ARTIST = '+JSON.stringify(a,null,2)+';';
+  }
+  function copyJson(){
+    navigator.clipboard.writeText($('out').textContent).then(()=>{
+      const m=$('okMsg'); m.style.display='inline'; setTimeout(()=>m.style.display='none',1800);
+    });
+  }
+  document.querySelectorAll('input,textarea').forEach(el=>el.addEventListener('input',render));
+  render();
+</script>
+</body>
+</html>
