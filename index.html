@@ -10,6 +10,7 @@
     --bg:#F7F7F7; --surface:#fff; --line:#ececec; --muted:#888; --text:#111; --radius:18px;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
   body{background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;}
   a{color:inherit;text-decoration:none;}
   .wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
@@ -489,8 +490,7 @@
       web: "https://thedinorenny.online"
     },
     works: ["./img/colors_nobg/sue_red.png","./img/colors_nobg/mossun_blue.png","./img/colors_nobg/putti_yellow.png"],
-    moreCount: 12,
-    moreUrl: "https://thedinorenny.online"
+    moreUrl: "#discover"
   };
   // シンプルな単色SVGアイコン
   const SOCIAL_ICONS = {
@@ -505,8 +505,13 @@
     const soc=['x','instagram','music','web']
       .filter(k=>a.social&&a.social[k])
       .map(k=>`<a href="${esc(a.social[k])}" target="_blank" rel="noopener" aria-label="${label[k]}">${SOCIAL_ICONS[k]}</a>`).join('');
-    const works=(a.works||[]).slice(0,3).map(w=>`<div class="w"><img src="${esc(w)}" alt=""></div>`).join('')
-      + (a.moreUrl?`<a class="w more" href="${esc(a.moreUrl)}" target="_blank">+${esc(a.moreCount||'')}</a>`:'');
+    // 「+N」= サイト内のこのアーティストの掲載数 − カードに見えている3枚（DISCOVERのピンから自動計算）
+    const shown=(a.works||[]).slice(0,3);
+    const total=[...document.querySelectorAll('#discover .pin .pin-sub')].filter(el=>el.textContent.trim()===a.name).length;
+    const moreCount=Math.max(total-shown.length,0);
+    const inPage=a.moreUrl&&a.moreUrl.startsWith('#');
+    const works=shown.map(w=>`<div class="w"><img src="${esc(w)}" alt=""></div>`).join('')
+      + (a.moreUrl&&moreCount>0?`<a class="w more" href="${esc(a.moreUrl)}"${inPage?'':' target="_blank" rel="noopener"'} title="ほかの作品を見る">+${moreCount}</a>`:'');
     const primary=(a.social&&(a.social.x||a.social.instagram||a.social.music||a.social.web))||'#';
     document.getElementById('artistCard').innerHTML=`
       <img class="artist-photo" src="${esc(a.photo)}" alt="${esc(a.name)}">
