@@ -8,8 +8,16 @@
   :root{--orange:#FF8A00;--purple:#A855F7;--line:#e7e7ee;--muted:#999;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f5f5fa;color:#1a1a26;padding:24px;line-height:1.5;}
-  .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px;}
-  @media(max-width:880px){.wrap{grid-template-columns:1fr;}}
+  .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+  .pv-col{position:sticky;top:16px;}
+  @media(max-width:880px){
+    .wrap{grid-template-columns:1fr;}
+    .pv-col{order:-1;position:sticky;top:0;z-index:5;background:#f5f5fa;padding:10px 0 12px;margin:-4px 0 4px;}
+    .pv-col .artist-card{grid-template-columns:1fr;text-align:center;padding:16px;gap:12px;}
+    .pv-col .artist-card>*{min-width:0;}
+    .pv-col .artist-photo{justify-self:center;}
+    .pv-col .artist-name,.pv-col .artist-social{justify-content:center;}
+  }
   h1{font-size:22px;font-weight:900;margin-bottom:4px;}
   .sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
   .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;}
@@ -89,7 +97,7 @@
     </div>
   </div>
 
-  <div>
+  <div class="pv-col">
     <div class="pv-head">プレビュー</div>
     <div class="artist-card" id="pv"></div>
   </div>
@@ -108,14 +116,16 @@
     };
   }
   const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  // プレビュー画像用: index基準の "./img" をサイトルート "/img" に読み替え(フォームは/tools/配下のため)
+  const pv=p=>esc(String(p||'').replace(/^\.\//,'/'));
   function render(){
     const a=model();
     const soc=[['x','𝕏'],['instagram','📷'],['music','🎵'],['web','🌐']].filter(([k])=>a.social[k])
       .map(([k,ic])=>`<a href="${esc(a.social[k])}" target="_blank">${ic}</a>`).join('');
-    const works=a.works.slice(0,3).map(w=>`<div class="w"><img src="${esc(w)}" alt=""></div>`).join('')
+    const works=a.works.slice(0,3).map(w=>`<div class="w"><img src="${pv(w)}" alt=""></div>`).join('')
       + (a.moreUrl?`<a class="w more" href="${esc(a.moreUrl)}" target="_blank">+${esc(a.moreCount)}</a>`:'');
     $('pv').innerHTML=`
-      <img class="artist-photo" src="${esc(a.photo)}" alt="">
+      <img class="artist-photo" src="${pv(a.photo)}" alt="">
       <div>
         <div class="artist-name">${esc(a.name)} ${a.verified?'<span class="verified">✔</span>':''}</div>
         <div class="artist-role">${esc(a.role)}</div>
