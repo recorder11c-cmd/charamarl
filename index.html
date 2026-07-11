@@ -212,6 +212,20 @@
   .modal-buy{flex:1;min-width:140px;background:var(--orange);color:#fff;border:none;border-radius:28px;padding:14px;font-size:15px;font-weight:900;cursor:pointer;}
   .modal-buy:hover{opacity:.9;}
   .modal-tap{background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.4);color:var(--purple);border-radius:28px;padding:14px 18px;font-size:13px;font-weight:800;display:flex;align-items:center;white-space:nowrap;}
+  /* アートモーダル */
+  .modal-img.art{background:#faf7f5;padding:0;}
+  .modal-img.art img{width:100%;height:100%;max-height:92vh;object-fit:cover;}
+  @media(max-width:720px){ .modal-img.art img{max-height:52vh;} }
+  .art-top{display:flex;justify-content:flex-end;margin-bottom:10px;}
+  .art-react{display:flex;gap:10px;}
+  .react-btn{display:inline-flex;align-items:center;gap:7px;background:#f2f2f2;border:none;border-radius:24px;padding:9px 16px;font-size:14px;font-weight:800;color:#333;cursor:pointer;transition:.18s;}
+  .react-btn:hover{background:#e7e7ee;}
+  .react-btn .ic{font-size:16px;line-height:1;}
+  .react-btn.on{background:#ffe1e6;color:#e0245e;}
+  #aSave.on{background:#ffeede;color:var(--orange);}
+  .art-visit{display:block;text-align:center;background:#efefef;color:#111;border-radius:26px;padding:13px;font-size:14px;font-weight:800;text-decoration:none;margin:6px 0 20px;transition:.18s;}
+  .art-visit:hover{background:var(--orange);color:#fff;}
+  .art-desc-h{font-size:15px;font-weight:900;margin-bottom:8px;}
 </style>
 <link rel="stylesheet" href="cart.css">
 </head>
@@ -438,6 +452,27 @@
   </div>
 </div>
 
+<!-- アート用モーダル(Pinterest風) -->
+<div class="modal-overlay" id="artOverlay">
+  <div class="modal">
+    <button class="modal-close" id="artClose">×</button>
+    <div class="modal-img art"><img id="aImg" src="" alt=""></div>
+    <div class="modal-info">
+      <div class="art-top">
+        <div class="art-react">
+          <button class="react-btn" id="aLike"><span class="ic">♡</span><span class="ct" id="aLikeCt">0</span></button>
+          <button class="react-btn" id="aSave"><span class="ic">🔖</span><span class="lb" id="aSaveLb">保存</span></button>
+        </div>
+      </div>
+      <h2 id="aTitle"></h2>
+      <div class="modal-creator" id="aArtist"></div>
+      <a class="art-visit" id="aVisit" href="#" target="_blank">サイトにアクセス →</a>
+      <div class="art-desc-h">説明</div>
+      <div class="modal-desc" id="aDesc"></div>
+    </div>
+  </div>
+</div>
+
 <script>
   // ===== HERO カルーセル =====
   // ===== 注目アーティスト設定（tools/artist-form.html で生成したJSONをここに貼り替え）=====
@@ -568,15 +603,53 @@
     }));
     pin.addEventListener('click',()=>openModal(char,color));
   });
+  // ===== アートワーク・データ / モーダル =====
+  const ARTWORKS={
+    roar:{img:'./img/gallery/gallery_roar.png',title:'ROAR!',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'ネオンピンクに吠えるDinoRenny。稲妻とビビッドカラーが弾ける、エネルギー全開のアートワーク。',likes:18},
+    worldcup:{img:'./img/gallery/gallery_worldcup.png',title:'WORLD CUP EDITION',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'サッカーユニフォーム姿のSUE。"PLAY FOR THE PRIDE" ―ワールドカップ・エディション。',likes:24},
+    '90s':{img:'./img/gallery/gallery_90s.png',title:'RETRO POP',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'90年代レトロポップなコラージュ。DinoRennyのキャラクターたちが一堂に集結。',likes:31},
+    nodino:{img:'./img/gallery/gallery_nodino.png',title:'NO DINO NO LIFE',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'"NO DINO NO LIFE." 王冠をかぶったブラックダイナソーのエンブレム。EST.2023。',likes:27},
+    costume:{img:'./img/gallery/gallery_costume.png',title:'COSTUME COLLECTION',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'恐竜きぐるみをまとった "COSTUME COLLECTION"。"BE CUTE. BE WILD."',likes:22},
+    ahoyoung:{img:'./img/gallery/gallery_ahoyoung.png',title:'DinoRenny × ahoyoung',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'DinoRenny × ahoyoung コラボレーション。羽根飾りをまとった特別なアートワーク。',likes:15}
+  };
+  const LK='charamarl_art_likes', SV='charamarl_art_saves';
+  const getSet=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'));}catch(e){return new Set();}};
+  const putSet=(k,s)=>localStorage.setItem(k,JSON.stringify([...s]));
+  const artOverlay=document.getElementById('artOverlay');
+  let curArt=null;
+  function renderArt(){
+    const a=ARTWORKS[curArt]; if(!a) return;
+    const liked=getSet(LK).has(curArt), saved=getSet(SV).has(curArt);
+    document.getElementById('aImg').src=a.img;
+    document.getElementById('aTitle').textContent=a.title;
+    document.getElementById('aArtist').textContent=a.artist;
+    document.getElementById('aDesc').textContent=a.desc;
+    document.getElementById('aVisit').href=a.site;
+    document.getElementById('aLikeCt').textContent=(a.likes||0)+(liked?1:0);
+    const lb=document.getElementById('aLike'); lb.classList.toggle('on',liked); lb.querySelector('.ic').textContent=liked?'♥':'♡';
+    const sb=document.getElementById('aSave'); sb.classList.toggle('on',saved); document.getElementById('aSaveLb').textContent=saved?'保存済み':'保存';
+  }
+  function openArt(id){curArt=id;renderArt();artOverlay.classList.add('open');document.body.style.overflow='hidden';}
+  function closeArt(){artOverlay.classList.remove('open');document.body.style.overflow='';}
+  document.getElementById('artClose').addEventListener('click',closeArt);
+  artOverlay.addEventListener('click',e=>{if(e.target===artOverlay)closeArt();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeArt();});
+  document.getElementById('aLike').addEventListener('click',()=>{const s=getSet(LK);s.has(curArt)?s.delete(curArt):s.add(curArt);putSet(LK,s);renderArt();});
+  document.getElementById('aSave').addEventListener('click',()=>{const s=getSet(SV);s.has(curArt)?s.delete(curArt):s.add(curArt);putSet(SV,s);renderArt();});
+
   // アート/GMCピン
   document.querySelectorAll('.pin.art').forEach(card=>{
     const site=card.dataset.site||card.getAttribute('href');
+    const imgEl=card.querySelector('.pin-img img');
+    const m=imgEl && imgEl.getAttribute('src').match(/gallery_([a-z0-9]+)\.png/);
+    const artId=(m && ARTWORKS[m[1]])?m[1]:null;
     card.querySelectorAll('.act').forEach(btn=>btn.addEventListener('click',e=>{
       e.preventDefault();e.stopPropagation();const a=btn.dataset.act;
       if(a==='tap')window.open(card.dataset.tap||site,'_blank');
       else if(a==='share'){const t='CHARAMARL';if(navigator.share)navigator.share({title:t,url:site}).catch(()=>{});else window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(site)}`,'_blank');}
       else window.open(site,'_blank');
     }));
+    if(artId) card.addEventListener('click',()=>openArt(artId));
   });
 </script>
 <script src="cart.js"></script>
