@@ -617,6 +617,14 @@
   const putSet=(k,s)=>localStorage.setItem(k,JSON.stringify([...s]));
   const artOverlay=document.getElementById('artOverlay');
   let curArt=null;
+  // サーバー集計(/api/react)。失敗時はローカルのみで動作
+  let artCounts=null; // {roar:{likes,saves},...} 取得できたらオブジェクト
+  fetch('/api/react').then(r=>r.ok?r.json():null).then(d=>{if(d&&!d.error){artCounts=d;if(curArt)renderArt();}}).catch(()=>{});
+  function likeTotal(id){
+    const base=(ARTWORKS[id].likes||0);
+    if(artCounts&&artCounts[id])return base+(artCounts[id].likes||0);
+    return base+(getSet(LK).has(id)?1:0); // フォールバック
+  }
   function renderArt(){
     const a=ARTWORKS[curArt]; if(!a) return;
     const liked=getSet(LK).has(curArt), saved=getSet(SV).has(curArt);
@@ -625,7 +633,7 @@
     document.getElementById('aArtist').textContent=a.artist;
     document.getElementById('aDesc').textContent=a.desc;
     document.getElementById('aVisit').href=a.site;
-    document.getElementById('aLikeCt').textContent=(a.likes||0)+(liked?1:0);
+    document.getElementById('aLikeCt').textContent=likeTotal(curArt);
     const lb=document.getElementById('aLike'); lb.classList.toggle('on',liked); lb.querySelector('.ic').textContent=liked?'♥':'♡';
     const sb=document.getElementById('aSave'); sb.classList.toggle('on',saved); document.getElementById('aSaveLb').textContent=saved?'保存済み':'保存';
   }
@@ -634,8 +642,24 @@
   document.getElementById('artClose').addEventListener('click',closeArt);
   artOverlay.addEventListener('click',e=>{if(e.target===artOverlay)closeArt();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeArt();});
-  document.getElementById('aLike').addEventListener('click',()=>{const s=getSet(LK);s.has(curArt)?s.delete(curArt):s.add(curArt);putSet(LK,s);renderArt();});
-  document.getElementById('aSave').addEventListener('click',()=>{const s=getSet(SV);s.has(curArt)?s.delete(curArt):s.add(curArt);putSet(SV,s);renderArt();});
+  function sendReact(id,type,op){
+    fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,type,op})})
+      .then(r=>r.ok?r.json():null)
+      .then(d=>{if(d&&typeof d.count==='number'){if(!artCounts)artCounts={};if(!artCounts[id])artCounts[id]={likes:0,saves:0};artCounts[id][type+'s']=d.count;if(curArt===id)renderArt();}})
+      .catch(()=>{});
+  }
+  document.getElementById('aLike').addEventListener('click',()=>{
+    const s=getSet(LK);const had=s.has(curArt);
+    had?s.delete(curArt):s.add(curArt);putSet(LK,s);
+    sendReact(curArt,'like',had?'remove':'add');
+    renderArt();
+  });
+  document.getElementById('aSave').addEventListener('click',()=>{
+    const s=getSet(SV);const had=s.has(curArt);
+    had?s.delete(curArt):s.add(curArt);putSet(SV,s);
+    sendReact(curArt,'save',had?'remove':'add');
+    renderArt();
+  });
 
   // アート/GMCピン
   document.querySelectorAll('.pin.art').forEach(card=>{
