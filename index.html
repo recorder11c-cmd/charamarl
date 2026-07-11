@@ -123,6 +123,13 @@
   .tab:hover{background:#f0f0f0;}
   .tab.active{background:var(--black);color:#fff;border-color:var(--black);}
   .masonry{columns:5 210px;column-gap:14px;margin-top:16px;}
+  .pin.cat-hide{display:none;}
+  @keyframes pinIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .masonry.filtering .pin:not(.cat-hide){animation:pinIn .28s ease both;}
+  .cat-empty{text-align:center;padding:56px 20px;background:#fff;border:1px dashed var(--line);border-radius:22px;margin-top:16px;}
+  .cat-empty .ce-ic{font-size:40px;}
+  .cat-empty .ce-t{font-weight:900;font-size:17px;margin-top:10px;}
+  .cat-empty .ce-s{color:var(--muted);font-size:13px;margin-top:4px;}
   @media(max-width:600px){ .masonry{columns:2 150px;column-gap:10px;} }
   .pin{break-inside:avoid;margin-bottom:14px;position:relative;cursor:pointer;display:block;}
   .pin-img{width:100%;border-radius:var(--radius);overflow:hidden;position:relative;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
@@ -309,8 +316,8 @@
 <section class="blk" id="discover">
   <div class="sec-head"><div><div class="sec-eyebrow">DISCOVER</div><h2 class="sec-title">作品・記事・グッズをピックアップ</h2></div><div class="sec-more">おすすめ順 ▾</div></div>
   <div class="tabs">
-    <div class="tab active">すべて</div><div class="tab">キャラクター</div><div class="tab">グッズ</div>
-    <div class="tab">アートワーク</div><div class="tab">インタビュー</div><div class="tab">制作風景</div><div class="tab">イベント</div>
+    <div class="tab active" data-cat="all">すべて</div><div class="tab" data-cat="CHARACTER">キャラクター</div><div class="tab" data-cat="PRODUCT">グッズ</div>
+    <div class="tab" data-cat="ARTWORK">アートワーク</div><div class="tab" data-cat="INTERVIEW">インタビュー</div><div class="tab" data-cat="MAKING">制作風景</div><div class="tab" data-cat="EVENT">イベント</div>
   </div>
   <div class="masonry" id="masonry">
 
@@ -384,6 +391,11 @@
       <div class="pin-body"><div class="pin-cat">ARTWORK</div><div class="pin-title">DinoRenny × ahoyoung</div><div class="pin-sub"><span class="av"></span>DinoRenny</div></div>
     </div>
 
+  </div>
+  <div class="cat-empty" id="catEmpty" hidden>
+    <div class="ce-ic">🦖</div>
+    <div class="ce-t">このカテゴリは準備中です</div>
+    <div class="ce-s">近日公開予定。お楽しみに！</div>
   </div>
 </section>
 
@@ -556,8 +568,23 @@
   let heroTimer=setInterval(()=>setHero(hi+1),5000);
   document.getElementById('heroCard').addEventListener('mouseenter',()=>clearInterval(heroTimer));
 
-  // タブ
-  document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');}));
+  // タブ（カテゴリ絞り込み）
+  const masonryEl=document.getElementById('masonry'), catEmpty=document.getElementById('catEmpty');
+  document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const cat=tab.dataset.cat||'all';
+    let shown=0;
+    masonryEl.querySelectorAll('.pin').forEach(pin=>{
+      const pc=pin.querySelector('.pin-cat');
+      const hit=cat==='all'||(pc&&pc.textContent.trim()===cat);
+      pin.classList.toggle('cat-hide',!hit);
+      if(hit)shown++;
+    });
+    masonryEl.classList.remove('filtering');void masonryEl.offsetWidth;masonryEl.classList.add('filtering');
+    masonryEl.style.display=shown?'':'none';
+    catEmpty.hidden=shown>0;
+  }));
 
   // ===== 商品データ・モーダル =====
   const PRODUCTS = {
