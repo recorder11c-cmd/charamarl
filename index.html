@@ -130,6 +130,11 @@
   .cat-empty .ce-ic{font-size:40px;}
   .cat-empty .ce-t{font-weight:900;font-size:17px;margin-top:10px;}
   .cat-empty .ce-s{color:var(--muted);font-size:13px;margin-top:4px;}
+  .sortdd{position:relative;}
+  .sort-menu{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:6px;min-width:170px;z-index:50;}
+  .sort-opt{font-size:13px;font-weight:700;color:#333;padding:9px 12px;border-radius:9px;cursor:pointer;white-space:nowrap;}
+  .sort-opt:hover{background:#f5f5f5;}
+  .sort-opt.active{background:var(--black);color:#fff;}
   @media(max-width:600px){ .masonry{columns:2 150px;column-gap:10px;} }
   .pin{break-inside:avoid;margin-bottom:14px;position:relative;cursor:pointer;display:block;}
   .pin-img{width:100%;border-radius:var(--radius);overflow:hidden;position:relative;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
@@ -314,7 +319,15 @@
 
 <!-- DISCOVER -->
 <section class="blk" id="discover">
-  <div class="sec-head"><div><div class="sec-eyebrow">DISCOVER</div><h2 class="sec-title">作品・記事・グッズをピックアップ</h2></div><div class="sec-more">おすすめ順 ▾</div></div>
+  <div class="sec-head"><div><div class="sec-eyebrow">DISCOVER</div><h2 class="sec-title">作品・記事・グッズをピックアップ</h2></div>
+    <div class="sortdd">
+      <div class="sec-more" id="sortBtn">おすすめ順 ▾</div>
+      <div class="sort-menu" id="sortMenu" hidden>
+        <div class="sort-opt active" data-sort="reco">おすすめ順</div>
+        <div class="sort-opt" data-sort="popular">人気順（いいね数）</div>
+      </div>
+    </div>
+  </div>
   <div class="tabs">
     <div class="tab active" data-cat="all">すべて</div><div class="tab" data-cat="CHARACTER">キャラクター</div><div class="tab" data-cat="PRODUCT">グッズ</div>
     <div class="tab" data-cat="ARTWORK">アートワーク</div><div class="tab" data-cat="INTERVIEW">インタビュー</div><div class="tab" data-cat="MAKING">制作風景</div><div class="tab" data-cat="EVENT">イベント</div>
@@ -584,6 +597,32 @@
     masonryEl.classList.remove('filtering');void masonryEl.offsetWidth;masonryEl.classList.add('filtering');
     masonryEl.style.display=shown?'':'none';
     catEmpty.hidden=shown>0;
+  }));
+
+  // 並び替え（おすすめ順 / 人気順=いいね数）
+  const sortBtn=document.getElementById('sortBtn'), sortMenu=document.getElementById('sortMenu');
+  const baseOrder=[...masonryEl.querySelectorAll('.pin')];
+  function pinLikes(pin){
+    const img=pin.querySelector('.pin-img img');
+    const m=img&&img.getAttribute('src').match(/gallery_([a-z0-9]+)\.png/);
+    return (m&&ARTWORKS[m[1]])?likeTotal(m[1]):-1; // いいねを持たないピンは末尾へ
+  }
+  function applySort(mode){
+    const pins=mode==='popular'
+      ? baseOrder.map((p,i)=>({p,i,l:pinLikes(p)})).sort((a,b)=>(b.l-a.l)||(a.i-b.i)).map(o=>o.p)
+      : baseOrder;
+    pins.forEach(p=>masonryEl.appendChild(p));
+    masonryEl.classList.remove('filtering');void masonryEl.offsetWidth;masonryEl.classList.add('filtering');
+  }
+  sortBtn.addEventListener('click',e=>{e.stopPropagation();sortMenu.hidden=!sortMenu.hidden;});
+  document.addEventListener('click',()=>{sortMenu.hidden=true;});
+  sortMenu.querySelectorAll('.sort-opt').forEach(opt=>opt.addEventListener('click',e=>{
+    e.stopPropagation();
+    sortMenu.querySelectorAll('.sort-opt').forEach(o=>o.classList.remove('active'));
+    opt.classList.add('active');
+    sortBtn.textContent=opt.textContent.replace(/（.*）/,'')+' ▾';
+    applySort(opt.dataset.sort);
+    sortMenu.hidden=true;
   }));
 
   // ===== 商品データ・モーダル =====
