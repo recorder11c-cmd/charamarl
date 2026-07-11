@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クリエイター登録 — CHARAMARL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#FF8A00; --purple:#A855F7; --black:#1a1a26;
+    --line:#e7e7ee; --muted:#8a8a97; --bg:#f7f7fa;
+    --input-bg:#eef4ff;
+    --tap-min:44px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--black);font-family:'M PLUS Rounded 1c','Helvetica Neue',Arial,sans-serif;padding-bottom:48px;}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;}
+  .logo{font-size:18px;font-weight:800;letter-spacing:.08em;text-decoration:none;}
+  .logo .c1{color:var(--orange);} .logo .c2{color:var(--purple);}
+  .back{color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;min-height:var(--tap-min);display:inline-flex;align-items:center;}
+
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px;}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--orange);text-transform:uppercase;}
+  h1{font-size:22px;font-weight:800;margin:2px 0 4px;}
+  .sub{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.7;}
+
+  form{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px 18px;}
+  .fld{margin-bottom:16px;}
+  label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;}
+  label .req{color:#e0245e;font-size:10px;margin-left:4px;}
+  label .opt{color:var(--muted);font-size:10px;font-weight:700;margin-left:4px;}
+  input,select,textarea{
+    width:100%;min-height:var(--tap-min);padding:10px 14px;
+    font-family:inherit;font-size:15px;font-weight:700;color:var(--black);
+    background:var(--input-bg);border:1.5px solid transparent;border-radius:13px;
+  }
+  textarea{min-height:110px;resize:vertical;line-height:1.6;}
+  input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
+  ::placeholder{color:#9aa7c2;font-weight:500;}
+  .hint{font-size:10px;color:var(--muted);margin-top:4px;}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
+
+  .send{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;margin-top:4px;
+    background:var(--orange);color:#fff;border:none;border-radius:26px;
+    font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;transition:transform .12s;}
+  .send:active{transform:scale(.95);}
+  .send:focus-visible{outline:3px solid var(--purple);outline-offset:2px;}
+  .send[disabled]{opacity:.5;cursor:default;}
+
+  .err{background:#FFC7CE;color:#9C0006;border-radius:14px;padding:12px 14px;font-size:12px;font-weight:700;margin-bottom:14px;display:none;}
+
+  .done{display:none;text-align:center;background:#fff;border:1px solid var(--line);border-radius:22px;padding:44px 20px;}
+  .done .ic{font-size:44px;}
+  .done .t{font-size:18px;font-weight:800;margin-top:12px;}
+  .done .s{font-size:12px;color:var(--muted);line-height:1.8;margin-top:6px;}
+  .done a{display:inline-flex;align-items:center;justify-content:center;min-height:var(--tap-min);margin-top:14px;padding:0 24px;
+    background:var(--black);color:#fff;border-radius:24px;font-size:13px;font-weight:800;text-decoration:none;}
+
+  .note{font-size:11px;color:var(--muted);line-height:1.7;margin-top:16px;background:#fff;border:1px dashed var(--line);border-radius:14px;padding:12px 14px;}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="./index.html"><span class="c1">CHARA</span><span class="c2">MARL</span></a>
+  <a class="back" href="./index.html">← サイトへ戻る</a>
+</header>
+
+<div class="wrap">
+  <div class="eyebrow">New Artists Wanted</div>
+  <h1>クリエイター登録</h1>
+  <p class="sub">あなたのキャラクター・作品をCHARAMARLで展開しませんか？<br>下のフォームから応募すると、運営から折り返しご連絡します。</p>
+
+  <div class="err" id="err"></div>
+
+  <form id="form" novalidate>
+    <div class="fld">
+      <label for="name">アーティスト名 / 活動名<span class="req">必須</span></label>
+      <input id="name" name="name" type="text" maxlength="100" placeholder="例: DinoRenny" autocomplete="nickname">
+    </div>
+    <div class="fld">
+      <label for="genre">活動ジャンル<span class="opt">任意</span></label>
+      <select id="genre" name="genre">
+        <option value="">選択してください</option>
+        <option>イラスト・キャラクターデザイン</option>
+        <option>グッズ・雑貨</option>
+        <option>音楽・VJ</option>
+        <option>映像・アニメーション</option>
+        <option>その他</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label for="sns">SNS・ポートフォリオURL<span class="req">必須(メールとどちらか)</span></label>
+      <input id="sns" name="sns" type="url" maxlength="300" placeholder="https://x.com/～ や pixiv など" autocomplete="url">
+      <div class="hint">作品が見られるリンクをひとつ。X / Instagram / pixiv / 自サイトなんでもOK</div>
+    </div>
+    <div class="fld">
+      <label for="email">メールアドレス<span class="req">必須(SNSとどちらか)</span></label>
+      <input id="email" name="email" type="email" maxlength="200" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="fld">
+      <label for="message">自己PR・やりたいこと<span class="opt">任意</span></label>
+      <textarea id="message" name="message" maxlength="2000" placeholder="キャラクターの紹介、作ってみたいグッズ、COLOR TAPでやりたいこと など"></textarea>
+    </div>
+    <div class="hp" aria-hidden="true"><label>この欄は空のまま<input name="hp" type="text" tabindex="-1" autocomplete="off"></label></div>
+    <button class="send" id="send" type="submit">応募を送信する →</button>
+  </form>
+
+  <div class="done" id="done">
+    <div class="ic">🦖🎉</div>
+    <div class="t">応募を受け付けました！</div>
+    <div class="s">運営が内容を確認して、SNSまたはメールでご連絡します。<br>楽しみにお待ちください。</div>
+    <a href="./index.html">サイトへ戻る</a>
+  </div>
+
+  <div class="note">
+    ・いただいた情報は出店のご案内以外には使用しません<br>
+    ・現在はプレオープン期間のため、ご案内まで少しお時間をいただく場合があります
+  </div>
+</div>
+
+<script>
+  const form=document.getElementById('form'), err=document.getElementById('err'), send=document.getElementById('send');
+  function showErr(m){err.textContent=m;err.style.display='block';err.scrollIntoView({block:'nearest'});}
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();
+    err.style.display='none';
+    const v=id=>document.getElementById(id).value.trim();
+    const body={name:v('name'),genre:v('genre'),sns:v('sns'),email:v('email'),message:v('message'),hp:form.hp.value};
+    if(!body.name)return showErr('アーティスト名を入力してください');
+    if(!body.sns&&!body.email)return showErr('SNSリンクかメールアドレスのどちらかを入力してください');
+    if(body.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email))return showErr('メールアドレスの形式が正しくありません');
+    send.disabled=true;send.textContent='送信中…';
+    try{
+      const r=await fetch('/api/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(d.error||'送信に失敗しました');
+      form.style.display='none';
+      document.getElementById('done').style.display='block';
+      window.scrollTo({top:0});
+    }catch(ex){
+      showErr(ex.message==='Failed to fetch'?'通信に失敗しました。時間をおいてもう一度お試しください':ex.message);
+      send.disabled=false;send.textContent='応募を送信する →';
+    }
+  });
+</script>
+</body>
+</html>
