@@ -414,12 +414,8 @@
 
 <!-- TRENDING -->
 <section class="blk" id="trending">
-  <div class="sec-head"><div><div class="sec-eyebrow">🔥 TRENDING</div><h2 class="sec-title">人気キャラクターランキング</h2></div><div class="sec-more">もっと見る →</div></div>
-  <div class="rank-grid">
-    <a class="rank" href="./characters/sue.html"><div class="no">1</div><img src="./img/colors_nobg/sue_red.png" alt=""><div><div class="nm">SUE</div><div class="cr">DinoRenny</div><div class="lk">♥ 2.3k</div></div></a>
-    <a class="rank" href="./characters/putti.html"><div class="no">2</div><img src="./img/colors_nobg/putti_yellow.png" alt=""><div><div class="nm">PUTTI</div><div class="cr">DinoRenny</div><div class="lk">♥ 1.8k</div></div></a>
-    <a class="rank" href="./characters/mossun.html"><div class="no">3</div><img src="./img/colors_nobg/mossun_blue.png" alt=""><div><div class="nm">MOSSUN</div><div class="cr">DinoRenny</div><div class="lk">♥ 1.2k</div></div></a>
-    <a class="rank" href="https://dinorenny-colortap.vercel.app/gmc.html" target="_blank"><div class="no">4</div><img src="./img/gallery/gmc.png" alt=""><div><div class="nm">レコマル</div><div class="cr">MARU</div><div class="lk">♥ 980</div></div></a>
+  <div class="sec-head"><div><div class="sec-eyebrow">🔥 TRENDING</div><h2 class="sec-title">人気キャラクターランキング</h2></div><div class="sec-more" id="rankMore">作品の人気順を見る →</div></div>
+  <div class="rank-grid" id="rankGrid">
   </div>
 </section>
 
@@ -690,7 +686,7 @@
   let curArt=null;
   // サーバー集計(/api/react)。失敗時はローカルのみで動作
   let artCounts=null; // {roar:{likes,saves},...} 取得できたらオブジェクト
-  fetch('/api/react').then(r=>r.ok?r.json():null).then(d=>{if(d&&!d.error){artCounts=d;if(curArt)renderArt();}}).catch(()=>{});
+  fetch('/api/react').then(r=>r.ok?r.json():null).then(d=>{if(d&&!d.error){artCounts=d;if(curArt)renderArt();renderRanking();}}).catch(()=>{});
   function likeTotal(id){
     const base=(ARTWORKS[id].likes||0);
     if(artCounts&&artCounts[id])return base+(artCounts[id].likes||0);
@@ -745,6 +741,28 @@
       else window.open(site,'_blank');
     }));
     if(artId) card.addEventListener('click',()=>openArt(artId));
+  });
+
+  // ===== TRENDING ランキング（ベース値 + サーバー実カウントで動的に並び替え）=====
+  const RANKING=[
+    {id:'sue',   name:'SUE',    cr:'DinoRenny', img:'./img/colors_nobg/sue_red.png',     href:'./characters/sue.html',    likes:128},
+    {id:'putti', name:'PUTTI',  cr:'DinoRenny', img:'./img/colors_nobg/putti_yellow.png',href:'./characters/putti.html',  likes:96},
+    {id:'mossun',name:'MOSSUN', cr:'DinoRenny', img:'./img/colors_nobg/mossun_blue.png', href:'./characters/mossun.html', likes:74},
+    {id:'gmc',   name:'レコマル',cr:'MARU',      img:'./img/gallery/gmc.png',             href:'https://dinorenny-colortap.vercel.app/gmc.html', ext:true, prep:true, likes:52}
+  ];
+  const fmtLikes=n=>n>=1000?(Math.round(n/100)/10)+'k':n;
+  function rankLikes(c){return c.likes+((artCounts&&artCounts[c.id]&&artCounts[c.id].likes)||0);}
+  function renderRanking(){
+    const grid=document.getElementById('rankGrid'); if(!grid)return;
+    grid.innerHTML=[...RANKING].sort((a,b)=>rankLikes(b)-rankLikes(a)).map((c,i)=>
+      `<a class="rank" href="${c.href}"${c.ext?' target="_blank" rel="noopener"':''}><div class="no">${i+1}</div><img src="${c.img}" alt="${c.name}"><div><div class="nm">${c.name}${c.prep?' <span style="color:var(--muted);font-weight:600">(準備中)</span>':''}</div><div class="cr">${c.cr}</div><div class="lk">♥ ${fmtLikes(rankLikes(c))}</div></div></a>`
+    ).join('');
+  }
+  renderRanking();
+  document.getElementById('rankMore').addEventListener('click',()=>{
+    const opt=document.querySelector('.sort-opt[data-sort="popular"]');
+    if(opt&&!opt.classList.contains('active'))opt.click();
+    document.getElementById('discover').scrollIntoView({behavior:'smooth'});
   });
 </script>
 <script src="cart.js"></script>

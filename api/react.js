@@ -6,7 +6,10 @@
 // 必要な環境変数(VercelのStorage連携で自動追加):
 //   KV_REST_API_URL / KV_REST_API_TOKEN  (または UPSTASH_REDIS_REST_URL / _TOKEN)
 
-const ART_IDS = ['roar','worldcup','90s','nodino','costume','ahoyoung'];
+const ART_IDS = [
+  'roar','worldcup','90s','nodino','costume','ahoyoung', // ギャラリーアート
+  'sue','putti','mossun','gmc',                          // キャラクター(TRENDINGランキング用)
+];
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
