@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アーティストダッシュボード — CHARAMARL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#FF8A00; --purple:#A855F7; --black:#1a1a26;
+    --line:#e7e7ee; --muted:#8a8a97; --bg:#f7f7fa;
+    --like:#e0245e; --save:#FF8A00;
+    --tap-min:44px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--black);font-family:'M PLUS Rounded 1c','Helvetica Neue',Arial,sans-serif;padding-bottom:48px;}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;}
+  .logo{font-size:18px;font-weight:800;letter-spacing:.08em;text-decoration:none;}
+  .logo .c1{color:var(--orange);} .logo .c2{color:var(--purple);}
+  .back{color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;min-height:var(--tap-min);display:inline-flex;align-items:center;}
+
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px;}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--orange);text-transform:uppercase;}
+  h1{font-size:22px;font-weight:800;margin:2px 0 4px;}
+  .sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .tile{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;}
+  .tile .lb{font-size:11px;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .tile .vl{font-size:32px;font-weight:800;margin-top:2px;}
+  .tile.like .vl{color:var(--like);} .tile.save .vl{color:var(--save);}
+
+  .list{display:flex;flex-direction:column;gap:10px;}
+  .row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px 14px 10px 10px;}
+  .row img{width:56px;height:56px;border-radius:12px;object-fit:cover;background:#eee;flex:0 0 auto;}
+  .row .ttl{font-size:13px;font-weight:800;line-height:1.3;}
+  .row .who{font-size:11px;color:var(--muted);}
+  .row .counts{margin-left:auto;display:flex;gap:14px;flex:0 0 auto;}
+  .cnt{text-align:right;min-width:44px;}
+  .cnt .n{font-size:18px;font-weight:800;}
+  .cnt .l{font-size:10px;font-weight:700;color:var(--muted);}
+  .cnt.like .n{color:var(--like);} .cnt.save .n{color:var(--save);}
+  .bar{height:5px;border-radius:3px;background:#f0f0f4;margin-top:5px;overflow:hidden;}
+  .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--orange),var(--purple));width:0;transition:width .6s;}
+
+  .refresh{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:var(--tap-min);margin:20px 0 6px;background:var(--orange);color:#fff;border:none;border-radius:26px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:transform .12s;}
+  .refresh:active{transform:scale(.95);}
+  .refresh:focus-visible{outline:3px solid var(--purple);outline-offset:2px;}
+  .updated{text-align:center;font-size:11px;color:var(--muted);}
+  .note{font-size:11px;color:var(--muted);line-height:1.7;margin-top:16px;background:#fff;border:1px dashed var(--line);border-radius:14px;padding:12px 14px;}
+  .err{background:#FFC7CE;color:#9C0006;border-radius:14px;padding:12px 14px;font-size:12px;font-weight:700;margin-bottom:14px;display:none;}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="./index.html"><span class="c1">CHARA</span><span class="c2">MARL</span></a>
+  <a class="back" href="./index.html">← サイトへ戻る</a>
+</header>
+
+<div class="wrap">
+  <div class="eyebrow">Artist Dashboard</div>
+  <h1>いいね・保存 集計</h1>
+  <div class="sub">ギャラリー作品へのリアクション（全ユーザー合計・リアルタイム）</div>
+
+  <div class="err" id="err">集計サーバーに接続できませんでした。時間をおいて再度お試しください。</div>
+
+  <div class="tiles">
+    <div class="tile like"><div class="lb">♥ 総いいね</div><div class="vl num" id="totalLikes">–</div></div>
+    <div class="tile save"><div class="lb">🔖 総保存</div><div class="vl num" id="totalSaves">–</div></div>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <button class="refresh" id="refresh">↻ 集計を更新する</button>
+  <div class="updated" id="updated"></div>
+
+  <div class="note">
+    ・数値は<b>実際のリアクション数</b>（サイト上の♡表示は演出用ベース値を加算した見た目です）<br>
+    ・作品の追加時はこのページの一覧にも自動で並びます（index.htmlと同じ作品リスト）
+  </div>
+</div>
+
+<script>
+  const ARTWORKS=[
+    {id:'roar',     title:'ROAR!',               artist:'DinoRenny', img:'./img/gallery/gallery_roar.png'},
+    {id:'worldcup', title:'WORLD CUP EDITION',   artist:'DinoRenny', img:'./img/gallery/gallery_worldcup.png'},
+    {id:'90s',      title:'RETRO POP',           artist:'DinoRenny', img:'./img/gallery/gallery_90s.png'},
+    {id:'nodino',   title:'NO DINO NO LIFE',     artist:'DinoRenny', img:'./img/gallery/gallery_nodino.png'},
+    {id:'costume',  title:'COSTUME COLLECTION',  artist:'DinoRenny', img:'./img/gallery/gallery_costume.png'},
+    {id:'ahoyoung', title:'DinoRenny × ahoyoung',artist:'DinoRenny', img:'./img/gallery/gallery_ahoyoung.png'},
+  ];
+  const list=document.getElementById('list');
+  ARTWORKS.forEach(a=>{
+    const d=document.createElement('div');d.className='row';d.id='row_'+a.id;
+    d.innerHTML=`<img src="${a.img}" alt="">
+      <div style="min-width:0;flex:1;">
+        <div class="ttl">${a.title}</div><div class="who">${a.artist}</div>
+        <div class="bar"><i id="bar_${a.id}"></i></div>
+      </div>
+      <div class="counts">
+        <div class="cnt like"><div class="n num" id="lk_${a.id}">–</div><div class="l">いいね</div></div>
+        <div class="cnt save"><div class="n num" id="sv_${a.id}">–</div><div class="l">保存</div></div>
+      </div>`;
+    list.appendChild(d);
+  });
+
+  async function load(){
+    const err=document.getElementById('err');
+    try{
+      const r=await fetch('/api/react');
+      if(!r.ok) throw new Error(r.status);
+      const d=await r.json();
+      if(d.error) throw new Error(d.error);
+      err.style.display='none';
+      let tl=0,ts=0,max=1;
+      ARTWORKS.forEach(a=>{const c=d[a.id]||{likes:0,saves:0};tl+=c.likes;ts+=c.saves;max=Math.max(max,c.likes+c.saves);});
+      document.getElementById('totalLikes').textContent=tl.toLocaleString();
+      document.getElementById('totalSaves').textContent=ts.toLocaleString();
+      ARTWORKS.forEach(a=>{
+        const c=d[a.id]||{likes:0,saves:0};
+        document.getElementById('lk_'+a.id).textContent=c.likes.toLocaleString();
+        document.getElementById('sv_'+a.id).textContent=c.saves.toLocaleString();
+        document.getElementById('bar_'+a.id).style.width=Math.round((c.likes+c.saves)/max*100)+'%';
+      });
+      // 多い順に並べ替え
+      [...list.children].sort((x,y)=>{
+        const g=el=>{const id=el.id.slice(4);const c=d[id]||{likes:0,saves:0};return c.likes+c.saves;};
+        return g(y)-g(x);
+      }).forEach(el=>list.appendChild(el));
+      document.getElementById('updated').textContent='最終更新: '+new Date().toLocaleTimeString('ja-JP');
+    }catch(e){ err.style.display='block'; }
+  }
+  document.getElementById('refresh').addEventListener('click',load);
+  load();
+  setInterval(load,60000); // 1分ごと自動更新
+</script>
+</body>
+</html>
