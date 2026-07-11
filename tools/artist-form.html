@@ -45,7 +45,8 @@
   .artist-role{font-size:12px;color:var(--muted);margin:4px 0 10px;}
   .artist-bio{font-size:13px;color:#555;line-height:1.7;margin-bottom:12px;}
   .artist-social{display:flex;gap:8px;margin-bottom:14px;}
-  .artist-social a{width:30px;height:30px;border-radius:50%;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:13px;color:#555;text-decoration:none;}
+  .artist-social a{width:32px;height:32px;border-radius:50%;background:#f2f2f2;display:flex;align-items:center;justify-content:center;color:#555;text-decoration:none;}
+  .artist-social a svg{width:16px;height:16px;display:block;}
   .artist-works{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
   .artist-works .w{aspect-ratio:1;border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
   .artist-works .w img{width:86%;height:86%;object-fit:contain;}
@@ -118,10 +119,16 @@
   const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   // プレビュー画像用: index基準の "./img" をサイトルート "/img" に読み替え(フォームは/tools/配下のため)
   const pv=p=>esc(String(p||'').replace(/^\.\//,'/'));
+  const SOCIAL_ICONS={
+    x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.3 8.3L23.3 22h-6.8l-5.3-6.9L4.9 22H1.8l7.8-8.9L.9 2h6.9l4.8 6.4L18.9 2Zm-1.2 18h1.7L7.4 3.8H5.6L17.7 20Z"/></svg>',
+    instagram:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>',
+    music:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.3 3c.35 2.1 1.7 3.6 3.7 3.85v2.5c-1.35 0-2.6-.42-3.7-1.15v5.95c0 3-2.4 5.3-5.3 5.3S5.7 17.15 5.7 14.15 8.1 8.85 11 8.85c.3 0 .6.03.9.08v2.6c-.28-.1-.58-.15-.9-.15-1.55 0-2.8 1.25-2.8 2.77s1.25 2.78 2.8 2.78 2.8-1.25 2.8-2.78V3h2.5Z"/></svg>',
+    web:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.5 2.6 15.5 0 18M12 3c-2.6 2.5-2.6 15.5 0 18"/></svg>'
+  };
   function render(){
     const a=model();
-    const soc=[['x','𝕏'],['instagram','📷'],['music','🎵'],['web','🌐']].filter(([k])=>a.social[k])
-      .map(([k,ic])=>`<a href="${esc(a.social[k])}" target="_blank">${ic}</a>`).join('');
+    const soc=['x','instagram','music','web'].filter(k=>a.social[k])
+      .map(k=>`<a href="${esc(a.social[k])}" target="_blank">${SOCIAL_ICONS[k]}</a>`).join('');
     const works=a.works.slice(0,3).map(w=>`<div class="w"><img src="${pv(w)}" alt=""></div>`).join('')
       + (a.moreUrl?`<a class="w more" href="${esc(a.moreUrl)}" target="_blank">+${esc(a.moreCount)}</a>`:'');
     $('pv').innerHTML=`
