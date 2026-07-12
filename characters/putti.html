@@ -36,6 +36,10 @@
   .color-preview img{width:92%;height:92%;object-fit:contain;}
   .color-name{font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:4px;}
   .color-price{font-size:13px;font-weight:900;color:var(--accent);}
+  .like-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(224,36,94,.12);border:1px solid rgba(224,36,94,.45);color:#ff6b9a;font-family:inherit;font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;cursor:pointer;transition:transform .12s;}
+  .like-btn:active{transform:scale(.95);}
+  .like-btn.on{background:#e0245e;border-color:#e0245e;color:#fff;}
+  .like-btn .num{font-variant-numeric:tabular-nums;}
   .buy-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(14,14,20,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:200;}
   .buy-bar-info{font-size:13px;color:var(--muted);}
   .buy-bar-info strong{color:var(--text);font-size:16px;display:block;}
@@ -71,6 +75,7 @@
     <p class="char-desc">空を自由に舞うプテラノドン「PUTTI」。<br>元気いっぱいの表情と鮮やかなカラーが魅力のキャラクターです。<br><br>全6色から選べる、ビビッドカラーのアクリルキーホルダー。お気に入りのカラーを見つけて、自分だけの一匹をコレクションしよう。</p>
     <div class="selected-color-label" id="selectedLabel">BLAZE RED</div>
     <div><a href="https://dinorenny-colortap.vercel.app/putti.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(162,89,255,.12);border:1px solid rgba(162,89,255,.4);color:var(--accent2);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎨 COLOR TAP で遊ぶ</a></div>
+    <div style="margin-top:12px;"><button class="like-btn" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span><span>いいね</span><b class="num" id="likeCt"></b></button></div>
   </div>
 </div>
 <section>
@@ -132,6 +137,46 @@ document.getElementById('addCartBtn').addEventListener('click', function(){
   window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE, `${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
+
+// ♥ いいね（全ユーザー集計 → トップのTRENDINGランキングに反映）
+const LIKE_BASE={sue:128,putti:96,mossun:74,gmc:52}[CHAR_ID]||0;
+const LK='charamarl_art_likes', SV='charamarl_art_saves';
+const getSet=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'));}catch(e){return new Set();}};
+const putSet=(k,s)=>localStorage.setItem(k,JSON.stringify([...s]));
+let likeServer=0, likeServerKnown=false;
+const likeBtn=document.getElementById('likeBtn');
+function renderLike(){
+  const liked=getSet(LK).has(CHAR_ID);
+  likeBtn.classList.toggle('on',liked);
+  likeBtn.setAttribute('aria-pressed',String(liked));
+  document.getElementById('likeIc').textContent=liked?'♥':'♡';
+  document.getElementById('likeCt').textContent=LIKE_BASE+likeServer+((!likeServerKnown&&liked)?1:0);
+}
+fetch('/api/react?id='+CHAR_ID).then(r=>r.ok?r.json():null).then(d=>{
+  if(d&&typeof d.likes==='number'){likeServer=d.likes;likeServerKnown=true;renderLike();}
+}).catch(()=>{});
+// ログイン中ならアカウントのコレクションを取り込み
+let cmLogged=false;
+fetch('/api/auth').then(r=>r.ok?r.json():{user:null}).then(d=>{
+  if(!d||!d.user)return;
+  cmLogged=true;
+  const ml=getSet(LK);(d.likes||[]).forEach(x=>ml.add(x));putSet(LK,ml);
+  const ms=getSet(SV);(d.saves||[]).forEach(x=>ms.add(x));putSet(SV,ms);
+  renderLike();
+}).catch(()=>{});
+likeBtn.addEventListener('click',()=>{
+  const s=getSet(LK);const had=s.has(CHAR_ID);
+  had?s.delete(CHAR_ID):s.add(CHAR_ID);putSet(LK,s);
+  fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({id:CHAR_ID,type:'like',op:had?'remove':'add'})})
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{if(d&&typeof d.count==='number'){likeServer=d.count;likeServerKnown=true;renderLike();}})
+    .catch(()=>{});
+  if(cmLogged)fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'sync',likes:[...getSet(LK)],saves:[...getSet(SV)]})}).catch(()=>{});
+  renderLike();
+});
+renderLike();
 </script>
 <script src="../cart.js"></script>
 </body>
