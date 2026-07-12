@@ -29,6 +29,15 @@
   nav.main a:hover{color:var(--orange);}
   .header-icons{display:flex;align-items:center;gap:14px;flex-shrink:0;}
   .hi{font-size:18px;color:#444;cursor:pointer;}
+  .noti{position:relative;display:flex;align-items:center;}
+  .noti-btn{background:none;border:none;font-family:inherit;position:relative;padding:4px;}
+  .noti-dot{position:absolute;top:2px;right:0;width:9px;height:9px;border-radius:50%;background:#e0245e;border:2px solid #fff;}
+  .noti-panel{position:absolute;right:-8px;top:calc(100% + 12px);width:300px;max-width:calc(100vw - 24px);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 34px rgba(0,0,0,.14);padding:8px;z-index:60;}
+  .noti-head{font-size:11px;font-weight:900;letter-spacing:.1em;color:var(--muted);padding:8px 10px 6px;}
+  .noti-item{display:block;text-decoration:none;color:var(--text);padding:9px 10px;border-radius:11px;}
+  .noti-item:hover{background:#f6f6f6;}
+  .noti-item .nt{display:block;font-size:12.5px;font-weight:700;line-height:1.5;}
+  .noti-item .nd{display:block;font-size:10px;color:var(--muted);margin-top:2px;}
   .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--purple));overflow:hidden;}
   .avatar img{width:100%;height:100%;object-fit:cover;}
   @media(max-width:900px){ nav.main{display:none;} }
@@ -256,7 +265,13 @@
       <a href="#cta">ABOUT</a>
     </nav>
     <div class="header-icons">
-      <span class="hi">🔔</span>
+      <div class="noti">
+        <button class="hi noti-btn" id="notiBtn" aria-label="お知らせ">🔔<i class="noti-dot" id="notiDot" hidden></i></button>
+        <div class="noti-panel" id="notiPanel" hidden>
+          <div class="noti-head">お知らせ</div>
+          <div id="notiList"></div>
+        </div>
+      </div>
       <span data-cart-mount></span>
       <div class="avatar"><img src="./img/colors_nobg/sue_red.png" alt=""></div>
     </div>
@@ -577,23 +592,62 @@
   let heroTimer=setInterval(()=>setHero(hi+1),5000);
   document.getElementById('heroCard').addEventListener('mouseenter',()=>clearInterval(heroTimer));
 
-  // タブ（カテゴリ絞り込み）
+  // タブ（カテゴリ絞り込み）× 検索（キーワード）— 両方の条件を満たすピンを表示
   const masonryEl=document.getElementById('masonry'), catEmpty=document.getElementById('catEmpty');
-  document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    tab.classList.add('active');
-    const cat=tab.dataset.cat||'all';
+  let curCat='all', curQuery='';
+  function pinText(pin){
+    return ['.pin-title','.pin-sub','.pin-cat'].map(s=>{const el=pin.querySelector(s);return el?el.textContent:'';}).join(' ').toLowerCase();
+  }
+  function applyFilters(){
     let shown=0;
     masonryEl.querySelectorAll('.pin').forEach(pin=>{
       const pc=pin.querySelector('.pin-cat');
-      const hit=cat==='all'||(pc&&pc.textContent.trim()===cat);
+      const catHit=curCat==='all'||(pc&&pc.textContent.trim()===curCat);
+      const qHit=!curQuery||pinText(pin).includes(curQuery);
+      const hit=catHit&&qHit;
       pin.classList.toggle('cat-hide',!hit);
       if(hit)shown++;
     });
     masonryEl.classList.remove('filtering');void masonryEl.offsetWidth;masonryEl.classList.add('filtering');
     masonryEl.style.display=shown?'':'none';
     catEmpty.hidden=shown>0;
+    catEmpty.querySelector('.ce-t').textContent=curQuery?`「${curQuery}」に合う作品が見つかりません`:'このカテゴリは準備中です';
+    catEmpty.querySelector('.ce-s').textContent=curQuery?'別のキーワードでお試しください':'近日公開予定。お楽しみに！';
+  }
+  document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    curCat=tab.dataset.cat||'all';
+    applyFilters();
   }));
+  // 検索ボックス
+  const searchInput=document.querySelector('.search input');
+  searchInput.addEventListener('input',()=>{
+    const q=searchInput.value.trim().toLowerCase();
+    const started=!curQuery&&q;
+    curQuery=q;
+    applyFilters();
+    if(started)document.getElementById('discover').scrollIntoView({behavior:'smooth'});
+  });
+
+  // 通知ベル（サイトのお知らせ・最新未読は赤ドット）
+  const NEWS=[
+    {d:'2026-07-12',t:'クリエイター登録の受付をはじめました！あなたのキャラクターをCHARAMARLで',href:'./apply.html'},
+    {d:'2026-07-11',t:'DinoRennyのアートギャラリー公開。♥いいね・🔖保存で応援できます',href:'#discover'},
+    {d:'2026-07-01',t:'CHARAMARL プレオープン中。SUE / PUTTI / MOSSUN のアクキー販売中',href:'#discover'},
+  ];
+  const notiBtn=document.getElementById('notiBtn'),notiPanel=document.getElementById('notiPanel'),notiDot=document.getElementById('notiDot');
+  const NOTI_SEEN='charamarl_noti_seen';
+  const newest=NEWS[0].d;
+  notiDot.hidden=(localStorage.getItem(NOTI_SEEN)||'')>=newest;
+  document.getElementById('notiList').innerHTML=NEWS.map(n=>
+    `<a class="noti-item" href="${n.href}"><span class="nt">${n.t}</span><span class="nd">${n.d.replace(/-/g,'.')}</span></a>`).join('');
+  notiBtn.addEventListener('click',e=>{
+    e.stopPropagation();
+    notiPanel.hidden=!notiPanel.hidden;
+    if(!notiPanel.hidden){localStorage.setItem(NOTI_SEEN,newest);notiDot.hidden=true;}
+  });
+  document.addEventListener('click',e=>{if(!notiPanel.hidden&&!notiPanel.contains(e.target))notiPanel.hidden=true;});
 
   // 並び替え（おすすめ順 / 人気順=いいね数）
   const sortBtn=document.getElementById('sortBtn'), sortMenu=document.getElementById('sortMenu');
