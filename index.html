@@ -38,8 +38,13 @@
   .noti-item:hover{background:#f6f6f6;}
   .noti-item .nt{display:block;font-size:12.5px;font-weight:700;line-height:1.5;}
   .noti-item .nd{display:block;font-size:10px;color:var(--muted);margin-top:2px;}
-  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--purple));overflow:hidden;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--purple));overflow:hidden;cursor:pointer;border:none;padding:0;color:#fff;font-family:inherit;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;}
   .avatar img{width:100%;height:100%;object-fit:cover;}
+  .userdd{position:relative;display:flex;align-items:center;}
+  .user-menu{position:absolute;right:0;top:calc(100% + 12px);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:6px;min-width:160px;z-index:60;}
+  .user-menu .um-name{font-size:11px;font-weight:800;color:var(--muted);padding:8px 12px 4px;}
+  .user-menu a,.user-menu button{display:block;width:100%;text-align:left;font-size:13px;font-weight:700;color:#333;padding:9px 12px;border-radius:9px;text-decoration:none;background:none;border:none;font-family:inherit;cursor:pointer;}
+  .user-menu a:hover,.user-menu button:hover{background:#f5f5f5;}
   @media(max-width:900px){ nav.main{display:none;} }
 
   /* HERO */
@@ -273,7 +278,10 @@
         </div>
       </div>
       <span data-cart-mount></span>
-      <div class="avatar"><img src="./img/colors_nobg/sue_red.png" alt=""></div>
+      <div class="userdd">
+        <button class="avatar" id="userBtn" aria-label="アカウント"><img src="./img/colors_nobg/sue_red.png" alt=""></button>
+        <div class="user-menu" id="userMenu" hidden></div>
+      </div>
     </div>
   </div>
 </header>
@@ -774,12 +782,14 @@
     had?s.delete(curArt):s.add(curArt);putSet(LK,s);
     sendReact(curArt,'like',had?'remove':'add');
     renderArt();
+    if(typeof cmSync==='function')cmSync();
   });
   document.getElementById('aSave').addEventListener('click',()=>{
     const s=getSet(SV);const had=s.has(curArt);
     had?s.delete(curArt):s.add(curArt);putSet(SV,s);
     sendReact(curArt,'save',had?'remove':'add');
     renderArt();
+    if(typeof cmSync==='function')cmSync();
   });
 
   // アート/GMCピン
@@ -813,6 +823,35 @@
     ).join('');
   }
   renderRanking();
+
+  // ===== アカウント（ヘッダーのアバター）=====
+  let cmUser=null;
+  const userBtn=document.getElementById('userBtn'),userMenu=document.getElementById('userMenu');
+  function cmSync(){
+    if(!cmUser)return;
+    fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'sync',likes:[...getSet(LK)],saves:[...getSet(SV)]})}).catch(()=>{});
+  }
+  fetch('/api/auth').then(r=>r.ok?r.json():{user:null}).then(d=>{
+    if(!d.user)return;
+    cmUser=d.user;
+    userBtn.textContent=cmUser.name.slice(0,1).toUpperCase();
+    userMenu.innerHTML=`<div class="um-name">${cmUser.name}</div><a href="./mypage.html">🦖 マイページ</a><button type="button" id="umLogout">ログアウト</button>`;
+    document.getElementById('umLogout').addEventListener('click',async()=>{
+      await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout'})}).catch(()=>{});
+      location.reload();
+    });
+    // アカウントのコレクションをこの端末へマージ
+    const merge=(k,arr)=>{const s=getSet(k);(arr||[]).forEach(x=>s.add(x));putSet(k,s);};
+    merge(LK,d.likes);merge(SV,d.saves);
+    if(curArt)renderArt();
+  }).catch(()=>{});
+  userBtn.addEventListener('click',e=>{
+    if(!cmUser){location.href='./login.html';return;}
+    e.stopPropagation();userMenu.hidden=!userMenu.hidden;
+  });
+  document.addEventListener('click',e=>{if(!userMenu.hidden&&!userMenu.contains(e.target))userMenu.hidden=true;});
+
   document.getElementById('rankMore').addEventListener('click',()=>{
     const opt=document.querySelector('.sort-opt[data-sort="popular"]');
     if(opt&&!opt.classList.contains('active'))opt.click();

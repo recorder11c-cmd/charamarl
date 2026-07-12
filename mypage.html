@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マイページ — CHARAMARL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#FF8A00; --purple:#A855F7; --black:#1a1a26;
+    --line:#e7e7ee; --muted:#8a8a97; --bg:#f7f7fa;
+    --like:#e0245e;
+    --tap-min:44px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--black);font-family:'M PLUS Rounded 1c','Helvetica Neue',Arial,sans-serif;padding-bottom:48px;}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;}
+  .logo{font-size:18px;font-weight:800;letter-spacing:.08em;text-decoration:none;}
+  .logo .c1{color:var(--orange);} .logo .c2{color:var(--purple);}
+  .back{color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;min-height:var(--tap-min);display:inline-flex;align-items:center;}
+
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px;}
+  .profile{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+  .pfp{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--purple));color:#fff;font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .pname{font-size:20px;font-weight:800;}
+  .pstat{font-size:12px;color:var(--muted);margin-top:2px;}
+  .logout{margin-left:auto;min-height:var(--tap-min);padding:0 16px;background:#fff;border:1px solid var(--line);border-radius:22px;font-family:inherit;font-size:12px;font-weight:800;color:#555;cursor:pointer;}
+  .logout:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
+
+  .tabs{display:flex;gap:8px;margin-bottom:14px;}
+  .tab{min-height:var(--tap-min);padding:0 18px;display:inline-flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:22px;font-size:13px;font-weight:800;color:#555;cursor:pointer;font-family:inherit;}
+  .tab.on{background:var(--black);color:#fff;border-color:var(--black);}
+  .tab:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+  .item{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;text-decoration:none;color:var(--black);}
+  .item img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#eee;}
+  .item .tt{font-size:12px;font-weight:800;padding:8px 10px 2px;line-height:1.4;}
+  .item .badges{padding:0 10px 10px;font-size:11px;}
+  .badges .b{margin-right:6px;}
+  .badges .lk{color:var(--like);font-weight:800;}
+  .badges .sv{color:var(--orange);font-weight:800;}
+
+  .empty{text-align:center;padding:56px 20px;background:#fff;border:1px dashed var(--line);border-radius:22px;}
+  .empty .ic{font-size:40px;}
+  .empty .t{font-weight:800;font-size:15px;margin-top:10px;}
+  .empty .s{color:var(--muted);font-size:12px;margin-top:4px;line-height:1.7;}
+  .empty a{display:inline-flex;align-items:center;justify-content:center;min-height:var(--tap-min);margin-top:14px;padding:0 24px;background:var(--orange);color:#fff;border-radius:24px;font-size:13px;font-weight:800;text-decoration:none;}
+
+  .err{background:#FFC7CE;color:#9C0006;border-radius:14px;padding:12px 14px;font-size:12px;font-weight:700;margin-bottom:14px;display:none;}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="./index.html"><span class="c1">CHARA</span><span class="c2">MARL</span></a>
+  <a class="back" href="./index.html">← サイトへ戻る</a>
+</header>
+
+<div class="wrap">
+  <div class="err" id="err"></div>
+  <div class="profile">
+    <div class="pfp" id="pfp">🦖</div>
+    <div>
+      <div class="pname" id="pname">…</div>
+      <div class="pstat"><span class="num" id="nLike">0</span> いいね ・ <span class="num" id="nSave">0</span> 保存</div>
+    </div>
+    <button class="logout" id="logout">ログアウト</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-t="all">すべて</button>
+    <button class="tab" data-t="like">♥ いいね</button>
+    <button class="tab" data-t="save">🔖 保存</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" hidden>
+    <div class="ic">🦕</div>
+    <div class="t">まだコレクションがありません</div>
+    <div class="s">ギャラリーで気になるアートに ♥ や 🔖 を付けると<br>ここに集まっていきます。</div>
+    <a href="./index.html#discover">ギャラリーを見る →</a>
+  </div>
+</div>
+
+<script>
+  // ギャラリー作品メタ（index.htmlのARTWORKSと同じID）
+  const ART={
+    roar:{img:'./img/gallery/gallery_roar.png',title:'ROAR!'},
+    worldcup:{img:'./img/gallery/gallery_worldcup.png',title:'WORLD CUP EDITION'},
+    '90s':{img:'./img/gallery/gallery_90s.png',title:'RETRO POP'},
+    nodino:{img:'./img/gallery/gallery_nodino.png',title:'NO DINO NO LIFE'},
+    costume:{img:'./img/gallery/gallery_costume.png',title:'COSTUME COLLECTION'},
+    ahoyoung:{img:'./img/gallery/gallery_ahoyoung.png',title:'DinoRenny × ahoyoung'}
+  };
+  const $=id=>document.getElementById(id);
+  let likes=[],saves=[],filter='all';
+
+  function render(){
+    const ids=[...new Set([...likes,...saves])].filter(id=>ART[id]).filter(id=>
+      filter==='all'||(filter==='like'?likes.includes(id):saves.includes(id)));
+    $('nLike').textContent=likes.filter(id=>ART[id]).length;
+    $('nSave').textContent=saves.filter(id=>ART[id]).length;
+    $('grid').innerHTML=ids.map(id=>`
+      <a class="item" href="./index.html#discover">
+        <img src="${ART[id].img}" alt="${ART[id].title}">
+        <div class="tt">${ART[id].title}</div>
+        <div class="badges">
+          ${likes.includes(id)?'<span class="b lk">♥ いいね</span>':''}
+          ${saves.includes(id)?'<span class="b sv">🔖 保存</span>':''}
+        </div>
+      </a>`).join('');
+    $('empty').hidden=ids.length>0;
+  }
+
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');filter=t.dataset.t;render();
+  }));
+
+  $('logout').addEventListener('click',async()=>{
+    await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout'})}).catch(()=>{});
+    location.href='./index.html';
+  });
+
+  (async()=>{
+    try{
+      const d=await fetch('/api/auth').then(r=>r.json());
+      if(!d.user){location.href='./login.html';return;}
+      $('pname').textContent=d.user.name;
+      $('pfp').textContent=d.user.name.slice(0,1).toUpperCase();
+      // サーバーのコレクションとローカルをマージ → 双方に反映
+      const g=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];}};
+      likes=[...new Set([...(d.likes||[]),...g('charamarl_art_likes')])];
+      saves=[...new Set([...(d.saves||[]),...g('charamarl_art_saves')])];
+      localStorage.setItem('charamarl_art_likes',JSON.stringify(likes));
+      localStorage.setItem('charamarl_art_saves',JSON.stringify(saves));
+      fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'sync',likes,saves})}).catch(()=>{});
+      render();
+    }catch(e){
+      $('err').textContent='読み込みに失敗しました。時間をおいてお試しください';
+      $('err').style.display='block';
+    }
+  })();
+</script>
+</body>
+</html>

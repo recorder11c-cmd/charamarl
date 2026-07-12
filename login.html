@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ログイン / 新規登録 — CHARAMARL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#FF8A00; --purple:#A855F7; --black:#1a1a26;
+    --line:#e7e7ee; --muted:#8a8a97; --bg:#f7f7fa;
+    --input-bg:#eef4ff;
+    --tap-min:44px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--black);font-family:'M PLUS Rounded 1c','Helvetica Neue',Arial,sans-serif;padding-bottom:48px;}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;}
+  .logo{font-size:18px;font-weight:800;letter-spacing:.08em;text-decoration:none;}
+  .logo .c1{color:var(--orange);} .logo .c2{color:var(--purple);}
+  .back{color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;min-height:var(--tap-min);display:inline-flex;align-items:center;}
+
+  .wrap{max-width:440px;margin:0 auto;padding:28px 16px;}
+  .hero-ic{text-align:center;font-size:44px;}
+  h1{font-size:22px;font-weight:800;text-align:center;margin:8px 0 4px;}
+  .sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:18px;line-height:1.7;}
+
+  .mode{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#ececf2;border-radius:26px;padding:5px;margin-bottom:18px;}
+  .mode button{min-height:var(--tap-min);border:none;border-radius:22px;background:none;font-family:inherit;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;}
+  .mode button.on{background:#fff;color:var(--black);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+  .mode button:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
+
+  form{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px 18px;}
+  .fld{margin-bottom:16px;}
+  label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;}
+  input{width:100%;min-height:var(--tap-min);padding:10px 14px;font-family:inherit;font-size:15px;font-weight:700;color:var(--black);
+    background:var(--input-bg);border:1.5px solid transparent;border-radius:13px;}
+  input:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
+  ::placeholder{color:#9aa7c2;font-weight:500;}
+  .hint{font-size:10px;color:var(--muted);margin-top:4px;}
+
+  .go{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;margin-top:4px;
+    background:var(--orange);color:#fff;border:none;border-radius:26px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;transition:transform .12s;}
+  .go:active{transform:scale(.95);}
+  .go:focus-visible{outline:3px solid var(--purple);outline-offset:2px;}
+  .go[disabled]{opacity:.5;cursor:default;}
+
+  .err{background:#FFC7CE;color:#9C0006;border-radius:14px;padding:12px 14px;font-size:12px;font-weight:700;margin-bottom:14px;display:none;}
+  .note{font-size:11px;color:var(--muted);line-height:1.7;margin-top:16px;background:#fff;border:1px dashed var(--line);border-radius:14px;padding:12px 14px;}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="./index.html"><span class="c1">CHARA</span><span class="c2">MARL</span></a>
+  <a class="back" href="./index.html">← サイトへ戻る</a>
+</header>
+
+<div class="wrap">
+  <div class="hero-ic">🦖</div>
+  <h1 id="title">ログイン</h1>
+  <p class="sub">お気に入りのアートをコレクションして、<br>どの端末からでも見られるようになります。</p>
+
+  <div class="mode" role="tablist">
+    <button id="mLogin" class="on" type="button">ログイン</button>
+    <button id="mReg" type="button">新規登録</button>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <form id="form" novalidate>
+    <div class="fld">
+      <label for="name">ニックネーム</label>
+      <input id="name" type="text" maxlength="20" placeholder="例: dino_fan" autocomplete="username">
+      <div class="hint" id="nameHint" hidden>2〜20文字。あとで表示される名前になります</div>
+    </div>
+    <div class="fld">
+      <label for="pass">パスワード</label>
+      <input id="pass" type="password" maxlength="100" placeholder="8文字以上" autocomplete="current-password">
+    </div>
+    <button class="go" id="go" type="submit">ログインする</button>
+  </form>
+
+  <div class="note">
+    ・パスワードは暗号化(ハッシュ化)して保存されます<br>
+    ・メールアドレスの登録は不要です
+  </div>
+</div>
+
+<script>
+  let mode='login';
+  const $=id=>document.getElementById(id);
+  const err=$('err');
+  function setMode(m){
+    mode=m;
+    $('mLogin').classList.toggle('on',m==='login');
+    $('mReg').classList.toggle('on',m==='register');
+    $('title').textContent=m==='login'?'ログイン':'新規登録';
+    $('go').textContent=m==='login'?'ログインする':'登録してはじめる';
+    $('nameHint').hidden=m==='login';
+    $('pass').setAttribute('autocomplete',m==='login'?'current-password':'new-password');
+    err.style.display='none';
+  }
+  $('mLogin').addEventListener('click',()=>setMode('login'));
+  $('mReg').addEventListener('click',()=>setMode('register'));
+  if(new URLSearchParams(location.search).get('mode')==='register')setMode('register');
+
+  // ログイン済みならマイページへ
+  fetch('/api/auth').then(r=>r.json()).then(d=>{if(d.user)location.href='./mypage.html';}).catch(()=>{});
+
+  $('form').addEventListener('submit',async e=>{
+    e.preventDefault();
+    err.style.display='none';
+    const name=$('name').value.trim(), pass=$('pass').value;
+    if(!name)return showErr('ニックネームを入力してください');
+    if(!pass)return showErr('パスワードを入力してください');
+    if(mode==='register'&&pass.length<8)return showErr('パスワードは8文字以上にしてください');
+    const go=$('go');go.disabled=true;
+    try{
+      const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:mode,name,pass})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(d.error||'失敗しました');
+      // ローカルの♥/🔖とアカウントのコレクションをマージして引き継ぎ
+      try{
+        const g=k=>JSON.parse(localStorage.getItem(k)||'[]');
+        const me=await fetch('/api/auth').then(r=>r.json());
+        const likes=[...new Set([...(me.likes||[]),...g('charamarl_art_likes')])];
+        const saves=[...new Set([...(me.saves||[]),...g('charamarl_art_saves')])];
+        localStorage.setItem('charamarl_art_likes',JSON.stringify(likes));
+        localStorage.setItem('charamarl_art_saves',JSON.stringify(saves));
+        await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({action:'sync',likes,saves})});
+      }catch(_){}
+      location.href='./mypage.html';
+    }catch(ex){
+      showErr(ex.message==='Failed to fetch'?'通信に失敗しました。時間をおいてお試しください':ex.message);
+      go.disabled=false;
+    }
+  });
+  function showErr(m){err.textContent=m;err.style.display='block';}
+</script>
+</body>
+</html>
