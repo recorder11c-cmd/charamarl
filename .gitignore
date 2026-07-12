@@ -7,3 +7,4 @@ node_modules/
 _inbox/*
 !_inbox/README.txt
 .DS_Store
+.env*
