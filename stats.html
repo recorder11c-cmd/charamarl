@@ -33,6 +33,12 @@
   .tile .vl{font-size:32px;font-weight:800;margin-top:2px;}
   .tile.like .vl{color:var(--like);} .tile.save .vl{color:var(--save);}
 
+  .chips{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .chip{min-height:var(--tap-min);padding:0 18px;display:inline-flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:22px;font-size:13px;font-weight:800;color:#555;cursor:pointer;font-family:inherit;}
+  .chip.on{background:var(--black);color:#fff;border-color:var(--black);}
+  .chip:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
+  .row .tag{display:inline-block;font-size:9px;font-weight:800;color:var(--purple);background:#f3e9ff;border-radius:8px;padding:2px 8px;margin-left:6px;vertical-align:middle;}
+  .row.hide{display:none;}
   .list{display:flex;flex-direction:column;gap:10px;}
   .row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px 14px 10px 10px;}
   .row img{width:56px;height:56px;border-radius:12px;object-fit:cover;background:#eee;flex:0 0 auto;}
@@ -64,7 +70,9 @@
 <div class="wrap">
   <div class="eyebrow">Artist Dashboard</div>
   <h1>いいね・保存 集計</h1>
-  <div class="sub">ギャラリー作品へのリアクション（全ユーザー合計・リアルタイム）</div>
+  <div class="sub">ギャラリー作品・キャラクターへのリアクション（全ユーザー合計・リアルタイム）</div>
+
+  <div class="chips" id="chips"></div>
 
   <div class="err" id="err">集計サーバーに接続できませんでした。時間をおいて再度お試しください。</div>
 
@@ -85,20 +93,24 @@
 </div>
 
 <script>
-  const ARTWORKS=[
+  const ITEMS=[
     {id:'roar',     title:'ROAR!',               artist:'DinoRenny', img:'./img/gallery/gallery_roar.png'},
     {id:'worldcup', title:'WORLD CUP EDITION',   artist:'DinoRenny', img:'./img/gallery/gallery_worldcup.png'},
     {id:'90s',      title:'RETRO POP',           artist:'DinoRenny', img:'./img/gallery/gallery_90s.png'},
     {id:'nodino',   title:'NO DINO NO LIFE',     artist:'DinoRenny', img:'./img/gallery/gallery_nodino.png'},
     {id:'costume',  title:'COSTUME COLLECTION',  artist:'DinoRenny', img:'./img/gallery/gallery_costume.png'},
     {id:'ahoyoung', title:'DinoRenny × ahoyoung',artist:'DinoRenny', img:'./img/gallery/gallery_ahoyoung.png'},
+    {id:'sue',      title:'SUE',    artist:'DinoRenny', type:'char', img:'./img/colors_nobg/sue_red.png'},
+    {id:'putti',    title:'PUTTI',  artist:'DinoRenny', type:'char', img:'./img/colors_nobg/putti_yellow.png'},
+    {id:'mossun',   title:'MOSSUN', artist:'DinoRenny', type:'char', img:'./img/colors_nobg/mossun_blue.png'},
+    {id:'gmc',      title:'レコマル', artist:'MARU',     type:'char', img:'./img/gallery/gmc.png'},
   ];
   const list=document.getElementById('list');
-  ARTWORKS.forEach(a=>{
-    const d=document.createElement('div');d.className='row';d.id='row_'+a.id;
+  ITEMS.forEach(a=>{
+    const d=document.createElement('div');d.className='row';d.id='row_'+a.id;d.dataset.artist=a.artist;
     d.innerHTML=`<img src="${a.img}" alt="">
       <div style="min-width:0;flex:1;">
-        <div class="ttl">${a.title}</div><div class="who">${a.artist}</div>
+        <div class="ttl">${a.title}${a.type==='char'?'<span class="tag">キャラクター</span>':''}</div><div class="who">${a.artist}</div>
         <div class="bar"><i id="bar_${a.id}"></i></div>
       </div>
       <div class="counts">
@@ -108,6 +120,42 @@
     list.appendChild(d);
   });
 
+  // アーティスト別フィルタ
+  let curArtist='all', lastData=null;
+  const chips=document.getElementById('chips');
+  ['all',...new Set(ITEMS.map(a=>a.artist))].forEach(name=>{
+    const b=document.createElement('button');
+    b.className='chip'+(name==='all'?' on':'');b.type='button';
+    b.textContent=name==='all'?'すべて':name;
+    b.addEventListener('click',()=>{
+      chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+      b.classList.add('on');curArtist=name;
+      if(lastData)applyData(lastData);
+    });
+    chips.appendChild(b);
+  });
+  const visibleItems=()=>ITEMS.filter(a=>curArtist==='all'||a.artist===curArtist);
+
+  function applyData(d){
+    const vis=visibleItems(), visIds=new Set(vis.map(a=>a.id));
+    let tl=0,ts=0,max=1;
+    vis.forEach(a=>{const c=d[a.id]||{likes:0,saves:0};tl+=c.likes;ts+=c.saves;max=Math.max(max,c.likes+c.saves);});
+    document.getElementById('totalLikes').textContent=tl.toLocaleString();
+    document.getElementById('totalSaves').textContent=ts.toLocaleString();
+    ITEMS.forEach(a=>{
+      document.getElementById('row_'+a.id).classList.toggle('hide',!visIds.has(a.id));
+      const c=d[a.id]||{likes:0,saves:0};
+      document.getElementById('lk_'+a.id).textContent=c.likes.toLocaleString();
+      document.getElementById('sv_'+a.id).textContent=c.saves.toLocaleString();
+      document.getElementById('bar_'+a.id).style.width=Math.round((c.likes+c.saves)/max*100)+'%';
+    });
+    // 多い順に並べ替え
+    [...list.children].sort((x,y)=>{
+      const g=el=>{const id=el.id.slice(4);const c=d[id]||{likes:0,saves:0};return c.likes+c.saves;};
+      return g(y)-g(x);
+    }).forEach(el=>list.appendChild(el));
+  }
+
   async function load(){
     const err=document.getElementById('err');
     try{
@@ -116,21 +164,8 @@
       const d=await r.json();
       if(d.error) throw new Error(d.error);
       err.style.display='none';
-      let tl=0,ts=0,max=1;
-      ARTWORKS.forEach(a=>{const c=d[a.id]||{likes:0,saves:0};tl+=c.likes;ts+=c.saves;max=Math.max(max,c.likes+c.saves);});
-      document.getElementById('totalLikes').textContent=tl.toLocaleString();
-      document.getElementById('totalSaves').textContent=ts.toLocaleString();
-      ARTWORKS.forEach(a=>{
-        const c=d[a.id]||{likes:0,saves:0};
-        document.getElementById('lk_'+a.id).textContent=c.likes.toLocaleString();
-        document.getElementById('sv_'+a.id).textContent=c.saves.toLocaleString();
-        document.getElementById('bar_'+a.id).style.width=Math.round((c.likes+c.saves)/max*100)+'%';
-      });
-      // 多い順に並べ替え
-      [...list.children].sort((x,y)=>{
-        const g=el=>{const id=el.id.slice(4);const c=d[id]||{likes:0,saves:0};return c.likes+c.saves;};
-        return g(y)-g(x);
-      }).forEach(el=>list.appendChild(el));
+      lastData=d;
+      applyData(d);
       document.getElementById('updated').textContent='最終更新: '+new Date().toLocaleTimeString('ja-JP');
     }catch(e){ err.style.display='block'; }
   }
