@@ -122,7 +122,8 @@
       <input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden>
     </div>
     <div class="fld"><label for="pTitle">作品タイトル</label><input type="text" id="pTitle" maxlength="60" placeholder="例: MIDNIGHT ROAR"></div>
-    <div class="fld"><label for="pLink">あなたのサイト / SNSリンク<span class="opt">任意</span></label><input type="url" id="pLink" maxlength="300" placeholder="https://…（作品の「サイトにアクセス」ボタンの飛び先）"></div>
+    <div class="fld"><label for="pLink">あなたのサイト / SNSリンク<span class="opt">任意・公開されます</span></label><input type="url" id="pLink" maxlength="300" placeholder="https://…（作品の「サイトにアクセス」ボタンの飛び先）">
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;">承認されると、このリンクとあなたのニックネームが作品と一緒にギャラリーで公開されます</div></div>
     <div class="fld"><label for="pDesc">作品の説明<span class="opt">任意</span></label><textarea id="pDesc" maxlength="500" placeholder="作品のコンセプトや制作エピソードなど"></textarea></div>
     <button class="post-btn" id="postBtn" type="button">審査に出す →</button>
     <div class="post-done" id="postDone">投稿を受け付けました！運営の承認後にギャラリーへ公開されます 🦖</div>
