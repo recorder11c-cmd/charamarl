@@ -199,12 +199,18 @@
   .cta-chars{display:flex;gap:6px;}
   .cta-chars img{width:72px;height:72px;object-fit:contain;}
   @media(max-width:820px){ .cta-chars{justify-content:center;flex-wrap:wrap;} }
-  .benefits{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;max-width:1180px;margin:26px auto 0;padding:0 24px;}
+  .benefits{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;align-items:start;max-width:1180px;margin:26px auto 0;padding:0 24px;}
   @media(max-width:700px){ .benefits{grid-template-columns:repeat(2,1fr);} }
-  .benefit{display:flex;gap:10px;align-items:flex-start;}
+  .benefit{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+  .benefit:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.06);}
+  .benefit:focus-visible{outline:3px solid var(--purple);outline-offset:2px;}
   .benefit .bi{font-size:20px;}
-  .benefit .bt{font-size:13px;font-weight:900;}
+  .benefit .bt{font-size:13px;font-weight:900;display:flex;align-items:center;gap:6px;}
+  .benefit .bt .chev{font-size:9px;color:var(--muted);transition:transform .2s;}
+  .benefit.open .bt .chev{transform:rotate(180deg);}
   .benefit .bs{font-size:11px;color:var(--muted);line-height:1.5;}
+  .benefit .bd{display:none;font-size:11px;color:#555;line-height:1.7;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);}
+  .benefit.open .bd{display:block;}
 
   /* FOOTER */
   footer{margin-top:54px;border-top:1px solid var(--line);padding:40px 24px 90px;text-align:center;}
@@ -459,10 +465,14 @@
     </div>
   </div>
   <div class="benefits">
-    <div class="benefit"><span class="bi">📦</span><div><div class="bt">販売サポート</div><div class="bs">販売・発送をサポートします</div></div></div>
-    <div class="benefit"><span class="bi">📣</span><div><div class="bt">ファンに届く</div><div class="bs">多くのユーザーに作品を届けます</div></div></div>
-    <div class="benefit"><span class="bi">💰</span><div><div class="bt">収益を得る</div><div class="bs">販売手数料を引いた収益を得られます</div></div></div>
-    <div class="benefit"><span class="bi">📰</span><div><div class="bt">メディア掲載</div><div class="bs">注目アーティストとして紹介</div></div></div>
+    <div class="benefit" role="button" tabindex="0" aria-expanded="false"><span class="bi">📦</span><div><div class="bt">販売サポート<span class="chev">▼</span></div><div class="bs">販売・発送をサポートします</div>
+      <div class="bd">商品ページの作成から決済まではCHARAMARLの仕組みをそのまま使えます。物販がはじめてでも、立ち上げの流れを運営が一緒に進めます。詳しい進め方は応募後にご案内します。</div></div></div>
+    <div class="benefit" role="button" tabindex="0" aria-expanded="false"><span class="bi">📣</span><div><div class="bt">ファンに届く<span class="chev">▼</span></div><div class="bs">多くのユーザーに作品を届けます</div>
+      <div class="bd">トップページのDISCOVERギャラリーにあなたの作品が並び、訪問者が♥いいね・🔖保存でリアクションできます。反応は集計され、人気ランキングにも反映されます。</div></div></div>
+    <div class="benefit" role="button" tabindex="0" aria-expanded="false"><span class="bi">💰</span><div><div class="bt">収益を得る<span class="chev">▼</span></div><div class="bs">販売手数料を引いた収益を得られます</div>
+      <div class="bd">売上から販売手数料を差し引いた金額があなたの収益になります。手数料率やお支払いの流れは、応募いただいた方に個別にご案内します。</div></div></div>
+    <div class="benefit" role="button" tabindex="0" aria-expanded="false"><span class="bi">📰</span><div><div class="bt">メディア掲載<span class="chev">▼</span></div><div class="bs">注目アーティストとして紹介</div>
+      <div class="bd">トップページの「今週の注目アーティスト」枠やサイト内のお知らせ(🔔)でピックアップ。プロフィール・SNSリンク付きであなたの活動を紹介します。</div></div></div>
   </div>
 </div>
 
@@ -851,6 +861,13 @@
     e.stopPropagation();userMenu.hidden=!userMenu.hidden;
   });
   document.addEventListener('click',e=>{if(!userMenu.hidden&&!userMenu.contains(e.target))userMenu.hidden=true;});
+
+  // 出店メリット（クリックで詳細を開閉）
+  document.querySelectorAll('.benefit').forEach(b=>{
+    const toggle=()=>{const on=b.classList.toggle('open');b.setAttribute('aria-expanded',String(on));};
+    b.addEventListener('click',toggle);
+    b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  });
 
   document.getElementById('rankMore').addEventListener('click',()=>{
     const opt=document.querySelector('.sort-opt[data-sort="popular"]');
