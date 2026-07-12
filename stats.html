@@ -106,11 +106,12 @@
     {id:'gmc',      title:'レコマル', artist:'MARU',     type:'char', img:'./img/gallery/gmc.png'},
   ];
   const list=document.getElementById('list');
-  ITEMS.forEach(a=>{
+  const escS=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  function addRow(a){
     const d=document.createElement('div');d.className='row';d.id='row_'+a.id;d.dataset.artist=a.artist;
-    d.innerHTML=`<img src="${a.img}" alt="">
+    d.innerHTML=`<img src="${escS(a.img)}" alt="">
       <div style="min-width:0;flex:1;">
-        <div class="ttl">${a.title}${a.type==='char'?'<span class="tag">キャラクター</span>':''}</div><div class="who">${a.artist}</div>
+        <div class="ttl">${escS(a.title)}${a.type==='char'?'<span class="tag">キャラクター</span>':''}</div><div class="who">${escS(a.artist)}</div>
         <div class="bar"><i id="bar_${a.id}"></i></div>
       </div>
       <div class="counts">
@@ -118,23 +119,39 @@
         <div class="cnt save"><div class="n num" id="sv_${a.id}">–</div><div class="l">保存</div></div>
       </div>`;
     list.appendChild(d);
-  });
+  }
+  ITEMS.forEach(addRow);
 
   // アーティスト別フィルタ
   let curArtist='all', lastData=null;
   const chips=document.getElementById('chips');
-  ['all',...new Set(ITEMS.map(a=>a.artist))].forEach(name=>{
-    const b=document.createElement('button');
-    b.className='chip'+(name==='all'?' on':'');b.type='button';
-    b.textContent=name==='all'?'すべて':name;
-    b.addEventListener('click',()=>{
-      chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-      b.classList.add('on');curArtist=name;
-      if(lastData)applyData(lastData);
+  function buildChips(){
+    chips.innerHTML='';
+    ['all',...new Set(ITEMS.map(a=>a.artist))].forEach(name=>{
+      const b=document.createElement('button');
+      b.className='chip'+((name==='all'&&curArtist==='all')||name===curArtist?' on':'');b.type='button';
+      b.textContent=name==='all'?'すべて':name;
+      b.addEventListener('click',()=>{
+        chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+        b.classList.add('on');curArtist=name;
+        if(lastData)applyData(lastData);
+      });
+      chips.appendChild(b);
     });
-    chips.appendChild(b);
-  });
+  }
+  buildChips();
   const visibleItems=()=>ITEMS.filter(a=>curArtist==='all'||a.artist===curArtist);
+
+  // 投稿ギャラリー（承認済み）も集計対象に自動追加
+  fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
+    (d.list||[]).forEach(a=>{
+      if(ITEMS.some(x=>x.id===a.id))return;
+      const item={id:a.id,title:a.title,artist:a.artist,img:a.img};
+      ITEMS.push(item);addRow(item);
+    });
+    buildChips();
+    if(lastData)applyData(lastData);
+  }).catch(()=>{});
 
   function applyData(d){
     const vis=visibleItems(), visIds=new Set(vis.map(a=>a.id));

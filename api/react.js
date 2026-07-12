@@ -10,6 +10,12 @@ const ART_IDS = [
   'roar','worldcup','90s','nodino','costume','ahoyoung', // ギャラリーアート
   'sue','putti','mossun','gmc',                          // キャラクター(TRENDINGランキング用)
 ];
+// 投稿ギャラリー(api/gallery.js)で承認された作品IDは react:extra 集合で許可
+async function isAllowedId(id) {
+  if (ART_IDS.includes(id)) return true;
+  if (!/^g[a-f0-9]{12}$/.test(String(id))) return false;
+  return Number(await redis('SISMEMBER', 'react:extra', id)) === 1;
+}
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -39,18 +45,20 @@ module.exports = async (req, res) => {
     if (req.method === 'GET') {
       const { id } = req.query || {};
       if (id) {
-        if (!ART_IDS.includes(id)) return res.status(400).json({ error: 'unknown id' });
+        if (!(await isAllowedId(id))) return res.status(400).json({ error: 'unknown id' });
         const [likes, saves] = await Promise.all([
           redis('GET', `art:${id}:likes`),
           redis('GET', `art:${id}:saves`),
         ]);
         return res.status(200).json({ likes: Number(likes) || 0, saves: Number(saves) || 0 });
       }
-      // 全件: MGETでまとめて取得
-      const keys = ART_IDS.flatMap(a => [`art:${a}:likes`, `art:${a}:saves`]);
+      // 全件: 固定ID + 承認済み投稿IDをMGETでまとめて取得
+      const extra = (await redis('SMEMBERS', 'react:extra')) || [];
+      const allIds = [...ART_IDS, ...extra];
+      const keys = allIds.flatMap(a => [`art:${a}:likes`, `art:${a}:saves`]);
       const vals = await redis('MGET', ...keys);
       const out = {};
-      ART_IDS.forEach((a, i) => {
+      allIds.forEach((a, i) => {
         out[a] = { likes: Number(vals[i * 2]) || 0, saves: Number(vals[i * 2 + 1]) || 0 };
       });
       return res.status(200).json(out);
@@ -58,7 +66,7 @@ module.exports = async (req, res) => {
 
     if (req.method === 'POST') {
       const { id, type, op } = req.body || {};
-      if (!ART_IDS.includes(id)) return res.status(400).json({ error: 'unknown id' });
+      if (!(await isAllowedId(id))) return res.status(400).json({ error: 'unknown id' });
       if (!['like', 'save'].includes(type)) return res.status(400).json({ error: 'bad type' });
       const key = `art:${id}:${type}s`;
       let count = await redis(op === 'remove' ? 'DECR' : 'INCR', key);

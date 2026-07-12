@@ -40,6 +40,21 @@
   .card .msg{font-size:12px;line-height:1.8;margin-top:8px;background:var(--bg);border-radius:12px;padding:10px 12px;white-space:pre-wrap;}
 
   .empty{text-align:center;padding:56px 20px;background:#fff;border:1px dashed var(--line);border-radius:22px;color:var(--muted);font-size:13px;font-weight:700;}
+  .gcard{display:flex;gap:12px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px;margin-bottom:12px;align-items:flex-start;}
+  .gcard img{width:92px;height:92px;border-radius:12px;object-fit:cover;background:#eee;flex:0 0 auto;}
+  .gcard .gi{min-width:0;flex:1;}
+  .gcard .gt{font-size:14px;font-weight:800;}
+  .gcard .ga{font-size:11px;color:var(--muted);margin-top:1px;}
+  .gcard .gl{font-size:11px;margin-top:4px;word-break:break-all;}
+  .gcard .gl a{color:var(--purple);font-weight:700;}
+  .gcard .gd{font-size:11px;color:#555;line-height:1.6;margin-top:4px;}
+  .gbtns{display:flex;flex-direction:column;gap:8px;flex:0 0 auto;}
+  .gbtn{min-height:var(--tap-min);padding:0 16px;border:none;border-radius:14px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;}
+  .gbtn.ok{background:#1a7f4b;color:#fff;}
+  .gbtn.ng{background:#f3f3f6;color:#555;}
+  .gbtn.rm{background:#fff0f2;color:#e0245e;}
+  .gbtn:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
+  .badge-live{display:inline-block;font-size:9px;font-weight:800;color:#1a7f4b;background:#e8f8ee;border-radius:8px;padding:2px 8px;margin-left:6px;vertical-align:middle;}
   .err{background:#FFC7CE;color:#9C0006;border-radius:14px;padding:12px 14px;font-size:12px;font-weight:700;margin-bottom:14px;display:none;}
   .refresh{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:var(--tap-min);margin:20px 0 6px;background:var(--orange);color:#fff;border:none;border-radius:26px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:transform .12s;}
   .refresh:active{transform:scale(.95);}
@@ -60,6 +75,11 @@
 
   <div class="err" id="err"></div>
   <div id="list"></div>
+
+  <h1 style="margin-top:34px;">ギャラリー投稿の審査</h1>
+  <p class="sub">審査待ち <b class="num" id="gpCount">-</b> 件 ・ 公開中 <b class="num" id="gaCount">-</b> 件</p>
+  <div id="galPending"></div>
+  <div id="galApproved"></div>
 
   <button class="refresh" id="refresh">↻ 一覧を更新する</button>
 </div>
@@ -105,8 +125,53 @@
       load();
     }catch(ex){err.textContent=ex.message;err.style.display='block';btn.disabled=false;}
   });
-  document.getElementById('refresh').addEventListener('click',load);
+  // ===== ギャラリー投稿の審査 =====
+  const gp=document.getElementById('galPending'), ga=document.getElementById('galApproved');
+  function gcard(a,btns){
+    return `<div class="gcard" data-id="${esc(a.id)}">
+      <img src="${esc(a.img)}" alt="">
+      <div class="gi">
+        <div class="gt">${esc(a.title)}${a.status==='approved'?'<span class="badge-live">公開中</span>':''}</div>
+        <div class="ga">by ${esc(a.artist)} ・ ${fmt(a.ts)}</div>
+        ${a.link?`<div class="gl">🔗 <a href="${esc(a.link)}" target="_blank" rel="noopener nofollow">${esc(a.link)}</a></div>`:''}
+        ${a.desc?`<div class="gd">${esc(a.desc)}</div>`:''}
+      </div>
+      <div class="gbtns">${btns}</div>
+    </div>`;
+  }
+  async function loadGallery(){
+    try{
+      const r=await fetch(`/api/gallery?status=all&key=${encodeURIComponent(key)}`);
+      if(!r.ok)throw new Error('ギャラリー一覧の取得に失敗 ('+r.status+')');
+      const d=await r.json();
+      const pend=d.list.filter(a=>a.status==='pending'), appr=d.list.filter(a=>a.status==='approved');
+      document.getElementById('gpCount').textContent=pend.length;
+      document.getElementById('gaCount').textContent=appr.length;
+      gp.innerHTML=pend.length?pend.map(a=>gcard(a,
+        `<button class="gbtn ok" data-act="approve">✓ 承認して公開</button><button class="gbtn ng" data-act="reject">見送り</button>`)).join('')
+        :'<div class="empty" style="padding:24px;margin-bottom:12px;">審査待ちはありません 🦖</div>';
+      ga.innerHTML=appr.map(a=>gcard(a,
+        `<button class="gbtn rm" data-act="remove">✕ 掲載終了</button>`)).join('');
+    }catch(ex){err.textContent=ex.message;err.style.display='block';}
+  }
+  async function galAction(id,act){
+    const r=await fetch('/api/gallery',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:act,id,key})});
+    if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.error||'操作に失敗しました');}
+  }
+  document.addEventListener('click',async e=>{
+    const btn=e.target.closest('.gbtn'); if(!btn)return;
+    const id=btn.closest('.gcard').dataset.id, act=btn.dataset.act;
+    const msg={approve:'この作品を承認してギャラリーに公開しますか？',reject:'この投稿を見送りますか？',remove:'この作品の掲載を終了しますか？（画像も削除されます）'}[act];
+    if(!confirm(msg))return;
+    btn.disabled=true;
+    try{await galAction(id,act);loadGallery();}
+    catch(ex){err.textContent=ex.message;err.style.display='block';btn.disabled=false;}
+  });
+
+  document.getElementById('refresh').addEventListener('click',()=>{load();loadGallery();});
   load();
+  loadGallery();
 </script>
 </body>
 </html>

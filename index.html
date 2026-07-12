@@ -788,7 +788,7 @@
     document.getElementById('aTitle').textContent=a.title;
     document.getElementById('aArtist').textContent=a.artist;
     document.getElementById('aDesc').textContent=a.desc;
-    document.getElementById('aVisit').href=a.site;
+    const av=document.getElementById('aVisit');av.href=a.site||'#';av.style.display=a.site?'':'none';
     document.getElementById('aLikeCt').textContent=likeTotal(curArt);
     const lb=document.getElementById('aLike'); lb.classList.toggle('on',liked); lb.querySelector('.ic').textContent=liked?'♥':'♡';
     const sb=document.getElementById('aSave'); sb.classList.toggle('on',saved); document.getElementById('aSaveLb').textContent=saved?'保存済み':'保存';
@@ -819,20 +819,48 @@
     if(typeof cmSync==='function')cmSync();
   });
 
-  // アート/GMCピン
-  document.querySelectorAll('.pin.art').forEach(card=>{
+  // アート/GMCピンの配線（静的・動的共通）
+  function wireArtPin(card,forcedId){
     const site=card.dataset.site||card.getAttribute('href');
     const imgEl=card.querySelector('.pin-img img');
     const m=imgEl && imgEl.getAttribute('src').match(/gallery_([a-z0-9]+)\.png/);
-    const artId=(m && ARTWORKS[m[1]])?m[1]:null;
+    const artId=forcedId||((m && ARTWORKS[m[1]])?m[1]:null);
     card.querySelectorAll('.act').forEach(btn=>btn.addEventListener('click',e=>{
       e.preventDefault();e.stopPropagation();const a=btn.dataset.act;
       if(a==='tap')window.open(card.dataset.tap||site,'_blank');
-      else if(a==='share'){const t='CHARAMARL';if(navigator.share)navigator.share({title:t,url:site}).catch(()=>{});else window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(site)}`,'_blank');}
-      else window.open(site,'_blank');
+      else if(a==='share'){const t='CHARAMARL';const u=location.origin;if(navigator.share)navigator.share({title:t,url:site||u}).catch(()=>{});else window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(site||u)}`,'_blank');}
+      else if(site)window.open(site,'_blank');
     }));
     if(artId) card.addEventListener('click',()=>openArt(artId));
-  });
+  }
+  document.querySelectorAll('.pin.art').forEach(card=>wireArtPin(card));
+
+  // ===== 投稿ギャラリー（マイページから投稿→承認された作品を自動掲載）=====
+  function addGalleryItem(a){
+    if(ARTWORKS[a.id])return;
+    const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    ARTWORKS[a.id]={img:a.img,title:a.title,artist:'by '+a.artist,site:a.link||'',desc:a.desc||'',likes:0};
+    const div=document.createElement('div');
+    div.className='pin art';
+    if(a.link)div.dataset.site=a.link;
+    div.innerHTML=`<div class="pin-img"><img src="${esc(a.img)}" alt="${esc(a.title)}" loading="lazy">
+        <div class="pin-actions">${a.link?'<button class="act act-visit" data-act="visit">↗ Visit</button>':''}<button class="act act-share" data-act="share">↗</button></div></div>
+      <div class="pin-body"><div class="pin-cat">ARTWORK</div><div class="pin-title">${esc(a.title)}</div><div class="pin-sub"><span class="av"></span>${esc(a.artist)}</div></div>`;
+    masonryEl.appendChild(div);
+    wireArtPin(div,a.id);
+    baseOrder.push(div);
+  }
+  fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
+    if(!d.list||!d.list.length)return;
+    d.list.forEach(addGalleryItem);
+    applyFilters();
+    // 注目アーティストの「+N」を再計算
+    const moreEl=document.querySelector('.artist-works .more');
+    if(moreEl){
+      const total=[...document.querySelectorAll('#discover .pin .pin-sub')].filter(el=>el.textContent.trim()===ARTIST.name).length;
+      moreEl.textContent='+'+Math.max(total-3,0);
+    }
+  }).catch(()=>{});
 
   // ===== TRENDING ランキング（ベース値 + サーバー実カウントで動的に並び替え）=====
   const RANKING=[
