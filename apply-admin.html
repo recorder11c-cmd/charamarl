@@ -28,8 +28,11 @@
   .sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
   .sub b{color:var(--black);}
 
-  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;}
-  .card .nm{font-size:15px;font-weight:800;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;position:relative;}
+  .card .del{position:absolute;top:10px;right:10px;width:var(--tap-min);height:var(--tap-min);display:flex;align-items:center;justify-content:center;background:none;border:none;border-radius:12px;color:var(--muted);font-size:16px;font-family:inherit;cursor:pointer;}
+  .card .del:hover{background:#fff0f2;color:#e0245e;}
+  .card .del:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
+  .card .nm{font-size:15px;font-weight:800;padding-right:44px;}
   .card .genre{display:inline-block;font-size:10px;font-weight:800;color:var(--purple);background:#f3e9ff;border-radius:9px;padding:3px 9px;margin-left:8px;vertical-align:middle;}
   .card .ts{font-size:10px;color:var(--muted);margin-top:2px;}
   .card .ln{font-size:12px;margin-top:8px;word-break:break-all;}
@@ -78,6 +81,7 @@
       list.innerHTML=d.list.map(a=>{
         const url=/^https?:\/\//.test(a.sns)?a.sns:(a.sns?'https://'+a.sns:'');
         return `<div class="card">
+          <button class="del" data-ts="${a.ts}" title="この応募を削除">✕</button>
           <div class="nm">${esc(a.name)}${a.genre?`<span class="genre">${esc(a.genre)}</span>`:''}</div>
           <div class="ts">${fmt(a.ts)}</div>
           ${a.sns?`<div class="ln">🔗 <a href="${esc(url)}" target="_blank" rel="noopener nofollow">${esc(a.sns)}</a></div>`:''}
@@ -90,6 +94,17 @@
       list.innerHTML='';document.getElementById('count').textContent='-';
     }
   }
+  list.addEventListener('click',async e=>{
+    const btn=e.target.closest('.del'); if(!btn)return;
+    const nm=btn.parentElement.querySelector('.nm').textContent;
+    if(!confirm(`「${nm}」の応募を削除しますか？（元に戻せません）`))return;
+    btn.disabled=true;
+    try{
+      const r=await fetch(`/api/apply?key=${encodeURIComponent(key)}&ts=${btn.dataset.ts}`,{method:'DELETE'});
+      if(!r.ok)throw new Error('削除に失敗しました ('+r.status+')');
+      load();
+    }catch(ex){err.textContent=ex.message;err.style.display='block';btn.disabled=false;}
+  });
   document.getElementById('refresh').addEventListener('click',load);
   load();
 </script>
