@@ -246,9 +246,10 @@
   .modal-buy:hover{opacity:.9;}
   .modal-tap{background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.4);color:var(--purple);border-radius:28px;padding:14px 18px;font-size:13px;font-weight:800;display:flex;align-items:center;white-space:nowrap;}
   /* アートモーダル */
-  .modal-img.art{background:#faf7f5;padding:0;}
-  .modal-img.art img{width:100%;height:100%;max-height:92vh;object-fit:cover;}
-  @media(max-width:720px){ .modal-img.art img{max-height:52vh;} }
+  .modal-img.art{background:#faf7f5;padding:0;position:relative;overflow:hidden;}
+  .modal-img.art .abg{position:absolute;inset:-24px;background-size:cover;background-position:center;filter:blur(26px) brightness(.85);}
+  .modal-img.art img{position:relative;width:100%;height:100%;max-height:92vh;object-fit:contain;}
+  @media(max-width:720px){ .modal-img.art img{height:auto;max-height:56vh;} }
   .art-top{display:flex;justify-content:flex-end;margin-bottom:10px;}
   .art-react{display:flex;gap:10px;}
   .react-btn{display:inline-flex;align-items:center;gap:7px;background:#f2f2f2;border:none;border-radius:24px;padding:9px 16px;font-size:14px;font-weight:800;color:#333;cursor:pointer;transition:.18s;}
@@ -513,7 +514,7 @@
 <div class="modal-overlay" id="artOverlay">
   <div class="modal">
     <button class="modal-close" id="artClose">×</button>
-    <div class="modal-img art"><img id="aImg" src="" alt=""></div>
+    <div class="modal-img art"><div class="abg" id="aBg"></div><img id="aImg" src="" alt=""></div>
     <div class="modal-info">
       <div class="art-top">
         <div class="art-react">
@@ -770,6 +771,7 @@
     const a=ARTWORKS[curArt]; if(!a) return;
     const liked=getSet(LK).has(curArt), saved=getSet(SV).has(curArt);
     document.getElementById('aImg').src=a.img;
+    document.getElementById('aBg').style.backgroundImage=`url("${a.img}")`;
     document.getElementById('aTitle').textContent=a.title;
     document.getElementById('aArtist').textContent=a.artist;
     document.getElementById('aDesc').textContent=a.desc;
