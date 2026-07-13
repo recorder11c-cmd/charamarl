@@ -77,6 +77,11 @@
   .mine .mt .ml{display:block;font-size:10px;color:var(--muted);font-weight:700;word-break:break-all;}
   .st{flex:0 0 auto;font-size:10px;font-weight:800;border-radius:9px;padding:4px 10px;}
   .st.pending{background:#fff3d6;color:#946200;} .st.approved{background:#e8f8ee;color:#1a7f4b;} .st.rejected{background:#f3f3f6;color:var(--muted);}
+  .ebtn{flex:0 0 auto;min-height:36px;padding:0 14px;background:#fff;border:1px solid var(--line);border-radius:12px;font-family:inherit;font-size:11px;font-weight:800;color:#555;cursor:pointer;}
+  .ebtn:hover{background:#f5f5f5;}
+  .ebtn:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
+  .post-cancel{display:none;align-items:center;justify-content:center;width:100%;min-height:var(--tap-min);margin-top:8px;background:none;border:none;font-family:inherit;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;}
+  .post-card.editing{border-color:var(--purple);box-shadow:0 0 0 3px #f3e9ff;}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
 </style>
 </head>
@@ -125,7 +130,9 @@
     <div class="fld"><label for="pLink">あなたのサイト / SNSリンク<span class="opt">任意・公開されます</span></label><input type="url" id="pLink" maxlength="300" placeholder="https://…（作品の「サイトにアクセス」ボタンの飛び先）">
       <div style="font-size:10px;color:var(--muted);margin-top:4px;">承認されると、このリンクとあなたのニックネームが作品と一緒にギャラリーで公開されます</div></div>
     <div class="fld"><label for="pDesc">作品の説明<span class="opt">任意</span></label><textarea id="pDesc" maxlength="500" placeholder="作品のコンセプトや制作エピソードなど"></textarea></div>
+    <div id="editHint" hidden style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:10px;">✏️ 編集中：タイトル・リンク・説明の変更はすぐ反映されます。画像を選び直した場合のみ再審査になります。</div>
     <button class="post-btn" id="postBtn" type="button">審査に出す →</button>
+    <button class="post-cancel" id="postCancel" type="button">編集をやめる</button>
     <div class="post-done" id="postDone">投稿を受け付けました！運営の承認後にギャラリーへ公開されます 🦖</div>
   </div>
 
@@ -240,32 +247,71 @@
   });
 
   function postErr(m){$('err').textContent=m;$('err').style.display='block';$('err').scrollIntoView({block:'center'});}
+
+  // 編集モード
+  let editingId=null, mineItems={};
+  function startEdit(id){
+    const a=mineItems[id]; if(!a)return;
+    editingId=id; imgData=null;
+    $('pTitle').value=a.title||'';$('pLink').value=a.link||'';$('pDesc').value=a.desc||'';
+    drop.classList.add('has');
+    drop.innerHTML=`<img src="${esc(a.img)}" alt="現在の画像">`;
+    $('postBtn').textContent='変更を保存する →';
+    $('postCancel').style.display='flex';
+    $('editHint').hidden=false;
+    $('postDone').style.display='none';
+    document.querySelector('.post-card').classList.add('editing');
+    document.querySelector('.post-card').scrollIntoView({block:'center',behavior:'smooth'});
+  }
+  function endEdit(){
+    editingId=null;imgData=null;fileIn.value='';
+    drop.classList.remove('has');drop.innerHTML=dropDefault;
+    $('pTitle').value='';$('pLink').value='';$('pDesc').value='';
+    $('postBtn').textContent='審査に出す →';
+    $('postCancel').style.display='none';
+    $('editHint').hidden=true;
+    document.querySelector('.post-card').classList.remove('editing');
+  }
+  $('postCancel').addEventListener('click',endEdit);
+  $('mineList').addEventListener('click',e=>{
+    const b=e.target.closest('.ebtn'); if(b)startEdit(b.dataset.id);
+  });
+
   $('postBtn').addEventListener('click',async()=>{
     $('err').style.display='none';$('postDone').style.display='none';
     const title=$('pTitle').value.trim();
-    if(!imgData)return postErr('画像を選択してください');
+    if(!editingId&&!imgData)return postErr('画像を選択してください');
     if(!title)return postErr('作品タイトルを入力してください');
-    const btn=$('postBtn');btn.disabled=true;btn.textContent='送信中…';
+    const btn=$('postBtn');btn.disabled=true;const orig=btn.textContent;btn.textContent='送信中…';
     try{
+      const body=editingId
+        ?{action:'edit',id:editingId,title,link:$('pLink').value.trim(),desc:$('pDesc').value.trim()}
+        :{action:'submit',title,link:$('pLink').value.trim(),desc:$('pDesc').value.trim()};
+      if(imgData)body.image=imgData;
       const r=await fetch('/api/gallery',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'submit',title,link:$('pLink').value.trim(),desc:$('pDesc').value.trim(),image:imgData})});
+        body:JSON.stringify(body)});
       const d=await r.json().catch(()=>({}));
-      if(!r.ok)throw new Error(d.error||'投稿に失敗しました');
-      imgData=null;fileIn.value='';drop.classList.remove('has');drop.innerHTML=dropDefault;
-      $('pTitle').value='';$('pLink').value='';$('pDesc').value='';
+      if(!r.ok)throw new Error(d.error||(editingId?'変更に失敗しました':'投稿に失敗しました'));
+      const wasEdit=!!editingId;
+      endEdit();
+      $('postDone').textContent=wasEdit
+        ?(d.status==='pending'?'変更を保存しました。画像を差し替えたため、再承認後に公開されます 🦖':'変更を保存しました！公開中の作品にも反映されています 🦖')
+        :'投稿を受け付けました！運営の承認後にギャラリーへ公開されます 🦖';
       $('postDone').style.display='block';
       loadMine();
     }catch(ex){postErr(ex.message==='Failed to fetch'?'通信に失敗しました。時間をおいてお試しください':ex.message);}
-    btn.disabled=false;btn.textContent='審査に出す →';
+    btn.disabled=false;if(btn.textContent==='送信中…')btn.textContent=editingId?'変更を保存する →':'審査に出す →';
   });
 
   async function loadMine(){
     try{
       const d=await fetch('/api/gallery?mine=1').then(r=>r.ok?r.json():{list:[]});
       const lbl={pending:'審査待ち',approved:'公開中',rejected:'見送り'};
+      mineItems={};
       if(d.list&&d.list.length){
+        d.list.forEach(a=>mineItems[a.id]=a);
         $('mineList').innerHTML=d.list.map(a=>
-          `<div class="mine"><img src="${esc(a.img)}" alt=""><div class="mt">${esc(a.title)}${a.link?`<span class="ml">🔗 ${esc(a.link)}</span>`:''}</div><span class="st ${esc(a.status)}">${lbl[a.status]||esc(a.status)}</span></div>`).join('');
+          `<div class="mine"><img src="${esc(a.img)}" alt=""><div class="mt">${esc(a.title)}${a.link?`<span class="ml">🔗 ${esc(a.link)}</span>`:''}</div><span class="st ${esc(a.status)}">${lbl[a.status]||esc(a.status)}</span><button class="ebtn" data-id="${esc(a.id)}" type="button">✏️ 編集</button></div>`).join('');
       }
     }catch(e){}
   }

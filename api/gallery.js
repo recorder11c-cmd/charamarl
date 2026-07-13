@@ -115,6 +115,41 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, id });
     }
 
+    if (b.action === 'edit') {
+      const u = await currentUser(req);
+      if (!u) return res.status(401).json({ error: 'ログインしてください' });
+      const id = trim(b.id, 20);
+      const raw = await redis('GET', `gal:${id}`);
+      if (!raw) return res.status(404).json({ error: 'not found' });
+      const item = JSON.parse(raw);
+      if (item.artistKey !== u.key) return res.status(403).json({ error: '自分の投稿のみ編集できます' });
+      const title = trim(b.title, 60);
+      if (!title) return res.status(400).json({ error: '作品タイトルを入力してください' });
+      item.title = title;
+      item.desc = trim(b.desc, 500);
+      let link = trim(b.link, 300);
+      if (link && !/^https?:\/\//.test(link)) link = 'https://' + link;
+      item.link = link;
+      if (b.image) { // 画像差し替えは再審査へ
+        const img = decodeImage(b.image);
+        if (!img) return res.status(400).json({ error: '画像を読み込めませんでした（jpeg/png/webp・3.5MBまで）' });
+        const ext = img.contentType === 'image/png' ? 'png' : img.contentType === 'image/webp' ? 'webp' : 'jpg';
+        const oldImg = item.img;
+        const blob = await put(`gallery/${id}_${Date.now()}.${ext}`, img.buf, {
+          access: 'public', contentType: img.contentType, addRandomSuffix: false,
+        });
+        item.img = blob.url;
+        if (item.status === 'approved') {
+          item.status = 'pending';
+          await redis('SREM', 'react:extra', id);
+        }
+        try { await del(oldImg); } catch (_) {}
+      }
+      item.edited = Date.now();
+      await redis('SET', `gal:${id}`, JSON.stringify(item));
+      return res.status(200).json({ ok: true, status: item.status });
+    }
+
     // 以下は管理操作
     if (!isAdmin(req.query) && !(process.env.APPLY_KEY && b.key === process.env.APPLY_KEY)) {
       return res.status(403).json({ error: 'forbidden' });
