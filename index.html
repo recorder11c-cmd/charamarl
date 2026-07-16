@@ -317,7 +317,7 @@
           <div class="drop-tag">NEW DROP</div>
           <div class="drop-name" id="dropName">SUE アクリルキーホルダー</div>
           <div class="drop-artist" id="dropArtist">DinoRenny</div>
-          <div class="drop-price">¥1,000 <small>(税込)</small></div>
+          <div class="drop-price">¥1,200 <small>(税込)</small></div>
           <button class="drop-btn" id="dropBtn">SHOP NOW →</button>
         </div>
         <img class="drop-img" id="dropImg" src="./img/products_t/sue_red.png" alt="">
@@ -371,21 +371,21 @@
       <div class="pin-img prod"><img src="./img/colors_nobg/sue_red.png" alt="SUE">
         <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">↗</button></div>
       </div>
-      <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">SUE アクキー</div><div class="pin-sub"><span class="av"></span>DinoRenny</div><div class="pin-price">¥1,000</div></div>
+      <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">SUE アクキー</div><div class="pin-sub"><span class="av"></span>DinoRenny</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin" data-char="putti" data-color="yellow">
       <div class="pin-img prod"><img src="./img/colors_nobg/putti_yellow.png" alt="PUTTI">
         <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">↗</button></div>
       </div>
-      <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">PUTTI アクキー</div><div class="pin-sub"><span class="av"></span>DinoRenny</div><div class="pin-price">¥1,000</div></div>
+      <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">PUTTI アクキー</div><div class="pin-sub"><span class="av"></span>DinoRenny</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin" data-char="mossun" data-color="blue">
       <div class="pin-img prod"><img src="./img/colors_nobg/mossun_blue.png" alt="MOSSUN">
         <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">↗</button></div>
       </div>
-      <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">MOSSUN アクキー</div><div class="pin-sub"><span class="av"></span>DinoRenny</div><div class="pin-price">¥1,000</div></div>
+      <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">MOSSUN アクキー</div><div class="pin-sub"><span class="av"></span>DinoRenny</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin art gmc" data-site="https://dinorenny-colortap.vercel.app/gmc.html" data-tap="https://dinorenny-colortap.vercel.app/gmc.html" data-title="レコマル" data-creator="MARU">
@@ -513,9 +513,11 @@
       <div class="modal-desc" id="mDesc"></div>
       <div class="modal-colorname" id="mColorName"></div>
       <div class="modal-swatches" id="mSwatches"></div>
-      <div class="modal-price">¥1,000</div>
+      <div class="modal-price" id="mPrice">¥1,200</div>
+      <div style="font-size:11px;color:var(--muted);margin:-8px 0 12px;" id="mShip">受注生産｜毎月末締め・翌月中旬ごろ発送</div>
       <div class="modal-actions">
         <button class="modal-addcart" id="mAddCart">🛍 カートに追加</button>
+        <button class="modal-buy" id="mReq" style="display:none;background:#fff;color:var(--text);border:2px dashed var(--orange);">🗳 この色をリクエスト</button>
         <button class="modal-buy" id="mBuy">今すぐ購入 →</button>
         <a class="modal-tap" id="mTap" href="#" target="_blank">🎨 TAP</a>
       </div>
@@ -666,6 +668,7 @@
 
   // 通知ベル（サイトのお知らせ・最新未読は赤ドット）
   const NEWS=[
+    {d:'2026-07-14',t:'アクキーは受注生産になりました（毎月末締め・翌月中旬発送）。定番色以外は🗳リクエストで商品化を応援！',href:'#discover'},
     {d:'2026-07-14',t:'マイページから作品を投稿できるようになりました！ギャラリー掲載だけの参加もOK',href:'./login.html?mode=register'},
     {d:'2026-07-13',t:'ahoyoungが新規参加。新作「no way」をギャラリーで公開中',href:'#discover'},
     {d:'2026-07-12',t:'クリエイター登録の受付をはじめました！あなたのキャラクターをCHARAMARLで',href:'./apply.html'},
@@ -718,6 +721,9 @@
     mossun:{name:'MOSSUN',creator:'by DinoRenny (@dino_renny)',desc:'海を泳ぐモササウルス「MOSSUN」。クールな表情と力強い存在感が魅力のキャラクター。全6色から選べるビビッドカラーのアクリルキーホルダー。',tap:'https://dinorenny-colortap.vercel.app/mossun.html',site:'https://thedinorenny.online'},
   };
   const COLORS=[{key:'red',name:'BLAZE RED',hex:'#ff2a2a'},{key:'yellow',name:'SUNNY YELLOW',hex:'#f5b500'},{key:'green',name:'SLIME GREEN',hex:'#19c819'},{key:'cyan',name:'ICE CYAN',hex:'#00c8dc'},{key:'blue',name:'GALAXY BLUE',hex:'#2a55ff'},{key:'pink',name:'NEON PINK',hex:'#e633c8'}];
+  const PRICE=1200, HERO={sue:'red',putti:'yellow',mossun:'blue'};
+  const REQ_KEY='charamarl_color_req';
+  const reqSetC=()=>{try{return new Set(JSON.parse(localStorage.getItem(REQ_KEY)||'[]'));}catch(e){return new Set();}};
   const overlay=document.getElementById('modalOverlay');
   let curChar='sue',curColor='red';
   function renderModal(){
@@ -726,7 +732,17 @@
     document.getElementById('mName').textContent=p.name;
     document.getElementById('mCreator').textContent=p.creator;
     document.getElementById('mDesc').textContent=p.desc;
-    document.getElementById('mColorName').textContent='カラー: '+c.name;
+    const hero=HERO[curChar]===curColor;
+    document.getElementById('mColorName').textContent='カラー: '+c.name+(hero?'（定番色）':'');
+    document.getElementById('mPrice').textContent=hero?'¥'+PRICE.toLocaleString():'🗳 リクエスト受付中';
+    document.getElementById('mShip').textContent=hero?'受注生産｜毎月末締め・翌月中旬ごろ発送':'リクエストが集まった色から商品化されます';
+    document.getElementById('mBuy').style.display=hero?'':'none';
+    document.getElementById('mAddCart').style.display=hero?'':'none';
+    const mr=document.getElementById('mReq');
+    const done=reqSetC().has(curChar+'_'+curColor);
+    mr.style.display=hero?'none':'';
+    mr.textContent=done?'✓ リクエスト済み':'🗳 この色をリクエスト';
+    mr.disabled=done;
     document.getElementById('mTap').href=p.tap;
     const sw=document.getElementById('mSwatches');sw.innerHTML='';
     COLORS.forEach(col=>{const d=document.createElement('div');d.className='swatch'+(col.key===curColor?' selected':'');d.style.background=col.hex;d.title=col.name;d.addEventListener('click',()=>{curColor=col.key;renderModal();});sw.appendChild(d);});
@@ -736,14 +752,24 @@
   document.getElementById('modalClose').addEventListener('click',closeModal);
   overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+  document.getElementById('mReq').addEventListener('click',()=>{
+    const id=curChar+'_'+curColor;
+    const s=reqSetC(); if(s.has(id))return;
+    s.add(id);localStorage.setItem(REQ_KEY,JSON.stringify([...s]));
+    fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id,type:'like',op:'add'})}).catch(()=>{});
+    renderModal();
+  });
   document.getElementById('mBuy').addEventListener('click',async()=>{
+    if(HERO[curChar]!==curColor)return;
     const p=PRODUCTS[curChar],c=COLORS.find(x=>x.key===curColor);const btn=document.getElementById('mBuy');
     btn.textContent='処理中...';btn.disabled=true;
-    try{const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:[{name:`${p.name} アクリルキーホルダー ${c.name}`,price:1000,quantity:1,images:[`https://charamarl.vercel.app/img/colors_nobg/${curChar}_${curColor}.png`]}]})});
+    try{const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:[{name:`${p.name} アクリルキーホルダー ${c.name}`,price:PRICE,quantity:1,images:[`https://charamarl.vercel.app/img/colors_nobg/${curChar}_${curColor}.png`]}]})});
     const data=await res.json();if(data.url)location.href=data.url;else{alert('エラー: '+(data.error||'不明'));btn.textContent='今すぐ購入 →';btn.disabled=false;}}catch(e){alert('通信エラー');btn.textContent='今すぐ購入 →';btn.disabled=false;}
   });
   document.getElementById('mAddCart').addEventListener('click',()=>{
-    const c=COLORS.find(x=>x.key===curColor);window.CHARAMARL_CART.add(curChar,curColor,PRODUCTS[curChar].name,c.name,1000);
+    if(HERO[curChar]!==curColor)return;
+    const c=COLORS.find(x=>x.key===curColor);window.CHARAMARL_CART.add(curChar,curColor,PRODUCTS[curChar].name,c.name,PRICE);
     const b=document.getElementById('mAddCart');const o=b.textContent;b.textContent='✓ 追加しました';setTimeout(()=>b.textContent=o,1000);
   });
   function shareProduct(char){const p=PRODUCTS[char];const url=`https://charamarl.vercel.app/characters/${char}.html`;const text=`${p.name} | CHARAMARL`;if(navigator.share)navigator.share({title:text,url}).catch(()=>{});else window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,'_blank');}

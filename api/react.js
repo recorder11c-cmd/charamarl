@@ -10,9 +10,14 @@ const ART_IDS = [
   'roar','worldcup','90s','nodino','costume','ahoyoung', // ギャラリーアート
   'sue','putti','mossun','gmc',                          // キャラクター(TRENDINGランキング用)
 ];
+// カラーリクエスト投票用ID（定番色以外の商品化リクエスト）
+const COLOR_REQ = /^(sue|putti|mossun)_(red|yellow|green|cyan|blue|pink)$/;
+const COLOR_IDS = ['sue','putti','mossun'].flatMap(c =>
+  ['red','yellow','green','cyan','blue','pink'].map(k => `${c}_${k}`));
 // 投稿ギャラリー(api/gallery.js)で承認された作品IDは react:extra 集合で許可
 async function isAllowedId(id) {
   if (ART_IDS.includes(id)) return true;
+  if (COLOR_REQ.test(String(id))) return true;
   if (!/^g[a-f0-9]{12}$/.test(String(id))) return false;
   return Number(await redis('SISMEMBER', 'react:extra', id)) === 1;
 }
@@ -54,7 +59,7 @@ module.exports = async (req, res) => {
       }
       // 全件: 固定ID + 承認済み投稿IDをMGETでまとめて取得
       const extra = (await redis('SMEMBERS', 'react:extra')) || [];
-      const allIds = [...ART_IDS, ...extra];
+      const allIds = [...ART_IDS, ...COLOR_IDS, ...extra];
       const keys = allIds.flatMap(a => [`art:${a}:likes`, `art:${a}:saves`]);
       const vals = await redis('MGET', ...keys);
       const out = {};

@@ -83,6 +83,12 @@
 
   <div class="list" id="list"></div>
 
+  <div id="reqSec" hidden>
+    <h1 style="margin-top:34px;font-size:18px;">🗳 カラーリクエスト投票</h1>
+    <div class="sub">定番色以外の「商品化してほしい」票（多い順）。生産ロットの判断材料に</div>
+    <div class="list" id="reqList"></div>
+  </div>
+
   <button class="refresh" id="refresh">↻ 集計を更新する</button>
   <div class="updated" id="updated"></div>
 
@@ -171,6 +177,18 @@
       const g=el=>{const id=el.id.slice(4);const c=d[id]||{likes:0,saves:0};return c.likes+c.saves;};
       return g(y)-g(x);
     }).forEach(el=>list.appendChild(el));
+
+    // カラーリクエスト投票（定番色以外の商品化リクエスト）
+    const CHAR_N={sue:'SUE',putti:'PUTTI',mossun:'MOSSUN'};
+    const COLOR_N={red:'BLAZE RED',yellow:'SUNNY YELLOW',green:'SLIME GREEN',cyan:'ICE CYAN',blue:'GALAXY BLUE',pink:'NEON PINK'};
+    const reqs=Object.entries(d).filter(([k,v])=>/^(sue|putti|mossun)_/.test(k)&&(v.likes||0)>0)
+      .map(([k,v])=>{const[c,col]=k.split('_');return{c,col,n:v.likes};})
+      .sort((a,b)=>b.n-a.n);
+    document.getElementById('reqSec').hidden=!reqs.length;
+    if(reqs.length){
+      document.getElementById('reqList').innerHTML=reqs.map(r=>
+        `<div class="row"><img src="./img/colors_nobg/${r.c}_${r.col}.png" alt=""><div style="min-width:0;flex:1;"><div class="ttl">${CHAR_N[r.c]} × ${COLOR_N[r.col]}</div><div class="who">商品化リクエスト</div></div><div class="counts"><div class="cnt like"><div class="n num">${r.n}</div><div class="l">票</div></div></div></div>`).join('');
+    }
   }
 
   async function load(){
