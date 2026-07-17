@@ -49,6 +49,12 @@
   .send:focus-visible{outline:3px solid var(--purple);outline-offset:2px;}
   .send[disabled]{opacity:.5;cursor:default;}
 
+  .about-box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:14px;}
+  .about-box .ab-t{font-size:13px;font-weight:800;margin-bottom:8px;}
+  .about-box ul{list-style:none;}
+  .about-box li{font-size:12px;color:#555;line-height:1.8;padding-left:1.2em;position:relative;}
+  .about-box li::before{content:"・";position:absolute;left:0;color:var(--orange);font-weight:800;}
+  .about-box b{color:var(--black);}
   .perks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
   @media(max-width:480px){ .perks{grid-template-columns:1fr;} }
   .perk{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;}
@@ -78,6 +84,16 @@
   <div class="eyebrow">New Artists Wanted</div>
   <h1>クリエイター登録</h1>
   <p class="sub">あなたのキャラクター・作品をCHARAMARLで展開しませんか？<br>下のフォームから応募すると、運営から折り返しご連絡します。</p>
+
+  <div class="about-box">
+    <div class="ab-t">🦖 CHARAMARLってどんな場所？</div>
+    <ul>
+      <li>Pinterestのような、キャラクター作品が集まるギャラリーサイトのイメージです</li>
+      <li><b>ギャラリー掲載だけの参加でもOK</b>（グッズ販売は必須ではありません）</li>
+      <li>作品からあなたのサイト・SNS・ショップへ<b>リンクを張れます</b>（ポートフォリオ兼入口に）</li>
+      <li>逆に「<b>作りたいグッズがある</b>」場合は商品化も対応します（受注生産・持ち出しなし）</li>
+    </ul>
+  </div>
 
   <div class="perks">
     <div class="perk"><div class="pt">📦 販売サポート</div><div class="ps">商品ページ・決済はCHARAMARLの仕組みをそのまま利用。立ち上げは運営が一緒に進めます</div></div>
