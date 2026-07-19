@@ -93,6 +93,7 @@ module.exports = async (req, res) => {
       const desc = trim(b.desc, 500);
       let link = trim(b.link, 300);
       if (!title) return res.status(400).json({ error: '作品タイトルを入力してください' });
+      if (b.noAi !== true) return res.status(400).json({ error: '生成AIを使用していないことの確認が必要です' });
       if (link && !/^https?:\/\//.test(link)) link = 'https://' + link;
       const mine = (await loadAll()).filter(a => a.artistKey === u.key);
       if (mine.length >= MAX_PER_USER) return res.status(400).json({ error: `投稿は${MAX_PER_USER}件までです` });
@@ -108,6 +109,7 @@ module.exports = async (req, res) => {
         id, title, desc, link,
         img: blob.url,
         artist: u.name, artistKey: u.key,
+        aiFree: true, // 生成AI不使用の宣言済み
         status: 'pending', ts: Date.now(),
       };
       await redis('SET', `gal:${id}`, JSON.stringify(item));

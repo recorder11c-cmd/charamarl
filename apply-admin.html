@@ -132,7 +132,7 @@
       <img src="${esc(a.img)}" alt="">
       <div class="gi">
         <div class="gt">${esc(a.title)}${a.status==='approved'?'<span class="badge-live">公開中</span>':''}</div>
-        <div class="ga">by ${esc(a.artist)} ・ ${fmt(a.ts)}</div>
+        <div class="ga">by ${esc(a.artist)} ・ ${fmt(a.ts)}${a.aiFree?' ・ ✍️ 生成AI不使用宣言済み':' ・ ⚠️ AI宣言なし(旧投稿)'}</div>
         ${a.link?`<div class="gl">🔗 <a href="${esc(a.link)}" target="_blank" rel="noopener nofollow">${esc(a.link)}</a></div>`:''}
         ${a.desc?`<div class="gd">${esc(a.desc)}</div>`:''}
       </div>

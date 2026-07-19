@@ -130,6 +130,10 @@
     <div class="fld"><label for="pLink">あなたのサイト / SNSリンク<span class="opt">任意・公開されます</span></label><input type="url" id="pLink" maxlength="300" placeholder="https://…（作品の「サイトにアクセス」ボタンの飛び先）">
       <div style="font-size:10px;color:var(--muted);margin-top:4px;">承認されると、このリンクとあなたのニックネームが作品と一緒にギャラリーで公開されます</div></div>
     <div class="fld"><label for="pDesc">作品の説明<span class="opt">任意</span></label><textarea id="pDesc" maxlength="500" placeholder="作品のコンセプトや制作エピソードなど"></textarea></div>
+    <label id="noAiWrap" style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#555;line-height:1.6;margin-bottom:12px;cursor:pointer;">
+      <input type="checkbox" id="noAi" style="width:18px;height:18px;margin-top:1px;flex:0 0 auto;">
+      <span>この作品は<b>生成AIを使用せず</b>に制作したものです（CHARAMARLのギャラリーは生成AI作品の掲載をご遠慮いただいています。虚偽申告が判明した場合は掲載を終了します）</span>
+    </label>
     <div id="editHint" hidden style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:10px;">✏️ 編集中：タイトル・リンク・説明の変更はすぐ反映されます。画像を選び直した場合のみ再審査になります。</div>
     <button class="post-btn" id="postBtn" type="button">審査に出す →</button>
     <button class="post-cancel" id="postCancel" type="button">編集をやめる</button>
@@ -259,6 +263,7 @@
     $('postBtn').textContent='変更を保存する →';
     $('postCancel').style.display='flex';
     $('editHint').hidden=false;
+    $('noAiWrap').style.display='none';
     $('postDone').style.display='none';
     document.querySelector('.post-card').classList.add('editing');
     document.querySelector('.post-card').scrollIntoView({block:'center',behavior:'smooth'});
@@ -270,6 +275,8 @@
     $('postBtn').textContent='審査に出す →';
     $('postCancel').style.display='none';
     $('editHint').hidden=true;
+    $('noAiWrap').style.display='flex';
+    $('noAi').checked=false;
     document.querySelector('.post-card').classList.remove('editing');
   }
   $('postCancel').addEventListener('click',endEdit);
@@ -282,11 +289,12 @@
     const title=$('pTitle').value.trim();
     if(!editingId&&!imgData)return postErr('画像を選択してください');
     if(!title)return postErr('作品タイトルを入力してください');
+    if(!editingId&&!$('noAi').checked)return postErr('生成AIを使用していないことの確認にチェックしてください');
     const btn=$('postBtn');btn.disabled=true;const orig=btn.textContent;btn.textContent='送信中…';
     try{
       const body=editingId
         ?{action:'edit',id:editingId,title,link:$('pLink').value.trim(),desc:$('pDesc').value.trim()}
-        :{action:'submit',title,link:$('pLink').value.trim(),desc:$('pDesc').value.trim()};
+        :{action:'submit',title,link:$('pLink').value.trim(),desc:$('pDesc').value.trim(),noAi:$('noAi').checked};
       if(imgData)body.image=imgData;
       const r=await fetch('/api/gallery',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify(body)});
