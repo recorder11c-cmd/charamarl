@@ -552,21 +552,41 @@
 <script>
   // ===== HERO カルーセル =====
   // ===== 注目アーティスト設定（tools/artist-form.html で生成したJSONをここに貼り替え）=====
-  const ARTIST = {
-    name: "DinoRenny",
-    verified: true,
-    role: "イラストレーター / キャラクターデザイナー",
-    bio: "恐竜のSUEを中心に、ポップで収集心をくすぐるキャラクターを制作。国内外でアパレルや雑貨、アートワークを展開中。",
-    photo: "./img/gallery/dinorenny_logo.png",
-    social: {
-      x: "https://x.com/dino_renny",
-      instagram: "https://instagram.com/dinorenny_official",
-      music: "https://tiktok.com/@dinorrculq4",
-      web: "https://thedinorenny.online"
+  // 週替わりで自動ローテーション（参加アーティストは全員ここに載る）
+  const FEATURED_ARTISTS = [
+    {
+      name: "DinoRenny",
+      verified: true,
+      role: "イラストレーター / キャラクターデザイナー",
+      bio: "恐竜のSUEを中心に、ポップで収集心をくすぐるキャラクターを制作。国内外でアパレルや雑貨、アートワークを展開中。",
+      photo: "./img/gallery/dinorenny_logo.png",
+      social: {
+        x: "https://x.com/dino_renny",
+        instagram: "https://instagram.com/dinorenny_official",
+        music: "https://tiktok.com/@dinorrculq4",
+        web: "https://thedinorenny.online"
+      },
+      works: ["./img/colors_nobg/sue_red.png","./img/colors_nobg/mossun_blue.png","./img/colors_nobg/putti_yellow.png"],
+      moreUrl: "#discover"
     },
-    works: ["./img/colors_nobg/sue_red.png","./img/colors_nobg/mossun_blue.png","./img/colors_nobg/putti_yellow.png"],
-    moreUrl: "#discover"
-  };
+    {
+      name: "ahoyoung",
+      role: "DJ / 3Dデザイナー",
+      bio: "メタバースを拠点に活動するDJ・3Dデザイナー。イベントの主催からグラフィックまで、手を動かして遊びを形にする。",
+      social: { x: "https://x.com/hatch0hme" },
+      worksFrom: "gallery",
+      moreUrl: "#discover"
+    },
+    {
+      name: "CryptoSuperHeroes",
+      role: "NFTキャラクタープロジェクト",
+      bio: "メタバース『Meta Earth』のヒーローたち。ホルダーが自由に商用利用できるオープンなキャラクターIPを展開中。",
+      social: { web: "https://cryptosuperheroesnft.com/" },
+      worksFrom: "gallery",
+      moreUrl: "#discover"
+    },
+  ];
+  const ARTIST = FEATURED_ARTISTS[Math.floor(Date.now()/(7*86400*1000)) % FEATURED_ARTISTS.length];
   // シンプルな単色SVGアイコン
   const SOCIAL_ICONS = {
     x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.3 8.3L23.3 22h-6.8l-5.3-6.9L4.9 22H1.8l7.8-8.9L.9 2h6.9l4.8 6.4L18.9 2Zm-1.2 18h1.7L7.4 3.8H5.6L17.7 20Z"/></svg>',
@@ -574,13 +594,13 @@
     music:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.3 3c.35 2.1 1.7 3.6 3.7 3.85v2.5c-1.35 0-2.6-.42-3.7-1.15v5.95c0 3-2.4 5.3-5.3 5.3S5.7 17.15 5.7 14.15 8.1 8.85 11 8.85c.3 0 .6.03.9.08v2.6c-.28-.1-.58-.15-.9-.15-1.55 0-2.8 1.25-2.8 2.77s1.25 2.78 2.8 2.78 2.8-1.25 2.8-2.78V3h2.5Z"/></svg>',
     web:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.5 2.6 15.5 0 18M12 3c-2.6 2.5-2.6 15.5 0 18"/></svg>'
   };
-  (function renderArtist(){
+  function renderArtistCard(){
     const a=ARTIST, esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     const label={x:'X',instagram:'Instagram',music:'TikTok',web:'Web'};
     const soc=['x','instagram','music','web']
       .filter(k=>a.social&&a.social[k])
       .map(k=>`<a href="${esc(a.social[k])}" target="_blank" rel="noopener" aria-label="${label[k]}">${SOCIAL_ICONS[k]}</a>`).join('');
-    // 「+N」= サイト内のこのアーティストの掲載数 − カードに見えている3枚（DISCOVERのピンから自動計算）
+    // 「+N」= サイト内のこのアーティストの掲載数 − カードに見えている枚数（DISCOVERのピンから自動計算）
     const shown=(a.works||[]).slice(0,3);
     const total=[...document.querySelectorAll('#discover .pin .pin-sub')].filter(el=>el.textContent.trim()===a.name).length;
     const moreCount=Math.max(total-shown.length,0);
@@ -588,8 +608,11 @@
     const works=shown.map(w=>`<div class="w"><img src="${esc(w)}" alt=""></div>`).join('')
       + (a.moreUrl&&moreCount>0?`<a class="w more" href="${esc(a.moreUrl)}"${inPage?'':' target="_blank" rel="noopener"'} title="ほかの作品を見る">+${moreCount}</a>`:'');
     const primary=(a.social&&(a.social.x||a.social.instagram||a.social.music||a.social.web))||'#';
+    const photo=a.photo
+      ?`<img class="artist-photo" src="${esc(a.photo)}" alt="${esc(a.name)}">`
+      :`<div class="artist-photo" style="display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;">🎨</div>`;
     document.getElementById('artistCard').innerHTML=`
-      <img class="artist-photo" src="${esc(a.photo)}" alt="${esc(a.name)}">
+      ${photo}
       <div>
         <div class="artist-name">${esc(a.name)} ${a.verified?'<span class="verified">✔</span>':''}</div>
         <div class="artist-role">${esc(a.role)}</div>
@@ -598,7 +621,8 @@
         <a class="btn-follow" href="${esc(primary)}" target="_blank" rel="noopener">＋ フォローする</a>
       </div>
       <div class="artist-works">${works}</div>`;
-  })();
+  }
+  renderArtistCard();
 
   const FEATURED = [
     { id:'sue', name:'SUE', creator:'DinoRenny', desc:'DinoRennyを代表するティラノサウルス「SUE」。力強い表情とポップなカラーが魅力の人気キャラクター。', color:'red', page:'./characters/sue.html', drop:'SUE アクリルキーホルダー', photos:true },
@@ -671,6 +695,7 @@
 
   // 通知ベル（サイトのお知らせ・最新未読は赤ドット）
   const NEWS=[
+    {d:'2026-07-23',t:'CryptoSuperHeroesが参加！Pizza BoyとUltimate Manがギャラリーに登場',href:'#discover'},
     {d:'2026-07-14',t:'アクキーは受注生産になりました（毎月末締め・翌月中旬発送）。定番色以外は🗳リクエストで商品化を応援！',href:'#discover'},
     {d:'2026-07-14',t:'マイページから作品を投稿できるようになりました！ギャラリー掲載だけの参加もOK',href:'./login.html?mode=register'},
     {d:'2026-07-13',t:'ahoyoungが新規参加。新作「no way」をギャラリーで公開中',href:'#discover'},
@@ -885,12 +910,15 @@
     if(!d.list||!d.list.length)return;
     d.list.forEach(addGalleryItem);
     applyFilters();
-    // 注目アーティストの「+N」を再計算
-    const moreEl=document.querySelector('.artist-works .more');
-    if(moreEl){
-      const total=[...document.querySelectorAll('#discover .pin .pin-sub')].filter(el=>el.textContent.trim()===ARTIST.name).length;
-      moreEl.textContent='+'+Math.max(total-3,0);
+    // 注目アーティストカードを再描画（投稿作品でプロフィールを補完し「+N」も再計算）
+    if(ARTIST.worksFrom==='gallery'){
+      const mine=d.list.filter(x=>x.artist===ARTIST.name);
+      if(mine.length){
+        ARTIST.works=mine.map(m=>m.img);
+        if(!ARTIST.photo)ARTIST.photo=mine[0].img;
+      }
     }
+    renderArtistCard();
   }).catch(()=>{});
 
   // ===== TRENDING ランキング（ベース値 + サーバー実カウントで動的に並び替え）=====
