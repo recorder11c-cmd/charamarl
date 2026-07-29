@@ -58,7 +58,7 @@
   .fld{margin-bottom:14px;}
   .fld label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;}
   .fld label .opt{color:var(--muted);font-size:10px;font-weight:700;margin-left:4px;}
-  .fld input[type=text],.fld input[type=url],.fld textarea{width:100%;min-height:var(--tap-min);padding:10px 14px;font-family:inherit;font-size:14px;font-weight:700;color:var(--black);background:#eef4ff;border:1.5px solid transparent;border-radius:13px;}
+  .fld input[type=text],.fld input[type=url],.fld textarea,.fld select{width:100%;min-height:var(--tap-min);padding:10px 14px;font-family:inherit;font-size:14px;font-weight:700;color:var(--black);background:#eef4ff;border:1.5px solid transparent;border-radius:13px;}
   .fld textarea{min-height:80px;resize:vertical;line-height:1.6;}
   .fld input:focus-visible,.fld textarea:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
   .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:120px;border:2px dashed #c9d4ee;border-radius:16px;background:#f6f9ff;cursor:pointer;text-align:center;padding:12px;}
@@ -127,6 +127,16 @@
       <input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden>
     </div>
     <div class="fld"><label for="pTitle">作品タイトル</label><input type="text" id="pTitle" maxlength="60" placeholder="例: MIDNIGHT ROAR"></div>
+    <div class="fld"><label for="pCat">カテゴリ</label>
+      <select id="pCat">
+        <option value="ARTWORK">アート作品</option>
+        <option value="CHARACTER">キャラクター紹介</option>
+        <option value="PRODUCT">グッズ・商品（販売はリンク先で）</option>
+        <option value="MAKING">制作風景</option>
+        <option value="EVENT">イベント</option>
+      </select>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px;">ギャラリーの絞り込みチップに対応します。迷ったら「アート作品」でOK（承認時に運営が調整することがあります）</div>
+    </div>
     <div class="fld"><label for="pLink">あなたのサイト / SNSリンク<span class="opt">任意・公開されます</span></label><input type="url" id="pLink" maxlength="300" placeholder="https://…（作品の「サイトにアクセス」ボタンの飛び先）">
       <div style="font-size:10px;color:var(--muted);margin-top:4px;">承認されると、このリンクとあなたのニックネームが作品と一緒にギャラリーで公開されます</div></div>
     <div class="fld"><label for="pDesc">作品の説明<span class="opt">任意</span></label><textarea id="pDesc" maxlength="500" placeholder="作品のコンセプトや制作エピソードなど"></textarea></div>
@@ -259,6 +269,7 @@
     const a=mineItems[id]; if(!a)return;
     editingId=id; imgData=null;
     $('pTitle').value=a.title||'';$('pLink').value=a.link||'';$('pDesc').value=a.desc||'';
+    $('pCat').value=a.cat||'ARTWORK';
     drop.classList.add('has');
     drop.innerHTML=`<img src="${esc(a.img)}" alt="現在の画像">`;
     $('postBtn').textContent='変更を保存する →';
@@ -272,7 +283,7 @@
   function endEdit(){
     editingId=null;imgData=null;fileIn.value='';
     drop.classList.remove('has');drop.innerHTML=dropDefault;
-    $('pTitle').value='';$('pLink').value='';$('pDesc').value='';
+    $('pTitle').value='';$('pLink').value='';$('pDesc').value='';$('pCat').value='ARTWORK';
     $('postBtn').textContent='審査に出す →';
     $('postCancel').style.display='none';
     $('editHint').hidden=true;
@@ -294,8 +305,8 @@
     const btn=$('postBtn');btn.disabled=true;const orig=btn.textContent;btn.textContent='送信中…';
     try{
       const body=editingId
-        ?{action:'edit',id:editingId,title,link:$('pLink').value.trim(),desc:$('pDesc').value.trim()}
-        :{action:'submit',title,link:$('pLink').value.trim(),desc:$('pDesc').value.trim(),noAi:$('noAi').checked};
+        ?{action:'edit',id:editingId,title,cat:$('pCat').value,link:$('pLink').value.trim(),desc:$('pDesc').value.trim()}
+        :{action:'submit',title,cat:$('pCat').value,link:$('pLink').value.trim(),desc:$('pDesc').value.trim(),noAi:$('noAi').checked};
       if(imgData)body.image=imgData;
       const r=await fetch('/api/gallery',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify(body)});
@@ -316,11 +327,12 @@
     try{
       const d=await fetch('/api/gallery?mine=1').then(r=>r.ok?r.json():{list:[]});
       const lbl={pending:'審査待ち',approved:'公開中',rejected:'見送り'};
+      const catLbl={ARTWORK:'アート作品',CHARACTER:'キャラクター',PRODUCT:'グッズ・商品',MAKING:'制作風景',EVENT:'イベント',INTERVIEW:'インタビュー'};
       mineItems={};
       if(d.list&&d.list.length){
         d.list.forEach(a=>mineItems[a.id]=a);
         $('mineList').innerHTML=d.list.map(a=>
-          `<div class="mine"><img src="${esc(a.img)}" alt=""><div class="mt">${esc(a.title)}${a.link?`<span class="ml">🔗 ${esc(a.link)}</span>`:''}</div><span class="st ${esc(a.status)}">${lbl[a.status]||esc(a.status)}</span><button class="ebtn" data-id="${esc(a.id)}" type="button">✏️ 編集</button></div>`).join('');
+          `<div class="mine"><img src="${esc(a.img)}" alt=""><div class="mt">${esc(a.title)}<span class="ml">📂 ${catLbl[a.cat]||'アート作品'}${a.link?` ・ 🔗 ${esc(a.link)}`:''}</span></div><span class="st ${esc(a.status)}">${lbl[a.status]||esc(a.status)}</span><button class="ebtn" data-id="${esc(a.id)}" type="button">✏️ 編集</button></div>`).join('');
       }
     }catch(e){}
   }

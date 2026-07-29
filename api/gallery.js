@@ -15,6 +15,8 @@ const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const MAX_IMG_BYTES = 3.5 * 1024 * 1024;
 const MAX_PER_USER = 20;
+// DISCOVERのカテゴリチップと一致させること(index.htmlのdata-cat)
+const CATS = ['ARTWORK','CHARACTER','PRODUCT','MAKING','EVENT','INTERVIEW'];
 
 async function redis(...cmd) {
   const res = await fetch(KV_URL, {
@@ -108,6 +110,7 @@ module.exports = async (req, res) => {
       const item = {
         id, title, desc, link,
         img: blob.url,
+        cat: CATS.includes(b.cat) ? b.cat : 'ARTWORK',
         artist: u.name, artistKey: u.key,
         aiFree: true, // 生成AI不使用の宣言済み
         status: 'pending', ts: Date.now(),
@@ -129,6 +132,7 @@ module.exports = async (req, res) => {
       if (!title) return res.status(400).json({ error: '作品タイトルを入力してください' });
       item.title = title;
       item.desc = trim(b.desc, 500);
+      if (CATS.includes(b.cat)) item.cat = b.cat;
       let link = trim(b.link, 300);
       if (link && !/^https?:\/\//.test(link)) link = 'https://' + link;
       item.link = link;
@@ -160,6 +164,13 @@ module.exports = async (req, res) => {
     const raw = await redis('GET', `gal:${id}`);
     if (!raw) return res.status(404).json({ error: 'not found' });
     const item = JSON.parse(raw);
+
+    if (b.action === 'setcat') { // 管理側でカテゴリを最終決定
+      if (!CATS.includes(b.cat)) return res.status(400).json({ error: 'bad cat' });
+      item.cat = b.cat;
+      await redis('SET', `gal:${id}`, JSON.stringify(item));
+      return res.status(200).json({ ok: true, cat: item.cat });
+    }
 
     if (b.action === 'approve' || b.action === 'reject') {
       item.status = b.action === 'approve' ? 'approved' : 'rejected';
