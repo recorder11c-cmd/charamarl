@@ -179,9 +179,9 @@
     }).forEach(el=>list.appendChild(el));
 
     // カラーリクエスト投票（定番色以外の商品化リクエスト）
-    const CHAR_N={sue:'SUE',putti:'PUTTI',mossun:'MOSSUN'};
+    const CHAR_N={sue:'SUE',putti:'PUTTI',mossun:'MOSSUN',gmc:'レコマル'};
     const COLOR_N={red:'BLAZE RED',yellow:'SUNNY YELLOW',green:'SLIME GREEN',cyan:'ICE CYAN',blue:'GALAXY BLUE',pink:'NEON PINK'};
-    const reqs=Object.entries(d).filter(([k,v])=>/^(sue|putti|mossun)_/.test(k)&&(v.likes||0)>0)
+    const reqs=Object.entries(d).filter(([k,v])=>/^(sue|putti|mossun|gmc)_/.test(k)&&(v.likes||0)>0)
       .map(([k,v])=>{const[c,col]=k.split('_');return{c,col,n:v.likes};})
       .sort((a,b)=>b.n-a.n);
     document.getElementById('reqSec').hidden=!reqs.length;
