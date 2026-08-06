@@ -89,6 +89,12 @@
     <div class="list" id="reqList"></div>
   </div>
 
+  <div id="nfcSec" hidden>
+    <h1 style="margin-top:34px;font-size:18px;">📶 NFCタップ数</h1>
+    <div class="sub">アクキー裏のNFCタグからサイトに来た回数（キャラ別）</div>
+    <div class="list" id="nfcList"></div>
+  </div>
+
   <button class="refresh" id="refresh">↻ 集計を更新する</button>
   <div class="updated" id="updated"></div>
 
@@ -204,6 +210,18 @@
       document.getElementById('updated').textContent='最終更新: '+new Date().toLocaleTimeString('ja-JP');
     }catch(e){ err.style.display='block'; }
   }
+  // NFCスキャン集計（アクキー裏タグからの流入）
+  fetch('/api/go?stats=1').then(r=>r.ok?r.json():null).then(d=>{
+    if(!d)return;
+    const N={sue:'SUE',putti:'PUTTI',mossun:'MOSSUN',gmc:'レコマル',top:'サイトトップ'};
+    const IMG={sue:'./img/colors_nobg/sue_red.png',putti:'./img/colors_nobg/putti_yellow.png',mossun:'./img/colors_nobg/mossun_blue.png',gmc:'./img/gallery/gmc.png'};
+    const rows=Object.entries(d).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+    if(!rows.length)return;
+    document.getElementById('nfcSec').hidden=false;
+    document.getElementById('nfcList').innerHTML=rows.map(([k,v])=>
+      `<div class="row"><img src="${IMG[k]||'./img/gallery/dinorenny_logo.png'}" alt=""><div style="min-width:0;flex:1;"><div class="ttl">${N[k]||k}</div><div class="who">NFCタップ流入</div></div><div class="counts"><div class="cnt like"><div class="n num">${v}</div><div class="l">回</div></div></div></div>`).join('');
+  }).catch(()=>{});
+
   document.getElementById('refresh').addEventListener('click',load);
   load();
   setInterval(load,60000); // 1分ごと自動更新
