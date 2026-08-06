@@ -54,6 +54,28 @@ module.exports = async (req, res) => {
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'KV未設定' });
 
   try {
+    if (req.method === 'GET' && req.query && req.query.key) {
+      // 管理用: 登録ユーザー一覧（APPLY_KEYで保護）
+      if (!process.env.APPLY_KEY || req.query.key !== process.env.APPLY_KEY) {
+        return res.status(403).json({ error: 'forbidden' });
+      }
+      let cursor = '0'; const keys = [];
+      do {
+        const r = await redis('SCAN', cursor, 'MATCH', 'user:*', 'COUNT', '200');
+        cursor = String(r[0]);
+        for (const k of r[1]) if (!k.endsWith(':col')) keys.push(k);
+      } while (cursor !== '0');
+      const users = [];
+      for (const k of keys) {
+        const [name, created] = await Promise.all([
+          redis('HGET', k, 'name'), redis('HGET', k, 'created'),
+        ]);
+        users.push({ name, created: Number(created) || 0 });
+      }
+      users.sort((a, b) => b.created - a.created);
+      return res.status(200).json({ count: users.length, users });
+    }
+
     if (req.method === 'GET') {
       const u = await currentUser(req);
       if (!u) return res.status(200).json({ user: null });
