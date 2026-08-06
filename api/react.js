@@ -7,7 +7,7 @@
 //   KV_REST_API_URL / KV_REST_API_TOKEN  (または UPSTASH_REDIS_REST_URL / _TOKEN)
 
 const ART_IDS = [
-  'roar','worldcup','90s','nodino','costume','ahoyoung', // ギャラリーアート
+  'roar','worldcup','90s','nodino', // ギャラリーアート
   'sue','putti','mossun','gmc',                          // キャラクター(TRENDINGランキング用)
 ];
 // カラーリクエスト投票用ID（定番色以外の商品化リクエスト）
