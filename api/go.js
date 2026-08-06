@@ -28,6 +28,14 @@ async function redis(...cmd) {
 module.exports = async (req, res) => {
   const q = req.query || {};
 
+  if (q.reset) { // 管理用: カウンタリセット
+    if (!process.env.APPLY_KEY || q.key !== process.env.APPLY_KEY) {
+      return res.status(403).json({ error: 'forbidden' });
+    }
+    await redis('DEL', ...Object.keys(DEST).map(c => `nfc:${c}:scans`));
+    return res.status(200).json({ ok: true });
+  }
+
   if (q.stats) { // スキャン集計（回数のみ・公開値）
     const ids = Object.keys(DEST);
     const vals = await redis('MGET', ...ids.map(c => `nfc:${c}:scans`));
