@@ -10,6 +10,7 @@
 
 const crypto = require('crypto');
 const { put, del } = require('@vercel/blob');
+const { isAdminReq } = require('../lib/admin.js');
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -75,7 +76,7 @@ module.exports = async (req, res) => {
         return res.status(200).json({ list });
       }
       if (q.status === 'pending' || q.status === 'all') {
-        if (!isAdmin(q)) return res.status(403).json({ error: 'forbidden' });
+        if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
         const list = (await loadAll()).filter(a => q.status === 'all' || a.status === 'pending');
         return res.status(200).json({ list });
       }
@@ -157,7 +158,7 @@ module.exports = async (req, res) => {
     }
 
     // 以下は管理操作
-    if (!isAdmin(req.query) && !(process.env.APPLY_KEY && b.key === process.env.APPLY_KEY)) {
+    if (!(await isAdminReq(req))) {
       return res.status(403).json({ error: 'forbidden' });
     }
     const id = trim(b.id, 20);

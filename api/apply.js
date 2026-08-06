@@ -6,6 +6,8 @@
 // 必要な環境変数: KV_REST_API_URL / KV_REST_API_TOKEN（react.jsと共通）
 //                APPLY_KEY（管理一覧の閲覧キー）
 
+const { isAdminReq } = require('../lib/admin.js');
+
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const LIST_KEY = 'apply:list';
@@ -51,8 +53,8 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'GET' || req.method === 'DELETE') {
-      const { key, ts } = req.query || {};
-      if (!process.env.APPLY_KEY || key !== process.env.APPLY_KEY) {
+      const { ts } = req.query || {};
+      if (!(await isAdminReq(req))) {
         return res.status(403).json({ error: 'forbidden' });
       }
       const raw = (await redis('LRANGE', LIST_KEY, '0', '-1')) || [];

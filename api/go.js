@@ -29,7 +29,8 @@ module.exports = async (req, res) => {
   const q = req.query || {};
 
   if (q.reset) { // 管理用: カウンタリセット
-    if (!process.env.APPLY_KEY || q.key !== process.env.APPLY_KEY) {
+    const { isAdminReq } = require('../lib/admin.js');
+    if (!(await isAdminReq(req))) {
       return res.status(403).json({ error: 'forbidden' });
     }
     await redis('DEL', ...Object.keys(DEST).map(c => `nfc:${c}:scans`));

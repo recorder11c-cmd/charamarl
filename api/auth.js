@@ -54,9 +54,10 @@ module.exports = async (req, res) => {
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'KV未設定' });
 
   try {
-    if (req.method === 'GET' && req.query && req.query.key) {
-      // 管理用: 登録ユーザー一覧（APPLY_KEYで保護）
-      if (!process.env.APPLY_KEY || req.query.key !== process.env.APPLY_KEY) {
+    if (req.method === 'GET' && req.query && (req.query.key || req.query.users)) {
+      // 管理用: 登録ユーザー一覧（APPLY_KEY または 管理者セッション）
+      const { isAdminReq } = require('../lib/admin.js');
+      if (!(await isAdminReq(req))) {
         return res.status(403).json({ error: 'forbidden' });
       }
       let cursor = '0'; const keys = [];
@@ -79,9 +80,10 @@ module.exports = async (req, res) => {
     if (req.method === 'GET') {
       const u = await currentUser(req);
       if (!u) return res.status(200).json({ user: null });
+      const { ADMIN_USERS } = require('../lib/admin.js');
       const col = await redis('GET', `user:${u.key}:col`);
       const { likes = [], saves = [] } = col ? JSON.parse(col) : {};
-      return res.status(200).json({ user: { name: u.name }, likes, saves });
+      return res.status(200).json({ user: { name: u.name, admin: ADMIN_USERS.includes(u.key) }, likes, saves });
     }
 
     if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });

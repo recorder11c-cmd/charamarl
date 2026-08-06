@@ -976,7 +976,7 @@
     if(!d.user)return;
     cmUser=d.user;
     userBtn.textContent=cmUser.name.slice(0,1).toUpperCase();
-    userMenu.innerHTML=`<div class="um-name">${cmUser.name}</div><a href="./mypage.html">🦖 マイページ</a><button type="button" id="umLogout">ログアウト</button>`;
+    userMenu.innerHTML=`<div class="um-name">${cmUser.name}</div>${cmUser.admin?'<a href="./apply-admin.html">🛠 運営管理</a>':''}<a href="./mypage.html">🦖 マイページ</a><button type="button" id="umLogout">ログアウト</button>`;
     document.getElementById('umLogout').addEventListener('click',async()=>{
       await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout'})}).catch(()=>{});
       location.reload();
