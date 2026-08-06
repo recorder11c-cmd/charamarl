@@ -58,7 +58,7 @@
   .fld{margin-bottom:14px;}
   .fld label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;}
   .fld label .opt{color:var(--muted);font-size:10px;font-weight:700;margin-left:4px;}
-  .fld input[type=text],.fld input[type=url],.fld textarea,.fld select{width:100%;min-height:var(--tap-min);padding:10px 14px;font-family:inherit;font-size:14px;font-weight:700;color:var(--black);background:#eef4ff;border:1.5px solid transparent;border-radius:13px;}
+  .fld input[type=text],.fld input[type=url],.fld input[type=password],.fld textarea,.fld select{width:100%;min-height:var(--tap-min);padding:10px 14px;font-family:inherit;font-size:14px;font-weight:700;color:var(--black);background:#eef4ff;border:1.5px solid transparent;border-radius:13px;}
   .fld textarea{min-height:80px;resize:vertical;line-height:1.6;}
   .fld input:focus-visible,.fld textarea:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
   .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:120px;border:2px dashed #c9d4ee;border-radius:16px;background:#f6f9ff;cursor:pointer;text-align:center;padding:12px;}
@@ -153,6 +153,14 @@
 
   <div class="sec-h">📮 あなたの投稿</div>
   <div class="mine-list" id="mineList"><div class="empty" style="padding:24px;"><div class="s">まだ投稿はありません</div></div></div>
+
+  <div class="sec-h">🔑 パスワード変更</div>
+  <div class="post-card">
+    <div class="fld"><label for="pwOld">現在のパスワード</label><input type="password" id="pwOld" maxlength="100" autocomplete="current-password"></div>
+    <div class="fld"><label for="pwNew">新しいパスワード（8文字以上）</label><input type="password" id="pwNew" maxlength="100" autocomplete="new-password"></div>
+    <button class="post-btn" id="pwBtn" type="button">パスワードを変更する</button>
+    <div class="post-done" id="pwDone">パスワードを変更しました！</div>
+  </div>
 </div>
 
 <script>
@@ -321,6 +329,23 @@
       loadMine();
     }catch(ex){postErr(ex.message==='Failed to fetch'?'通信に失敗しました。時間をおいてお試しください':ex.message);}
     btn.disabled=false;if(btn.textContent==='送信中…')btn.textContent=editingId?'変更を保存する →':'審査に出す →';
+  });
+
+  $('pwBtn').addEventListener('click',async()=>{
+    $('err').style.display='none';$('pwDone').style.display='none';
+    const o=$('pwOld').value,n=$('pwNew').value;
+    if(!o||!n)return postErr('現在のパスワードと新しいパスワードを入力してください');
+    if(n.length<8)return postErr('新しいパスワードは8文字以上にしてください');
+    const btn=$('pwBtn');btn.disabled=true;
+    try{
+      const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'passwd',old:o,new:n})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(d.error||'変更に失敗しました');
+      $('pwOld').value='';$('pwNew').value='';
+      $('pwDone').style.display='block';
+    }catch(ex){postErr(ex.message==='Failed to fetch'?'通信に失敗しました':ex.message);}
+    btn.disabled=false;
   });
 
   async function loadMine(){

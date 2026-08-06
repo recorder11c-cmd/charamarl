@@ -125,6 +125,18 @@ module.exports = async (req, res) => {
     const u = await currentUser(req);
     if (!u) return res.status(401).json({ error: 'ログインしてください' });
 
+    if (b.action === 'passwd') { // パスワード変更
+      const raw = await redis('HGETALL', `user:${u.key}`);
+      const obj = {}; for (let i = 0; raw && i < raw.length; i += 2) obj[raw[i]] = raw[i + 1];
+      if (hashPass(String(b.old || ''), obj.salt) !== obj.hash) {
+        return res.status(401).json({ error: '現在のパスワードが違います' });
+      }
+      if (String(b.new || '').length < 8) return res.status(400).json({ error: '新しいパスワードは8文字以上にしてください' });
+      const salt = crypto.randomBytes(16).toString('hex');
+      await redis('HSET', `user:${u.key}`, 'salt', salt, 'hash', hashPass(b.new, salt));
+      return res.status(200).json({ ok: true });
+    }
+
     if (b.action === 'sync') {
       const clean = a => [...new Set((Array.isArray(a) ? a : []).map(s => String(s).slice(0, 30)))].slice(0, 200);
       await redis('SET', `user:${u.key}:col`, JSON.stringify({ likes: clean(b.likes), saves: clean(b.saves) }));
