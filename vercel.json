@@ -1,0 +1,16 @@
+{
+  "redirects": [
+    {
+      "source": "/:path((?!api/).*)",
+      "has": [{ "type": "host", "value": "charamarl.vercel.app" }],
+      "destination": "https://charamarl.com/:path",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.charamarl.com" }],
+      "destination": "https://charamarl.com/:path*",
+      "permanent": true
+    }
+  ]
+}

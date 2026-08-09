@@ -8,7 +8,7 @@
 
 | ページ | URL |
 |---|---|
-| 本番トップ | https://charamarl.vercel.app |
+| 本番トップ | https://charamarl.com |
 | クリエイター応募 | /apply.html |
 | ログイン / マイページ | /login.html → /mypage.html |
 | アーティスト用ダッシュボード | /stats.html |

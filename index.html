@@ -595,7 +595,7 @@
       name: "MARU_GMC",
       role: "DJ / キャラクターデザイン",
       bio: "レコード盤のキャラクター「レコマル」の生みの親。音楽とキャラクターをつなぐDJクリエイター。",
-      social: { web: "https://charamarl.vercel.app/tap/gmc.html" },
+      social: { web: "https://charamarl.com/tap/gmc.html" },
       worksFrom: "gallery",
       moreUrl: "#discover"
     },
@@ -839,7 +839,7 @@
     if(HERO[curChar]!==curColor)return;
     const p=PRODUCTS[curChar],c=COLORS.find(x=>x.key===curColor);const btn=document.getElementById('mBuy');
     btn.textContent='処理中...';btn.disabled=true;
-    try{const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:[{name:`${p.name} アクリルキーホルダー ${c.name}`,price:PRICE,quantity:1,images:[`https://charamarl.vercel.app/img/colors_nobg/${curChar}_${curColor}.png`]}]})});
+    try{const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:[{name:`${p.name} アクリルキーホルダー ${c.name}`,price:PRICE,quantity:1,images:[`https://charamarl.com/img/colors_nobg/${curChar}_${curColor}.png`]}]})});
     const data=await res.json();if(data.url)location.href=data.url;else{alert('エラー: '+(data.error||'不明'));btn.textContent='今すぐ購入 →';btn.disabled=false;}}catch(e){alert('通信エラー');btn.textContent='今すぐ購入 →';btn.disabled=false;}
   });
   document.getElementById('mAddCart').addEventListener('click',()=>{
@@ -847,7 +847,7 @@
     const c=COLORS.find(x=>x.key===curColor);window.CHARAMARL_CART.add(curChar,curColor,PRODUCTS[curChar].name,c.name,PRICE);
     const b=document.getElementById('mAddCart');const o=b.textContent;b.textContent='✓ 追加しました';setTimeout(()=>b.textContent=o,1000);
   });
-  function shareProduct(char){const p=PRODUCTS[char];const url=`https://charamarl.vercel.app/characters/${char}.html`;const text=`${p.name} | CHARAMARL`;if(navigator.share)navigator.share({title:text,url}).catch(()=>{});else window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,'_blank');}
+  function shareProduct(char){const p=PRODUCTS[char];const url=`https://charamarl.com/characters/${char}.html`;const text=`${p.name} | CHARAMARL`;if(navigator.share)navigator.share({title:text,url}).catch(()=>{});else window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,'_blank');}
 
   // ピン操作（商品）
   document.querySelectorAll('.pin[data-char]').forEach(pin=>{

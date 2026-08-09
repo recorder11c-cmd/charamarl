@@ -7,7 +7,7 @@
 */
 (function(){
   const KEY = 'charamarl_cart';
-  const PROD_BASE = 'https://charamarl.vercel.app';
+  const PROD_BASE = 'https://charamarl.com';
   const img = (char,color) => `/img/colors_nobg/${char}_${color}.png`;          // サムネ(ルート相対)
   const imgAbs = (char,color) => `${PROD_BASE}/img/colors_nobg/${char}_${color}.png`; // 決済用(公開HTTPS)
 

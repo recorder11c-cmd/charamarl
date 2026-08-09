@@ -136,7 +136,7 @@ async function checkout() {
   try {
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.vercel.app${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`] }] }),
+      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`] }] }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }

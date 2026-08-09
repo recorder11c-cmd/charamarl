@@ -2,7 +2,7 @@
 // GET /api/go?c=sue            → nfc:sue:scans を+1して /characters/sue.html?from=nfc へ302
 // GET /api/go?stats=1&key=…    → スキャン集計（管理用）
 //
-// NFCタグにはこのURLを書き込む: https://charamarl.vercel.app/api/go?c=sue など
+// NFCタグにはこのURLを書き込む: https://charamarl.com/api/go?c=sue など
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;

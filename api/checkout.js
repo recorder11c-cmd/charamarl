@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   const { items, successUrl, cancelUrl } = req.body;
 
   // Origin が無いリクエストでも壊れないよう固定ベースURLをフォールバック
-  const base = req.headers.origin || "https://charamarl.vercel.app";
+  const base = req.headers.origin || "https://charamarl.com";
 
   try {
     const session = await stripe.checkout.sessions.create({
