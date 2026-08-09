@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COLOR TAP — CHARAMARL</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; }
+  body {
+    background: var(--bg, #F2EDE2);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; font-family:'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;
+    transition: background .35s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .stage {
+    position:relative; width:min(94vmin,680px); aspect-ratio:1;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; user-select:none;
+    transform-origin: 50% 78%;
+    /* 揺らぎ(boil)＋静止時は少し暗く＝映え */
+    filter:url(#boil) brightness(.94);
+    -webkit-transform: translateZ(0);          /* iOSの消失バグ回避 */
+  }
+  @media (prefers-reduced-motion: reduce){ .stage{ filter:url(#boil); } }
+  .stage img {
+    width:100%; height:100%; object-fit:contain;
+    filter: hue-rotate(var(--hue,0deg)) saturate(var(--sat,1)) brightness(var(--bri,1));
+    transition: filter .3s ease;
+  }
+  /* pop は .stage 自身に。filter+transform を同一要素にしてiOSの消失を防ぐ */
+  .stage.pop { animation: pop .5s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes pop {
+    0%   { transform: translateY(0)    scale(1)    rotate(0deg); filter:url(#boil) brightness(1.12); }  /* タップ瞬間=明るく */
+    25%  { transform: translateY(-14%) scale(1.12) rotate(-5deg); }                                     /* ぴょん */
+    55%  { transform: translateY(2%)   scale(.96)  rotate(4deg); }
+    100% { transform: translateY(0)    scale(1)    rotate(0deg); filter:url(#boil) brightness(.94); }   /* 揺らぎ=少し暗く */
+  }
+
+  .ui { position:fixed; inset:0; pointer-events:none; }
+  .name {
+    position:fixed; top:6%; left:0; right:0; text-align:center;
+    font-size:clamp(20px,4.5vmin,32px); font-weight:800;
+    letter-spacing:.14em; color:#111;
+    text-shadow:3px 3px 0 rgba(255,233,74,.9);
+    opacity:0; transform:translateY(8px) scale(.9);
+  }
+  .name.show { animation: flash 1.1s ease forwards; }
+  @keyframes flash {
+    0%   { opacity:0; transform:translateY(8px) scale(.9); }
+    15%  { opacity:1; transform:translateY(0) scale(1.06); }
+    25%  { transform:scale(1); }
+    80%  { opacity:1; }
+    100% { opacity:0; }
+  }
+  .bottom { position:fixed; left:0; right:0; bottom:6%; text-align:center; }
+  .hint {
+    display:inline-block; background:#fff; color:#111; font-weight:900;
+    padding:12px 24px; border-radius:30px; font-size:clamp(14px,3.5vmin,18px);
+    box-shadow:0 6px 0 rgba(0,0,0,.12); animation:bob 1.4s ease-in-out infinite;
+    transition:opacity .4s;
+  }
+  .hint.hide { opacity:0; }
+  @keyframes bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-7px);} }
+
+  .tap-here {
+    position:fixed; top:16%; right:8%;
+    font-family:'Comic Sans MS','Chalkboard SE',cursive;
+    font-weight:900; font-size:clamp(22px,5.5vmin,36px); color:#111;
+    line-height:1.1; text-align:center; transform-origin:center;
+    animation:tapwiggle 1.6s ease-in-out infinite; transition:opacity .4s;
+    filter:drop-shadow(2px 2px 0 rgba(255,233,74,.95));
+  }
+  .tap-here.hide { opacity:0; }
+  @keyframes tapwiggle {
+    0%{transform:rotate(-6deg) scale(1);} 25%{transform:rotate(4deg) scale(1.08);}
+    50%{transform:rotate(-4deg) scale(1.04);} 75%{transform:rotate(5deg) scale(1.1);}
+    100%{transform:rotate(-6deg) scale(1);}
+  }
+  @media (prefers-reduced-motion: reduce){ .tap-here,.hint{ animation:none; } }
+
+  .buy {
+    pointer-events:auto; display:inline-block; margin-top:14px;
+    background:#111; color:#fff; font-weight:900; text-decoration:none;
+    padding:14px 28px; border-radius:30px; font-size:clamp(14px,3.5vmin,18px);
+    box-shadow:0 6px 0 rgba(0,0,0,.25); transition:transform .12s;
+  }
+  .buy:active { transform:scale(.96); }
+  .like {
+    pointer-events:auto; display:inline-flex; align-items:center; gap:8px; margin-top:14px;
+    background:#fff; border:3px solid #111; color:#e0245e; font-weight:900; font-family:inherit;
+    padding:12px 24px; border-radius:30px; font-size:clamp(14px,3.5vmin,18px); cursor:pointer;
+    box-shadow:0 6px 0 rgba(0,0,0,.15); transition:transform .12s;
+  }
+  .like:active { transform:scale(.96); }
+  .like.on { background:#e0245e; border-color:#e0245e; color:#fff; }
+</style>
+</head>
+<body>
+
+<!-- 手描き風の揺らぎ（boil）フィルター -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="1" result="n">
+      <animate attributeName="seed" values="1;2;3;4;5;6;7;8" dur="0.8s" repeatCount="indefinite" calcMode="discrete"/>
+    </feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<div class="stage" id="stage">
+  <img id="char" src="" alt="">
+</div>
+
+<div class="ui">
+  <div class="name" id="name"></div>
+  <div class="tap-here" id="tapHere">TAP<br>HERE</div>
+  <div class="bottom">
+    <div class="hint" id="hint">タップで色がかわるよ!</div><br>
+    <button class="like" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span>いいね <b id="likeCt"></b></button>
+    <a class="buy" id="buy" href="#" target="_blank" rel="noopener">🛒 購入する</a>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   COLOR TAP 統一フォーマット — ここだけ書き換えれば新キャラ完成
+   ========================================================= */
+const CONFIG = {
+  character: "う〜ほ〜",                         // 表示名
+  baseImage: "art/ufoo.png",                 // 透過キーアートPNG（正方形・1080px推奨）
+  bg: "#F4F0E6",                            // 初期背景色
+  mode: "char",                             // "char"=キャラの色が変わる / "bg"=背景の色が変わる（黒系キャラ向け）
+  baseHueOffset: -48,                       // UFOの黄色ドームを基準に補正
+
+  // mode:"image" のとき使う。事前生成PNG = `${imageDir}/${imageKey}_${key}.png`
+  imageDir: "art/colors",
+  imageKey: "sue",
+
+  // 6色パレット（key=画像/色名キー。hue/sat/bri は char モード用）
+  palettes: [
+    { key:"red",    name:"COSMIC RED",    hue:0,   sat:2.0, bri:1.12 },
+    { key:"yellow", name:"SUNNY UFO", hue:50,  sat:2.1, bri:1.14 },
+    { key:"green",  name:"ALIEN GREEN",  hue:120, sat:2.3, bri:1.10 },
+    { key:"cyan",   name:"ICE PLANET",     hue:175, sat:2.3, bri:1.18 },
+    { key:"blue",   name:"GALAXY BLUE",  hue:225, sat:1.9, bri:1.40 },
+    { key:"pink",   name:"LOVE PINK",    hue:300, sat:2.2, bri:1.14 },
+  ],
+
+  // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
+  shop: {
+    productUrl: "https://thedinorenny.online/products/...",
+    variants: {                              // 色名: Shopify variant ID
+      "BLAZE RED":"", "SUNNY YELLOW":"", "SLIME GREEN":"",
+      "ICE CYAN":"", "GALAXY BLUE":"", "NEON PINK":"",
+    }
+  }
+};
+/* ========================================================= */
+
+document.title = CONFIG.character + " COLOR TAP | CHARAMARL";
+document.body.style.setProperty("--bg", CONFIG.bg);
+document.getElementById("char").src = CONFIG.baseImage;
+// 商品未設定なら購入ボタンを隠す
+const shopReady = CONFIG.shop.productUrl && !CONFIG.shop.productUrl.includes("...");
+// image方式は全色を事前読み込みしてタップ即時切替（遅延防止）
+if(CONFIG.mode === "image"){
+  CONFIG.palettes.forEach(p => { const im = new Image(); im.src = `${CONFIG.imageDir}/${CONFIG.imageKey}_${p.key}.png`; });
+}
+
+const stage = document.getElementById("stage");
+const img   = document.getElementById("char");
+const nameEl= document.getElementById("name");
+const hint  = document.getElementById("hint");
+const tapHere = document.getElementById("tapHere");
+const buyEl = document.getElementById("buy");
+
+let idx = 0, tapped = false;
+
+function apply(p){
+  if(CONFIG.mode === "image"){
+    // 事前生成の鮮やかPNGを差し替え（最も正確）
+    img.style.filter = "none";
+    img.src = `${CONFIG.imageDir}/${CONFIG.imageKey}_${p.key}.png`;
+  } else if(CONFIG.mode === "bg"){
+    // 背景の色が変わる（黒系キャラ向け）
+    document.body.style.background = `hsl(${p.hue}, 85%, 62%)`;
+  } else {
+    // キャラ（帽子・靴などの有彩色）の色が変わる
+    img.style.setProperty("--hue", (p.hue + CONFIG.baseHueOffset) + "deg");
+    img.style.setProperty("--sat", p.sat);
+    img.style.setProperty("--bri", p.bri);
+  }
+  nameEl.textContent = p.name;
+  nameEl.classList.remove("show"); void nameEl.offsetWidth; nameEl.classList.add("show"); // ぱっと出てフェイドアウト
+  if(shopReady){
+    const vid = CONFIG.shop.variants[p.name];
+    buyEl.href = vid ? CONFIG.shop.productUrl + "?variant=" + vid : CONFIG.shop.productUrl;
+    buyEl.textContent = "🛒 " + p.name + " を購入";
+  } else {
+    buyEl.style.display = "none";
+  }
+}
+apply(CONFIG.palettes[0]);
+
+stage.addEventListener("pointerdown", () => {           // タッチした瞬間に発火（遅延なし）
+  if(!tapped){ tapped = true; hint.classList.add("hide"); tapHere.classList.add("hide"); }
+  idx = (idx + 1) % CONFIG.palettes.length;
+  apply(CONFIG.palettes[idx]);
+  stage.classList.remove("pop"); void stage.offsetWidth; stage.classList.add("pop");
+});
+
+// ♥ いいね（CHARAMARLのう〜ほ〜作品と共通集計）
+const CM_API="https://charamarl.vercel.app/api/react", LIKE_ID="g01544b48f170", LIKE_BASE=0;
+const LIKE_KEY="colortap_likes";
+const likeSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(LIKE_KEY)||"[]"));}catch(e){return new Set();}};
+let likeServer=0, likeKnown=false;
+const likeBtn=document.getElementById("likeBtn");
+function renderLike(){
+  const liked=likeSet().has(LIKE_ID);
+  likeBtn.classList.toggle("on",liked);
+  likeBtn.setAttribute("aria-pressed",String(liked));
+  document.getElementById("likeIc").textContent=liked?"♥":"♡";
+  document.getElementById("likeCt").textContent=LIKE_BASE+likeServer+((!likeKnown&&liked)?1:0);
+}
+fetch(CM_API+"?id="+LIKE_ID).then(r=>r.ok?r.json():null).then(d=>{
+  if(d&&typeof d.likes==="number"){likeServer=d.likes;likeKnown=true;renderLike();}
+}).catch(()=>{});
+likeBtn.addEventListener("pointerdown",e=>e.stopPropagation());
+likeBtn.addEventListener("click",()=>{
+  const s=likeSet();const had=s.has(LIKE_ID);
+  had?s.delete(LIKE_ID):s.add(LIKE_ID);
+  localStorage.setItem(LIKE_KEY,JSON.stringify([...s]));
+  fetch(CM_API,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({id:LIKE_ID,type:"like",op:had?"remove":"add"})})
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{if(d&&typeof d.count==="number"){likeServer=d.count;likeKnown=true;renderLike();}})
+    .catch(()=>{});
+  renderLike();
+});
+renderLike();
+</script>
+</body>
+</html>
