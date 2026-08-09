@@ -7,9 +7,9 @@
       "permanent": false
     },
     {
-      "source": "/:path*",
+      "source": "/:path(.*)",
       "has": [{ "type": "host", "value": "www.charamarl.com" }],
-      "destination": "https://charamarl.com/:path*",
+      "destination": "https://charamarl.com/:path",
       "permanent": true
     }
   ]
