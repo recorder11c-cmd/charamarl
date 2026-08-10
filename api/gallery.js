@@ -173,6 +173,30 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, cat: item.cat });
     }
 
+    if (b.action === 'update') { // 管理側で作品情報・画像を更新（本人依頼の代行用・再審査なし）
+      if (b.title) item.title = trim(b.title, 60);
+      if (b.desc !== undefined) item.desc = trim(b.desc, 500);
+      if (b.link !== undefined) {
+        let link = trim(b.link, 300);
+        if (link && !/^https?:\/\//.test(link)) link = 'https://' + link;
+        item.link = link;
+      }
+      if (b.image) {
+        const img = decodeImage(b.image);
+        if (!img) return res.status(400).json({ error: '画像を読み込めませんでした（jpeg/png/webp・3.5MBまで）' });
+        const ext = img.contentType === 'image/png' ? 'png' : img.contentType === 'image/webp' ? 'webp' : 'jpg';
+        const oldImg = item.img;
+        const blob = await put(`gallery/${id}_${Date.now()}.${ext}`, img.buf, {
+          access: 'public', contentType: img.contentType, addRandomSuffix: false,
+        });
+        item.img = blob.url;
+        try { await del(oldImg); } catch (_) {}
+      }
+      item.edited = Date.now();
+      await redis('SET', `gal:${id}`, JSON.stringify(item));
+      return res.status(200).json({ ok: true, img: item.img });
+    }
+
     if (b.action === 'approve' || b.action === 'reject') {
       item.status = b.action === 'approve' ? 'approved' : 'rejected';
       await redis('SET', `gal:${id}`, JSON.stringify(item));
