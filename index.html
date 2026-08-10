@@ -130,6 +130,10 @@
   .ctlab-body h2{font-size:clamp(20px,3vw,28px);font-weight:900;margin-bottom:8px;background:linear-gradient(90deg,var(--orange),#d8b4fe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
   .ctlab-body p{font-size:13px;color:#cdc7e0;line-height:1.6;margin-bottom:16px;}
   .ctlab-link{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--orange),var(--purple));color:#fff;font-weight:900;font-size:13px;padding:11px 26px;border-radius:24px;}
+  .ctlab-links{display:flex;flex-wrap:wrap;gap:10px;}
+  @media(max-width:700px){ .ctlab-links{justify-content:center;} }
+  .ctlab-imgs img:nth-child(3){margin:0 -14px;margin-top:22px;}
+  .ctlab-imgs img:nth-child(4){margin-top:6px;}
 
   /* DISCOVER */
   .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
@@ -339,14 +343,20 @@
   <div class="ctlab">
     <div class="ctlab-imgs">
       <img src="./img/colors_nobg/sue_red.png" alt="">
-      <img src="./img/colors_nobg/mossun_blue.png" alt="">
-      <img src="./img/colors_nobg/putti_yellow.png" alt="">
+      <img src="./img/colors_nobg/gmc_red.png" alt="">
+      <img src="./tap/art/ufoo.png" alt="">
+      <img src="./tap/art/kagechiyo.png" alt="">
     </div>
     <div class="ctlab-body">
       <span class="ctlab-eyebrow">COLOR TAP LAB</span>
       <h2>🎨 タップで色が変わる、遊べる体験</h2>
-      <p>キャラクターをタップするたびに色が切り替わる。お気に入りのカラーを見つけて、そのまま購入できます。</p>
-      <a class="ctlab-link" href="https://dinorenny-colortap.vercel.app/sue.html" target="_blank">SUEで試す →</a>
+      <p>キャラクターをタップするたびに色が切り替わる。お気に入りのカラーを見つけて、♥で応援。グッズの購入もできます。</p>
+      <div class="ctlab-links">
+        <a class="ctlab-link" href="https://dinorenny-colortap.vercel.app/sue.html" target="_blank">SUE →</a>
+        <a class="ctlab-link" href="./tap/gmc.html" target="_blank">レコマル →</a>
+        <a class="ctlab-link" href="./tap/ufoo.html" target="_blank">う〜ほ〜 →</a>
+        <a class="ctlab-link" href="./tap/kagechiyo.html" target="_blank">カゲチヨ →</a>
+      </div>
     </div>
   </div>
 </section>
