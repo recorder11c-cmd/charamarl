@@ -175,6 +175,8 @@ module.exports = async (req, res) => {
 
     if (b.action === 'update') { // 管理側で作品情報・画像を更新（本人依頼の代行用・再審査なし）
       if (b.title) item.title = trim(b.title, 60);
+      if (b.artist) item.artist = trim(b.artist, 40);       // 表示名義の修正
+      if (b.artistKey) item.artistKey = trim(b.artistKey, 60); // 所有アカウントの移管（キー=小文字名）
       if (b.desc !== undefined) item.desc = trim(b.desc, 500);
       if (b.link !== undefined) {
         let link = trim(b.link, 300);
