@@ -143,6 +143,18 @@
   .ctlab-imgs img:nth-child(3){margin:0 -14px;margin-top:22px;}
   .ctlab-imgs img:nth-child(4){margin-top:6px;}
 
+  /* 共有メニュー */
+  .share-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:none;align-items:flex-end;justify-content:center;}
+  .share-overlay.open{display:flex;}
+  .share-menu{background:#fff;border-radius:22px 22px 0 0;padding:20px 22px 30px;width:min(480px,100%);animation:shUp .22s ease;}
+  @media(min-width:600px){ .share-overlay{align-items:center;} .share-menu{border-radius:22px;} }
+  @keyframes shUp{from{transform:translateY(24px);opacity:0;}to{transform:none;opacity:1;}}
+  .share-title{font-weight:900;font-size:15px;margin-bottom:14px;text-align:center;}
+  .share-grid{display:flex;flex-direction:column;gap:6px;}
+  .share-opt{display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:800;color:#111;padding:10px 8px;border-radius:12px;transition:.15s;}
+  .share-opt:hover{background:#f5f5f5;}
+  .share-ic{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
+
   /* DISCOVER */
   .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
   .tabs::-webkit-scrollbar{display:none;}
@@ -536,6 +548,19 @@
 </div>
 
 <!-- アート用モーダル -->
+<!-- 共有メニュー -->
+<div class="share-overlay" id="shareOverlay">
+  <div class="share-menu">
+    <div class="share-title">共有する</div>
+    <div class="share-grid">
+      <button class="share-opt" data-sh="x"><span class="share-ic" style="background:#111;color:#fff">𝕏</span>X</button>
+      <button class="share-opt" data-sh="line"><span class="share-ic" style="background:#06C755;color:#fff">LINE</span>LINE</button>
+      <button class="share-opt" data-sh="copy"><span class="share-ic" style="background:#f0f0f0">🔗</span><span id="shCopyLb">リンクをコピー</span></button>
+      <button class="share-opt" data-sh="native" id="shNative"><span class="share-ic" style="background:#f0f0f0">📲</span>その他</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="artOverlay">
   <div class="modal">
     <button class="modal-close" id="artClose">×</button>
@@ -545,6 +570,7 @@
         <div class="art-react">
           <button class="react-btn" id="aLike"><span class="ic">♡</span><span class="ct" id="aLikeCt">0</span></button>
           <button class="react-btn" id="aSave"><span class="ic">🔖</span><span class="lb" id="aSaveLb">保存</span></button>
+          <button class="react-btn" id="aShare"><span class="ic">↗</span><span class="lb">共有</span></button>
         </div>
       </div>
       <h2 id="aTitle"></h2>
@@ -865,7 +891,7 @@
     const c=COLORS.find(x=>x.key===curColor);window.CHARAMARL_CART.add(curChar,curColor,PRODUCTS[curChar].name,c.name,PRICE);
     const b=document.getElementById('mAddCart');const o=b.textContent;b.textContent='✓ 追加しました';setTimeout(()=>b.textContent=o,1000);
   });
-  function shareProduct(char){const p=PRODUCTS[char];const url=`https://charamarl.com/characters/${char}.html`;const text=`${p.name} | CHARAMARL`;if(navigator.share)navigator.share({title:text,url}).catch(()=>{});else window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,'_blank');}
+  function shareProduct(char){const p=PRODUCTS[char];openShare(p.name,`https://charamarl.com/characters/${char}.html`);}
 
   // ピン操作（商品）
   document.querySelectorAll('.pin[data-char]').forEach(pin=>{
@@ -912,6 +938,33 @@
     const lb=document.getElementById('aLike'); lb.classList.toggle('on',liked); lb.querySelector('.ic').textContent=liked?'♥':'♡';
     const sb=document.getElementById('aSave'); sb.classList.toggle('on',saved); document.getElementById('aSaveLb').textContent=saved?'保存済み':'保存';
   }
+  // ===== 共有メニュー =====
+  const shareOverlay=document.getElementById('shareOverlay');
+  let shPayload={title:'CHARAMARL',url:'https://charamarl.com/'};
+  function openShare(title,url){
+    shPayload={title,url};
+    document.getElementById('shNative').style.display=navigator.share?'':'none';
+    document.getElementById('shCopyLb').textContent='リンクをコピー';
+    shareOverlay.classList.add('open');
+  }
+  shareOverlay.addEventListener('click',e=>{if(e.target===shareOverlay)shareOverlay.classList.remove('open');});
+  document.querySelectorAll('.share-opt').forEach(btn=>btn.addEventListener('click',()=>{
+    const {title,url}=shPayload;const text=`${title} | CHARAMARL`;
+    const kind=btn.dataset.sh;
+    if(kind==='x')window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,'_blank');
+    else if(kind==='line')window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}`,'_blank');
+    else if(kind==='copy'){
+      (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(()=>{
+        document.getElementById('shCopyLb').textContent='✓ コピーしました';
+        setTimeout(()=>shareOverlay.classList.remove('open'),700);
+      }).catch(()=>{prompt('このURLをコピーしてください',url);});
+      return;
+    }
+    else if(kind==='native'&&navigator.share)navigator.share({title:text,url}).catch(()=>{});
+    shareOverlay.classList.remove('open');
+  }));
+  const artShareUrl=id=>`https://charamarl.com/?g=${encodeURIComponent(id)}`;
+
   function openArt(id){curArt=id;renderArt();artOverlay.classList.add('open');document.body.style.overflow='hidden';}
   function closeArt(){artOverlay.classList.remove('open');document.body.style.overflow='';}
   document.getElementById('artClose').addEventListener('click',closeArt);
@@ -937,6 +990,10 @@
     renderArt();
     if(typeof cmSync==='function')cmSync();
   });
+  document.getElementById('aShare').addEventListener('click',()=>{
+    const a=ARTWORKS[curArt];if(!a)return;
+    openShare(`${a.title} ${a.artist||''}`.trim(),artShareUrl(curArt));
+  });
 
   // アート/GMCピンの配線（静的・動的共通）
   function wireArtPin(card,forcedId){
@@ -947,7 +1004,10 @@
     card.querySelectorAll('.act').forEach(btn=>btn.addEventListener('click',e=>{
       e.preventDefault();e.stopPropagation();const a=btn.dataset.act;
       if(a==='tap')window.open(card.dataset.tap||site,'_blank');
-      else if(a==='share'){const t='CHARAMARL';const u=location.origin;if(navigator.share)navigator.share({title:t,url:site||u}).catch(()=>{});else window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(site||u)}`,'_blank');}
+      else if(a==='share'){
+        if(artId){const w=ARTWORKS[artId];openShare(`${w.title} ${w.artist||''}`.trim(),artShareUrl(artId));}
+        else openShare('CHARAMARL',site||location.origin);
+      }
       else if(site)window.open(site,'_blank');
     }));
     if(artId) card.addEventListener('click',()=>openArt(artId));
@@ -969,10 +1029,16 @@
     wireArtPin(div,a.id);
     baseOrder.push(div);
   }
+  // ?g=作品ID で該当作品を直接ひらく（共有リンク用）
+  function openDeepLink(){
+    const gid=new URLSearchParams(location.search).get('g');
+    if(gid&&ARTWORKS[gid])openArt(gid);
+  }
   fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
-    if(!d.list||!d.list.length)return;
+    if(!d.list||!d.list.length){openDeepLink();return;}
     d.list.forEach(addGalleryItem);
     applyFilters();
+    openDeepLink();
     // 注目アーティストカードを再描画（投稿作品でプロフィールを補完し「+N」も再計算）
     if(ARTIST.worksFrom==='gallery'){
       const mine=d.list.filter(x=>x.artist===ARTIST.name);
