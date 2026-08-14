@@ -1035,6 +1035,25 @@
     wireArtPin(div,a.id);
     baseOrder.push(div);
   }
+  // 同一アーティストが連続しないように交互配置（多い人から順に間隔を空けて散らす）
+  function interleaveByArtist(){
+    const key=p=>{const el=p.querySelector('.pin-sub');return el?el.textContent.trim():p.dataset.site||'';};
+    const groups=new Map();
+    baseOrder.forEach(p=>{const k=key(p);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);});
+    const out=[];let last='';
+    while(out.length<baseOrder.length){
+      let best=null,bestLen=-1;
+      for(const [k,arr] of groups){
+        if(!arr.length||k===last)continue;
+        if(arr.length>bestLen){best=k;bestLen=arr.length;}
+      }
+      if(best===null){for(const [k,arr] of groups){if(arr.length){best=k;break;}}}
+      out.push(groups.get(best).shift());last=best;
+    }
+    baseOrder.length=0;baseOrder.push(...out);
+    out.forEach(p=>masonryEl.appendChild(p));
+  }
+
   // ?g=作品ID で該当作品を直接ひらく（共有リンク用）
   function openDeepLink(){
     const gid=new URLSearchParams(location.search).get('g');
@@ -1043,6 +1062,7 @@
   fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
     if(!d.list||!d.list.length){openDeepLink();return;}
     d.list.forEach(addGalleryItem);
+    interleaveByArtist();
     applyFilters();
     openDeepLink();
     // 注目アーティストカードを再描画（投稿作品でプロフィールを補完し「+N」も再計算）
