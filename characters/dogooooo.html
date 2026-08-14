@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>レコマル — CHARAMARL</title>
+<title>dogooooo — CHARAMARL</title>
 <style>
+
   :root {
     --bg:#0e0e14; --surface:#1a1a26; --card:#1f1f2e;
     --accent:#f5c842; --accent2:#a259ff; --text:#f0f0f0; --muted:#777; --radius:18px;
@@ -55,6 +56,7 @@
     .buy-bar #addCartBtn,.buy-bar .buy-btn{flex:1;padding:13px 8px !important;}
   }
   footer{border-top:1px solid rgba(255,255,255,.08);padding:32px;text-align:center;color:var(--muted);font-size:12px;margin-bottom:120px;}
+
 </style>
 <link rel="stylesheet" href="../cart.css">
 </head>
@@ -68,76 +70,47 @@
 </header>
 <div class="char-hero">
   <div class="char-visual" id="charVisual">
-    <img src="../img/colors_nobg/gmc_red.png" alt="レコマル" id="charImg">
+    <img src="../img/products_t/dogooooo_pink.png" alt="dogooooo" id="charImg">
   </div>
   <div class="char-info">
-    <div class="tag-row"><span class="tag">MARU</span><span class="tag">アクキー</span><span class="tag">50mm</span><span class="tag">NFCタグ付き</span></div>
-    <h1>レコマル</h1>
-    <div class="char-creator">by MARU</div>
-    <p class="char-desc">DJ MARUが生んだレコードのキャラクター「レコマル」。<br>音楽とともに歩くレコード盤のボディがトレードマークです。<br><br>公式カラーは赤。アクリルキーホルダー（50mm・片面印刷＋裏面NFCシール）で、まもなく登場します。</p>
-    <div class="selected-color-label" id="selectedLabel">BLAZE RED</div>
-    <div><a href="../tap/gmc.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(162,89,255,.12);border:1px solid rgba(162,89,255,.4);color:var(--accent2);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎨 COLOR TAP で遊ぶ</a></div>
+    <div class="tag-row"><span class="tag">SAYoooooh</span><span class="tag">アクキー</span><span class="tag">約50mm</span><span class="tag">NFCタグ付き</span></div>
+    <h1>dogooooo</h1>
+    <div class="char-creator">by SAYoooooh</div>
+    <p class="char-desc">土偶から生まれた宇宙人「ドグー」。<br>3Dアートでメタバース世界を構築中のdogoooooプロジェクトから、ピンクのドグーがアクリルキーホルダーになりました（約45mm・片面印刷）。<br>裏面のNFCシールにスマホをかざすと、COLOR TAPページがひらきます。</p>
+    <div class="selected-color-label">PINK DOGU</div>
+    <div><a href="../tap/dogooooo.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(162,89,255,.12);border:1px solid rgba(162,89,255,.4);color:var(--accent2);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎨 COLOR TAP で遊ぶ</a></div>
     <div style="margin-top:12px;"><button class="like-btn" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span><span>いいね</span><b class="num" id="likeCt"></b></button></div>
   </div>
 </div>
-<section>
-  <div class="section-title">COLOR SELECT</div>
-  <div class="section-heading">カラーを選ぶ</div>
-  <div class="color-grid" id="colorGrid"></div>
-</section>
 <section style="padding-top:0;">
   <div style="font-size:11.5px;color:var(--muted);line-height:1.9;border:1px dashed rgba(255,255,255,.22);border-radius:14px;padding:14px 18px;">
-    <b style="color:var(--text);">価格について</b> — CHARAMARLのグッズは受注生産の小ロットで丁寧に作っており、売上の一部はアーティスト本人に直接還元されます。「安く大量に」ではなく「欲しい人に届いて、作り手が続けられる」価格設定です。
+    <b style="color:var(--text);">価格について</b> — CHARAMARLのグッズは受注生産の小ロットで丁寧に作っており、売上の一部はアーティスト本人に直接還元されます。「安く大量に」ではなく「欲しい人に届いて、作り手が続けられる」価格設定です。<br>
+    <b style="color:var(--text);">NFCタグについて</b> — 裏面のNFCシールにスマホをかざすと、dogoooooのCOLOR TAPページがひらきます。持ち歩けるちいさなギャラリーです。
   </div>
 </section>
-<footer>© 2026 CHARAMARL / MARU. All rights reserved.</footer>
+<footer>© 2026 CHARAMARL / SAYoooooh. All rights reserved.</footer>
 <div class="buy-bar">
   <div class="buy-bar-info">
-    <strong id="barName">BLAZE RED</strong>
-    レコマル アクリルキーホルダー 50mm・NFCタグ付き<br><span style="font-size:10px;opacity:.75;">受注生産｜毎月末締め・翌月中旬ごろ発送</span>
+    <strong>dogooooo アクリルキーホルダー</strong>
+    約50mm・片面印刷＋裏面NFCシール<br><span style="font-size:10px;opacity:.75;">受注生産｜毎月末締め・翌月中旬ごろ発送</span>
   </div>
   <div style="display:flex; gap:10px; align-items:center;">
     <button id="addCartBtn" style="background:#fff; border:2px solid var(--accent); color:var(--accent); border-radius:32px; padding:13px 22px; font-size:14px; font-weight:900; cursor:pointer; white-space:nowrap;">🛍 カートに追加</button>
     <button class="buy-btn" id="buyBtn" onclick="checkout()">今すぐ購入 →</button>
-    <button class="buy-btn" id="reqBtn" style="display:none;">🗳 この色をリクエスト</button>
   </div>
 </div>
 <script>
-const CHAR_ID = "gmc", CHAR_NAME = "レコマル", PRICE = 1200;
-const SALE_READY = false; // サンプル品質確認後にtrueへ
-const IMG_DIR = "../img/colors_nobg";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
-const IMG_ROOT = "/img/colors_nobg";  // カート/決済用(ルート相対)
-const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];
-const HERO_COLOR = {sue:"red", putti:"yellow", mossun:"blue", gmc:"red"}[CHAR_ID];
-let selected = colors[0];
-const grid = document.getElementById('colorGrid');
-const yen = n => '¥'+n.toLocaleString();
-colors.forEach((c, i) => {
-  const card = document.createElement('div');
-  card.className = 'color-card' + (i===0?' selected':'');
-  card.innerHTML = `
-    <div class="color-preview"><img src="${IMG_DIR}/${CHAR_ID}_${c.key}.png" alt="${c.name}"></div>
-    <div class="color-name" style="color:${c.accent}">${c.name}</div>
-    <div class="color-price">${c.key===HERO_COLOR?yen(PRICE):'🗳 リクエスト受付中'}</div>`;
-  card.addEventListener('click', () => {
-    document.querySelectorAll('.color-card').forEach(x => x.classList.remove('selected'));
-    card.classList.add('selected');
-    selected = colors[i];
-    document.getElementById('charImg').src = `${IMG_DIR}/${CHAR_ID}_${c.key}.png`;
-    document.getElementById('selectedLabel').textContent = c.name;
-    document.getElementById('barName').textContent = c.name;
-    updateBuyBar();
-  });
-  grid.appendChild(card);
-});
+const CHAR_ID = "dogooooo", CHAR_NAME = "dogooooo", PRICE = 1200;
+const SALE_READY = false; // 本人OKで true へ
+const IMG_PUBLIC = "/img/products_t/dogooooo_pink.png"; // 決済/カート用(ルート相対)
 async function checkout() {
-  if (!SALE_READY || !selected || selected.key !== HERO_COLOR) return;
+  if (!SALE_READY) return;
   const btn = document.getElementById('buyBtn');
   btn.textContent = '処理中...'; btn.disabled = true;
   try {
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`] }] }),
+      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_PUBLIC}`] }] }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
@@ -145,76 +118,43 @@ async function checkout() {
   } catch(e) { alert('通信エラー'); btn.textContent='今すぐ購入 →'; btn.disabled=false; }
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
-  if (!SALE_READY || selected.key !== HERO_COLOR) return;
-  window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE, `${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`);
+  if (!SALE_READY) return;
+  window.CHARAMARL_CART.add(CHAR_ID, 'pink', CHAR_NAME, 'ORIGINAL', PRICE, IMG_PUBLIC);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
-
-
-// ===== 定番色のみ販売・他の色は🗳リクエスト制 =====
-const REQ_KEY='charamarl_color_req';
-const reqSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(REQ_KEY)||'[]'));}catch(e){return new Set();}};
-function updateBuyBar(){
-  const hero=selected.key===HERO_COLOR;
-  document.getElementById('addCartBtn').style.display=(hero&&SALE_READY)?'':'none';
+function applySale(){
   const bb=document.getElementById('buyBtn');
-  bb.style.display=hero?'':'none';
   bb.disabled=!SALE_READY;
   bb.textContent=SALE_READY?'今すぐ購入 →':'🛠 サンプル製作中・まもなく販売';
-  const rb=document.getElementById('reqBtn');
-  rb.style.display=hero?'none':'';
-  const done=reqSet().has(CHAR_ID+'_'+selected.key);
-  rb.textContent=done?'✓ リクエスト済み ありがとう！':'🗳 この色をリクエスト';
-  rb.disabled=done;
+  document.getElementById('addCartBtn').style.display=SALE_READY?'':'none';
 }
-document.getElementById('reqBtn').addEventListener('click',()=>{
-  const id=CHAR_ID+'_'+selected.key;
-  const s=reqSet(); if(s.has(id))return;
-  s.add(id);localStorage.setItem(REQ_KEY,JSON.stringify([...s]));
-  fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({id,type:'like',op:'add'})}).catch(()=>{});
-  updateBuyBar();
-});
-// 初期選択を定番色に
-const heroIdx=colors.findIndex(c=>c.key===HERO_COLOR);
-if(heroIdx>0){grid.children[heroIdx].click();}else{updateBuyBar();}
+applySale();
 
-// ♥ いいね（全ユーザー集計 → トップのTRENDINGランキングに反映）
-const LIKE_BASE={sue:128,putti:96,mossun:74,gmc:52}[CHAR_ID]||0;
-const LK='charamarl_art_likes', SV='charamarl_art_saves';
+// ♥ いいね（ギャラリー作品と共通集計）
+const LIKE_ID="g9487847a10e8", LIKE_BASE=0;
+const LK='charamarl_art_likes';
 const getSet=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'));}catch(e){return new Set();}};
 const putSet=(k,s)=>localStorage.setItem(k,JSON.stringify([...s]));
 let likeServer=0, likeServerKnown=false;
 const likeBtn=document.getElementById('likeBtn');
 function renderLike(){
-  const liked=getSet(LK).has(CHAR_ID);
+  const liked=getSet(LK).has(LIKE_ID);
   likeBtn.classList.toggle('on',liked);
   likeBtn.setAttribute('aria-pressed',String(liked));
   document.getElementById('likeIc').textContent=liked?'♥':'♡';
   document.getElementById('likeCt').textContent=LIKE_BASE+likeServer+((!likeServerKnown&&liked)?1:0);
 }
-fetch('/api/react?id='+CHAR_ID).then(r=>r.ok?r.json():null).then(d=>{
+fetch('/api/react?id='+LIKE_ID).then(r=>r.ok?r.json():null).then(d=>{
   if(d&&typeof d.likes==='number'){likeServer=d.likes;likeServerKnown=true;renderLike();}
 }).catch(()=>{});
-// ログイン中ならアカウントのコレクションを取り込み
-let cmLogged=false;
-fetch('/api/auth').then(r=>r.ok?r.json():{user:null}).then(d=>{
-  if(!d||!d.user)return;
-  cmLogged=true;
-  const ml=getSet(LK);(d.likes||[]).forEach(x=>ml.add(x));putSet(LK,ml);
-  const ms=getSet(SV);(d.saves||[]).forEach(x=>ms.add(x));putSet(SV,ms);
-  renderLike();
-}).catch(()=>{});
 likeBtn.addEventListener('click',()=>{
-  const s=getSet(LK);const had=s.has(CHAR_ID);
-  had?s.delete(CHAR_ID):s.add(CHAR_ID);putSet(LK,s);
+  const s=getSet(LK);const had=s.has(LIKE_ID);
+  had?s.delete(LIKE_ID):s.add(LIKE_ID);putSet(LK,s);
   fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({id:CHAR_ID,type:'like',op:had?'remove':'add'})})
+    body:JSON.stringify({id:LIKE_ID,type:'like',op:had?'remove':'add'})})
     .then(r=>r.ok?r.json():null)
     .then(d=>{if(d&&typeof d.count==='number'){likeServer=d.count;likeServerKnown=true;renderLike();}})
     .catch(()=>{});
-  if(cmLogged)fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({action:'sync',likes:[...getSet(LK)],saves:[...getSet(SV)]})}).catch(()=>{});
   renderLike();
 });
 renderLike();
