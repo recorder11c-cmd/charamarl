@@ -68,7 +68,7 @@
 </header>
 <div class="char-hero">
   <div class="char-visual" id="charVisual">
-    <img src="../img/colors_nobg/gmc_red.png" alt="レコマル" id="charImg">
+    <img src="../img/products_t/gmc_red.png" alt="レコマル アクリルキーホルダー" id="charImg">
   </div>
   <div class="char-info">
     <div class="tag-row"><span class="tag">MARU</span><span class="tag">アクキー</span><span class="tag">50mm</span><span class="tag">NFCタグ付き</span></div>
@@ -123,7 +123,7 @@ colors.forEach((c, i) => {
     document.querySelectorAll('.color-card').forEach(x => x.classList.remove('selected'));
     card.classList.add('selected');
     selected = colors[i];
-    document.getElementById('charImg').src = `${IMG_DIR}/${CHAR_ID}_${c.key}.png`;
+    document.getElementById('charImg').src = c.key===HERO_COLOR ? `../img/products_t/${CHAR_ID}_${c.key}.png` : `${IMG_DIR}/${CHAR_ID}_${c.key}.png`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
     updateBuyBar();
