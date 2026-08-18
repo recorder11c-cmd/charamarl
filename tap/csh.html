@@ -135,7 +135,7 @@
   <div class="name" id="name"></div>
   <div class="tap-here" id="tapHere">TAP<br>HERE</div>
   <div class="bottom">
-    <div class="hint" id="hint">タップで色がかわるよ!</div><br>
+    <div class="hint" id="hint">タップでキャラがかわるよ!</div><br>
     <button class="like" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span>いいね <b id="likeCt"></b></button>
     <button class="share-btn" id="shareBtn" type="button">🚀 シェア</button>
     <a class="buy" id="buy" href="#" target="_blank" rel="noopener">🛒 購入する</a>
@@ -160,24 +160,25 @@
    COLOR TAP 統一フォーマット — ここだけ書き換えれば新キャラ完成
    ========================================================= */
 const CONFIG = {
-  character: "カゲチヨ",                        // 表示名
-  baseImage: "art/kagechiyo.png",                 // 透過キーアートPNG（正方形・1080px推奨）
-  bg: "#EAF1F6",                            // 初期背景色
-  mode: "char",                             // "char"=キャラの色が変わる / "bg"=背景の色が変わる（黒系キャラ向け）
-  baseHueOffset: -220,                      // 青い体毛を基準に補正
+  character: "CryptoSuperHeroes",             // 表示名
+  baseImage: "art/colors/csh_pizza.png",                 // 透過キーアートPNG（正方形・1080px推奨）
+  bg: "#FFF6D9",                            // 初期背景色
+  mode: "image",                            // タップでキャラクターが切り替わる
+  baseHueOffset: -48,                       // UFOの黄色ドームを基準に補正
 
   // mode:"image" のとき使う。事前生成PNG = `${imageDir}/${imageKey}_${key}.png`
   imageDir: "art/colors",
-  imageKey: "sue",
+  imageKey: "csh",
 
   // 6色パレット（key=画像/色名キー。hue/sat/bri は char モード用）
   palettes: [
-    { key:"red",    name:"PULSE RED",    hue:0,   sat:1.8, bri:1.10 },
-    { key:"yellow", name:"VOLT YELLOW", hue:50,  sat:1.9, bri:1.14 },
-    { key:"green",  name:"MATRIX GREEN",  hue:120, sat:2.0, bri:1.10 },
-    { key:"cyan",   name:"CYBER CYAN",     hue:175, sat:2.0, bri:1.16 },
-    { key:"blue",   name:"SIGNAL BLUE",  hue:220, sat:1.0, bri:1.00 },
-    { key:"pink",   name:"NEON PINK",    hue:300, sat:1.9, bri:1.14 },
+    { key:"pizza",    name:"PIZZA BOY",    hue:0, sat:1, bri:1 },
+    { key:"ultimate", name:"ULTIMATE MAN", hue:0, sat:1, bri:1 },
+    { key:"water",    name:"WATER MAN",    hue:0, sat:1, bri:1 },
+    { key:"fly",      name:"FLY MAN",      hue:0, sat:1, bri:1 },
+    { key:"shark",    name:"SHARK MAN",    hue:0, sat:1, bri:1 },
+    { key:"drdangerous", name:"DR. DANGEROUS", hue:0, sat:1, bri:1 },
+    
   ],
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
@@ -243,8 +244,8 @@ stage.addEventListener("pointerdown", () => {           // タッチした瞬間
   stage.classList.remove("pop"); void stage.offsetWidth; stage.classList.add("pop");
 });
 
-// ♥ いいね（CHARAMARLのカゲチヨ作品と共通集計）
-const CM_API="/api/react", LIKE_ID="g8d69be3f1e86", LIKE_BASE=0;
+// ♥ いいね（CHARAMARLのPizza Boy作品と共通集計）
+const CM_API="/api/react", LIKE_ID="g4df484fa9830", LIKE_BASE=0;
 const LIKE_KEY="colortap_likes";
 const likeSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(LIKE_KEY)||"[]"));}catch(e){return new Set();}};
 let likeServer=0, likeKnown=false;
@@ -285,7 +286,7 @@ shareOverlay.addEventListener("pointerdown",e=>e.stopPropagation());
 shareOverlay.addEventListener("click",e=>{if(e.target===shareOverlay)shareOverlay.classList.remove("open");});
 document.querySelectorAll(".share-opt").forEach(btn=>btn.addEventListener("click",()=>{
   const url=location.origin+location.pathname;
-  const text=CONFIG.character+" COLOR TAP | CHARAMARL";
+  const text=CONFIG.character+" CHARA TAP | CHARAMARL";
   const kind=btn.dataset.sh;
   if(kind==="x")window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(url),"_blank");
   else if(kind==="line")window.open("https://social-plugins.line.me/lineit/share?url="+encodeURIComponent(url),"_blank");

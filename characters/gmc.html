@@ -57,6 +57,7 @@
   footer{border-top:1px solid rgba(255,255,255,.08);padding:32px;text-align:center;color:var(--muted);font-size:12px;margin-bottom:120px;}
 </style>
 <link rel="stylesheet" href="../cart.css">
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <header>
@@ -68,13 +69,13 @@
 </header>
 <div class="char-hero">
   <div class="char-visual" id="charVisual">
-    <img src="../img/colors_nobg/gmc_red.png" alt="レコマル" id="charImg">
+    <img src="../img/products_t/gmc_red.png" alt="レコマル アクリルキーホルダー" id="charImg">
   </div>
   <div class="char-info">
-    <div class="tag-row"><span class="tag">MARU</span><span class="tag">アクキー</span><span class="tag">50mm</span><span class="tag">両面印刷</span></div>
+    <div class="tag-row"><span class="tag">MARU</span><span class="tag">アクキー</span><span class="tag">50mm</span><span class="tag">NFCタグ付き</span></div>
     <h1>レコマル</h1>
     <div class="char-creator">by MARU</div>
-    <p class="char-desc">DJ MARUが生んだレコードのキャラクター「レコマル」。<br>音楽とともに歩くレコード盤のボディがトレードマークです。<br><br>公式カラーは赤。アクリルキーホルダー（50mm・両面）で、まもなく登場します。</p>
+    <p class="char-desc">DJ MARUが生んだレコードのキャラクター「レコマル」。<br>音楽とともに歩くレコード盤のボディがトレードマークです。<br><br>公式カラーは赤。アクリルキーホルダー（50mm・片面印刷＋裏面NFCシール）、受注生産で販売中です。</p>
     <div class="selected-color-label" id="selectedLabel">BLAZE RED</div>
     <div><a href="../tap/gmc.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(162,89,255,.12);border:1px solid rgba(162,89,255,.4);color:var(--accent2);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎨 COLOR TAP で遊ぶ</a></div>
     <div style="margin-top:12px;"><button class="like-btn" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span><span>いいね</span><b class="num" id="likeCt"></b></button></div>
@@ -94,7 +95,7 @@
 <div class="buy-bar">
   <div class="buy-bar-info">
     <strong id="barName">BLAZE RED</strong>
-    レコマル アクリルキーホルダー 50mm<br><span style="font-size:10px;opacity:.75;">受注生産｜毎月末締め・翌月中旬ごろ発送</span>
+    レコマル アクリルキーホルダー 50mm・NFCタグ付き<br><span style="font-size:10px;opacity:.75;">受注生産｜毎月末締め・翌月中旬ごろ発送</span>
   </div>
   <div style="display:flex; gap:10px; align-items:center;">
     <button id="addCartBtn" style="background:#fff; border:2px solid var(--accent); color:var(--accent); border-radius:32px; padding:13px 22px; font-size:14px; font-weight:900; cursor:pointer; white-space:nowrap;">🛍 カートに追加</button>
@@ -104,7 +105,7 @@
 </div>
 <script>
 const CHAR_ID = "gmc", CHAR_NAME = "レコマル", PRICE = 1200;
-const SALE_READY = false; // サンプル品質確認後にtrueへ
+const SALE_READY = true; // 本人承認済み(2026-08-14)
 const IMG_DIR = "../img/colors_nobg";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
 const IMG_ROOT = "/img/colors_nobg";  // カート/決済用(ルート相対)
 const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];
@@ -123,7 +124,7 @@ colors.forEach((c, i) => {
     document.querySelectorAll('.color-card').forEach(x => x.classList.remove('selected'));
     card.classList.add('selected');
     selected = colors[i];
-    document.getElementById('charImg').src = `${IMG_DIR}/${CHAR_ID}_${c.key}.png`;
+    document.getElementById('charImg').src = c.key===HERO_COLOR ? `../img/products_t/${CHAR_ID}_${c.key}.png` : `${IMG_DIR}/${CHAR_ID}_${c.key}.png`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
     updateBuyBar();

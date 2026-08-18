@@ -160,11 +160,11 @@
    COLOR TAP 統一フォーマット — ここだけ書き換えれば新キャラ完成
    ========================================================= */
 const CONFIG = {
-  character: "カゲチヨ",                        // 表示名
-  baseImage: "art/kagechiyo.png",                 // 透過キーアートPNG（正方形・1080px推奨）
-  bg: "#EAF1F6",                            // 初期背景色
+  character: "dogooooo",                      // 表示名
+  baseImage: "art/dogooooo.png",                 // 透過キーアートPNG（正方形・1080px推奨）
+  bg: "#EFEDF6",                            // 初期背景色
   mode: "char",                             // "char"=キャラの色が変わる / "bg"=背景の色が変わる（黒系キャラ向け）
-  baseHueOffset: -220,                      // 青い体毛を基準に補正
+  baseHueOffset: 0,                         // パステル多色なので回転のみ
 
   // mode:"image" のとき使う。事前生成PNG = `${imageDir}/${imageKey}_${key}.png`
   imageDir: "art/colors",
@@ -172,12 +172,12 @@ const CONFIG = {
 
   // 6色パレット（key=画像/色名キー。hue/sat/bri は char モード用）
   palettes: [
-    { key:"red",    name:"PULSE RED",    hue:0,   sat:1.8, bri:1.10 },
-    { key:"yellow", name:"VOLT YELLOW", hue:50,  sat:1.9, bri:1.14 },
-    { key:"green",  name:"MATRIX GREEN",  hue:120, sat:2.0, bri:1.10 },
-    { key:"cyan",   name:"CYBER CYAN",     hue:175, sat:2.0, bri:1.16 },
-    { key:"blue",   name:"SIGNAL BLUE",  hue:220, sat:1.0, bri:1.00 },
-    { key:"pink",   name:"NEON PINK",    hue:300, sat:1.9, bri:1.14 },
+    { key:"original", name:"DOGU ORIGINAL", hue:0,  sat:1.0, bri:1.0 },
+    { key:"sunrise", name:"SUNRISE",   hue:60,  sat:1.2, bri:1.05 },
+    { key:"matcha",  name:"MATCHA",    hue:120, sat:1.2, bri:1.02 },
+    { key:"deepsea", name:"DEEP SEA",  hue:180, sat:1.2, bri:1.02 },
+    { key:"cosmic",  name:"COSMIC",    hue:240, sat:1.2, bri:1.05 },
+    { key:"aurora",  name:"AURORA",    hue:300, sat:1.2, bri:1.05 },
   ],
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
@@ -243,8 +243,8 @@ stage.addEventListener("pointerdown", () => {           // タッチした瞬間
   stage.classList.remove("pop"); void stage.offsetWidth; stage.classList.add("pop");
 });
 
-// ♥ いいね（CHARAMARLのカゲチヨ作品と共通集計）
-const CM_API="/api/react", LIKE_ID="g8d69be3f1e86", LIKE_BASE=0;
+// ♥ いいね（CHARAMARLのdogooooo作品と共通集計）
+const CM_API="/api/react", LIKE_ID="g9487847a10e8", LIKE_BASE=0;
 const LIKE_KEY="colortap_likes";
 const likeSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(LIKE_KEY)||"[]"));}catch(e){return new Set();}};
 let likeServer=0, likeKnown=false;
