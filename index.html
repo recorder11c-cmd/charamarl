@@ -1010,14 +1010,14 @@
   });
   // ===== アートワーク・データ / モーダル =====
   const ARTWORKS={
-    gmc:{img:'./img/gallery/gmc.png',title:'レコマル',artist:'by MARU (@maru_nft_)',site:'./characters/gmc.html',desc:'DJ MARUが生んだレコードのキャラクター「レコマル」。音楽とともに歩くレコード盤のボディがトレードマーク。公式カラーは赤。',likes:52},
-    sue:{img:'./img/colors_nobg/sue_red.png',title:'SUE',artist:'by DinoRenny (@dino_renny)',site:'./characters/sue.html',desc:'DinoRennyを代表するティラノサウルス「SUE」。力強い表情とポップなカラーが魅力の、市場1号店の看板キャラクター。',likes:128},
-    putti:{img:'./img/colors_nobg/putti_yellow.png',title:'PUTTI',artist:'by DinoRenny (@dino_renny)',site:'./characters/putti.html',desc:'空を自由に舞うプテラノドン「PUTTI」。元気いっぱいの表情と鮮やかなイエローが魅力。',likes:96},
-    mossun:{img:'./img/colors_nobg/mossun_blue.png',title:'MOSSUN',artist:'by DinoRenny (@dino_renny)',site:'./characters/mossun.html',desc:'海を泳ぐモササウルス「MOSSUN」。クールな表情と力強い存在感が魅力。',likes:74},
-    roar:{img:'./img/gallery/gallery_roar.png',title:'ROAR!',artist:'by ahoyoung (@hatch0hme)',site:'https://x.com/hatch0hme',desc:'ネオンピンクに吠えるDinoRenny。稲妻とビビッドカラーが弾ける、エネルギー全開のアートワーク。',likes:18},
-    worldcup:{img:'./img/gallery/gallery_worldcup.png',title:'WORLD CUP EDITION',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'サッカーユニフォーム姿のSUE。"PLAY FOR THE PRIDE" ―ワールドカップ・エディション。',likes:24},
-    '90s':{img:'./img/gallery/gallery_90s.png',title:'RETRO POP',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'90年代レトロポップなコラージュ。DinoRennyのキャラクターたちが一堂に集結。',likes:31},
-    nodino:{img:'./img/gallery/gallery_nodino.png',title:'NO DINO NO LIFE',artist:'by ahoyoung (@hatch0hme)',site:'https://x.com/hatch0hme',desc:'"NO DINO NO LIFE." 王冠をかぶったブラックダイナソーのエンブレム。EST.2023。',likes:27},
+    gmc:{img:'./img/gallery/gmc.png',title:'レコマル',artist:'by MARU (@maru_nft_)',site:'./characters/gmc.html',desc:'DJ MARUが生んだレコードのキャラクター「レコマル」。音楽とともに歩くレコード盤のボディがトレードマーク。公式カラーは赤。',likes:0},
+    sue:{img:'./img/colors_nobg/sue_red.png',title:'SUE',artist:'by DinoRenny (@dino_renny)',site:'./characters/sue.html',desc:'DinoRennyを代表するティラノサウルス「SUE」。力強い表情とポップなカラーが魅力の、市場1号店の看板キャラクター。',likes:0},
+    putti:{img:'./img/colors_nobg/putti_yellow.png',title:'PUTTI',artist:'by DinoRenny (@dino_renny)',site:'./characters/putti.html',desc:'空を自由に舞うプテラノドン「PUTTI」。元気いっぱいの表情と鮮やかなイエローが魅力。',likes:0},
+    mossun:{img:'./img/colors_nobg/mossun_blue.png',title:'MOSSUN',artist:'by DinoRenny (@dino_renny)',site:'./characters/mossun.html',desc:'海を泳ぐモササウルス「MOSSUN」。クールな表情と力強い存在感が魅力。',likes:0},
+    roar:{img:'./img/gallery/gallery_roar.png',title:'ROAR!',artist:'by ahoyoung (@hatch0hme)',site:'https://x.com/hatch0hme',desc:'ネオンピンクに吠えるDinoRenny。稲妻とビビッドカラーが弾ける、エネルギー全開のアートワーク。',likes:0},
+    worldcup:{img:'./img/gallery/gallery_worldcup.png',title:'WORLD CUP EDITION',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'サッカーユニフォーム姿のSUE。"PLAY FOR THE PRIDE" ―ワールドカップ・エディション。',likes:0},
+    '90s':{img:'./img/gallery/gallery_90s.png',title:'RETRO POP',artist:'by DinoRenny (@dino_renny)',site:'https://thedinorenny.online',desc:'90年代レトロポップなコラージュ。DinoRennyのキャラクターたちが一堂に集結。',likes:0},
+    nodino:{img:'./img/gallery/gallery_nodino.png',title:'NO DINO NO LIFE',artist:'by ahoyoung (@hatch0hme)',site:'https://x.com/hatch0hme',desc:'"NO DINO NO LIFE." 王冠をかぶったブラックダイナソーのエンブレム。EST.2023。',likes:0},
   };
   const LK='charamarl_art_likes', SV='charamarl_art_saves';
   const getSet=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'));}catch(e){return new Set();}};
@@ -1192,13 +1192,13 @@
 
   // ===== TRENDING ランキング（ベース値 + サーバー実カウントで動的に並び替え）=====
   const RANKING=[
-    {id:'sue',   name:'SUE',    cr:'DinoRenny', img:'./img/colors_nobg/sue_red.png',     href:'./characters/sue.html',    likes:128},
-    {id:'putti', name:'PUTTI',  cr:'DinoRenny', img:'./img/colors_nobg/putti_yellow.png',href:'./characters/putti.html',  likes:96},
-    {id:'mossun',name:'MOSSUN', cr:'DinoRenny', img:'./img/colors_nobg/mossun_blue.png', href:'./characters/mossun.html', likes:74},
-    {id:'g01544b48f170', name:'う〜ほ〜', cr:'ちゅい',     img:'./tap/art/ufoo.png',      href:'./characters/ufoo.html',     likes:38},
-    {id:'g8d69be3f1e86', name:'カゲチヨ', cr:'カゲチヨ',   img:'./tap/art/kagechiyo.png', href:'./tap/kagechiyo.html',       likes:30},
-    {id:'g9487847a10e8', name:'dogooooo', cr:'SAYoooooh', img:'./tap/art/dogooooo.png',  href:'./characters/dogooooo.html', likes:26},
-    {id:'gmc',   name:'レコマル',cr:'MARU',      img:'./img/gallery/gmc.png',             href:'./characters/gmc.html', likes:52}
+    {id:'sue',   name:'SUE',    cr:'DinoRenny', img:'./img/colors_nobg/sue_red.png',     href:'./characters/sue.html',    likes:0},
+    {id:'putti', name:'PUTTI',  cr:'DinoRenny', img:'./img/colors_nobg/putti_yellow.png',href:'./characters/putti.html',  likes:0},
+    {id:'mossun',name:'MOSSUN', cr:'DinoRenny', img:'./img/colors_nobg/mossun_blue.png', href:'./characters/mossun.html', likes:0},
+    {id:'g01544b48f170', name:'う〜ほ〜', cr:'ちゅい',     img:'./tap/art/ufoo.png',      href:'./characters/ufoo.html',     likes:0},
+    {id:'g8d69be3f1e86', name:'カゲチヨ', cr:'カゲチヨ',   img:'./tap/art/kagechiyo.png', href:'./tap/kagechiyo.html',       likes:0},
+    {id:'g9487847a10e8', name:'dogooooo', cr:'SAYoooooh', img:'./tap/art/dogooooo.png',  href:'./characters/dogooooo.html', likes:0},
+    {id:'gmc',   name:'レコマル',cr:'MARU',      img:'./img/gallery/gmc.png',             href:'./characters/gmc.html', likes:0}
   ];
   const fmtLikes=n=>n>=1000?(Math.round(n/100)/10)+'k':n;
   function rankLikes(c){return c.likes+((artCounts&&artCounts[c.id]&&artCounts[c.id].likes)||0);}

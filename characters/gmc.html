@@ -181,7 +181,7 @@ const heroIdx=colors.findIndex(c=>c.key===HERO_COLOR);
 if(heroIdx>0){grid.children[heroIdx].click();}else{updateBuyBar();}
 
 // ♥ いいね（全ユーザー集計 → トップのTRENDINGランキングに反映）
-const LIKE_BASE={sue:128,putti:96,mossun:74,gmc:52}[CHAR_ID]||0;
+const LIKE_BASE=0; // 実数運用(2026-08-18〜)
 const LK='charamarl_art_likes', SV='charamarl_art_saves';
 const getSet=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'));}catch(e){return new Set();}};
 const putSet=(k,s)=>localStorage.setItem(k,JSON.stringify([...s]));
