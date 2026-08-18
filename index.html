@@ -147,6 +147,24 @@
   .ctlab-imgs img:nth-child(4){margin-top:6px;}
   .ctlab-imgs img:nth-child(5){margin:0 0 0 -10px;margin-top:18px;}
 
+
+  /* ようこそポップアップ(初回のみ) */
+  .welcome-overlay{position:fixed;inset:0;background:rgba(26,26,38,.55);backdrop-filter:blur(8px);z-index:800;display:none;align-items:center;justify-content:center;padding:20px;}
+  .welcome-overlay.open{display:flex;}
+  .welcome{background:#fff;border-radius:28px;max-width:420px;width:100%;padding:36px 30px 28px;text-align:center;position:relative;animation:wIn .45s cubic-bezier(.2,1.4,.4,1);box-shadow:0 30px 80px rgba(26,26,38,.35);}
+  @keyframes wIn{from{transform:translateY(28px) scale(.94);opacity:0;}to{transform:none;opacity:1;}}
+  .welcome .w-ribbon{display:inline-block;background:linear-gradient(90deg,var(--orange),var(--purple));color:#fff;font-size:11px;font-weight:900;letter-spacing:.16em;padding:6px 18px;border-radius:20px;margin-bottom:14px;}
+  .welcome .w-logo{font-size:30px;font-weight:800;letter-spacing:.08em;margin-bottom:6px;}
+  .welcome .w-logo .c1{color:var(--orange);}.welcome .w-logo .c2{color:var(--purple);}
+  .welcome h3{font-size:17px;font-weight:800;margin-bottom:6px;}
+  .welcome p{font-size:13px;color:#666;line-height:1.8;margin-bottom:18px;}
+  .welcome .w-steps{display:flex;justify-content:center;gap:14px;margin-bottom:20px;}
+  .welcome .w-step{flex:1;max-width:110px;background:#f7f7fa;border-radius:16px;padding:12px 6px;}
+  .welcome .w-step .ic{font-size:24px;}
+  .welcome .w-step .tx{font-size:11px;font-weight:800;margin-top:6px;color:#444;}
+  .welcome .w-btn{display:inline-block;background:var(--black);color:#fff;font-size:14px;font-weight:900;border:none;border-radius:26px;padding:14px 40px;cursor:pointer;transition:.2s;}
+  .welcome .w-btn:hover{background:var(--purple);transform:translateY(-2px);}
+
   /* 共有メニュー */
   .share-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:700;display:none;align-items:flex-end;justify-content:center;}
   .share-overlay.open{display:flex;}
@@ -556,6 +574,23 @@
 </div>
 
 <!-- アート用モーダル -->
+
+<!-- ようこそポップアップ(初回訪問のみ) -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome">
+    <div class="w-ribbon">GRAND OPEN</div>
+    <div class="w-logo"><span class="c1">CHARA</span><span class="c2">MARL</span></div>
+    <h3>ようこそ、小さな市場へ🎪</h3>
+    <p>キャラクターとアート作品が集まるボード型ギャラリー。<br>23組のアーティストがあなたを待っています。</p>
+    <div class="w-steps">
+      <div class="w-step"><div class="ic">👀</div><div class="tx">眺めて</div></div>
+      <div class="w-step"><div class="ic">♥</div><div class="tx">応援して</div></div>
+      <div class="w-step"><div class="ic">🎨</div><div class="tx">タップで遊ぶ</div></div>
+    </div>
+    <button class="w-btn" id="welcomeClose">作品を見る →</button>
+  </div>
+</div>
+
 <!-- 共有メニュー -->
 <div class="share-overlay" id="shareOverlay">
   <div class="share-menu">
@@ -952,6 +987,19 @@
     const lb=document.getElementById('aLike'); lb.classList.toggle('on',liked); lb.querySelector('.ic').textContent=liked?'♥':'♡';
     const sb=document.getElementById('aSave'); sb.classList.toggle('on',saved); document.getElementById('aSaveLb').textContent=saved?'保存済み':'保存';
   }
+
+  // ようこそポップアップ(初回のみ・?g=共有リンク経由時は出さない)
+  (function(){
+    const KEY='charamarl_welcomed';
+    if(localStorage.getItem(KEY))return;
+    if(new URLSearchParams(location.search).get('g'))return;
+    const ov=document.getElementById('welcomeOverlay');
+    setTimeout(()=>ov.classList.add('open'),500);
+    function close(){ov.classList.remove('open');localStorage.setItem(KEY,'1');}
+    document.getElementById('welcomeClose').addEventListener('click',close);
+    ov.addEventListener('click',e=>{if(e.target===ov)close();});
+  })();
+
   // ===== 共有メニュー =====
   const shareOverlay=document.getElementById('shareOverlay');
   let shPayload={title:'CHARAMARL',url:'https://charamarl.com/'};
