@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/">
+<channel>
+  <title>CHARAMARL ストア</title>
+  <link>https://charamarl.com</link>
+  <description>キャラクターたちが集まる小さな市場 CHARAMARL の公式ストア。アーティストと利益折半・受注生産のアクリルキーホルダー（NFCタグ付き）。</description>
+  <language>ja</language>
+  <item>
+    <title>SUE アクリルキーホルダー（BLAZE RED）¥1,200</title>
+    <link>https://charamarl.com/characters/sue.html</link>
+    <description>DinoRennyの看板恐竜SUEのアクリルキーホルダー。50mm・NFCタグ付き・受注生産。¥1,200（税込・送料込）</description>
+    <enclosure url="https://charamarl.com/img/products_t/sue_red.png" type="image/png" length="0"/>
+    <media:thumbnail url="https://charamarl.com/img/products_t/sue_red.png"/>
+  </item>
+  <item>
+    <title>PUTTI アクリルキーホルダー（SUNNY YELLOW）¥1,200</title>
+    <link>https://charamarl.com/characters/putti.html</link>
+    <description>空を舞うプテラノドンPUTTIのアクリルキーホルダー。50mm・NFCタグ付き・受注生産。¥1,200（税込・送料込）</description>
+    <enclosure url="https://charamarl.com/img/products_t/putti_yellow.png" type="image/png" length="0"/>
+    <media:thumbnail url="https://charamarl.com/img/products_t/putti_yellow.png"/>
+  </item>
+  <item>
+    <title>MOSSUN アクリルキーホルダー（GALAXY BLUE）¥1,200</title>
+    <link>https://charamarl.com/characters/mossun.html</link>
+    <description>海のモササウルスMOSSUNのアクリルキーホルダー。50mm・NFCタグ付き・受注生産。¥1,200（税込・送料込）</description>
+    <enclosure url="https://charamarl.com/img/products_t/mossun_blue.png" type="image/png" length="0"/>
+    <media:thumbnail url="https://charamarl.com/img/products_t/mossun_blue.png"/>
+  </item>
+  <item>
+    <title>レコマル アクリルキーホルダー ¥1,200</title>
+    <link>https://charamarl.com/characters/gmc.html</link>
+    <description>DJ MARUが生んだレコードのキャラクター、レコマルのアクリルキーホルダー。50mm・NFCタグ付き・受注生産。¥1,200（税込・送料込）</description>
+    <enclosure url="https://charamarl.com/img/products_t/gmc_red.png" type="image/png" length="0"/>
+    <media:thumbnail url="https://charamarl.com/img/products_t/gmc_red.png"/>
+  </item>
+  <item>
+    <title>う〜ほ〜 アクリルキーホルダー ¥1,200</title>
+    <link>https://charamarl.com/characters/ufoo.html</link>
+    <description>ちゅいさん描きおろし、う〜ほ〜（UFOO）のアクリルキーホルダー。約50mm・NFCタグ付き・受注生産。¥1,200（税込・送料込）</description>
+    <enclosure url="https://charamarl.com/img/products_t/ufoo_white.png" type="image/png" length="0"/>
+    <media:thumbnail url="https://charamarl.com/img/products_t/ufoo_white.png"/>
+  </item>
+  <item>
+    <title>dogooooo アクリルキーホルダー ¥1,200</title>
+    <link>https://charamarl.com/characters/dogooooo.html</link>
+    <description>土偶から生まれたキャラクターアート、ドグーのアクリルキーホルダー。約70mm・NFCタグ付き・受注生産。¥1,200（税込・送料込）</description>
+    <enclosure url="https://charamarl.com/img/products_t/dogooooo_pink.png" type="image/png" length="0"/>
+    <media:thumbnail url="https://charamarl.com/img/products_t/dogooooo_pink.png"/>
+  </item>
+</channel>
+</rss>
