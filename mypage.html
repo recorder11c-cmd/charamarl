@@ -155,6 +155,7 @@
   <div class="sec-h">📮 あなたの投稿</div>
   <div class="mine-list" id="mineList"><div class="empty" style="padding:24px;"><div class="s">まだ投稿はありません</div></div></div>
 
+  <div id="sellerSec" hidden>
   <div class="sec-h">💰 販売者情報（お支払い先の登録）</div>
   <div class="post-card" id="sellerCard">
     <div style="font-size:11px;color:#555;line-height:1.8;background:var(--bg);border-radius:14px;padding:12px 14px;margin-bottom:14px;">
@@ -185,6 +186,7 @@
     </label>
     <button class="post-btn" id="sellerBtn" type="button">販売者情報を保存する</button>
     <div class="post-done" id="sellerDone">保存しました！お支払いの際はこの情報を使用します 🦖</div>
+  </div>
   </div>
 
   <div class="sec-h">🔑 パスワード変更</div>
@@ -363,10 +365,14 @@
   });
 
   // ===== 販売者情報 =====
+  // 折半条件など内部の数字を含むため、作品を持つアーティスト(＋登録済みの人)にだけ表示する
+  function showSeller(){$('sellerSec').hidden=false;}
+  if(new URLSearchParams(location.search).get('seller')==='1')showSeller();
   (async()=>{
     try{
       const d=await fetch('/api/seller').then(r=>r.ok?r.json():{data:null});
       if(d.data){
+        showSeller();
         $('sName').value=d.data.sellerName||'';$('sEmail').value=d.data.email||'';
         $('sBank').value=d.data.bank||'';$('sBranch').value=d.data.branch||'';
         $('sType').value=d.data.acctType||'普通';$('sNum').value=d.data.acctNum||'';
@@ -417,6 +423,7 @@
       const catLbl={ARTWORK:'アート作品',CHARACTER:'キャラクター',PRODUCT:'グッズ・商品',MAKING:'制作風景',EVENT:'イベント',INTERVIEW:'インタビュー'};
       mineItems={};
       if(d.list&&d.list.length){
+        showSeller();
         d.list.forEach(a=>mineItems[a.id]=a);
         $('mineList').innerHTML=d.list.map(a=>
           `<div class="mine"><img src="${esc(a.img)}" alt=""><div class="mt">${esc(a.title)}<span class="ml">📂 ${catLbl[a.cat]||'アート作品'}${a.link?` ・ 🔗 ${esc(a.link)}`:''}</span></div><span class="st ${esc(a.status)}">${lbl[a.status]||esc(a.status)}</span><button class="ebtn" data-id="${esc(a.id)}" type="button">✏️ 編集</button></div>`).join('');
