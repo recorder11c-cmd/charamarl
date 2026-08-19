@@ -221,5 +221,31 @@ likeBtn.addEventListener('click',()=>{
 renderLike();
 </script>
 <script src="../cart.js"></script>
+<script>
+// ===== あと◯票で商品化の可視化 (2026-08-20) =====
+(function(){
+  const rb=document.getElementById('reqBtn'); if(!rb||typeof CHAR_ID==='undefined')return;
+  const el=document.createElement('div');
+  el.id='reqProg';el.style.cssText='display:none;font-size:11px;font-weight:800;color:#8a8a97;margin-top:8px;text-align:center;line-height:1.6;';
+  rb.insertAdjacentElement('afterend',el);
+  const GOAL=20; // 商品化検討ライン(運用データを見て調整)
+  async function renderReqProg(){
+    if(typeof selected==='undefined'||!selected||selected.key===HERO_COLOR){el.style.display='none';return;}
+    const id=CHAR_ID+'_'+selected.key;
+    try{
+      const d=await fetch('/api/react?id='+encodeURIComponent(id)).then(r=>r.ok?r.json():null);
+      if(!d){el.style.display='none';return;}
+      const n=d.likes||0;
+      el.style.display='';
+      el.innerHTML=n>=GOAL
+        ?'🎉 <b>'+n+'票</b> 集まりました — 商品化を検討します！'
+        :'この色はいま <b>'+n+'票</b> ・ あと <b>'+(GOAL-n)+'票</b> で商品化検討へ 🗳';
+    }catch(e){el.style.display='none';}
+  }
+  if(typeof updateBuyBar==='function'){const orig=updateBuyBar;updateBuyBar=function(){orig();renderReqProg();};}
+  rb.addEventListener('click',()=>setTimeout(renderReqProg,500));
+  renderReqProg();
+})();
+</script>
 </body>
 </html>
