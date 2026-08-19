@@ -1144,17 +1144,21 @@
 
   // ===== 展示作品ラベル + OPENING MEMBERバッジ =====
   // オープン日(8/18)までに参加した作品には🎪バッジを常設。展示のみの作品には「展示作品」ラベル
-  const OPEN_CUTOFF=new Date('2026-08-19T00:00:00+09:00').getTime();
+  const OPEN_MOMENT=new Date('2026-08-18T12:00:00+09:00').getTime();
   function decoratePins(){
-    document.querySelectorAll('#discover .pin.art').forEach(p=>{
+    const pins=[...document.querySelectorAll('#discover .pin.art')];
+    const artistOf=p=>{const el=p.querySelector('.pin-sub');return el?el.textContent.trim():'';};
+    // OPENING MEMBERは「人」への称号: 開場時点で作品があったアーティストの全作品に付く(新作含む)
+    const members=new Set();
+    pins.forEach(p=>{const ts=Number(p.dataset.ts||0);if(!ts||ts<OPEN_MOMENT)members.add(artistOf(p));});
+    pins.forEach(p=>{
       const cat=p.querySelector('.pin-cat'), im=p.querySelector('.pin-img');
       if(!cat||!im)return;
       const catTxt=(cat.childNodes[0]&&cat.childNodes[0].textContent||'').trim().toUpperCase();
       if(!cat.querySelector('.pin-exh')&&catTxt!=='PRODUCT'&&catTxt!=='EVENT'&&catTxt!=='CHARACTER'){
         const s=document.createElement('span');s.className='pin-exh';s.textContent='展示作品';cat.appendChild(s);
       }
-      const ts=Number(p.dataset.ts||0);
-      if(!im.querySelector('.ob-chip')&&(!ts||ts<OPEN_CUTOFF)){
+      if(!im.querySelector('.ob-chip')&&members.has(artistOf(p))){
         const s=document.createElement('span');s.className='ob-chip';s.textContent='🎪 OPENING MEMBER';im.appendChild(s);
       }
     });
