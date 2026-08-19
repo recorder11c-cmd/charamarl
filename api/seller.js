@@ -34,8 +34,8 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'GET') {
-      // 管理用: 全登録一覧
-      if (req.query && req.query.key) {
+      // 管理用: 全登録一覧（key=空でも管理者セッションなら許可 — apply-adminと同じ挙動）
+      if (req.query && req.query.key !== undefined) {
         const { isAdminReq } = require('../lib/admin.js');
         if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
         const keys = (await redis('SMEMBERS', 'seller:index')) || [];

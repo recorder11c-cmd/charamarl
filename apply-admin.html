@@ -198,9 +198,10 @@
       const r=await fetch(`/api/seller?key=${encodeURIComponent(key)}`);
       if(!r.ok)throw new Error('販売者情報の取得に失敗 ('+r.status+')');
       const d=await r.json();
-      document.getElementById('sCount').textContent=d.count;
-      if(!d.list.length){el.innerHTML='<div class="empty" style="padding:24px;">まだ登録はありません 🦖</div>';return;}
-      el.innerHTML=d.list.map(s=>`<div class="card">
+      const list=d.list||[];
+      document.getElementById('sCount').textContent=d.count||0;
+      if(!list.length){el.innerHTML='<div class="empty" style="padding:24px;">まだ登録はありません 🦖</div>';return;}
+      el.innerHTML=list.map(s=>`<div class="card">
         <div class="nm">${esc(s.userName)}<span class="genre">${s.agree?'✅ 条件同意済み':'⚠️ 未同意'}</span></div>
         <div class="ts">${fmt(s.ts)} 登録</div>
         <div class="msg">名義: ${esc(s.sellerName)}
