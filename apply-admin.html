@@ -87,6 +87,10 @@
   <div id="galPending"></div>
   <div id="galApproved"></div>
 
+  <h1 style="margin-top:34px;">販売者情報（お支払い先）</h1>
+  <p class="sub">登録 <b class="num" id="sCount">-</b> 件</p>
+  <div id="sellerList"></div>
+
   <button class="refresh" id="refresh">↻ 一覧を更新する</button>
 </div>
 
@@ -187,9 +191,31 @@
     catch(ex){err.textContent=ex.message;err.style.display='block';btn.disabled=false;}
   });
 
-  document.getElementById('refresh').addEventListener('click',()=>{load();loadGallery();});
+  // ===== 販売者情報 =====
+  async function loadSellers(){
+    const el=document.getElementById('sellerList');
+    try{
+      const r=await fetch(`/api/seller?key=${encodeURIComponent(key)}`);
+      if(!r.ok)throw new Error('販売者情報の取得に失敗 ('+r.status+')');
+      const d=await r.json();
+      document.getElementById('sCount').textContent=d.count;
+      if(!d.list.length){el.innerHTML='<div class="empty" style="padding:24px;">まだ登録はありません 🦖</div>';return;}
+      el.innerHTML=d.list.map(s=>`<div class="card">
+        <div class="nm">${esc(s.userName)}<span class="genre">${s.agree?'✅ 条件同意済み':'⚠️ 未同意'}</span></div>
+        <div class="ts">${fmt(s.ts)} 登録</div>
+        <div class="msg">名義: ${esc(s.sellerName)}
+✉️ ${esc(s.email)}
+🏦 ${esc(s.bank)} ${esc(s.branch)} ${esc(s.acctType)} ${esc(s.acctNum)}
+カナ: ${esc(s.acctName)}${s.note?`
+備考: ${esc(s.note)}`:''}</div>
+      </div>`).join('');
+    }catch(ex){err.textContent=ex.message;err.style.display='block';}
+  }
+
+  document.getElementById('refresh').addEventListener('click',()=>{load();loadGallery();loadSellers();});
   load();
   loadGallery();
+  loadSellers();
 </script>
 </body>
 </html>

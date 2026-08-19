@@ -155,6 +155,38 @@
   <div class="sec-h">📮 あなたの投稿</div>
   <div class="mine-list" id="mineList"><div class="empty" style="padding:24px;"><div class="s">まだ投稿はありません</div></div></div>
 
+  <div class="sec-h">💰 販売者情報（お支払い先の登録）</div>
+  <div class="post-card" id="sellerCard">
+    <div style="font-size:11px;color:#555;line-height:1.8;background:var(--bg);border-radius:14px;padding:12px 14px;margin-bottom:14px;">
+      グッズ販売などで売上が発生するアーティストさん向けの登録です。<b>売上のお支払いに使用します</b>（ファンとして楽しむだけの方は登録不要です）。
+    </div>
+    <div id="sellerDone2" style="display:none;background:#e8f8ee;color:#1a7f4b;border-radius:14px;padding:12px 14px;font-size:12px;font-weight:800;margin-bottom:14px;">✅ 登録済みです（<span id="sellerTs"></span>）。内容を変更したら、もう一度保存してください。</div>
+    <div class="fld"><label for="sName">お支払い先の名義（本名または屋号）</label><input type="text" id="sName" maxlength="60" placeholder="例: 山田 太郎 / 〇〇工房"></div>
+    <div class="fld"><label for="sEmail">連絡先メールアドレス</label><input type="text" id="sEmail" maxlength="100" placeholder="支払い明細のご連絡に使用します" inputmode="email" autocomplete="email"></div>
+    <div class="fld"><label for="sBank">銀行名</label><input type="text" id="sBank" maxlength="40" placeholder="例: 三菱UFJ銀行 / ゆうちょ銀行"></div>
+    <div class="fld"><label for="sBranch">支店名（ゆうちょは記号）</label><input type="text" id="sBranch" maxlength="40" placeholder="例: 渋谷支店 / 12345"></div>
+    <div class="fld"><label for="sType">口座種別</label>
+      <select id="sType"><option value="普通">普通</option><option value="当座">当座</option></select>
+    </div>
+    <div class="fld"><label for="sNum">口座番号（ゆうちょは番号）</label><input type="text" id="sNum" maxlength="10" inputmode="numeric" placeholder="例: 1234567"></div>
+    <div class="fld"><label for="sKana">口座名義（カナ）</label><input type="text" id="sKana" maxlength="60" placeholder="例: ヤマダ タロウ"></div>
+    <div class="fld"><label for="sNote">備考<span class="opt">任意</span></label><input type="text" id="sNote" maxlength="300" placeholder="インボイス登録番号など、あれば"></div>
+    <div style="font-size:11px;color:#555;line-height:1.9;background:#fff8ec;border:1px solid #ffe2b0;border-radius:14px;padding:12px 14px;margin-bottom:12px;">
+      <b>📋 販売条件（かんたんまとめ）</b><br>
+      ・商品の売上は、販売価格から製造原価を引いた利益を<b>運営と折半</b>します（例: アクキー¥1,200 → 約300円/個）<br>
+      ・<b>毎月末締め・翌月中旬</b>に、登録された口座へお振込みします（振込手数料は運営負担・売上のない月はお支払いなし）<br>
+      ・製造・在庫・発送・決済・お客様対応はすべて運営が行います。作家さんの費用負担はありません<br>
+      ・作品・キャラクターの権利は作家さんに帰属します。グッズ化はその都度の個別合意で行います<br>
+      ・販売数はダッシュボード（stats）でいつでも確認できます。詳細は<a href="./terms.html" style="color:var(--purple);font-weight:700;">利用規約</a>をご覧ください
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#555;line-height:1.6;margin-bottom:12px;cursor:pointer;">
+      <input type="checkbox" id="sAgree" style="width:18px;height:18px;margin-top:1px;flex:0 0 auto;">
+      <span>上記の販売条件を確認し、<b>同意します</b></span>
+    </label>
+    <button class="post-btn" id="sellerBtn" type="button">販売者情報を保存する</button>
+    <div class="post-done" id="sellerDone">保存しました！お支払いの際はこの情報を使用します 🦖</div>
+  </div>
+
   <div class="sec-h">🔑 パスワード変更</div>
   <div class="post-card">
     <div class="fld"><label for="pwOld">現在のパスワード</label><input type="password" id="pwOld" maxlength="100" autocomplete="current-password"></div>
@@ -328,6 +360,37 @@
       loadMine();
     }catch(ex){postErr(ex.message==='Failed to fetch'?'通信に失敗しました。時間をおいてお試しください':ex.message);}
     btn.disabled=false;if(btn.textContent==='送信中…')btn.textContent=editingId?'変更を保存する →':'審査に出す →';
+  });
+
+  // ===== 販売者情報 =====
+  (async()=>{
+    try{
+      const d=await fetch('/api/seller').then(r=>r.ok?r.json():{data:null});
+      if(d.data){
+        $('sName').value=d.data.sellerName||'';$('sEmail').value=d.data.email||'';
+        $('sBank').value=d.data.bank||'';$('sBranch').value=d.data.branch||'';
+        $('sType').value=d.data.acctType||'普通';$('sNum').value=d.data.acctNum||'';
+        $('sKana').value=d.data.acctName||'';$('sNote').value=d.data.note||'';
+        $('sAgree').checked=true;
+        $('sellerTs').textContent=new Date(d.data.ts).toLocaleDateString('ja-JP');
+        $('sellerDone2').style.display='block';
+      }
+    }catch(e){}
+  })();
+  $('sellerBtn').addEventListener('click',async()=>{
+    $('err').style.display='none';$('sellerDone').style.display='none';
+    if(!$('sAgree').checked)return postErr('販売条件への同意にチェックしてください');
+    const btn=$('sellerBtn');btn.disabled=true;btn.textContent='保存中…';
+    try{
+      const r=await fetch('/api/seller',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'save',sellerName:$('sName').value,email:$('sEmail').value,
+          bank:$('sBank').value,branch:$('sBranch').value,acctType:$('sType').value,
+          acctNum:$('sNum').value,acctName:$('sKana').value,note:$('sNote').value,agree:$('sAgree').checked})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(d.error||'保存に失敗しました');
+      $('sellerDone').style.display='block';
+    }catch(ex){postErr(ex.message==='Failed to fetch'?'通信に失敗しました。時間をおいてお試しください':ex.message);}
+    btn.disabled=false;btn.textContent='販売者情報を保存する';
   });
 
   $('pwBtn').addEventListener('click',async()=>{

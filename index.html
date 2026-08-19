@@ -216,7 +216,11 @@
   .pin-title{font-size:13px;font-weight:800;margin:2px 0;line-height:1.3;}
   .pin-sub{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;}
   .pin-sub .av{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--purple));}
-  .pin-price{font-size:13px;font-weight:900;color:var(--text);margin-top:5px;}
+  .pin-price{display:inline-block;font-size:12px;font-weight:900;color:#fff;background:var(--orange);border-radius:13px;padding:3px 11px;margin-top:6px;box-shadow:0 2px 6px rgba(255,138,0,.3);}
+  .pin-price::before{content:"🛒 ";font-size:11px;}
+  .pin-exh{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.02em;color:var(--muted);background:#f0f0f4;border-radius:8px;padding:2px 7px;margin-left:6px;vertical-align:1px;text-transform:none;}
+  .ob-chip{position:absolute;top:8px;left:8px;font-size:9px;font-weight:800;letter-spacing:.03em;color:#7a4d00;background:linear-gradient(135deg,#ffedb8,#ffd77a);border-radius:10px;padding:3px 9px;box-shadow:0 2px 6px rgba(0,0,0,.15);pointer-events:none;transition:opacity .2s;}
+  .pin:hover .ob-chip{opacity:0;}
   .pin-meta{font-size:11px;color:var(--muted);margin-top:5px;}
   .pin.coming .pin-img{background:linear-gradient(150deg,#fff3e6,#f3e9ff);border:1px dashed #e0c9f0;}
   .pin.coming .ct{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;}
@@ -1138,6 +1142,25 @@
   }
   document.querySelectorAll('.pin.art').forEach(card=>wireArtPin(card));
 
+  // ===== 展示作品ラベル + OPENING MEMBERバッジ =====
+  // オープン日(8/18)までに参加した作品には🎪バッジを常設。展示のみの作品には「展示作品」ラベル
+  const OPEN_CUTOFF=new Date('2026-08-19T00:00:00+09:00').getTime();
+  function decoratePins(){
+    document.querySelectorAll('#discover .pin.art').forEach(p=>{
+      const cat=p.querySelector('.pin-cat'), im=p.querySelector('.pin-img');
+      if(!cat||!im)return;
+      const catTxt=(cat.childNodes[0]&&cat.childNodes[0].textContent||'').trim().toUpperCase();
+      if(!cat.querySelector('.pin-exh')&&catTxt!=='PRODUCT'&&catTxt!=='EVENT'&&catTxt!=='CHARACTER'){
+        const s=document.createElement('span');s.className='pin-exh';s.textContent='展示作品';cat.appendChild(s);
+      }
+      const ts=Number(p.dataset.ts||0);
+      if(!im.querySelector('.ob-chip')&&(!ts||ts<OPEN_CUTOFF)){
+        const s=document.createElement('span');s.className='ob-chip';s.textContent='🎪 OPENING MEMBER';im.appendChild(s);
+      }
+    });
+  }
+  decoratePins();
+
   // ===== 投稿ギャラリー（マイページから投稿→承認された作品を自動掲載）=====
   function addGalleryItem(a){
     if(ARTWORKS[a.id])return;
@@ -1145,6 +1168,7 @@
     ARTWORKS[a.id]={img:a.img,title:a.title,artist:'by '+a.artist,site:a.link||'',desc:a.desc||'',likes:0};
     const div=document.createElement('div');
     div.className='pin art';
+    if(a.ts)div.dataset.ts=a.ts;
     if(a.link)div.dataset.site=a.link;
     div.innerHTML=`<div class="pin-img"><img src="${esc(a.img)}" alt="${esc(a.title)}" loading="lazy">
         <div class="pin-actions">${a.link?'<button class="act act-visit" data-act="visit">↗ Visit</button>':''}<button class="act act-share" data-act="share">🚀</button></div></div>
@@ -1181,6 +1205,7 @@
     if(!d.list||!d.list.length){openDeepLink();return;}
     d.list.forEach(addGalleryItem);
     interleaveByArtist();
+    decoratePins();
     applyFilters();
     openDeepLink();
     // 注目アーティストカードを再描画（投稿作品でプロフィールを補完し「+N」も再計算）
