@@ -177,8 +177,16 @@ const CONFIG = {
     { key:"pudding", name:"よくできました", hue:0, sat:1, bri:1 },
     { key:"onigiri", name:"ぺろり",      hue:0, sat:1, bri:1 },
     { key:"snake",   name:"虹蛇",       hue:0, sat:1, bri:1 },
-    
-    
+    { key:"tebanasu", name:"手放す", ext:"jpg", hue:0, sat:1, bri:1 },
+    { key:"matakoko", name:"また、ここから", ext:"jpg", hue:0, sat:1, bri:1 },
+    { key:"mujou", name:"無常", ext:"jpg", hue:0, sat:1, bri:1 },
+    { key:"wasurerarenai", name:"忘れられない日", ext:"jpg", hue:0, sat:1, bri:1 },
+    { key:"mukiau", name:"向き合う", ext:"jpg", hue:0, sat:1, bri:1 },
+    { key:"jawamegu", name:"じゃわめぐ", ext:"jpg", hue:0, sat:1, bri:1 },
+    { key:"hanashitakunai", name:"はなしたくない", ext:"jpg", hue:0, sat:1, bri:1 },
+    { key:"takou", name:"多幸", ext:"jpg", hue:0, sat:1, bri:1 },
+    { key:"itsumonoasa", name:"いつもの朝", ext:"jpg", hue:0, sat:1, bri:1 },
+    { key:"mataaitai", name:"また会いたい", ext:"jpg", hue:0, sat:1, bri:1 },
   ],
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
@@ -199,7 +207,7 @@ document.getElementById("char").src = CONFIG.baseImage;
 const shopReady = CONFIG.shop.productUrl && !CONFIG.shop.productUrl.includes("...");
 // image方式は全色を事前読み込みしてタップ即時切替（遅延防止）
 if(CONFIG.mode === "image"){
-  CONFIG.palettes.forEach(p => { const im = new Image(); im.src = `${CONFIG.imageDir}/${CONFIG.imageKey}_${p.key}.png`; });
+  CONFIG.palettes.forEach(p => { const im = new Image(); im.src = `${CONFIG.imageDir}/${CONFIG.imageKey}_${p.key}.${p.ext||"png"}`; });
 }
 
 const stage = document.getElementById("stage");
@@ -215,7 +223,7 @@ function apply(p){
   if(CONFIG.mode === "image"){
     // 事前生成の鮮やかPNGを差し替え（最も正確）
     img.style.filter = "none";
-    img.src = `${CONFIG.imageDir}/${CONFIG.imageKey}_${p.key}.png`;
+    img.src = `${CONFIG.imageDir}/${CONFIG.imageKey}_${p.key}.${p.ext||"png"}`;
   } else if(CONFIG.mode === "bg"){
     // 背景の色が変わる（黒系キャラ向け）
     document.body.style.background = `hsl(${p.hue}, 85%, 62%)`;
