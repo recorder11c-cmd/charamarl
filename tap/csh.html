@@ -161,6 +161,7 @@
    ========================================================= */
 const CONFIG = {
   character: "CryptoSuperHeroes",             // 表示名
+  shareText: "タップするとヒーローが交代！CryptoSuperHeroesのCOLOR TAP🦸 #CHARAMARL",
   baseImage: "art/colors/csh_pizza.png",                 // 透過キーアートPNG（正方形・1080px推奨）
   bg: "#FFF6D9",                            // 初期背景色
   mode: "image",                            // タップでキャラクターが切り替わる
@@ -286,7 +287,7 @@ shareOverlay.addEventListener("pointerdown",e=>e.stopPropagation());
 shareOverlay.addEventListener("click",e=>{if(e.target===shareOverlay)shareOverlay.classList.remove("open");});
 document.querySelectorAll(".share-opt").forEach(btn=>btn.addEventListener("click",()=>{
   const url=location.origin+location.pathname;
-  const text=CONFIG.character+" CHARA TAP | CHARAMARL";
+  const text=CONFIG.shareText||(CONFIG.character+" COLOR TAP | CHARAMARL");
   const kind=btn.dataset.sh;
   if(kind==="x")window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(url),"_blank");
   else if(kind==="line")window.open("https://social-plugins.line.me/lineit/share?url="+encodeURIComponent(url),"_blank");

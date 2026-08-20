@@ -160,7 +160,8 @@
    COLOR TAP 統一フォーマット — ここだけ書き換えれば新キャラ完成
    ========================================================= */
 const CONFIG = {
-  character: "ラフ",                          // 表示名
+  character: "ボストンテリアのラフ",                          // 表示名
+  shareText: "ボストンテリアのラフ🌷 タップするたび頭の上がかわる「キモチずかん」 #CHARAMARL",
   baseImage: "art/colors/rafu_cake.png",                 // 透過キーアートPNG（正方形・1080px推奨）
   bg: "#FFF3F0",                            // 初期背景色
   mode: "image",                            // タップでキャラクターが切り替わる
@@ -285,7 +286,7 @@ shareOverlay.addEventListener("pointerdown",e=>e.stopPropagation());
 shareOverlay.addEventListener("click",e=>{if(e.target===shareOverlay)shareOverlay.classList.remove("open");});
 document.querySelectorAll(".share-opt").forEach(btn=>btn.addEventListener("click",()=>{
   const url=location.origin+location.pathname;
-  const text=CONFIG.character+" CHARA TAP | CHARAMARL";
+  const text=CONFIG.shareText||(CONFIG.character+" COLOR TAP | CHARAMARL");
   const kind=btn.dataset.sh;
   if(kind==="x")window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(url),"_blank");
   else if(kind==="line")window.open("https://social-plugins.line.me/lineit/share?url="+encodeURIComponent(url),"_blank");

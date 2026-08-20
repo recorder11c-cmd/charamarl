@@ -161,6 +161,7 @@
    ========================================================= */
 const CONFIG = {
   character: "う〜ほ〜",                         // 表示名
+  shareText: "う〜ほ〜がタップで宇宙の色に🛸 #CHARAMARL",
   baseImage: "art/ufoo.png",                 // 透過キーアートPNG（正方形・1080px推奨）
   bg: "#F4F0E6",                            // 初期背景色
   mode: "char",                             // "char"=キャラの色が変わる / "bg"=背景の色が変わる（黒系キャラ向け）
@@ -285,7 +286,7 @@ shareOverlay.addEventListener("pointerdown",e=>e.stopPropagation());
 shareOverlay.addEventListener("click",e=>{if(e.target===shareOverlay)shareOverlay.classList.remove("open");});
 document.querySelectorAll(".share-opt").forEach(btn=>btn.addEventListener("click",()=>{
   const url=location.origin+location.pathname;
-  const text=CONFIG.character+" COLOR TAP | CHARAMARL";
+  const text=CONFIG.shareText||(CONFIG.character+" COLOR TAP | CHARAMARL");
   const kind=btn.dataset.sh;
   if(kind==="x")window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(url),"_blank");
   else if(kind==="line")window.open("https://social-plugins.line.me/lineit/share?url="+encodeURIComponent(url),"_blank");
