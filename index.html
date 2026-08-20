@@ -211,15 +211,15 @@
   .act-buy{top:10px;right:10px;background:var(--orange);color:#fff;}
   .act-tap{bottom:10px;left:10px;background:#fff;color:#111;}
   .act-share{bottom:10px;right:10px;background:#fff;color:#111;width:36px;height:36px;padding:0;justify-content:center;border-radius:50%;font-size:14px;}
-  .pin-body{padding:9px 4px 2px;}
-  .pin-cat{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--purple);text-transform:uppercase;}
-  .pin-title{font-size:13px;font-weight:800;margin:2px 0;line-height:1.3;}
+  .pin-body{padding:8px 4px 2px;}
+  .pin-cat{display:none;} /* 絵を主役に: カテゴリ行は非表示(検索・絞り込みはDOMを読むので残す) */
+  .pin-title{font-size:12.5px;font-weight:800;margin:0 0 1px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .pin-sub{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;}
   .pin-sub .av{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--purple));}
   .pin-price{display:inline-block;font-size:12px;font-weight:900;color:#fff;background:var(--orange);border-radius:13px;padding:3px 11px;margin-top:6px;box-shadow:0 2px 6px rgba(255,138,0,.3);}
   .pin-price::before{content:"🛒 ";font-size:11px;}
   .pin-exh{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.02em;color:var(--muted);background:#f0f0f4;border-radius:8px;padding:2px 7px;margin-left:6px;vertical-align:1px;text-transform:none;}
-  .ob-chip{position:absolute;top:8px;left:8px;font-size:9px;font-weight:800;letter-spacing:.03em;color:#7a4d00;background:linear-gradient(135deg,#ffedb8,#ffd77a);border-radius:10px;padding:3px 9px;box-shadow:0 2px 6px rgba(0,0,0,.15);pointer-events:none;transition:opacity .2s;}
+  .ob-chip{position:absolute;top:8px;left:8px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;background:rgba(255,255,255,.92);border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.15);pointer-events:none;transition:opacity .2s;}
   .pin:hover .ob-chip{opacity:0;}
   .pin-meta{font-size:11px;color:var(--muted);margin-top:5px;}
   .pin.coming .pin-img{background:linear-gradient(150deg,#fff3e6,#f3e9ff);border:1px dashed #e0c9f0;}
@@ -1164,7 +1164,7 @@
         const s=document.createElement('span');s.className='pin-exh';s.textContent='展示作品';cat.appendChild(s);
       }
       if(!im.querySelector('.ob-chip')&&members.has(artistOf(p))){
-        const s=document.createElement('span');s.className='ob-chip';s.textContent='🎪 OPENING MEMBER';im.appendChild(s);
+        const s=document.createElement('span');s.className='ob-chip';s.textContent='🎪';s.title='OPENING MEMBER';im.appendChild(s);
       }
     });
   }
