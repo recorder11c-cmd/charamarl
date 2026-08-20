@@ -1050,7 +1050,7 @@
     document.getElementById('aTitle').textContent=a.title;
     document.getElementById('aArtist').textContent=a.artist;
     document.getElementById('aDesc').textContent=a.desc;
-    const av=document.getElementById('aVisit');av.href=a.site||'#';av.style.display=a.site?'':'none';
+    const av=document.getElementById('aVisit');av.href=outUrl(curArt,a.site)||a.site||'#';av.style.display=a.site?'':'none';
     document.getElementById('aLikeCt').textContent=likeTotal(curArt);
     const lb=document.getElementById('aLike'); lb.classList.toggle('on',liked); lb.querySelector('.ic').textContent=liked?'♥':'♡';
     const sb=document.getElementById('aSave'); sb.classList.toggle('on',saved); document.getElementById('aSaveLb').textContent=saved?'保存済み':'保存';
@@ -1125,6 +1125,8 @@
     openShare(`${a.title} ${a.artist||''}`.trim(),artShareUrl(curArt));
   });
 
+  // 投稿ギャラリー作品の外部リンクは送客計測(/api/out)経由にする
+  const outUrl=(id,site)=>(site&&/^g[a-f0-9]{12}$/.test(String(id)))?('/api/out?g='+id):site;
   // アート/GMCピンの配線（静的・動的共通）
   function wireArtPin(card,forcedId){
     const site=card.dataset.site||card.getAttribute('href');
@@ -1138,7 +1140,7 @@
         if(artId){const w=ARTWORKS[artId];openShare(`${w.title} ${w.artist||''}`.trim(),artShareUrl(artId));}
         else openShare('CHARAMARL',site||location.origin);
       }
-      else if(site)window.open(site,'_blank');
+      else if(site)window.open(outUrl(artId,site)||site,'_blank');
     }));
     if(artId) card.addEventListener('click',()=>openArt(artId));
   }
