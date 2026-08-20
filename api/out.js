@@ -19,6 +19,23 @@ async function redis(...cmd) {
 module.exports = async (req, res) => {
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'KV未設定' });
   try {
+    // 公開用: 作品別の送客数のみ GET /api/out?counts=1 → { g123..: n, ... }
+    if (req.query && req.query.counts) {
+      let cursor = '0'; const keys = [];
+      do {
+        const r = await redis('SCAN', cursor, 'MATCH', 'out:g*', 'COUNT', '200');
+        cursor = String(r[0]);
+        keys.push(...r[1]);
+      } while (cursor !== '0');
+      const out = {};
+      if (keys.length) {
+        const vals = await redis('MGET', ...keys);
+        keys.forEach((k, i) => { out[k.slice(4)] = Number(vals[i]) || 0; });
+      }
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.status(200).json(out);
+    }
+
     // 管理用: 集計一覧 GET /api/out?stats=1&key=...
     if (req.query && req.query.stats) {
       const { isAdminReq } = require('../lib/admin.js');
