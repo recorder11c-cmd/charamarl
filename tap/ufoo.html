@@ -183,7 +183,7 @@ const CONFIG = {
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
   shop: {
-    productUrl: "https://thedinorenny.online/products/...",
+    productUrl: "../characters/ufoo.html",
     variants: {                              // 色名: Shopify variant ID
       "BLAZE RED":"", "SUNNY YELLOW":"", "SLIME GREEN":"",
       "ICE CYAN":"", "GALAXY BLUE":"", "NEON PINK":"",
@@ -229,8 +229,8 @@ function apply(p){
   nameEl.classList.remove("show"); void nameEl.offsetWidth; nameEl.classList.add("show"); // ぱっと出てフェイドアウト
   if(shopReady){
     const vid = CONFIG.shop.variants[p.name];
-    buyEl.href = vid ? CONFIG.shop.productUrl + "?variant=" + vid : CONFIG.shop.productUrl;
-    buyEl.textContent = "🛒 " + p.name + " を購入";
+    buyEl.href = CONFIG.shop.productUrl;
+    buyEl.textContent = "🛒 アクリルキーホルダーを購入";
   } else {
     buyEl.style.display = "none";
   }
