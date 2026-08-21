@@ -312,27 +312,5 @@ document.querySelectorAll(".share-opt").forEach(btn=>btn.addEventListener("click
 
 </script>
 
-<section id="fesSec" style="max-width:560px;margin:34px auto 60px;padding:0 16px;text-align:center;">
-  <div style="font-size:12px;font-weight:900;letter-spacing:.2em;color:#FF8A00;margin-bottom:8px;">NEXT EVENT</div>
-  <a href="https://junkeeees.art/" target="_blank" rel="noopener">
-    <img src="art/junkeeees_fes.jpg" alt="JUNKeeeeS FES 2026 in KYOTO" style="width:100%;border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.35);">
-  </a>
-  <div style="margin-top:12px;font-size:14px;font-weight:900;">🍟 JUNKeeeeS FES 2026 in KYOTO</div>
-  <div style="margin-top:4px;font-size:12px;font-weight:700;opacity:.8;">10/24(土)・25(日) ROOT2 SEIKA NIJO（JR二条駅 徒歩5分）<br>遊んで！見て！食べて！買って！みんなでワイワイ楽しもう!!</div>
-</section>
-<script>
-// 6色ぜんぶ見たらFES告知へご案内
-(function(){
-  let taps=0, shown=false;
-  const st=document.getElementById("stage")||document.querySelector(".stage");
-  if(!st)return;
-  st.addEventListener("pointerdown",()=>{
-    taps++;
-    if(!shown && taps>=8){ shown=true;
-      setTimeout(()=>{document.getElementById("fesSec").scrollIntoView({behavior:"smooth",block:"center"});},600);
-    }
-  });
-})();
-</script>
 </body>
 </html>
