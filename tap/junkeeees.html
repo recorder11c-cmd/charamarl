@@ -32,6 +32,8 @@
   /* pop は .stage 自身に。filter+transform を同一要素にしてiOSの消失を防ぐ */
   .stage.pop { animation: pop .5s cubic-bezier(.2,1.6,.4,1); }
   .stage.flip { animation: cardflip .32s ease; }
+  .stage.bang { animation: bang .5s cubic-bezier(.2,1.7,.4,1); }
+  @keyframes bang { 0%{transform:scale(.62);opacity:.4;} 60%{transform:scale(1.06);opacity:1;} 100%{transform:scale(1);} }
   @keyframes cardflip { 0%{transform:rotateY(0)} 45%{transform:rotateY(90deg)} 55%{transform:rotateY(90deg)} 100%{transform:rotateY(0)} }
   .gacha-count{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:5;max-width:94vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;font-size:clamp(12px,3.4vw,15px);font-weight:900;background:#fff;color:#111;border-radius:22px;padding:8px 18px;letter-spacing:.04em;box-shadow:0 4px 0 rgba(0,0,0,.12);}
   .gacha-count b{color:#FF8A00;font-size:1.2em;}
@@ -297,9 +299,16 @@ function prefetchNext(){ if(deck.length){ const im2 = new Image(); im2.src = CAR
 function drawCard(){
   if(!deck.length){
     // 一巡→FES面を2枚見せてから新しい山札
-    if(fesIdx < FES.length){ const f = FES[fesIdx++]; apply(f); return; }
+    if(fesIdx < FES.length){
+      const f = FES[fesIdx++];
+      apply(f);
+      stage.style.filter = "none";
+      stage.classList.remove("flip","bang"); void stage.offsetWidth; stage.classList.add("bang");
+      return;
+    }
     fesIdx = 0; shuffle();
   }
+  stage.style.filter = "";
   const card = CARDS[deck.pop()];
   const s = seenSet();
   const isNew = !s.has(card.key);
