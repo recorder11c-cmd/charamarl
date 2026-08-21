@@ -279,8 +279,6 @@ function apply(p){
     buyEl.style.display = "none";
   }
 }
-drawCard();
-
 // ===== JUNKeeeeS 36ガチャ + 図鑑 =====
 const CARDS = CONFIG.palettes.filter(p=>p.key.startsWith("j"));
 const FES = CONFIG.palettes.filter(p=>p.key.startsWith("fes"));
@@ -319,6 +317,7 @@ stage.addEventListener("pointerdown", () => {
 });
 updateCounter();
 prefetchNext();
+drawCard();
 
 // ♥ いいね（CHARAMARLのカゲチヨ作品と共通集計）
 const CM_API="/api/react", LIKE_ID="g9769aa4b0d9b", LIKE_BASE=0;
