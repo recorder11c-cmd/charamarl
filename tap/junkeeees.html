@@ -198,6 +198,7 @@ document.getElementById("char").src = CONFIG.baseImage;
 // 商品未設定なら購入ボタンを隠す
 const shopReady = CONFIG.shop.productUrl && !CONFIG.shop.productUrl.includes("...");
 // image方式は全色を事前読み込みしてタップ即時切替（遅延防止）
+CONFIG.palettes.filter(p=>p.img).forEach(p => { const im = new Image(); im.src = p.img; });
 if(CONFIG.mode === "image"){
   CONFIG.palettes.forEach(p => { const im = new Image(); im.src = `${CONFIG.imageDir}/${CONFIG.imageKey}_${p.key}.png`; });
 }
@@ -212,7 +213,11 @@ const buyEl = document.getElementById("buy");
 let idx = 0, tapped = false;
 
 function apply(p){
-  if(CONFIG.mode === "image"){
+  if(p.img){
+    // FESフライヤー面: フィルタを外して画像そのものを表示
+    img.style.filter = "none";
+    img.src = p.img;
+  } else if(CONFIG.mode === "image"){
     // 事前生成の鮮やかPNGを差し替え（最も正確）
     img.style.filter = "none";
     img.src = `${CONFIG.imageDir}/${CONFIG.imageKey}_${p.key}.png`;
@@ -221,6 +226,8 @@ function apply(p){
     document.body.style.background = `hsl(${p.hue}, 85%, 62%)`;
   } else {
     // キャラ（帽子・靴などの有彩色）の色が変わる
+    img.style.filter = "";
+    img.src = CONFIG.baseImage;
     img.style.setProperty("--hue", (p.hue + CONFIG.baseHueOffset) + "deg");
     img.style.setProperty("--sat", p.sat);
     img.style.setProperty("--bri", p.bri);
@@ -319,7 +326,7 @@ document.querySelectorAll(".share-opt").forEach(btn=>btn.addEventListener("click
   if(!st)return;
   st.addEventListener("pointerdown",()=>{
     taps++;
-    if(!shown && taps>=6){ shown=true;
+    if(!shown && taps>=8){ shown=true;
       setTimeout(()=>{document.getElementById("fesSec").scrollIntoView({behavior:"smooth",block:"center"});},600);
     }
   });
