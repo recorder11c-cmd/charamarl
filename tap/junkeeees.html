@@ -31,6 +31,10 @@
   }
   /* pop は .stage 自身に。filter+transform を同一要素にしてiOSの消失を防ぐ */
   .stage.pop { animation: pop .5s cubic-bezier(.2,1.6,.4,1); }
+  .stage.flip { animation: cardflip .32s ease; }
+  @keyframes cardflip { 0%{transform:rotateY(0)} 45%{transform:rotateY(90deg)} 55%{transform:rotateY(90deg)} 100%{transform:rotateY(0)} }
+  .gacha-count{margin:14px auto 0;text-align:center;font-size:14px;font-weight:800;background:rgba(255,255,255,.12);border-radius:22px;padding:9px 20px;width:fit-content;letter-spacing:.04em;}
+  .gacha-count b{color:#FFB74D;font-size:17px;}
   @keyframes pop {
     0%   { transform: translateY(0)    scale(1)    rotate(0deg); filter:url(#boil) brightness(1.12); }  /* タップ瞬間=明るく */
     25%  { transform: translateY(-14%) scale(1.12) rotate(-5deg); }                                     /* ぴょん */
@@ -130,6 +134,7 @@
 <div class="stage" id="stage">
   <img id="char" src="" alt="">
 </div>
+<div class="gacha-count" id="gachaCount"></div>
 
 <div class="ui">
   <div class="name" id="name"></div>
@@ -173,14 +178,44 @@ const CONFIG = {
 
   // 6色パレット（key=画像/色名キー。hue/sat/bri は char モード用）
   palettes: [
-    { key:"ketchup", name:"KETCHUP RED",    hue:0,   sat:1.15, bri:1.02 },
-    { key:"mustard", name:"MUSTARD YELLOW", hue:40,  sat:1.2,  bri:1.05 },
-    { key:"pickle",  name:"PICKLE GREEN",   hue:110, sat:1.2,  bri:1.0 },
-    { key:"icesoda", name:"ICE SODA",       hue:180, sat:1.2,  bri:1.05 },
-    { key:"grape",   name:"GRAPE SODA",     hue:250, sat:1.15, bri:1.0 },
-    { key:"berry",   name:"BERRY PINK",     hue:310, sat:1.2,  bri:1.03 },
-    { key:"fes1",    name:"JUNKeeeeS FES 2026 in KYOTO 🎪", img:"art/junkeeees_fes1.jpg" },
-    { key:"fes2",    name:"EVENT DETAILS 📅 10/24-25", img:"art/junkeeees_fes2.jpg" },
+    { key:"j01", name:"", img:"art/junk/j01.jpg" },
+    { key:"j02", name:"", img:"art/junk/j02.jpg" },
+    { key:"j03", name:"", img:"art/junk/j03.jpg" },
+    { key:"j04", name:"", img:"art/junk/j04.jpg" },
+    { key:"j05", name:"", img:"art/junk/j05.jpg" },
+    { key:"j06", name:"", img:"art/junk/j06.jpg" },
+    { key:"j07", name:"", img:"art/junk/j07.jpg" },
+    { key:"j08", name:"", img:"art/junk/j08.jpg" },
+    { key:"j09", name:"", img:"art/junk/j09.jpg" },
+    { key:"j10", name:"", img:"art/junk/j10.jpg" },
+    { key:"j11", name:"", img:"art/junk/j11.jpg" },
+    { key:"j12", name:"", img:"art/junk/j12.jpg" },
+    { key:"j13", name:"", img:"art/junk/j13.jpg" },
+    { key:"j14", name:"", img:"art/junk/j14.jpg" },
+    { key:"j15", name:"", img:"art/junk/j15.jpg" },
+    { key:"j16", name:"", img:"art/junk/j16.jpg" },
+    { key:"j17", name:"", img:"art/junk/j17.jpg" },
+    { key:"j18", name:"", img:"art/junk/j18.jpg" },
+    { key:"j19", name:"", img:"art/junk/j19.jpg" },
+    { key:"j20", name:"", img:"art/junk/j20.jpg" },
+    { key:"j21", name:"", img:"art/junk/j21.jpg" },
+    { key:"j22", name:"", img:"art/junk/j22.jpg" },
+    { key:"j23", name:"", img:"art/junk/j23.jpg" },
+    { key:"j24", name:"", img:"art/junk/j24.jpg" },
+    { key:"j25", name:"", img:"art/junk/j25.jpg" },
+    { key:"j26", name:"", img:"art/junk/j26.jpg" },
+    { key:"j27", name:"", img:"art/junk/j27.jpg" },
+    { key:"j28", name:"", img:"art/junk/j28.jpg" },
+    { key:"j29", name:"", img:"art/junk/j29.jpg" },
+    { key:"j30", name:"", img:"art/junk/j30.jpg" },
+    { key:"j31", name:"", img:"art/junk/j31.jpg" },
+    { key:"j32", name:"", img:"art/junk/j32.jpg" },
+    { key:"j33", name:"", img:"art/junk/j33.jpg" },
+    { key:"j34", name:"", img:"art/junk/j34.jpg" },
+    { key:"j35", name:"", img:"art/junk/j35.jpg" },
+    { key:"j36", name:"", img:"art/junk/j36.jpg" },
+    { key:"fes1", name:"JUNKeeeeS FES 2026 in KYOTO 🎪", img:"art/junkeeees_fes1.jpg" },
+    { key:"fes2", name:"EVENT DETAILS 📅 10/24-25", img:"art/junkeeees_fes2.jpg" },
   ],
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
@@ -244,14 +279,46 @@ function apply(p){
     buyEl.style.display = "none";
   }
 }
-apply(CONFIG.palettes[0]);
+drawCard();
 
-stage.addEventListener("pointerdown", () => {           // タッチした瞬間に発火（遅延なし）
+// ===== JUNKeeeeS 36ガチャ + 図鑑 =====
+const CARDS = CONFIG.palettes.filter(p=>p.key.startsWith("j"));
+const FES = CONFIG.palettes.filter(p=>p.key.startsWith("fes"));
+const SEEN_KEY = "junk_gacha_seen";
+const seenSet = ()=>{try{return new Set(JSON.parse(localStorage.getItem(SEEN_KEY)||"[]"));}catch(e){return new Set();}};
+let deck = [], fesIdx = 0, completeMode = false;
+function shuffle(){ deck = CARDS.map((c,i)=>i); for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];} }
+shuffle();
+function updateCounter(){
+  const n = seenSet().size;
+  const el = document.getElementById("gachaCount");
+  if(!el) return;
+  el.innerHTML = n >= 36 ? "🎉 <b>COMPLETE!!</b> 36キャラぜんぶ発見！ 10/24-25、京都で会おう🍟" : "みつけたJUNKeeeeS <b>" + n + "</b> / 36";
+}
+function prefetchNext(){ if(deck.length){ const im2 = new Image(); im2.src = CARDS[deck[deck.length-1]].img; } }
+function drawCard(){
+  if(!deck.length){
+    // 一巡→FES面を2枚見せてから新しい山札
+    if(fesIdx < FES.length){ const f = FES[fesIdx++]; apply(f); return; }
+    fesIdx = 0; shuffle();
+  }
+  const card = CARDS[deck.pop()];
+  const s = seenSet();
+  const isNew = !s.has(card.key);
+  if(isNew){ s.add(card.key); localStorage.setItem(SEEN_KEY, JSON.stringify([...s])); }
+  apply(card);
+  nameEl.textContent = isNew ? "✨ NEW!" : "";
+  if(isNew){ nameEl.classList.remove("show"); void nameEl.offsetWidth; nameEl.classList.add("show"); }
+  updateCounter();
+  prefetchNext();
+}
+stage.addEventListener("pointerdown", () => {
   if(!tapped){ tapped = true; hint.classList.add("hide"); tapHere.classList.add("hide"); }
-  idx = (idx + 1) % CONFIG.palettes.length;
-  apply(CONFIG.palettes[idx]);
-  stage.classList.remove("pop"); void stage.offsetWidth; stage.classList.add("pop");
+  stage.classList.remove("flip"); void stage.offsetWidth; stage.classList.add("flip");
+  setTimeout(drawCard, 120);
 });
+updateCounter();
+prefetchNext();
 
 // ♥ いいね（CHARAMARLのカゲチヨ作品と共通集計）
 const CM_API="/api/react", LIKE_ID="g9769aa4b0d9b", LIKE_BASE=0;
