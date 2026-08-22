@@ -75,10 +75,10 @@
 <script>
   const STEPS = [
     { img:'./tap/art/colors/sue_red.png', by:'SUE / DinoRenny', bg:'#FFEFEC', t:'タップすると、色がかわる。', s:'これが CHARAMARL の「COLOR TAP」🎨' },
-    { img:'./tap/art/kagechiyo.png', by:'カゲチヨ / カゲチヨ', bg:'#E7EDFB', t:'あなたの作品も、1枚から飾れます。', s:'掲載無料・販売の義務なし・権利はあなたのまま' },
-    { img:'./tap/art/ufoo.png', by:'う〜ほ〜 / ちゅい', bg:'#FFF6DC', t:'♥ や保存、反応が見えます。', s:'あなたのSNSへ何人送ったかまで計測。宣伝の入口になります' },
-    { img:'./tap/art/dogooooo.png', by:'dogooooo / SAYoooooh', bg:'#FBE7F1', t:'人気が出たら、グッズに。', s:'NFCタグ付きアクキーを受注生産 — 費用ゼロ・在庫ゼロ・利益は折半' },
-    { img:'./tap/art/lp_pizza.png', by:'Pizza Boy / CryptoSuperHeroes', bg:'#FFF3E0', t:'毎月18日は「市の日」。', s:'新しく参加した作家さんを、公式Xでまとめてご紹介します' },
+    { img:'./tap/art/kagechiyo.png', by:'カゲチヨ / カゲチヨ', bg:'#E7EDFB', t:'あなたの作品も、1枚から飾れます。', s:'掲載無料・販売の義務なし<br>権利はあなたのまま' },
+    { img:'./tap/art/ufoo.png', by:'う〜ほ〜 / ちゅい', bg:'#FFF6DC', t:'♥ や保存、反応が見えます。', s:'あなたのSNSへ何人送ったかまで計測。<br>宣伝の入口になります' },
+    { img:'./tap/art/dogooooo.png', by:'dogooooo / SAYoooooh', bg:'#FBE7F1', t:'人気が出たら、グッズに。', s:'NFCタグ付きアクキーを受注生産。<br>費用ゼロ・在庫ゼロ・利益は折半' },
+    { img:'./tap/art/lp_pizza.png', by:'Pizza Boy / CryptoSuperHeroes', bg:'#FFF3E0', t:'毎月18日は「市の日」。', s:'新しく参加した作家さんを、<br>公式Xでまとめてご紹介します' },
     { img:'./tap/art/lp_rafu.png', by:'ボストンテリアのラフ / ハンナ', bg:'#E9F8E4', t:'登録は、画像1枚送るだけ。', s:'めんどうな作業はぜんぶ運営が代行します' },
   ];
   let i = 0, done = false;
@@ -91,7 +91,7 @@
     const s=STEPS[k];
     img.src=s.img;
     document.body.style.background=s.bg;
-    msgT.textContent=s.t; msgS.textContent=s.s; document.getElementById('msgBy').textContent='案内役: '+s.by;
+    msgT.textContent=s.t; msgS.innerHTML=s.s; document.getElementById('msgBy').textContent='案内役: '+s.by;
     [...dots.children].forEach((d,j)=>d.classList.toggle('on',j===k));
     stage.classList.remove('pop'); void stage.offsetWidth; stage.classList.add('pop');
   }
