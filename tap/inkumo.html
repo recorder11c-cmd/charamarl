@@ -164,8 +164,8 @@ const CONFIG = {
   shareText: "インクモがいろんな絵の具にダイブ🎨 タップで色がかわる #CHARAMARL",
   baseImage: "art/inkumo.png",                 // 透過キーアートPNG（正方形・1080px推奨）
   bg: "#EAF1F6",                            // 初期背景色
-  mode: "bg",                             // "char"=キャラの色が変わる / "bg"=背景の色が変わる（黒系キャラ向け）
-  baseHueOffset: -220,                      // 青い体毛を基準に補正
+  mode: "char",                             // "char"=キャラの色が変わる / "bg"=背景の色が変わる（黒系キャラ向け）
+  baseHueOffset: -50,                       // 黄色いインクが基準                      // 青い体毛を基準に補正
 
   // mode:"image" のとき使う。事前生成PNG = `${imageDir}/${imageKey}_${key}.png`
   imageDir: "art/colors",
@@ -173,17 +173,17 @@ const CONFIG = {
 
   // 6色パレット（key=画像/色名キー。hue/sat/bri は char モード用）
   palettes: [
-    { key:"red",    name:"INK RED",    hue:0,   sat:1, bri:1 },
-    { key:"yellow", name:"INK YELLOW", hue:48,  sat:1, bri:1 },
-    { key:"green",  name:"INK GREEN",  hue:130, sat:1, bri:1 },
-    { key:"cyan",   name:"INK CYAN",   hue:180, sat:1, bri:1 },
-    { key:"blue",   name:"INK BLUE",   hue:225, sat:1, bri:1 },
-    { key:"pink",   name:"INK PINK",   hue:315, sat:1, bri:1 },
+    { key:"yellow", name:"INK YELLOW", hue:50,  sat:1.0, bri:1.0 },
+    { key:"red",    name:"INK RED",    hue:0,   sat:1.1, bri:1.0 },
+    { key:"green",  name:"INK GREEN",  hue:130, sat:1.1, bri:1.0 },
+    { key:"cyan",   name:"INK CYAN",   hue:180, sat:1.1, bri:1.05 },
+    { key:"blue",   name:"INK BLUE",   hue:225, sat:1.1, bri:1.05 },
+    { key:"pink",   name:"INK PINK",   hue:315, sat:1.1, bri:1.0 },
   ],
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
   shop: {
-    productUrl: "https://thedinorenny.online/products/...",
+    productUrl: "../characters/inkumo.html",
     variants: {                              // 色名: Shopify variant ID
       "BLAZE RED":"", "SUNNY YELLOW":"", "SLIME GREEN":"",
       "ICE CYAN":"", "GALAXY BLUE":"", "NEON PINK":"",
