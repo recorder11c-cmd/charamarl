@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CHARAMARLってなに？ — タップでわかる小さな市場</title>
+<meta name="description" content="タップするだけでCHARAMARLがわかる、体験型の紹介ページ。あなたの作品を1枚から飾れる小さな市場です。">
+<meta property="og:title" content="タップでわかるCHARAMARL 🎨">
+<meta property="og:image" content="https://charamarl.com/img/og.png">
+<link rel="icon" href="./img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{background:#FFEFEC;transition:background .4s ease;font-family:'M PLUS Rounded 1c',sans-serif;color:#1a1a26;
+    display:flex;flex-direction:column;align-items:center;overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;}
+  .logo{margin-top:18px;font-size:20px;font-weight:900;letter-spacing:.1em;}
+  .logo .c1{color:#FF8A00;} .logo .c2{color:#A855F7;}
+  .dots{display:flex;gap:6px;margin-top:8px;}
+  .dots i{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.15);transition:.2s;}
+  .dots i.on{background:#FF8A00;transform:scale(1.25);}
+  .stage{position:relative;flex:1;width:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:0;}
+  .stage img{max-width:82vw;max-height:52vh;object-fit:contain;filter:drop-shadow(0 14px 18px rgba(30,40,80,.18));transition:transform .15s;}
+  .stage.pop img{animation:pop .45s cubic-bezier(.2,1.6,.4,1);}
+  @keyframes pop{0%{transform:scale(.92)}55%{transform:scale(1.05)}100%{transform:scale(1)}}
+  .msg{min-height:110px;padding:0 22px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+  .msg .t{font-size:clamp(19px,5.6vw,26px);font-weight:900;line-height:1.5;}
+  .msg .s{margin-top:6px;font-size:clamp(12px,3.6vw,14px);font-weight:700;color:#555;line-height:1.7;}
+  .tapme{margin:0 0 22px;background:#fff;border-radius:28px;padding:12px 26px;font-size:15px;font-weight:900;box-shadow:0 6px 0 rgba(0,0,0,.1);animation:bob 1.4s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  /* CTA画面 */
+  .cta{position:fixed;inset:0;background:linear-gradient(150deg,#fff7ec 0%,#faf5ff 55%,#fff0f6 100%);display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;z-index:10;}
+  .cta.show{display:flex;animation:bang .5s cubic-bezier(.2,1.7,.4,1);}
+  @keyframes bang{0%{transform:scale(.8);opacity:.3;}100%{transform:scale(1);opacity:1;}}
+  .cta h1{font-size:clamp(24px,6.5vw,34px);font-weight:900;line-height:1.5;}
+  .cta h1 b{color:#FF8A00;}
+  .stats{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center;}
+  .st{background:#fff;border:2px solid #eee2f7;border-radius:18px;padding:8px 16px;font-size:13px;font-weight:900;}
+  .st b{color:#e0245e;}
+  .btns{display:flex;flex-direction:column;gap:12px;margin-top:22px;width:min(320px,86vw);}
+  .btn{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:28px;font-size:15px;font-weight:900;text-decoration:none;}
+  .btn.main{background:#FF8A00;color:#fff;box-shadow:0 6px 16px rgba(255,138,0,.35);}
+  .btn.sub{background:#fff;color:#1a1a26;border:2px solid #e7e7ee;}
+  .cta .replay{margin-top:16px;background:none;border:none;font-family:inherit;font-size:12px;font-weight:800;color:#8a8a97;cursor:pointer;}
+  .cta .foot{margin-top:14px;font-size:11px;font-weight:700;color:#8a8a97;}
+</style>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+  <div class="logo"><span class="c1">CHARA</span><span class="c2">MARL</span></div>
+  <div class="dots" id="dots"></div>
+  <div class="stage" id="stage"><img id="char" src="./tap/art/colors/sue_red.png" alt="SUE"></div>
+  <div class="msg" id="msg">
+    <div class="t" id="msgT"></div>
+    <div class="s" id="msgS"></div>
+  </div>
+  <div class="tapme" id="tapme">👆 タップしてみて</div>
+
+  <div class="cta" id="cta">
+    <div class="logo"><span class="c1">CHARA</span><span class="c2">MARL</span></div>
+    <h1>あなたのキャラを、<br><b>市場で育てませんか？</b></h1>
+    <div class="stats" id="ctaStats"></div>
+    <div class="btns">
+      <a class="btn main" href="./apply.html?utm_source=event">🎨 出店・掲載を申し込む（無料）</a>
+      <a class="btn sub" href="./index.html?utm_source=event">🎪 市場をのぞいてみる</a>
+      <a class="btn sub" href="https://x.com/charamarl" target="_blank" rel="noopener">𝕏 公式をフォロー @charamarl</a>
+    </div>
+    <div class="foot">この画面をイベント会場で見た方は、そのままお声がけください。<br>画像1枚いただければ、その場で掲載までご案内します🦖</div>
+    <button class="replay" id="replay">↻ もういちど見る</button>
+  </div>
+
+<script>
+  const STEPS = [
+    { c:'red',    bg:'#FFEFEC', t:'タップすると、色がかわる。', s:'これが CHARAMARL の「COLOR TAP」🎨' },
+    { c:'yellow', bg:'#FFF6DC', t:'あなたの作品も、1枚から飾れます。', s:'掲載無料・販売の義務なし・権利はあなたのまま' },
+    { c:'green',  bg:'#E9F8E4', t:'♥ や保存、反応が見えます。', s:'あなたのSNSへ何人送ったかまで計測。宣伝の入口になります' },
+    { c:'cyan',   bg:'#E2F6F8', t:'人気が出たら、グッズに。', s:'NFCタグ付きアクキーを受注生産 — 費用ゼロ・在庫ゼロ・利益は折半' },
+    { c:'blue',   bg:'#E7EDFB', t:'毎月18日は「市の日」。', s:'新しく参加した作家さんを、公式Xでまとめてご紹介します' },
+    { c:'pink',   bg:'#FBE7F1', t:'登録は、画像1枚送るだけ。', s:'めんどうな作業はぜんぶ運営が代行します' },
+  ];
+  let i = 0, done = false;
+  const img=document.getElementById('char'), stage=document.getElementById('stage');
+  const msgT=document.getElementById('msgT'), msgS=document.getElementById('msgS');
+  const dots=document.getElementById('dots'), tapme=document.getElementById('tapme'), cta=document.getElementById('cta');
+  STEPS.forEach((_,k)=>{const d=document.createElement('i'); if(k===0)d.className='on'; dots.appendChild(d);});
+  STEPS.forEach(s=>{const im=new Image(); im.src=`./tap/art/colors/sue_${s.c}.png`;});
+  function show(k){
+    const s=STEPS[k];
+    img.src=`./tap/art/colors/sue_${s.c}.png`;
+    document.body.style.background=s.bg;
+    msgT.textContent=s.t; msgS.textContent=s.s;
+    [...dots.children].forEach((d,j)=>d.classList.toggle('on',j===k));
+    stage.classList.remove('pop'); void stage.offsetWidth; stage.classList.add('pop');
+  }
+  show(0);
+  function next(){
+    if(done) return;
+    tapme.style.visibility='hidden';
+    if(i < STEPS.length-1){ i++; show(i); }
+    else { done=true; cta.classList.add('show'); }
+  }
+  stage.addEventListener('pointerdown', next);
+  document.getElementById('msg').addEventListener('pointerdown', next);
+  document.getElementById('replay').addEventListener('click', e=>{
+    e.stopPropagation(); done=false; i=0; cta.classList.remove('show'); show(0);
+  });
+  // CTAのライブ実績
+  Promise.all([
+    fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}),
+    fetch('/api/react').then(r=>r.ok?r.json():{})
+  ]).then(([g,c])=>{
+    const artists=new Set((g.list||[]).map(a=>a.artist)); ['DinoRenny','ahoyoung'].forEach(a=>artists.add(a));
+    let likes=0; Object.values(c).forEach(v=>{if(v)likes+=v.likes||0;});
+    document.getElementById('ctaStats').innerHTML =
+      `<span class="st">🎨 ${artists.size}組が参加中</span><span class="st">♥ <b>${likes.toLocaleString()}</b> いいね</span><span class="st">🛒 アクキー受注販売中</span>`;
+  }).catch(()=>{});
+</script>
+</body>
+</html>
