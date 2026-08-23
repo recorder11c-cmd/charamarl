@@ -60,6 +60,11 @@
   .gbtn.rm{background:#fff0f2;color:#e0245e;}
   .gbtn:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
   .badge-live{display:inline-block;font-size:9px;font-weight:800;color:#1a7f4b;background:#e8f8ee;border-radius:8px;padding:2px 8px;margin-left:6px;vertical-align:middle;}
+  .editbox{margin-top:8px;background:var(--bg);border-radius:12px;padding:10px;}
+  .editbox label{display:block;font-size:10px;font-weight:800;color:var(--muted);margin:6px 0 2px;}
+  .editbox input,.editbox textarea{width:100%;padding:8px 10px;font-family:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:8px;background:#fff;}
+  .editbox textarea{min-height:52px;resize:vertical;}
+  .editbox .gbtn{margin-top:8px;width:100%;}
   .err{background:#FFC7CE;color:#9C0006;border-radius:14px;padding:12px 14px;font-size:12px;font-weight:700;margin-bottom:14px;display:none;}
   .refresh{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:var(--tap-min);margin:20px 0 6px;background:var(--orange);color:#fff;border:none;border-radius:26px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:transform .12s;}
   .refresh:active{transform:scale(.95);}
@@ -148,6 +153,14 @@
         </select></div>
         ${a.link?`<div class="gl">🔗 <a href="${esc(a.link)}" target="_blank" rel="noopener nofollow">${esc(a.link)}</a></div>`:''}
         ${a.desc?`<div class="gd">${esc(a.desc)}</div>`:''}
+        <button class="ebtn" data-edit="${esc(a.id)}" type="button" style="margin-top:8px;">✏️ 編集</button>
+        <div class="editbox" id="ed_${esc(a.id)}" hidden>
+          <label>タイトル</label><input type="text" id="et_${esc(a.id)}" value="${esc(a.title)}" maxlength="60">
+          <label>表示名義</label><input type="text" id="ea_${esc(a.id)}" value="${esc(a.artist)}" maxlength="40">
+          <label>リンク</label><input type="text" id="el_${esc(a.id)}" value="${esc(a.link||'')}" maxlength="300">
+          <label>説明</label><textarea id="ez_${esc(a.id)}" maxlength="500">${esc(a.desc||'')}</textarea>
+          <button class="gbtn ok" data-save="${esc(a.id)}" type="button">💾 保存</button>
+        </div>
       </div>
       <div class="gbtns">${btns}</div>
     </div>`;
@@ -181,8 +194,26 @@
       sel.style.background='#e8f8ee';setTimeout(()=>sel.style.background='',800);
     }catch(ex){err.textContent=ex.message;err.style.display='block';}
   });
+  document.addEventListener('click',e=>{
+    const eb=e.target.closest('[data-edit]'); if(!eb)return;
+    const box=document.getElementById('ed_'+eb.dataset.edit); box.hidden=!box.hidden;
+  });
   document.addEventListener('click',async e=>{
-    const btn=e.target.closest('.gbtn'); if(!btn)return;
+    const sv=e.target.closest('[data-save]'); if(!sv)return;
+    const id=sv.dataset.save; sv.disabled=true; sv.textContent='保存中…';
+    try{
+      const r=await fetch('/api/gallery',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'update',id,key,
+          title:document.getElementById('et_'+id).value,
+          artist:document.getElementById('ea_'+id).value,
+          link:document.getElementById('el_'+id).value,
+          desc:document.getElementById('ez_'+id).value})});
+      if(!r.ok)throw new Error('保存に失敗しました');
+      sv.textContent='✓ 保存しました'; setTimeout(()=>loadGallery(),700);
+    }catch(ex){err.textContent=ex.message;err.style.display='block';sv.disabled=false;sv.textContent='💾 保存';}
+  });
+  document.addEventListener('click',async e=>{
+    const btn=e.target.closest('.gbtn'); if(!btn||btn.dataset.save)return;
     const id=btn.closest('.gcard').dataset.id, act=btn.dataset.act;
     const msg={approve:'この作品を承認してギャラリーに公開しますか？',reject:'この投稿を見送りますか？',remove:'この作品の掲載を終了しますか？（画像も削除されます）'}[act];
     if(!confirm(msg))return;
