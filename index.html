@@ -872,7 +872,7 @@
     let shown=0;
     masonryEl.querySelectorAll('.pin').forEach(pin=>{
       const pc=pin.querySelector('.pin-cat');
-      const catHit=curCat==='all'||(pc&&pc.textContent.trim()===curCat);
+      const catHit=curCat==='all'||(pc&&(pc.childNodes[0]&&pc.childNodes[0].textContent||'').trim()===curCat);
       const qHit=!curQuery||pinText(pin).includes(curQuery);
       const hit=catHit&&qHit;
       pin.classList.toggle('cat-hide',!hit);
