@@ -197,7 +197,7 @@ renderLike();
   const el = document.createElement('div');
   el.style.cssText = 'font-size:10px;font-weight:800;color:#A855F7;margin-top:4px;';
   bar.appendChild(el);
-  function render(n){ el.textContent = n >= 3 ? `👀 今月 ${n}人がこの商品を検討中` : ''; }
+  function render(n){ el.textContent = n >= 2 ? `👀 今月 ${n}人がこの商品を検討中` : ''; }
   fetch('/api/react?id='+IID).then(r=>r.ok?r.json():null).then(d=>{ if(d) render(d.likes||0); }).catch(()=>{});
   function mark(){
     try{
