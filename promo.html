@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>宣伝キット — CHARAMARL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--orange:#FF8A00;--purple:#A855F7;--black:#1a1a26;--line:#e7e7ee;--muted:#8a8a97;--bg:#f7f7fa;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--black);font-family:'M PLUS Rounded 1c',sans-serif;padding-bottom:60px;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#fff;border-bottom:1px solid var(--line);}
+  .logo{font-size:18px;font-weight:900;letter-spacing:.08em;text-decoration:none;}
+  .logo .c1{color:var(--orange);} .logo .c2{color:var(--purple);}
+  .back{color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;}
+  .wrap{max-width:640px;margin:0 auto;padding:24px 16px;}
+  .eyebrow{font-size:11px;font-weight:900;letter-spacing:.14em;color:var(--orange);}
+  h1{font-size:24px;font-weight:900;margin:4px 0 6px;line-height:1.4;}
+  .lead{font-size:13px;color:#555;line-height:1.9;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:16px;}
+  .card h2{font-size:16px;font-weight:900;margin-bottom:4px;}
+  .card .sub{font-size:11px;color:var(--muted);margin-bottom:12px;}
+  .prod{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;cursor:pointer;transition:.15s;}
+  .prod.on{border-color:var(--orange);background:#fff8ec;}
+  .prod img{width:56px;height:56px;object-fit:contain;border-radius:10px;background:var(--bg);}
+  .prod .nm{font-size:14px;font-weight:900;}
+  .prod .cr{font-size:11px;color:var(--muted);}
+  textarea{width:100%;min-height:150px;padding:14px;font-family:inherit;font-size:13px;font-weight:700;line-height:1.9;
+    color:var(--black);background:var(--bg);border:1.5px solid var(--line);border-radius:14px;resize:vertical;}
+  .btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:50px;margin-top:10px;border:none;border-radius:26px;
+    font-family:inherit;font-size:14px;font-weight:900;cursor:pointer;text-decoration:none;}
+  .btn.main{background:var(--orange);color:#fff;}
+  .btn.sub{background:#fff;color:var(--black);border:2px solid var(--line);}
+  .btn.x{background:#111;color:#fff;}
+  .tips{font-size:11.5px;color:#555;line-height:1.9;background:#fff8ec;border:1px solid #ffe2b0;border-radius:14px;padding:12px 14px;margin-top:12px;}
+  .tips b{color:var(--black);}
+</style>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<header>
+  <a class="logo" href="./index.html"><span class="c1">CHARA</span><span class="c2">MARL</span></a>
+  <a class="back" href="./index.html">← 市場へ</a>
+</header>
+<div class="wrap">
+  <div class="eyebrow">PROMO KIT</div>
+  <h1>宣伝キット🚀</h1>
+  <p class="lead">あなたの商品を、あなたのファンに届けるための道具です。<br>キャラを選んで、文章をコピーして、SNSに貼るだけ。</p>
+
+  <div class="card">
+    <h2>1. あなたのキャラを選ぶ</h2>
+    <div class="sub">タップで選択</div>
+    <div id="prods"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. 告知文をコピーする</h2>
+    <div class="sub">そのまま貼ってOK・自由に書き換えても大丈夫です</div>
+    <textarea id="txt"></textarea>
+    <button class="btn main" id="copy">📋 文章をコピー</button>
+    <button class="btn x" id="post">𝕏 このままXに投稿する</button>
+    <div class="tips">
+      <b>効くコツ</b><br>
+      ・「8/31まではOPENING価格¥1,200」という<b>期限</b>を必ず入れる（9月から¥1,500）<br>
+      ・商品ページのスクショや、キャラの絵を1枚添える<br>
+      ・「買ってください」より「こんなの作りました」の方が届きます
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. 画像を使う</h2>
+    <div class="sub">商品ページを開いて、スクショや画像を保存してお使いください</div>
+    <a class="btn sub" id="openPage" href="#" target="_blank">🛒 商品ページを開く</a>
+    <a class="btn sub" id="openTap" href="#" target="_blank" style="display:none;">🎨 COLOR TAPを開く</a>
+  </div>
+</div>
+
+<script>
+const PRODUCTS = [
+  {id:'sue', name:'SUE', cr:'DinoRenny', img:'./img/products_t/sue_red.png', page:'./characters/sue.html', tap:'./tap/sue.html'},
+  {id:'putti', name:'PUTTI', cr:'DinoRenny', img:'./img/products_t/putti_yellow.png', page:'./characters/putti.html', tap:'./tap/putti.html'},
+  {id:'mossun', name:'MOSSUN', cr:'DinoRenny', img:'./img/products_t/mossun_blue.png', page:'./characters/mossun.html', tap:'./tap/mossun.html'},
+  {id:'gmc', name:'レコマル', cr:'MARU', img:'./img/products_t/gmc_red.png', page:'./characters/gmc.html', tap:'./tap/gmc.html'},
+  {id:'ufoo', name:'う〜ほ〜', cr:'ちゅい', img:'./img/products_t/ufoo_white.png', page:'./characters/ufoo.html', tap:'./tap/ufoo.html'},
+  {id:'dogooooo', name:'dogooooo', cr:'SAYoooooh', img:'./img/products_t/dogooooo_pink.png', page:'./characters/dogooooo.html', tap:'./tap/dogooooo.html'},
+  {id:'inkumo', name:'インクモ', cr:"Ink'z Monster", img:'./img/products_t/inkumo_mono.png', page:'./characters/inkumo.html'},
+  {id:'danna', name:'だんな', cr:'赤猫かるま', img:'./img/products_t/danna_blue.png', page:'./characters/danna.html'},
+];
+const BASE='https://charamarl.com/';
+let cur = PRODUCTS[0];
+const wrapEl = document.getElementById('prods');
+wrapEl.innerHTML = PRODUCTS.map((p,i)=>
+  `<div class="prod${i===0?' on':''}" data-i="${i}"><img src="${p.img}" alt=""><div><div class="nm">${p.name}</div><div class="cr">by ${p.cr}</div></div></div>`).join('');
+function text(p){
+  const url = BASE + p.page.replace('./','');
+  return `${p.name}のアクリルキーホルダー、CHARAMARLで受注販売中です🎪\n`
+    + `裏面にNFCタグが入っていて、スマホでかざすと${p.name}のページがひらきます📱\n\n`
+    + `▶ ${url}\n\n`
+    + `OPENING価格 ¥1,200（税込・送料込）で買えるのは 8/31 受注分まで。\n`
+    + `9月からは ¥1,500 になります。\n`
+    + `#CHARAMARL`;
+}
+function render(){
+  document.getElementById('txt').value = text(cur);
+  document.getElementById('openPage').href = cur.page;
+  const t = document.getElementById('openTap');
+  if(cur.tap){ t.style.display=''; t.href = cur.tap; } else { t.style.display='none'; }
+}
+wrapEl.addEventListener('click', e=>{
+  const el = e.target.closest('.prod'); if(!el) return;
+  wrapEl.querySelectorAll('.prod').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on'); cur = PRODUCTS[+el.dataset.i]; render();
+});
+document.getElementById('copy').addEventListener('click', function(){
+  const t = document.getElementById('txt');
+  (navigator.clipboard ? navigator.clipboard.writeText(t.value) : Promise.reject())
+    .then(()=>{ this.textContent='✓ コピーしました！'; setTimeout(()=>this.textContent='📋 文章をコピー',1600); })
+    .catch(()=>{ t.select(); document.execCommand('copy'); this.textContent='✓ コピーしました！'; });
+});
+document.getElementById('post').addEventListener('click', ()=>{
+  window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(document.getElementById('txt').value),'_blank');
+});
+render();
+</script>
+</body>
+</html>
