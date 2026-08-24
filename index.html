@@ -413,6 +413,7 @@
         <a class="ctlab-link" href="./tap/kagechiyo.html" target="_blank">カゲチヨ →</a>
         <a class="ctlab-link" href="./tap/dogooooo.html" target="_blank">ドグー →</a>
         <a class="ctlab-link" href="./tap/csh.html" target="_blank">CSHヒーローズ →</a>
+        <a class="ctlab-link" href="./tap/junkeeees.html" target="_blank">JUNKeeeeS →</a>
         <a class="ctlab-link" href="./tap/rafu.html" target="_blank">ボストンテリアのラフ →</a>
       </div>
     </div>
@@ -868,6 +869,23 @@
   function pinText(pin){
     return ['.pin-title','.pin-sub','.pin-cat'].map(s=>{const el=pin.querySelector(s);return el?el.textContent:'';}).join(' ').toLowerCase();
   }
+  // 表示中のピンを作家ごとに散らす(同じ作家が連続しないように)
+  function interleaveVisible(){
+    const vis=[...masonryEl.querySelectorAll('.pin:not(.cat-hide)')];
+    if(vis.length<3)return;
+    const key=p=>{const el=p.querySelector('.pin-sub');return el?el.textContent.trim():'';};
+    const groups=new Map();
+    vis.forEach(p=>{const k=key(p);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);});
+    if(groups.size<2)return;
+    const out=[];let last='';
+    while(out.length<vis.length){
+      let best=null,bestLen=-1;
+      for(const [k,arr] of groups){ if(!arr.length||k===last)continue; if(arr.length>bestLen){best=k;bestLen=arr.length;} }
+      if(best===null){for(const [k,arr] of groups){if(arr.length){best=k;break;}}}
+      out.push(groups.get(best).shift());last=best;
+    }
+    out.forEach(p=>masonryEl.appendChild(p));
+  }
   function applyFilters(){
     let shown=0;
     masonryEl.querySelectorAll('.pin').forEach(pin=>{
@@ -878,6 +896,7 @@
       pin.classList.toggle('cat-hide',!hit);
       if(hit)shown++;
     });
+    interleaveVisible();
     masonryEl.classList.remove('filtering');void masonryEl.offsetWidth;masonryEl.classList.add('filtering');
     masonryEl.style.display=shown?'':'none';
     catEmpty.hidden=shown>0;
