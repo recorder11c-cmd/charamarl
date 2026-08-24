@@ -247,5 +247,32 @@ renderLike();
   renderReqProg();
 })();
 </script>
+<script>
+// ===== 今月の検討数（購入ボタン/カート追加を関心として記録）=====
+(function(){
+  const IID = CHAR_ID + '_interest';
+  const KEY = 'charamarl_interest';
+  const bar = document.querySelector('.buy-bar-info');
+  if(!bar) return;
+  const el = document.createElement('div');
+  el.style.cssText = 'font-size:10px;font-weight:800;color:#A855F7;margin-top:4px;';
+  bar.appendChild(el);
+  function render(n){ el.textContent = n >= 3 ? `👀 今月 ${n}人がこの商品を検討中` : ''; }
+  fetch('/api/react?id='+IID).then(r=>r.ok?r.json():null).then(d=>{ if(d) render(d.likes||0); }).catch(()=>{});
+  function mark(){
+    try{
+      const s = new Set(JSON.parse(localStorage.getItem(KEY)||'[]'));
+      if(s.has(IID)) return;
+      s.add(IID); localStorage.setItem(KEY, JSON.stringify([...s]));
+      fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({id:IID,type:'like',op:'add'})})
+        .then(r=>r.ok?r.json():null).then(d=>{ if(d&&typeof d.count==='number') render(d.count); }).catch(()=>{});
+    }catch(e){}
+  }
+  const bb=document.getElementById('buyBtn'), ab=document.getElementById('addCartBtn');
+  if(bb) bb.addEventListener('click', mark);
+  if(ab) ab.addEventListener('click', mark);
+})();
+</script>
 </body>
 </html>
