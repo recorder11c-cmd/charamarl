@@ -869,7 +869,7 @@
   function pinText(pin){
     return ['.pin-title','.pin-sub','.pin-cat'].map(s=>{const el=pin.querySelector(s);return el?el.textContent:'';}).join(' ').toLowerCase();
   }
-  // 表示中のピンを作家ごとに散らす(同じ作家が連続しないように)
+  // 表示中のピンを作家ごとに散らす（CSS columnsは縦流しなので、列数を考慮して縦・横とも隣り合わないよう配置）
   function interleaveVisible(){
     const vis=[...masonryEl.querySelectorAll('.pin:not(.cat-hide)')];
     if(vis.length<3)return;
@@ -877,12 +877,25 @@
     const groups=new Map();
     vis.forEach(p=>{const k=key(p);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);});
     if(groups.size<2)return;
-    const out=[];let last='';
-    while(out.length<vis.length){
+    // 実際の列数を測る(1行に何枚並ぶか)
+    const w=masonryEl.clientWidth||1200;
+    const cols=Math.max(1,Math.min(5,Math.round(w/220))) || 3;
+    const rows=Math.ceil(vis.length/cols);
+    const out=[];
+    // 縦(直前)と横(左隣=rows個前)の両方を避けて選ぶ
+    for(let i=0;i<vis.length;i++){
+      const above = out[i-1] ? key(out[i-1]) : '';          // 同じ列の1つ上
+      const left  = (i>=rows && out[i-rows]) ? key(out[i-rows]) : ''; // 左隣の列の同じ高さ
       let best=null,bestLen=-1;
-      for(const [k,arr] of groups){ if(!arr.length||k===last)continue; if(arr.length>bestLen){best=k;bestLen=arr.length;} }
-      if(best===null){for(const [k,arr] of groups){if(arr.length){best=k;break;}}}
-      out.push(groups.get(best).shift());last=best;
+      for(const [k,arr] of groups){
+        if(!arr.length||k===above||k===left)continue;
+        if(arr.length>bestLen){best=k;bestLen=arr.length;}
+      }
+      if(best===null){ // 避けられない場合は縦だけ避ける
+        for(const [k,arr] of groups){ if(arr.length&&k!==above){best=k;break;} }
+      }
+      if(best===null){ for(const [k,arr] of groups){ if(arr.length){best=k;break;} } }
+      out.push(groups.get(best).shift());
     }
     out.forEach(p=>masonryEl.appendChild(p));
   }
