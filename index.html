@@ -132,22 +132,17 @@
   /* COLOR TAP LAB */
   .ctlab{border-radius:24px;overflow:hidden;background:linear-gradient(120deg,#1a0030,#10082e 55%,#001a14);display:grid;grid-template-columns:auto 1fr;align-items:center;color:#fff;}
   @media(max-width:700px){ .ctlab{grid-template-columns:1fr;text-align:center;} }
-  .ctlab-imgs{display:flex;padding:22px 0 22px 26px;}
-  @media(max-width:700px){ .ctlab-imgs{justify-content:center;padding:22px;} }
+  .ctlab-imgs{display:grid;grid-template-columns:repeat(3,96px);gap:12px;padding:26px 0 26px 30px;}
   .ctlab-imgs img{width:96px;height:96px;object-fit:contain;background:#fff;border-radius:18px;padding:6px;box-shadow:0 8px 22px rgba(0,0,0,.4);}
-  .ctlab-imgs img:nth-child(2){margin:0 -14px;margin-top:22px;}
+  .ctlab-imgs img:nth-child(2),.ctlab-imgs img:nth-child(5),.ctlab-imgs img:nth-child(8){transform:translateY(10px);}
   .ctlab-body{padding:26px 30px;}
   .ctlab-eyebrow{display:inline-block;background:rgba(168,85,247,.25);color:#d8b4fe;border:1px solid rgba(168,85,247,.4);font-size:10px;font-weight:900;letter-spacing:.12em;padding:3px 12px;border-radius:20px;margin-bottom:10px;}
   .ctlab-body h2{font-size:clamp(20px,3vw,28px);font-weight:900;margin-bottom:8px;background:linear-gradient(90deg,var(--orange),#d8b4fe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
   .ctlab-body p{font-size:13px;color:#cdc7e0;line-height:1.6;margin-bottom:16px;}
-  .ctlab-link{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--orange),var(--purple));color:#fff;font-weight:900;font-size:13px;padding:11px 26px;border-radius:24px;}
-  .ctlab-links{display:flex;flex-wrap:wrap;gap:10px;}
+  .ctlab-link{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,var(--orange),var(--purple));color:#fff;font-weight:900;font-size:12.5px;padding:9px 18px;border-radius:22px;white-space:nowrap;}
+  .ctlab-links{display:flex;flex-wrap:wrap;gap:8px;}
   @media(max-width:700px){ .ctlab-links{justify-content:center;} }
-  .ctlab-imgs img:nth-child(3){margin:0 -14px;margin-top:22px;}
-  .ctlab-imgs img:nth-child(4){margin-top:6px;}
-  .ctlab-imgs img:nth-child(5){margin:0 0 0 -10px;margin-top:18px;}
-  .ctlab-imgs img:nth-child(6){margin-top:4px;}
-  @media(max-width:700px){ .ctlab-imgs{flex-wrap:wrap;} .ctlab-imgs img{width:72px;height:72px;} }
+  @media(max-width:700px){ .ctlab-imgs{grid-template-columns:repeat(3,72px);gap:10px;justify-content:center;padding:20px;} .ctlab-imgs img{width:72px;height:72px;} }
 
 
   /* ようこそポップアップ(初回のみ) */
