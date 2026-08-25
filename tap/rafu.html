@@ -15,7 +15,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   .stage {
-    position:relative; width:min(94vmin,680px); aspect-ratio:1;
+    position:relative; width:min(92vw, 62vh, 560px); aspect-ratio:1;
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; user-select:none;
     transform-origin: 50% 78%;
@@ -54,9 +54,9 @@
     80%  { opacity:1; }
     100% { opacity:0; }
   }
-  .bottom { position:fixed; left:0; right:0; bottom:6%; text-align:center; }
+  /* BOTTOM_FIX */ .bottom { position:fixed; left:0; right:0; bottom:max(12px, env(safe-area-inset-bottom)); text-align:center; z-index:60; padding:8px 8px 6px; pointer-events:none; }
   .hint {
-    display:inline-block; background:#fff; color:#111; font-weight:900;
+    display:inline-block; margin-bottom:4px; background:#fff; color:#111; font-weight:900;
     padding:12px 24px; border-radius:30px; font-size:clamp(14px,3.5vmin,18px);
     box-shadow:0 6px 0 rgba(0,0,0,.12); animation:bob 1.4s ease-in-out infinite;
     transition:opacity .4s;
