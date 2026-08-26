@@ -162,23 +162,23 @@
 const CONFIG = {
   character: "ぶろっくま",                     // 表示名
   shareText: "ぶろっくまがビビッドに色チェンジ🎮 タップして遊んでね #CHARAMARL",
-  baseImage: "art/blockma.png",                 // 透過キーアートPNG（正方形・1080px推奨）
+  baseImage: "art/colors/blockma_orig.png",                 // 透過キーアートPNG（正方形・1080px推奨）
   bg: "#EAF1F6",                            // 初期背景色
-  mode: "char",                             // "char"=キャラの色が変わる / "bg"=背景の色が変わる（黒系キャラ向け）
+  mode: "image",                             // "char"=キャラの色が変わる / "bg"=背景の色が変わる（黒系キャラ向け）
   baseHueOffset: 0,                      // 青い体毛を基準に補正
 
   // mode:"image" のとき使う。事前生成PNG = `${imageDir}/${imageKey}_${key}.png`
   imageDir: "art/colors",
-  imageKey: "sue",
+  imageKey: "blockma",
 
   // 6色パレット（key=画像/色名キー。hue/sat/bri は char モード用）
   palettes: [
-    { key:"orange", name:"ORIGINAL",     hue:0,   sat:1.0, bri:1.0, bg:"#0d0d14" },
-    { key:"pink",   name:"NEON PINK",    hue:300, sat:1.9, bri:1.05, bg:"#003b2e" },
-    { key:"blue",   name:"ELECTRIC BLUE",hue:200, sat:1.9, bri:1.1, bg:"#3b1a00" },
-    { key:"lime",   name:"LIME GREEN",   hue:100, sat:1.9, bri:1.05, bg:"#2b0033" },
-    { key:"purple", name:"ULTRA VIOLET", hue:250, sat:1.8, bri:1.05, bg:"#2e2200" },
-    { key:"yellow", name:"CYBER YELLOW", hue:40,  sat:2.0, bri:1.15, bg:"#001f3a" },
+    { key:"orig",  name:"ORIGINAL",   hue:265, sat:1.0, bri:1.0, bg:"#0d0d14" },
+    { key:"neon",  name:"NEON GREEN", hue:150, sat:1.0, bri:1.0, bg:"#12002b" },
+    { key:"flame", name:"FLAME",      hue:26,  sat:1.0, bri:1.0, bg:"#001a2e" },
+    { key:"ocean", name:"OCEAN",      hue:225, sat:1.0, bri:1.0, bg:"#2b1200" },
+    { key:"candy", name:"CANDY POP",  hue:340, sat:1.0, bri:1.0, bg:"#062b1a" },
+    { key:"gold",  name:"GOLD RUSH",  hue:46,  sat:1.0, bri:1.0, bg:"#001f14" },
   ],
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
@@ -213,9 +213,10 @@ let idx = 0, tapped = false;
 
 function apply(p){
   if(CONFIG.mode === "image"){
-    // 事前生成の鮮やかPNGを差し替え（最も正確）
+    // 事前生成の鮮やかPNGを差し替え（最も正確・主線と白は不変）
     img.style.filter = "none";
     img.src = `${CONFIG.imageDir}/${CONFIG.imageKey}_${p.key}.png`;
+    if(p.bg) document.body.style.background = p.bg;
   } else if(CONFIG.mode === "bg"){
     // 背景の色が変わる（黒系キャラ向け）
     document.body.style.background = `hsl(${p.hue}, 85%, 62%)`;
