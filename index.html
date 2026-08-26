@@ -106,7 +106,19 @@
   .sec-eyebrow{font-size:12px;font-weight:900;letter-spacing:.14em;color:var(--orange);}
   .sec-title{font-size:22px;font-weight:900;margin:4px 0 0;}
   .sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;}
-  .sec-more{font-size:12px;font-weight:800;color:#555;background:#fff;border:1px solid var(--line);border-radius:20px;padding:8px 16px;cursor:pointer;}
+  .sec-more{font-size:12px;font-weight:800;color:#555;background:#fff;border:1px solid var(--line);border-radius:20px;padding:8px 16px;cursor:pointer;text-decoration:none;}
+
+  /* NEW ARRIVALS（新着作品の横スクロール） */
+  .newrow{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;}
+  .newrow::-webkit-scrollbar{height:6px;}
+  .newrow::-webkit-scrollbar-thumb{background:#dcdce4;border-radius:3px;}
+  .newcard{flex:0 0 150px;scroll-snap-align:start;cursor:pointer;}
+  .newcard .ni{position:relative;width:150px;height:150px;border-radius:16px;overflow:hidden;background:#f2f2f6;}
+  .newcard .ni img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s;}
+  .newcard:hover .ni img{transform:scale(1.06);}
+  .newcard .nb{position:absolute;top:8px;left:8px;z-index:2;background:var(--orange);color:#fff;font-size:9px;font-weight:900;letter-spacing:.08em;padding:3px 7px;border-radius:8px;}
+  .newcard .nt{margin-top:8px;font-size:12.5px;font-weight:900;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .newcard .nc{font-size:10.5px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
   /* FEATURED ARTIST */
   .artist-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px;display:grid;grid-template-columns:auto 1.1fr 1.4fr;gap:26px;align-items:center;}
@@ -380,6 +392,15 @@
 <section class="blk" id="artist">
   <div class="sec-head"><div><div class="sec-eyebrow">FEATURED ARTIST</div><h2 class="sec-title">今週の注目アーティスト</h2></div></div>
   <div class="artist-card" id="artistCard"></div>
+</section>
+
+<!-- NEW ARRIVALS -->
+<section class="blk" id="newarrivals" hidden>
+  <div class="sec-head">
+    <div><div class="sec-eyebrow">NEW ARRIVALS</div><h2 class="sec-title">🆕 あたらしく仲間入りした作品</h2></div>
+    <a class="sec-more" href="#discover">すべて見る →</a>
+  </div>
+  <div class="newrow" id="newRow"></div>
 </section>
 
 <!-- COLOR TAP LAB -->
@@ -1247,6 +1268,23 @@
     out.forEach(p=>masonryEl.appendChild(p));
   }
 
+  // 新着作品の横スクロール（掲載しても埋もれる問題への導線）
+  function renderNew(list){
+    const row=document.getElementById('newRow'),sec=document.getElementById('newarrivals');
+    if(!row||!sec)return;
+    const items=[...list].filter(a=>a.ts&&a.img).sort((a,b)=>b.ts-a.ts).slice(0,14);
+    if(items.length<4)return;
+    const WEEK=Date.now()-7*864e5;
+    const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    row.innerHTML=items.map(a=>
+      `<div class="newcard" data-id="${esc(a.id)}"><div class="ni">${a.ts>WEEK?'<span class="nb">NEW</span>':''}<img src="${esc(a.img)}" alt="${esc(a.title)}" loading="lazy"></div><div class="nt">${esc(a.title)}</div><div class="nc">${esc(a.artist)}</div></div>`
+    ).join('');
+    row.addEventListener('click',e=>{
+      const c=e.target.closest('.newcard'); if(c&&c.dataset.id)openArt(c.dataset.id);
+    });
+    sec.hidden=false;
+  }
+
   // ?g=作品ID で該当作品を直接ひらく（共有リンク用）
   function openDeepLink(){
     const gid=new URLSearchParams(location.search).get('g');
@@ -1255,6 +1293,7 @@
   fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
     if(!d.list||!d.list.length){openDeepLink();return;}
     d.list.forEach(addGalleryItem);
+    renderNew(d.list);
     interleaveByArtist();
     decoratePins();
     applyFilters();
