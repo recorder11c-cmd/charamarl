@@ -12,6 +12,7 @@ const ART_IDS = [
 ];
 // カラーリクエスト投票用ID（定番色以外の商品化リクエスト）
 const COLOR_REQ = /^(sue|putti|mossun|gmc|ufoo|dogooooo)_[a-z]{2,15}$/;
+const EXTRA_TAP = /^(crazy_tap)$/;
 const INTEREST = /^(sue|putti|mossun|gmc|ufoo|dogooooo|inkumo|danna)_interest$/;
 const COLOR_IDS = ['sue','putti','mossun','gmc'].flatMap(c =>
   ['red','yellow','green','cyan','blue','pink'].map(k => `${c}_${k}`));
@@ -20,6 +21,7 @@ async function isAllowedId(id) {
   if (ART_IDS.includes(id)) return true;
   if (COLOR_REQ.test(String(id))) return true;
   if (INTEREST.test(String(id))) return true;
+  if (EXTRA_TAP.test(String(id))) return true;
   if (!/^g[a-f0-9]{12}$/.test(String(id))) return false;
   return Number(await redis('SISMEMBER', 'react:extra', id)) === 1;
 }
