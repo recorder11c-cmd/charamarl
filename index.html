@@ -9,7 +9,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CHARAMARL">
 <meta property="og:title" content="CHARAMARL — キャラクターたちが集まる小さな市場">
-<meta property="og:description" content="眺めて、見つけて、♥で応援できるボード型の作品ギャラリー。23組のアーティストが参加中。">
+<meta property="og:description" content="眺めて、見つけて、♥で応援できるボード型の作品ギャラリー。30組以上のアーティストが参加中。">
 <meta property="og:url" content="https://charamarl.com/">
 <meta property="og:image" content="https://charamarl.com/img/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -665,7 +665,7 @@
     <div class="w-ribbon">GRAND OPEN</div>
     <div class="w-logo"><span class="c1">CHARA</span><span class="c2">MARL</span></div>
     <h3>ようこそ、小さな市場へ🎪</h3>
-    <p>キャラクターとアート作品が集まるボード型ギャラリー。<br>23組のアーティストがあなたを待っています。</p>
+    <p>キャラクターとアート作品が集まるボード型ギャラリー。<br><span id="wCount">23</span>組のアーティストがあなたを待っています。</p>
     <div class="w-steps">
       <div class="w-step"><div class="ic">👀</div><div class="tx">眺めて</div></div>
       <div class="w-step"><div class="ic">♥</div><div class="tx">応援して</div></div>
@@ -1294,6 +1294,9 @@
     if(!d.list||!d.list.length){openDeepLink();return;}
     d.list.forEach(addGalleryItem);
     renderNew(d.list);
+    // ようこそモーダルの参加組数を実データで更新
+    const wc=document.getElementById('wCount');
+    if(wc){const s=new Set(d.list.map(a=>a.artist));['DinoRenny','ahoyoung'].forEach(a=>s.add(a));wc.textContent=s.size;}
     interleaveByArtist();
     decoratePins();
     applyFilters();
