@@ -173,12 +173,12 @@ const CONFIG = {
 
   // 6色パレット（key=画像/色名キー。hue/sat/bri は char モード用）
   palettes: [
-    { key:"orange", name:"ORIGINAL",     hue:0,   sat:1.0, bri:1.0 },
-    { key:"pink",   name:"NEON PINK",    hue:300, sat:1.9, bri:1.05 },
-    { key:"blue",   name:"ELECTRIC BLUE",hue:200, sat:1.9, bri:1.1 },
-    { key:"lime",   name:"LIME GREEN",   hue:100, sat:1.9, bri:1.05 },
-    { key:"purple", name:"ULTRA VIOLET", hue:250, sat:1.8, bri:1.05 },
-    { key:"yellow", name:"CYBER YELLOW", hue:40,  sat:2.0, bri:1.15 },
+    { key:"orange", name:"ORIGINAL",     hue:0,   sat:1.0, bri:1.0, bg:"#111111" },
+    { key:"pink",   name:"NEON PINK",    hue:300, sat:1.9, bri:1.05, bg:"#2a0033" },
+    { key:"blue",   name:"ELECTRIC BLUE",hue:200, sat:1.9, bri:1.1, bg:"#001b33" },
+    { key:"lime",   name:"LIME GREEN",   hue:100, sat:1.9, bri:1.05, bg:"#062b00" },
+    { key:"purple", name:"ULTRA VIOLET", hue:250, sat:1.8, bri:1.05, bg:"#12002e" },
+    { key:"yellow", name:"CYBER YELLOW", hue:40,  sat:2.0, bri:1.15, bg:"#332200" },
   ],
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
@@ -221,6 +221,7 @@ function apply(p){
     document.body.style.background = `hsl(${p.hue}, 85%, 62%)`;
   } else {
     // キャラ（帽子・靴などの有彩色）の色が変わる
+    if(p.bg) document.body.style.background = p.bg;
     img.style.setProperty("--hue", (p.hue + CONFIG.baseHueOffset) + "deg");
     img.style.setProperty("--sat", p.sat);
     img.style.setProperty("--bri", p.bri);
