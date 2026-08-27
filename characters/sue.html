@@ -105,6 +105,8 @@
 </div>
 <script>
 const CHAR_ID = "sue", CHAR_NAME = "SUE", PRICE = 1200;
+// FUNNEL_TRACK: カート追加/購入ボタンの回数を匿名計測
+function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}}
 const IMG_DIR = "../img/products";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
 const IMG_ROOT = "/img/products";  // カート/決済用(ルート相対)
 const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];
@@ -135,6 +137,7 @@ async function checkout() {
   const btn = document.getElementById('buyBtn');
   btn.textContent = '処理中...'; btn.disabled = true;
   try {
+    ftrack('buy');
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`] }] }),
@@ -146,6 +149,7 @@ async function checkout() {
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
   if (selected.key !== HERO_COLOR) return;
+  ftrack('cart');
   window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE, `${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });

@@ -102,6 +102,8 @@
 </div>
 <script>
 const CHAR_ID = "danna", CHAR_NAME = "だんな", PRICE = 1200;
+// FUNNEL_TRACK: カート追加/購入ボタンの回数を匿名計測
+function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}}
 const SALE_READY = true; // 本人承認済み(2026-08-22)
 const IMG_PUBLIC = "/img/products_t/danna_blue.png"; // 決済/カート用(ルート相対)
 async function checkout() {
@@ -109,6 +111,7 @@ async function checkout() {
   const btn = document.getElementById('buyBtn');
   btn.textContent = '処理中...'; btn.disabled = true;
   try {
+    ftrack('buy');
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_PUBLIC}`] }] }),
@@ -120,6 +123,7 @@ async function checkout() {
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
   if (!SALE_READY) return;
+  ftrack('cart');
   window.CHARAMARL_CART.add(CHAR_ID, 'blue', CHAR_NAME, 'ORIGINAL', PRICE, IMG_PUBLIC);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
