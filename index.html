@@ -217,6 +217,8 @@
   .act-visit{top:10px;left:10px;background:#fff;color:#111;}
   .act-buy{top:10px;right:10px;background:var(--orange);color:#fff;}
   .act-tap{bottom:10px;left:10px;background:#fff;color:#111;}
+  .sale-badge{position:absolute;top:10px;left:10px;z-index:3;background:var(--orange);color:#fff;font-size:10px;font-weight:900;letter-spacing:.04em;padding:4px 9px;border-radius:9px;pointer-events:none;}
+  .pin:hover .sale-badge{opacity:0;}
   .act-share{bottom:10px;right:10px;background:#fff;color:#111;width:36px;height:36px;padding:0;justify-content:center;border-radius:50%;font-size:14px;}
   .pin-body{padding:8px 4px 2px;}
   .pin-cat{display:none;} /* 絵を主役に: カテゴリ行は非表示(検索・絞り込みはDOMを読むので残す) */
@@ -326,6 +328,7 @@
 </style>
 <link rel="stylesheet" href="cart.css">
 <script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/ga.js"></script>
 </head>
 <body>
 
@@ -394,6 +397,10 @@
   <div class="artist-card" id="artistCard"></div>
 </section>
 
+<div style="max-width:1180px;margin:18px auto 0;padding:0 24px;">
+  <a id="shopEntry" href="#discover" style="display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;border-radius:28px;background:#1a1a26;color:#fff;font-size:15px;font-weight:900;text-decoration:none;">🛒 今買えるキャラクターを見る <span style="opacity:.6;font-size:12px;">全10商品・税込送料込 ¥1,200</span> →</a>
+</div>
+
 <!-- NEW ARRIVALS -->
 <section class="blk" id="newarrivals" hidden>
   <div class="sec-head">
@@ -459,96 +466,96 @@
 
     <div class="pin" data-char="sue" data-color="red">
       <div class="pin-img prod"><img src="./img/products_t/sue_red.png" alt="SUE アクリルキーホルダー">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">SUE アクキー</div><div class="pin-sub"><span class="av"></span>DinoRenny</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin" data-char="putti" data-color="yellow">
       <div class="pin-img prod"><img src="./img/products_t/putti_yellow.png" alt="PUTTI アクリルキーホルダー">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">PUTTI アクキー</div><div class="pin-sub"><span class="av"></span>DinoRenny</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin prodlink" data-href="./characters/yurucrazy.html" data-tap="./tap/yurucrazy.html" data-pname="ユルクレイジー アクキー">
       <div class="pin-img prod"><img src="./img/products_t/yurucrazy.png" alt="ユルクレイジー アクリルキーホルダー">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">ユルクレイジー アクキー</div><div class="pin-sub"><span class="av"></span>CRAZY</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin prodlink" data-href="./characters/blockma.html" data-tap="./tap/blockma.html" data-pname="ぶろっくま アクキー">
       <div class="pin-img prod"><img src="./img/products_t/blockma.png" alt="ぶろっくま アクリルキーホルダー">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">ぶろっくま アクキー</div><div class="pin-sub"><span class="av"></span>チンチロ</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin" data-char="mossun" data-color="blue">
       <div class="pin-img prod"><img src="./img/products_t/mossun_blue.png" alt="MOSSUN アクリルキーホルダー">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">MOSSUN アクキー</div><div class="pin-sub"><span class="av"></span>DinoRenny</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin art gmc" data-art="gmc" data-site="./characters/gmc.html" data-tap="./tap/gmc.html" data-title="レコマル" data-creator="MARU">
       <div class="pin-img prod"><img src="./img/gallery/gmc.png" alt="レコマル">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">CHARACTER</div><div class="pin-title">レコマル</div><div class="pin-sub"><span class="av"></span>MARU</div></div>
     </div>
 
     <div class="pin art" data-art="sue" data-site="./characters/sue.html" data-tap="https://dinorenny-colortap.vercel.app/sue.html">
       <div class="pin-img prod"><img src="./img/colors_nobg/sue_red.png" alt="SUE">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">CHARACTER</div><div class="pin-title">SUE</div><div class="pin-sub"><span class="av"></span>DinoRenny</div></div>
     </div>
 
     <div class="pin art" data-art="putti" data-site="./characters/putti.html" data-tap="https://dinorenny-colortap.vercel.app/putti.html">
       <div class="pin-img prod"><img src="./img/colors_nobg/putti_yellow.png" alt="PUTTI">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">CHARACTER</div><div class="pin-title">PUTTI</div><div class="pin-sub"><span class="av"></span>DinoRenny</div></div>
     </div>
 
     <div class="pin art" data-art="mossun" data-site="./characters/mossun.html" data-tap="https://dinorenny-colortap.vercel.app/mossun.html">
       <div class="pin-img prod"><img src="./img/colors_nobg/mossun_blue.png" alt="MOSSUN">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">CHARACTER</div><div class="pin-title">MOSSUN</div><div class="pin-sub"><span class="av"></span>DinoRenny</div></div>
     </div>
 
     <div class="pin prodlink" data-href="./characters/gmc.html" data-tap="./tap/gmc.html" data-pname="レコマル アクキー">
       <div class="pin-img prod"><img src="./img/products_t/gmc_red.png" alt="レコマル アクリルキーホルダー">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">レコマル アクキー</div><div class="pin-sub"><span class="av"></span>MARU</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin prodlink" data-href="./characters/ufoo.html" data-tap="./tap/ufoo.html" data-pname="う〜ほ〜 アクキー">
       <div class="pin-img prod"><img src="./img/products_t/ufoo_white.png" alt="う〜ほ〜 アクリルキーホルダー">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">う〜ほ〜 アクキー</div><div class="pin-sub"><span class="av"></span>ちゅい</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin prodlink" data-href="./characters/inkumo.html" data-tap="./tap/inkumo.html" data-pname="インクモ アクキー">
       <div class="pin-img prod"><img src="./img/products_t/inkumo_mono.png" alt="インクモ アクリルキーホルダー" loading="lazy">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div></div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">インクモ アクキー</div><div class="pin-sub"><span class="av"></span>Ink'z Monster</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin prodlink" data-href="./characters/danna.html" data-pname="だんな アクキー">
       <div class="pin-img prod"><img src="./img/products_t/danna_blue.png" alt="だんな アクリルキーホルダー" loading="lazy">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-share" data-act="share">🚀</button></div></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-share" data-act="share">🚀</button></div></div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">だんな アクキー</div><div class="pin-sub"><span class="av"></span>赤猫かるま</div><div class="pin-price">¥1,200</div></div>
     </div>
 
     <div class="pin prodlink" data-href="./characters/dogooooo.html" data-tap="./tap/dogooooo.html" data-pname="dogooooo アクキー">
       <div class="pin-img prod"><img src="./img/products_t/dogooooo_pink.png" alt="dogooooo アクリルキーホルダー">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-buy" data-act="buy">⚡ Buy</button><button class="act act-tap" data-act="tap">🎨 Tap</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-buy" data-act="buy">🛒 購入</button><button class="act act-tap" data-act="tap">🎨 遊ぶ</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">PRODUCT</div><div class="pin-title">dogooooo アクキー</div><div class="pin-sub"><span class="av"></span>SAYoooooh</div><div class="pin-price">¥1,200</div></div>
     </div>
@@ -556,14 +563,14 @@
 
     <div class="pin art" data-site="https://thedinorenny.online">
       <div class="pin-img"><img src="./img/gallery/gallery_roar.png" alt="ROAR!">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">ARTWORK</div><div class="pin-title">ROAR!</div><div class="pin-sub"><span class="av"></span>ahoyoung</div></div>
     </div>
 
     <div class="pin art" data-site="https://thedinorenny.online">
       <div class="pin-img"><img src="./img/gallery/gallery_worldcup.png" alt="WORLD CUP EDITION">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">ARTWORK</div><div class="pin-title">WORLD CUP EDITION</div><div class="pin-sub"><span class="av"></span>DinoRenny</div></div>
     </div>
@@ -571,7 +578,7 @@
 
     <div class="pin art" data-site="https://thedinorenny.online">
       <div class="pin-img"><img src="./img/gallery/gallery_nodino.png" alt="NO DINO NO LIFE">
-        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ Visit</button><button class="act act-share" data-act="share">🚀</button></div>
+        <div class="pin-actions"><button class="act act-visit" data-act="visit">↗ 見る</button><button class="act act-share" data-act="share">🚀</button></div>
       </div>
       <div class="pin-body"><div class="pin-cat">ARTWORK</div><div class="pin-title">NO DINO NO LIFE</div><div class="pin-sub"><span class="av"></span>ahoyoung</div></div>
     </div>
@@ -1260,7 +1267,7 @@
     if(a.ts)div.dataset.ts=a.ts;
     if(a.link)div.dataset.site=a.link;
     div.innerHTML=`<div class="pin-img"><img src="${esc(a.img)}" alt="${esc(a.title)}" loading="lazy">
-        <div class="pin-actions">${a.link?'<button class="act act-visit" data-act="visit">↗ Visit</button>':''}<button class="act act-share" data-act="share">🚀</button></div></div>
+        <div class="pin-actions">${a.link?'<button class="act act-visit" data-act="visit">↗ 見る</button>':''}<button class="act act-share" data-act="share">🚀</button></div></div>
       <div class="pin-body"><div class="pin-cat">${esc(a.cat||'ARTWORK')}</div><div class="pin-title">${esc(a.title)}</div><div class="pin-sub"><span class="av"></span>${esc(a.artist)}</div></div>`;
     masonryEl.appendChild(div);
     wireArtPin(div,a.id);
@@ -1348,6 +1355,22 @@
     ).join('');
   }
   renderRanking();
+
+  // 販売中バッジ(価格つきピン=商品)を自動付与
+  document.querySelectorAll('.pin').forEach(p=>{
+    if(p.querySelector('.pin-price')&&!p.querySelector('.sale-badge')){
+      const b=document.createElement('div');b.className='sale-badge';b.textContent='🛒 販売中';
+      const im=p.querySelector('.pin-img');if(im)im.appendChild(b);
+    }
+  });
+  // トップの「今買える」入口 → PRODUCTタブを開く
+  const se=document.getElementById('shopEntry');
+  if(se)se.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=document.querySelector('.tab[data-cat="PRODUCT"]');if(t)t.click();
+    document.getElementById('discover').scrollIntoView({behavior:'smooth'});
+    if(window.cmEvent)cmEvent('click_shop_entry',{});
+  });
 
   // ===== アカウント（ヘッダーのアバター）=====
   let cmUser=null;

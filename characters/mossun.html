@@ -58,6 +58,7 @@
 </style>
 <link rel="stylesheet" href="../cart.css">
 <script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/ga.js"></script>
 </head>
 <body>
 <header>
@@ -76,6 +77,12 @@
     <h1>MOSSUN</h1>
     <div class="char-creator">by DinoRenny (@dino_renny)</div>
     <p class="char-desc">海を泳ぐモササウルス「MOSSUN」。<br>クールな表情と力強い存在感が魅力のキャラクターです。<br><br>全6色から選べる、ビビッドカラーのアクリルキーホルダー。お気に入りのカラーを見つけて、自分だけの一匹をコレクションしよう。</p>
+    <div class="asr-block" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 16px;font-size:11.5px;font-weight:700;line-height:1.6;">
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🛒 <b>¥1,200</b> 税込・送料込<br><span style="opacity:.7;">8/31受注分まで（9月から¥1,500）</span></div>
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">📦 受注生産<br><span style="opacity:.7;">毎月末締め・翌月中旬発送</span></div>
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">📱 NFCタグ内蔵<br><span style="opacity:.7;">かざすとキャラページが開く</span></div>
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🤝 売上は作家さんと折半<br><span style="opacity:.7;">実費を除いた粗利を分配</span></div>
+    </div>
     <div class="selected-color-label" id="selectedLabel">BLAZE RED</div>
     <div><a href="https://dinorenny-colortap.vercel.app/mossun.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(162,89,255,.12);border:1px solid rgba(162,89,255,.4);color:var(--accent2);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎨 COLOR TAP で遊ぶ</a></div>
     <div style="margin-top:12px;"><button class="like-btn" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span><span>いいね</span><b class="num" id="likeCt"></b></button></div>
@@ -106,7 +113,9 @@
 <script>
 const CHAR_ID = "mossun", CHAR_NAME = "MOSSUN", PRICE = 1200;
 // FUNNEL_TRACK: カート追加/購入ボタンの回数を匿名計測
-function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}}
+function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}
+  if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{character:CHAR_ID,price:PRICE});}
+setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{character:CHAR_ID,price:PRICE});},400);
 const IMG_DIR = "../img/products";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
 const IMG_ROOT = "/img/products";  // カート/決済用(ルート相対)
 const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];
