@@ -1,6 +1,6 @@
 // CHARAMARL 計測 (GA4)
 // 測定ID(G-XXXXXXXXXX)をセットすると有効化。空なら何もしない(検算用Redisカウンターは別系統で常時動作)
-window.CM_GA_ID = '';
+window.CM_GA_ID = 'G-PMSD6TMSJW';
 (function(){
   var id = window.CM_GA_ID; if(!id) return;
   var s=document.createElement('script'); s.async=true;
