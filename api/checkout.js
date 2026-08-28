@@ -14,6 +14,7 @@ module.exports = async (req, res) => {
 
   try {
     const session = await stripe.checkout.sessions.create({
+      allow_promotion_codes: true,
       payment_method_types: ['card'],
       line_items: items.map(item => ({
         price_data: {
