@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
     const amount = Number(b.amount) || 100;
     const code = String(b.code || 'THANKS100').toUpperCase();
     const coupon = await stripe.coupons.create({ amount_off: amount, currency: 'jpy', duration: 'once', name: `¥${amount}引き` });
-    const promo = await stripe.promotionCodes.create({ coupon: coupon.id, code, max_redemptions: Number(b.max) || 50 });
+    const promo = await stripe.promotionCodes.create({ promotion: { type: 'coupon', coupon: coupon.id }, code, max_redemptions: Number(b.max) || 50 });
     return res.status(200).json({ ok: true, code: promo.code, amount_off: amount, max: promo.max_redemptions });
   } catch (e) {
     return res.status(500).json({ error: String((e && e.message) || e) });
