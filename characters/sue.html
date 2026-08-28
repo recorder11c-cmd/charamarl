@@ -112,10 +112,11 @@
 </div>
 <script>
 const CHAR_ID = "sue", CHAR_NAME = "SUE", PRICE = 1200;
+const ARTIST_ID = "dinorenny";
 // FUNNEL_TRACK: カート追加/購入ボタンの回数を匿名計測
 function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}
-  if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{character:CHAR_ID,price:PRICE});}
-setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{character:CHAR_ID,price:PRICE});},400);
+  if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});}
+setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});},400);
 const IMG_DIR = "../img/products";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
 const IMG_ROOT = "/img/products";  // カート/決済用(ルート相対)
 const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];

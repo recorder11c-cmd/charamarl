@@ -97,7 +97,7 @@ const wrapEl = document.getElementById('prods');
 wrapEl.innerHTML = PRODUCTS.map((p,i)=>
   `<div class="prod${i===0?' on':''}" data-i="${i}"><img src="${p.img}" alt=""><div><div class="nm">${p.name}</div><div class="cr">by ${p.cr}</div></div></div>`).join('');
 function text(p){
-  const url = BASE + p.page.replace('./','');
+  const url = BASE + p.page.replace('./','') + '?utm_source=x&utm_medium=artist_social&utm_campaign=opening_price_end&utm_content=' + p.id;
   return `${p.name}のアクリルキーホルダー、CHARAMARLで受注販売中です🎪\n`
     + `裏面にNFCタグが入っていて、スマホでかざすと${p.name}のページがひらきます📱\n\n`
     + `▶ ${url}\n\n`

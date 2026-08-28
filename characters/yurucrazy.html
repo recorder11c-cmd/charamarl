@@ -113,10 +113,11 @@
 </div>
 <script>
 const CHAR_ID = "yurucrazy", CHAR_NAME = "ユルクレイジー", PRICE = 1200;
+const ARTIST_ID = "crazy";
 // FUNNEL_TRACK: カート追加/購入ボタンの回数を匿名計測
 function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}
-  if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{character:CHAR_ID,price:PRICE});}
-setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{character:CHAR_ID,price:PRICE});},400);
+  if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});}
+setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});},400);
 const SALE_READY = true; // 本人承認済み(2026-08-27)
 const IMG_PUBLIC = "/img/products_t/yurucrazy.png"; // 決済/カート用(ルート相対)
 async function checkout() {

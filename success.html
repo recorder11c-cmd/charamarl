@@ -26,7 +26,13 @@
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/js/ga.js"></script>
-<script>setTimeout(function(){if(window.cmEvent)cmEvent("purchase",{});},600);</script>
+<script>setTimeout(function(){try{
+  var sid=new URLSearchParams(location.search).get('sid')||('nosid_'+Date.now());
+  var seen=JSON.parse(localStorage.getItem('cm_purchased')||'[]');
+  if(seen.indexOf(sid)>=0)return;
+  seen.push(sid);localStorage.setItem('cm_purchased',JSON.stringify(seen.slice(-20)));
+  if(window.cmEvent)cmEvent('purchase',{transaction_id:sid,currency:'JPY'});
+}catch(e){}},600);</script>
 </head>
 <body>
 <div class="wrap">

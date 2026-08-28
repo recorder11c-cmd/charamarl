@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
         quantity: item.quantity,
       })),
       mode: 'payment',
-      success_url: successUrl || `${base}/success.html`,
+      success_url: successUrl || `${base}/success.html?sid={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${base}/cancel.html`,
       shipping_address_collection: {
         allowed_countries: ['JP'],
