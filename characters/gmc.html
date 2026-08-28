@@ -160,8 +160,7 @@ async function checkout() {
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
   if (!SALE_READY || selected.key !== HERO_COLOR) return;
-  ftrack('cart');
-  window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE, `${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`);
+    window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE, `${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
 

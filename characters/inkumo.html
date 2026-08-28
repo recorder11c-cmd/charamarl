@@ -134,8 +134,7 @@ async function checkout() {
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
   if (!SALE_READY) return;
-  ftrack('cart');
-  window.CHARAMARL_CART.add(CHAR_ID, 'mono', CHAR_NAME, 'ORIGINAL', PRICE, IMG_PUBLIC);
+    window.CHARAMARL_CART.add(CHAR_ID, 'mono', CHAR_NAME, 'ORIGINAL', PRICE, IMG_PUBLIC);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
 function applySale(){
