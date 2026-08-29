@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>カゲチヨ フルグラフィックパーカー — CHARAMARL</title>
+<style>
+
+  :root {
+    --bg:#0e0e14; --surface:#1a1a26; --card:#1f1f2e;
+    --accent:#f5c842; --accent2:#a259ff; --text:#f0f0f0; --muted:#777; --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:rgba(14,14,20,.92);backdrop-filter:blur(12px);z-index:100;}
+  .logo{font-size:22px;font-weight:900;letter-spacing:.1em;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;}
+  .back{color:var(--muted);text-decoration:none;font-size:13px;letter-spacing:.06em;}
+  .back:hover{color:var(--text);}
+  .char-hero{display:grid;grid-template-columns:1fr 1fr;gap:48px;max-width:1000px;margin:0 auto;padding:60px 32px 40px;align-items:center;}
+  @media(max-width:640px){.char-hero{grid-template-columns:1fr;padding:32px 20px 24px;}}
+  .char-visual{border-radius:24px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.4);transition:box-shadow .4s;}
+  .char-visual img{width:88%;height:88%;object-fit:contain;}
+  .view-thumbs{display:flex;gap:10px;margin-top:12px;justify-content:center;}
+  .view-thumb{width:72px;height:72px;border-radius:14px;overflow:hidden;background:#fff;border:2px solid transparent;cursor:pointer;padding:0;}
+  .view-thumb img{width:100%;height:100%;object-fit:contain;}
+  .view-thumb.selected{border-color:var(--accent);}
+  .char-info .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+  .tag{background:rgba(255,255,255,.07);color:var(--muted);font-size:11px;padding:4px 12px;border-radius:12px;letter-spacing:.04em;}
+  .char-info h1{font-size:clamp(32px,6vw,52px);font-weight:900;letter-spacing:.04em;margin-bottom:8px;}
+  .char-creator{color:var(--muted);font-size:13px;letter-spacing:.08em;margin-bottom:20px;}
+  .char-desc{color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:16px;}
+  .size-row{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 8px;}
+  .size-btn{min-width:56px;padding:10px 0;border-radius:14px;border:2px solid rgba(255,255,255,.18);background:var(--card);color:var(--text);font-weight:900;font-size:14px;cursor:pointer;transition:border-color .2s,transform .15s;}
+  .size-btn:hover{transform:translateY(-2px);}
+  .size-btn.selected{border-color:var(--accent);color:var(--accent);}
+  .size-note{font-size:10.5px;color:var(--muted);margin-bottom:16px;}
+  section{max-width:1000px;margin:0 auto;padding:0 32px 60px;}
+  .buy-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(14,14,20,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.1);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:200;}
+  .buy-bar-info{font-size:13px;color:var(--muted);}
+  .buy-bar-info strong{color:var(--text);font-size:16px;display:block;}
+  .buy-btn{background:var(--accent);color:#111;border:none;border-radius:32px;padding:14px 40px;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.06em;transition:opacity .2s;white-space:nowrap;}
+  .buy-btn:disabled{background:#333;color:var(--muted);cursor:default;}
+  .buy-btn:not(:disabled):hover{opacity:.85;}
+  @media(max-width:560px){
+    .buy-bar{flex-direction:column;align-items:stretch;gap:10px;padding:12px 14px;}
+    .buy-bar-info{text-align:center;}
+    .buy-bar > div{display:flex;gap:8px;}
+    .buy-bar #addCartBtn,.buy-bar .buy-btn{flex:1;padding:13px 8px !important;}
+  }
+  footer{border-top:1px solid rgba(255,255,255,.08);padding:32px;text-align:center;color:var(--muted);font-size:12px;margin-bottom:120px;}
+
+</style>
+<link rel="stylesheet" href="../cart.css">
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/ga.js"></script>
+</head>
+<body>
+<header>
+  <a class="logo" href="../index.html">CHARAMARL</a>
+  <div style="display:flex; align-items:center; gap:18px;">
+    <a class="back" href="../index.html">← キャラクター一覧</a>
+    <span data-cart-mount></span>
+  </div>
+</header>
+<div class="char-hero">
+  <div>
+    <div class="char-visual" id="charVisual">
+      <img src="../img/products_t/kagechiyo_hoodie_front.png" alt="カゲチヨ フルグラフィックパーカー(前面)" id="charImg">
+    </div>
+    <div class="view-thumbs">
+      <button class="view-thumb selected" type="button" data-img="../img/products_t/kagechiyo_hoodie_front.png" aria-label="前面"><img src="../img/products_t/kagechiyo_hoodie_front.png" alt="前面"></button>
+      <button class="view-thumb" type="button" data-img="../img/products_t/kagechiyo_hoodie_back.png" aria-label="背面"><img src="../img/products_t/kagechiyo_hoodie_back.png" alt="背面"></button>
+    </div>
+  </div>
+  <div class="char-info">
+    <div class="tag-row"><span class="tag">カゲチヨ</span><span class="tag">フルグラフィックパーカー</span><span class="tag">全面昇華プリント</span><span class="tag">受注生産</span></div>
+    <h1>カゲチヨ<br>フルグラフィックパーカー</h1>
+    <div class="char-creator">by カゲチヨ</div>
+    <p class="char-desc">カゲチヨの世界観を、一着まるごとに落とし込んだフルグラフィックパーカー。<br>胸元に走る心電図ライン、左袖のむらさきの稲妻、フードから肩へ流れる差し色。<br>近くで見た人だけが気づく仕掛けを、全面昇華プリントで再現しています。<br><br>本人監修デザイン・受注生産。ご注文をいただいてから1着ずつ製造します。</p>
+    <div class="asr-block" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 16px;font-size:11.5px;font-weight:700;line-height:1.6;">
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🛒 <b>¥14,800</b> 税込・送料込</div>
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">📦 受注生産<br><span style="opacity:.7;">ご注文後に1着ずつ製造</span></div>
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🎨 全面昇華プリント<br><span style="opacity:.7;">袖・フードまでフルグラフィック</span></div>
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🤝 売上は作家さんと折半<br><span style="opacity:.7;">実費を除いた粗利を分配</span></div>
+    </div>
+    <div style="font-size:13px;font-weight:800;letter-spacing:.06em;margin-bottom:8px;">サイズ</div>
+    <div class="size-row" id="sizeRow"></div>
+    <div class="size-note">※画像は製造データの3Dプレビューです。実物写真は初回製造分の検品後に掲載します。</div>
+  </div>
+</div>
+<section style="padding-top:0;">
+  <div style="font-size:11.5px;color:var(--muted);line-height:1.9;border:1px dashed rgba(255,255,255,.22);border-radius:14px;padding:14px 18px;">
+    <b style="color:var(--text);">価格について</b> — CHARAMARLのグッズは受注生産の小ロットで丁寧に作っており、売上の一部はアーティスト本人に直接還元されます。「安く大量に」ではなく「欲しい人に届いて、作り手が続けられる」価格設定です。<br>
+    <b style="color:var(--text);">受注生産について</b> — 在庫を持たず、ご注文をいただいてから1着ずつ製造する方式です。1着ごとに検品してお届けします。
+  </div>
+</section>
+<footer>© 2026 CHARAMARL / カゲチヨ. All rights reserved.</footer>
+<div class="buy-bar">
+  <div class="buy-bar-info">
+    <strong>カゲチヨ フルグラフィックパーカー</strong>
+    全面昇華プリント・受注生産<br><span style="font-size:10px;opacity:.75;">ご注文後に1着ずつ製造してお届けします</span>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <button id="addCartBtn" style="background:#fff; border:2px solid var(--accent); color:var(--accent); border-radius:32px; padding:13px 22px; font-size:14px; font-weight:900; cursor:pointer; white-space:nowrap;">🛍 カートに追加</button>
+    <button class="buy-btn" id="buyBtn" onclick="checkout()">今すぐ購入 →</button>
+  </div>
+</div>
+<script>
+const CHAR_ID = "kagechiyo_hoodie", CHAR_NAME = "カゲチヨ", PRICE = 14800;
+const ARTIST_ID = "kagechiyo";
+const PRODUCT_LABEL = "カゲチヨ フルグラフィックパーカー";
+const SIZES = ["S","M","L","XL"];
+let selectedSize = "M";
+const SALE_READY = false; // 本人最終確認中(2026-08-30ページ作成)。OKが出たらtrueへ
+const IMG_PUBLIC = "/img/products_t/kagechiyo_hoodie_front.png"; // 決済/カート用(ルート相対)
+
+// FUNNEL_TRACK: カート追加/購入ボタンの回数を匿名計測
+function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}
+  if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{item_id:CHAR_ID+'_hoodie',item_name:PRODUCT_LABEL,character_id:'kagechiyo',artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});}
+setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{item_id:CHAR_ID+'_hoodie',item_name:PRODUCT_LABEL,character_id:'kagechiyo',artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});},400);
+
+// サイズ選択
+(function(){
+  const row=document.getElementById('sizeRow');
+  SIZES.forEach(s=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='size-btn'+(s===selectedSize?' selected':'');b.textContent=s;
+    b.addEventListener('click',()=>{selectedSize=s;row.querySelectorAll('.size-btn').forEach(x=>x.classList.toggle('selected',x.textContent===s));updateBar();});
+    row.appendChild(b);
+  });
+})();
+function updateBar(){
+  const info=document.querySelector('.buy-bar-info strong');
+  if(info)info.textContent=PRODUCT_LABEL+'('+selectedSize+')';
+}
+
+// 前面/背面切り替え
+document.querySelectorAll('.view-thumb').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.getElementById('charImg').src=t.dataset.img;
+    document.querySelectorAll('.view-thumb').forEach(x=>x.classList.toggle('selected',x===t));
+  });
+});
+
+async function checkout() {
+  if (!SALE_READY) return;
+  const btn = document.getElementById('buyBtn');
+  btn.textContent = '処理中...'; btn.disabled = true;
+  try {
+    ftrack('buy');
+    const res = await fetch('/api/checkout', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ items: [{ name:`${PRODUCT_LABEL}(${selectedSize})`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_PUBLIC}`] }] }),
+    });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; }
+    else { alert('エラー: '+(data.error||'不明')); btn.textContent='今すぐ購入 →'; btn.disabled=false; }
+  } catch(e) { alert('通信エラー'); btn.textContent='今すぐ購入 →'; btn.disabled=false; }
+}
+document.getElementById('addCartBtn').addEventListener('click', function(){
+  if (!SALE_READY) return;
+  // カート計測(_cart / add_to_cart)は cart.js 側で一元発火(2026-08-29集約)
+  window.CHARAMARL_CART.add(CHAR_ID, selectedSize.toLowerCase(), PRODUCT_LABEL, selectedSize, PRICE, IMG_PUBLIC);
+  const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
+});
+function applySale(){
+  const bb=document.getElementById('buyBtn');
+  bb.disabled=!SALE_READY;
+  bb.textContent=SALE_READY?'今すぐ購入 →':'🛠 本人最終確認中・まもなく受注開始';
+  document.getElementById('addCartBtn').style.display=SALE_READY?'':'none';
+}
+applySale();
+</script>
+<script src="../cart.js"></script>
+</body>
+</html>
