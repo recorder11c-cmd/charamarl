@@ -65,11 +65,13 @@
 <div class="char-hero">
   <div>
     <div class="char-visual" id="charVisual">
-      <img src="../img/products_t/kagechiyo_hoodie_front.png" alt="カゲチヨ フルグラフィックパーカー(前面)" id="charImg">
+      <img src="../img/products_t/kagechiyo_hoodie_flat.jpg" alt="カゲチヨ フルグラフィックパーカー(前面・背面)" id="charImg">
     </div>
     <div class="view-thumbs">
-      <button class="view-thumb selected" type="button" data-img="../img/products_t/kagechiyo_hoodie_front.png" aria-label="前面"><img src="../img/products_t/kagechiyo_hoodie_front.png" alt="前面"></button>
-      <button class="view-thumb" type="button" data-img="../img/products_t/kagechiyo_hoodie_back.png" aria-label="背面"><img src="../img/products_t/kagechiyo_hoodie_back.png" alt="背面"></button>
+      <button class="view-thumb selected" type="button" data-img="../img/products_t/kagechiyo_hoodie_flat.jpg" aria-label="商品(前面・背面)"><img src="../img/products_t/kagechiyo_hoodie_flat.jpg" alt="商品"></button>
+      <button class="view-thumb" type="button" data-img="../img/products_t/kagechiyo_hoodie_model.jpg" aria-label="着用イメージ"><img src="../img/products_t/kagechiyo_hoodie_model.jpg" alt="着用"></button>
+      <button class="view-thumb" type="button" data-img="../img/products_t/kagechiyo_hoodie_street1.jpg" aria-label="着用イメージ(ストリート)"><img src="../img/products_t/kagechiyo_hoodie_street1.jpg" alt="ストリート"></button>
+      <button class="view-thumb" type="button" data-img="../img/products_t/kagechiyo_hoodie_street2.jpg" aria-label="着用イメージ(夜)"><img src="../img/products_t/kagechiyo_hoodie_street2.jpg" alt="夜"></button>
     </div>
   </div>
   <div class="char-info">
@@ -85,7 +87,7 @@
     </div>
     <div style="font-size:13px;font-weight:800;letter-spacing:.06em;margin-bottom:8px;">サイズ</div>
     <div class="size-row" id="sizeRow"></div>
-    <div class="size-note">※画像は製造データの3Dプレビューです。実物写真は初回製造分の検品後に掲載します。</div>
+    <div class="size-note">※画像は着用イメージ(モック)です。実物の写真は初回製造分の検品後に掲載します。</div>
   </div>
 </div>
 <section style="padding-top:0;">
@@ -112,7 +114,7 @@ const PRODUCT_LABEL = "カゲチヨ フルグラフィックパーカー";
 const SIZES = ["S","M","L","XL"];
 let selectedSize = "M";
 const SALE_READY = false; // 本人最終確認中(2026-08-30ページ作成)。OKが出たらtrueへ
-const IMG_PUBLIC = "/img/products_t/kagechiyo_hoodie_front.png"; // 決済/カート用(ルート相対)
+const IMG_PUBLIC = "/img/products_t/kagechiyo_hoodie_flat.jpg"; // 決済/カート用(ルート相対)
 
 // FUNNEL_TRACK: カート追加/購入ボタンの回数を匿名計測
 function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}
