@@ -85,7 +85,7 @@
     try{ cart.forEach(function(i){ fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({id:i.char+'_buy',type:'like',op:'add'})}); }); }catch(e){}
     if(window.cmEvent)cmEvent('begin_checkout',{currency:'JPY',
-      value: cart.reduce(function(a,i){return a+(i.price||1200)*(i.qty||1);},0),
+      value: cart.reduce(function(a,i){return a+(i.price||1500)*(i.qty||1);},0),
       items: cart.map(function(i){return {item_id:i.char+'_keyring',item_name:i.name,character_id:i.char,price:i.price,quantity:i.qty};})});
     try{
       const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -101,13 +101,13 @@
     add(char, color, name, colorName, price, imgPath){
       const cart=get(); const id=char+'_'+color;
       const ex=cart.find(i=>i.id===id);
-      if(ex) ex.qty++; else cart.push({ id, char, color, name, colorName, price:price||1200, qty:1, img:imgPath||null });
+      if(ex) ex.qty++; else cart.push({ id, char, color, name, colorName, price:price||1500, qty:1, img:imgPath||null });
       save(cart);
       // 計測(全経路をここに集約: 商品ページ / トップのモーダル 両方)
       try{ fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({id:char+'_cart',type:'like',op:'add'})}); }catch(e){}
       if(window.cmEvent)cmEvent('add_to_cart',{item_id:char+'_keyring',item_name:(name||char)+' アクリルキーホルダー',
-        character_id:char,price:price||1200,quantity:1,currency:'JPY'});
+        character_id:char,price:price||1500,quantity:1,currency:'JPY'});
     },
     open: openCart
   };
