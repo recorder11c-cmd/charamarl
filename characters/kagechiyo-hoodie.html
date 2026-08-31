@@ -85,9 +85,12 @@
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🎨 全面昇華プリント<br><span style="opacity:.7;">袖・フードまでフルグラフィック</span></div>
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🤝 売上は作家さんと折半<br><span style="opacity:.7;">実費を除いた粗利を分配</span></div>
     </div>
-    <div style="font-size:13px;font-weight:800;letter-spacing:.06em;margin-bottom:8px;">サイズ</div>
-    <div class="size-row" id="sizeRow"></div>
-    <div class="size-note">※画像は着用イメージ(モック)です。実物の写真は初回製造分の検品後に掲載します。</div>
+    <div style="font-size:13px;font-weight:800;letter-spacing:.06em;margin-bottom:8px;">サイズ — M(ワンサイズ)</div>
+    <table style="width:100%;max-width:360px;border-collapse:collapse;font-size:12px;text-align:center;margin-bottom:6px;">
+      <tr style="color:var(--muted);"><th style="padding:4px;border-bottom:1px solid rgba(255,255,255,.15);">身丈</th><th style="padding:4px;border-bottom:1px solid rgba(255,255,255,.15);">身幅</th><th style="padding:4px;border-bottom:1px solid rgba(255,255,255,.15);">肩幅</th><th style="padding:4px;border-bottom:1px solid rgba(255,255,255,.15);">袖丈</th></tr>
+      <tr style="font-weight:800;"><td style="padding:6px 4px;">約67cm</td><td style="padding:6px 4px;">約58cm</td><td style="padding:6px 4px;">約50cm</td><td style="padding:6px 4px;">約64cm</td></tr>
+    </table>
+    <div class="size-note">素材: ポリエステル100%(昇華転写プリント) ※寸法はメーカー提供情報のため若干の個体差があります。<br>※画像は着用イメージ(モック)です。実物の写真は初回製造分の検品後に掲載します。</div>
   </div>
 </div>
 <section style="padding-top:0;">
@@ -100,7 +103,7 @@
 <div class="buy-bar">
   <div class="buy-bar-info">
     <strong>カゲチヨ フルグラフィックパーカー</strong>
-    全面昇華プリント・受注生産<br><span style="font-size:10px;opacity:.75;">ご注文後に1着ずつ製造してお届けします</span>
+    全面昇華プリント・M(ワンサイズ)・受注生産<br><span style="font-size:10px;opacity:.75;">ご注文後に1着ずつ製造してお届けします</span>
   </div>
   <div style="display:flex; gap:10px; align-items:center;">
     <button id="addCartBtn" style="background:#fff; border:2px solid var(--accent); color:var(--accent); border-radius:32px; padding:13px 22px; font-size:14px; font-weight:900; cursor:pointer; white-space:nowrap;">🛍 カートに追加</button>
@@ -111,8 +114,7 @@
 const CHAR_ID = "kagechiyo_hoodie", CHAR_NAME = "カゲチヨ", PRICE = 14800;
 const ARTIST_ID = "kagechiyo";
 const PRODUCT_LABEL = "カゲチヨ フルグラフィックパーカー";
-const SIZES = ["S","M","L","XL"];
-let selectedSize = "M";
+const SIZE = "M"; // ワンサイズ(発注先の展開がMのみ・2026-08-30確認)
 const SALE_READY = false; // 本人最終確認中(2026-08-30ページ作成)。OKが出たらtrueへ
 const IMG_PUBLIC = "/img/products_t/kagechiyo_hoodie_flat.jpg"; // 決済/カート用(ルート相対)
 
@@ -120,21 +122,6 @@ const IMG_PUBLIC = "/img/products_t/kagechiyo_hoodie_flat.jpg"; // 決済/カー
 function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}
   if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{item_id:CHAR_ID+'_hoodie',item_name:PRODUCT_LABEL,character_id:'kagechiyo',artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});}
 setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{item_id:CHAR_ID+'_hoodie',item_name:PRODUCT_LABEL,character_id:'kagechiyo',artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});},400);
-
-// サイズ選択
-(function(){
-  const row=document.getElementById('sizeRow');
-  SIZES.forEach(s=>{
-    const b=document.createElement('button');
-    b.type='button';b.className='size-btn'+(s===selectedSize?' selected':'');b.textContent=s;
-    b.addEventListener('click',()=>{selectedSize=s;row.querySelectorAll('.size-btn').forEach(x=>x.classList.toggle('selected',x.textContent===s));updateBar();});
-    row.appendChild(b);
-  });
-})();
-function updateBar(){
-  const info=document.querySelector('.buy-bar-info strong');
-  if(info)info.textContent=PRODUCT_LABEL+'('+selectedSize+')';
-}
 
 // 前面/背面切り替え
 document.querySelectorAll('.view-thumb').forEach(t=>{
@@ -152,7 +139,7 @@ async function checkout() {
     ftrack('buy');
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: [{ name:`${PRODUCT_LABEL}(${selectedSize})`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_PUBLIC}`] }] }),
+      body: JSON.stringify({ items: [{ name:`${PRODUCT_LABEL}(${SIZE})`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_PUBLIC}`] }] }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
@@ -162,7 +149,7 @@ async function checkout() {
 document.getElementById('addCartBtn').addEventListener('click', function(){
   if (!SALE_READY) return;
   // カート計測(_cart / add_to_cart)は cart.js 側で一元発火(2026-08-29集約)
-  window.CHARAMARL_CART.add(CHAR_ID, selectedSize.toLowerCase(), PRODUCT_LABEL, selectedSize, PRICE, IMG_PUBLIC);
+  window.CHARAMARL_CART.add(CHAR_ID, SIZE.toLowerCase(), PRODUCT_LABEL, SIZE, PRICE, IMG_PUBLIC);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
 function applySale(){
