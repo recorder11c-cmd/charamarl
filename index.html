@@ -1074,7 +1074,7 @@
     if(HERO[curChar]!==curColor)return;
     const p=PRODUCTS[curChar],c=COLORS.find(x=>x.key===curColor);const btn=document.getElementById('mBuy');
     btn.textContent='処理中...';btn.disabled=true;
-    try{const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:[{name:`${p.name} アクリルキーホルダー ${c.name}`,price:PRICE,quantity:1,images:[`https://charamarl.com/img/colors_nobg/${curChar}_${curColor}.png`]}]})});
+    try{const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:[{name:`${p.name} アクリルキーホルダー ${c.name}`,price:PRICE,quantity:1,images:[`https://charamarl.com/img/products_t/${curChar}_${curColor}.png`]}]})});
     const data=await res.json();if(data.url)location.href=data.url;else{alert('エラー: '+(data.error||'不明'));btn.textContent='今すぐ購入 →';btn.disabled=false;}}catch(e){alert('通信エラー');btn.textContent='今すぐ購入 →';btn.disabled=false;}
   });
   document.getElementById('mAddCart').addEventListener('click',()=>{

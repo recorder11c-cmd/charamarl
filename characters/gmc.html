@@ -119,7 +119,7 @@ function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type
 setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});},400);
 const SALE_READY = true; // 本人承認済み(2026-08-14)
 const IMG_DIR = "../img/colors_nobg";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
-const IMG_ROOT = "/img/colors_nobg";  // カート/決済用(ルート相対)
+const IMG_ROOT = "/img/products_t";  // カート/決済用(ルート相対)
 const colors = [{"key":"red","name":"BLAZE RED","accent":"#ff2a2a"},{"key":"yellow","name":"SUNNY YELLOW","accent":"#f5b500"},{"key":"green","name":"SLIME GREEN","accent":"#19c819"},{"key":"cyan","name":"ICE CYAN","accent":"#00c8dc"},{"key":"blue","name":"GALAXY BLUE","accent":"#2a55ff"},{"key":"pink","name":"NEON PINK","accent":"#e633c8"}];
 const HERO_COLOR = {sue:"red", putti:"yellow", mossun:"blue", gmc:"red"}[CHAR_ID];
 let selected = colors[0];
