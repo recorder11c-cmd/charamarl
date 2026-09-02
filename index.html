@@ -1038,7 +1038,10 @@
   let curChar='sue',curColor='red';
   function renderModal(){
     const p=PRODUCTS[curChar],c=COLORS.find(x=>x.key===curColor);
-    document.getElementById('mImg').src=`./img/colors_nobg/${curChar}_${curColor}.png`;
+    // 販売色は商品モック、リクエスト色はイラスト
+    document.getElementById('mImg').src = HERO[curChar]===curColor
+      ? `./img/products_t/${curChar}_${curColor}.png`
+      : `./img/colors_nobg/${curChar}_${curColor}.png`;
     document.getElementById('mName').textContent=p.name;
     document.getElementById('mCreator').textContent=p.creator;
     document.getElementById('mDesc').textContent=p.desc;
@@ -1079,7 +1082,7 @@
   });
   document.getElementById('mAddCart').addEventListener('click',()=>{
     if(HERO[curChar]!==curColor)return;
-    const c=COLORS.find(x=>x.key===curColor);window.CHARAMARL_CART.add(curChar,curColor,PRODUCTS[curChar].name,c.name,PRICE);
+    const c=COLORS.find(x=>x.key===curColor);window.CHARAMARL_CART.add(curChar,curColor,PRODUCTS[curChar].name,c.name,PRICE,`/img/products_t/${curChar}_${curColor}.png`);
     const b=document.getElementById('mAddCart');const o=b.textContent;b.textContent='✓ 追加しました';setTimeout(()=>b.textContent=o,1000);
   });
   function shareProduct(char){const p=PRODUCTS[char];openShare(p.name,`https://charamarl.com/characters/${char}.html`);}
