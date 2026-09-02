@@ -116,7 +116,7 @@
     fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}),
     fetch('/api/react').then(r=>r.ok?r.json():{})
   ]).then(([g,c])=>{
-    const artists=new Set((g.list||[]).map(a=>a.artist)); ['DinoRenny','ahoyoung'].forEach(a=>artists.add(a));
+    const artists=new Set((g.list||[]).map(a=>a.artist)); ['DinoRenny','ahoyoung'].forEach(a=>artists.add(a)); artists.delete('CHARAMARL');
     let likes=0; Object.values(c).forEach(v=>{if(v)likes+=v.likes||0;});
     document.getElementById('ctaStats').innerHTML =
       `<span class="st">🎨 ${artists.size}組が参加中</span><span class="st">♥ <b>${likes.toLocaleString()}</b> いいね</span><span class="st">🛒 アクキー受注販売中</span>`;

@@ -170,6 +170,7 @@
       ]);
       const list=gal.list||[];
       const artists=new Set(list.map(a=>a.artist).filter(Boolean));
+      artists.delete('CHARAMARL'); // 運営名義(連載記事など)は参加組数に含めない
       ['DinoRenny','ahoyoung'].forEach(a=>artists.add(a)); // 静的掲載の運営作品ぶん
       const staticWorks=8; // index.html直書きのアート・キャラ作品
       let likes=0,saves=0;

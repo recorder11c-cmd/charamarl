@@ -1340,7 +1340,7 @@
     renderNew(d.list);
     // ようこそモーダルの参加組数を実データで更新
     const wc=document.getElementById('wCount');
-    if(wc){const s=new Set(d.list.map(a=>a.artist));['DinoRenny','ahoyoung'].forEach(a=>s.add(a));wc.textContent=s.size;}
+    if(wc){const s=new Set(d.list.map(a=>a.artist));['DinoRenny','ahoyoung'].forEach(a=>s.add(a));s.delete('CHARAMARL');wc.textContent=s.size;}
     interleaveByArtist();
     decoratePins();
     applyFilters();
