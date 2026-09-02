@@ -90,6 +90,7 @@ const PRODUCTS = [
   {id:'danna', name:'だんな', cr:'赤猫かるま', img:'./img/products_t/danna_blue.png', page:'./characters/danna.html'},
   {id:'blockma', name:'ぶろっくま', cr:'チンチロ', img:'./img/products_t/blockma.png', page:'./characters/blockma.html', tap:'./tap/blockma.html'},
   {id:'yurucrazy', name:'ユルクレイジー', cr:'CRAZY', img:'./img/products_t/yurucrazy.png', page:'./characters/yurucrazy.html', tap:'./tap/yurucrazy.html'},
+  {id:'kagechiyo_hoodie', name:'カゲチヨ パーカー', cr:'カゲチヨ', price:14800, kind:'フルグラフィックパーカー', img:'./img/products_t/kagechiyo_hoodie_front.png', page:'./characters/kagechiyo-hoodie.html', tap:'./tap/kagechiyo.html'},
 ];
 const BASE='https://charamarl.com/';
 let cur = PRODUCTS[0];
@@ -98,10 +99,13 @@ wrapEl.innerHTML = PRODUCTS.map((p,i)=>
   `<div class="prod${i===0?' on':''}" data-i="${i}"><img src="${p.img}" alt=""><div><div class="nm">${p.name}</div><div class="cr">by ${p.cr}</div></div></div>`).join('');
 function text(p){
   const url = BASE + p.page.replace('./','') + '?utm_source=x&utm_medium=artist_social&utm_campaign=opening_price_end&utm_content=' + p.id;
-  return `${p.name}のアクリルキーホルダー、CHARAMARLで受注販売中です🎪\n`
-    + `裏面にNFCタグが入っていて、スマホでかざすと${p.name}のページがひらきます📱\n\n`
+  const price = (p.price||1500).toLocaleString();
+  const kind = p.kind || 'アクリルキーホルダー';
+  const nfc = p.kind ? '' : `裏面にNFCタグが入っていて、スマホでかざすと${p.name}のページがひらきます📱\n`;
+  return `${p.name}の${kind}、CHARAMARLで受注販売中です🎪\n`
+    + nfc + `\n`
     + `▶ ${url}\n\n`
-    + `¥1,500（税込・送料込）・受注生産です。\n`
+    + `¥${price}（税込・送料込）・受注生産です。\n`
     + `毎月末締め、翌月中旬ごろの発送になります。\n`
     + `#CHARAMARL`;
 }
