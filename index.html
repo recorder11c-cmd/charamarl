@@ -381,7 +381,7 @@
           <div class="drop-tag">NEW DROP</div>
           <div class="drop-name" id="dropName">SUE アクリルキーホルダー</div>
           <div class="drop-artist" id="dropArtist">DinoRenny</div>
-          <div class="drop-price">¥1,500 <small>(税込)</small></div>
+          <div class="drop-price" id="dropPrice">¥1,500 <small>(税込)</small></div>
           <button class="drop-btn" id="dropBtn">SHOP NOW →</button>
         </div>
         <img class="drop-img" id="dropImg" src="./img/products_t/sue_red.png" alt="">
@@ -870,7 +870,7 @@
   renderArtistCard();
 
   const FEATURED = [
-    { id:'kagechiyo_hoodie', name:'カゲチヨ パーカー', creator:'カゲチヨ', desc:'カゲチヨさんのメカニャンをまとった、フルグラフィックパーカー。前面から背面まで全面プリントの一点物のような一着です。受注生産・Mワンサイズ。', color:'flat', page:'./characters/kagechiyo-hoodie.html', drop:'カゲチヨ フルグラフィックパーカー', photos:true },
+    { id:'kagechiyo_hoodie', price:14800, name:'カゲチヨ パーカー', creator:'カゲチヨ', desc:'カゲチヨさんのメカニャンをまとった、フルグラフィックパーカー。前面から背面まで全面プリントの一点物のような一着です。受注生産・Mワンサイズ。', color:'flat', page:'./characters/kagechiyo-hoodie.html', drop:'カゲチヨ フルグラフィックパーカー', photos:true },
     { id:'yurucrazy', name:'ユルクレイジー', creator:'CRAZY', desc:'クレイジーパンク世界の子ども向けアニメから飛び出した、モグラくん。COLOR TAPでは6色に色が変わります。', color:'orig', page:'./characters/yurucrazy.html', drop:'ユルクレイジー アクリルキーホルダー', photos:true },
     { id:'blockma', name:'ぶろっくま', creator:'チンチロ', desc:'チンチロのドット絵キャラクター「ぶろっくま」。紫とピンク、体が二色に分かれた四角い小さな相棒。COLOR TAPでは体の2色が同時に変わります。', color:'orig', page:'./characters/blockma.html', drop:'ぶろっくま アクリルキーホルダー', photos:true },
     { id:'sue', name:'SUE', creator:'DinoRenny', desc:'DinoRennyを代表するティラノサウルス「SUE」。力強い表情とポップなカラーが魅力の人気キャラクター。', color:'red', page:'./characters/sue.html', drop:'SUE アクリルキーホルダー', photos:true },
@@ -898,6 +898,7 @@
     document.getElementById('heroShop').href=f.page;
     document.getElementById('dropName').textContent=f.drop;
     document.getElementById('dropArtist').textContent=f.creator;
+    document.getElementById('dropPrice').innerHTML='¥'+((f.price||PRICE).toLocaleString())+' <small>(税込)</small>';
     document.getElementById('dropImg').src = f.photos ? `./img/products_t/${f.id}_${f.color}.png` : `./img/colors/${f.id}_${f.color}.png`;
     document.getElementById('dropBtn').onclick=()=>location.href=f.page;
     [...dots.children].forEach((s,j)=>s.classList.toggle('on',j===hi));
