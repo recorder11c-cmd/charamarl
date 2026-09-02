@@ -145,7 +145,13 @@ colors.forEach((c, i) => {
     document.getElementById('charImg').src = `${IMG_DIR}/photo_${c.key}.jpg`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
-    updateBuyBar();
+    // COLOR TAPから ?p=キー で来たら、その県を初期選択
+(function(){
+  const q=new URLSearchParams(location.search).get('p');
+  const i=colors.findIndex(c=>c.key===q);
+  if(i>=0){ grid.children[i].click(); return; }
+  updateBuyBar();
+})();
   });
   grid.appendChild(card);
 });
