@@ -80,7 +80,7 @@
     <p class="char-desc">DinoRennyの看板恐竜「SUE」が、日本各地をめぐるシリーズ。<br>その土地の名物や文化をまとった姿を、木枠張りのミニキャンバスにプリントしました。<br><br>W100×H100×D37mm。厚みがあるので、置いても掛けても飾れます。<br>現在は関西6県。順次エリアを増やしていきます。</p>
     <div class="asr-block" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 16px;font-size:11.5px;font-weight:700;line-height:1.6;">
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🛒 <b>¥3,300</b> 税込・送料込<br><span style="opacity:.7;">追加費用なし・そのままのお値段です</span></div>
-      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">📦 各1点ずつ在庫あり<br><span style="opacity:.7;">在庫分はすぐ発送／完売後は受注生産</span></div>
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">📦 在庫ありは即発送<br><span style="opacity:.7;">完売分も受注生産でご購入いただけます</span></div>
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🖼 木枠張りキャンバス<br><span style="opacity:.7;">100×100×37mm・置いても掛けても</span></div>
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🗾 ご当地シリーズ<br><span style="opacity:.7;">関西6県から順次拡大予定</span></div>
     </div>
@@ -102,7 +102,7 @@
 <div class="buy-bar">
   <div class="buy-bar-info">
     <strong id="barName">京都</strong>
-    ご当地スー キャンバスアート 100×100×37mm<br><span style="font-size:10px;opacity:.75;">在庫あり｜ご注文後すぐ発送します</span>
+    ご当地スー キャンバスアート 100×100×37mm<br><span style="font-size:10px;opacity:.75;" id="barNote">在庫あり｜ご注文後すぐ発送します</span>
   </div>
   <div style="display:flex; gap:10px; align-items:center;">
     <button id="addCartBtn" style="background:#fff; border:2px solid var(--accent); color:var(--accent); border-radius:32px; padding:13px 22px; font-size:14px; font-weight:900; cursor:pointer; white-space:nowrap;">🛍 カートに追加</button>
@@ -120,13 +120,16 @@ setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{item_id:CHAR_ID+
 const SALE_READY = true; // 本人承認済み(2026-08-14)
 const IMG_DIR = "../img/canvas";    // 表示用(相対)
 const IMG_ROOT = "/img/canvas";  // カート/決済用(ルート相対)
+// stock: 手元在庫（0 = 在庫切れ→受注生産で販売継続）。売れたら必ず0に更新すること
+const MADE_TO_ORDER_NOTE = "受注生産｜お届けまで2〜3週間ほど";
+const IN_STOCK_NOTE = "在庫あり｜ご注文後すぐ発送します";
 const colors = [
- {"key":"kyoto","name":"京都","accent":"#f5b500"},
- {"key":"osaka","name":"大阪","accent":"#00b3dc"},
- {"key":"nara","name":"奈良","accent":"#ff8a2a"},
- {"key":"hyogo","name":"兵庫","accent":"#8e4ed9"},
- {"key":"shiga","name":"滋賀","accent":"#ff4d4d"},
- {"key":"wakayama","name":"和歌山","accent":"#ff5aa8"}];
+ {"key":"kyoto","name":"京都","accent":"#f5b500","stock":1},
+ {"key":"osaka","name":"大阪","accent":"#00b3dc","stock":0},
+ {"key":"nara","name":"奈良","accent":"#ff8a2a","stock":1},
+ {"key":"hyogo","name":"兵庫","accent":"#8e4ed9","stock":1},
+ {"key":"shiga","name":"滋賀","accent":"#ff4d4d","stock":1},
+ {"key":"wakayama","name":"和歌山","accent":"#ff5aa8","stock":1}];
 const HERO_COLOR = null; // 全種販売（リクエスト制なし）
 let selected = colors[0];
 const grid = document.getElementById('colorGrid');
@@ -137,7 +140,8 @@ colors.forEach((c, i) => {
   card.innerHTML = `
     <div class="color-preview"><img src="${IMG_DIR}/dino_${c.key}.jpg" alt="${c.name}"></div>
     <div class="color-name" style="color:${c.accent}">${c.name}</div>
-    <div class="color-price">${yen(PRICE)}</div>`;
+    <div class="color-price">${yen(PRICE)}</div>
+    <div class="color-stock" style="font-size:10px;font-weight:800;margin-top:3px;${c.stock>0?'color:#2fbf6b;':'opacity:.6;'}">${c.stock>0?'在庫あり':'受注生産'}</div>`;
   card.addEventListener('click', () => {
     document.querySelectorAll('.color-card').forEach(x => x.classList.remove('selected'));
     card.classList.add('selected');
@@ -145,16 +149,17 @@ colors.forEach((c, i) => {
     document.getElementById('charImg').src = `${IMG_DIR}/photo_${c.key}.jpg`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
-    // COLOR TAPから ?p=キー で来たら、その県を初期選択
-(function(){
-  const q=new URLSearchParams(location.search).get('p');
-  const i=colors.findIndex(c=>c.key===q);
-  if(i>=0){ grid.children[i].click(); return; }
-  updateBuyBar();
-})();
+    updateBuyBar();
   });
   grid.appendChild(card);
 });
+// COLOR TAPから ?p=キー で来たら、その県を初期選択（無ければ先頭のまま）
+(function(){
+  const q = new URLSearchParams(location.search).get('p');
+  const i = colors.findIndex(c => c.key === q);
+  if (i >= 0) { grid.children[i].click(); return; }
+  updateBuyBar();
+})();
 async function checkout() {
   if (!SALE_READY || !selected) return;
   const btn = document.getElementById('buyBtn');
@@ -163,7 +168,7 @@ async function checkout() {
     ftrack('buy');
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} キャンバスアート ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_ROOT}/photo_${selected.key}.jpg`] }] }),
+      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} キャンバスアート ${selected.name}${selected.stock>0?'':'（受注生産）'}`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_ROOT}/photo_${selected.key}.jpg`] }] }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
@@ -172,7 +177,7 @@ async function checkout() {
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
   if (!SALE_READY) return;
-    window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name, PRICE, `${IMG_ROOT}/photo_${selected.key}.jpg`);
+    window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name+(selected.stock>0?'':'（受注生産）'), PRICE, `${IMG_ROOT}/photo_${selected.key}.jpg`);
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
 
@@ -187,6 +192,9 @@ function updateBuyBar(){
   bb.style.display=hero?'':'none';
   bb.disabled=!SALE_READY;
   bb.textContent=SALE_READY?'今すぐ購入 →':'🛠 サンプル製作中・まもなく販売';
+  // 手元在庫の有無で発送目安の表記を切り替える（在庫切れでも受注生産で購入できる）
+  const note=document.getElementById('barNote');
+  if(note) note.textContent = (selected&&selected.stock>0) ? IN_STOCK_NOTE : MADE_TO_ORDER_NOTE;
   const rb=document.getElementById('reqBtn');
   rb.style.display=hero?'none':'';
   const done=reqSet().has(CHAR_ID+'_'+selected.key);
