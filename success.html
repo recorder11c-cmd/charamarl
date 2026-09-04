@@ -31,7 +31,24 @@
   var seen=JSON.parse(localStorage.getItem('cm_purchased')||'[]');
   if(seen.indexOf(sid)>=0)return;
   seen.push(sid);localStorage.setItem('cm_purchased',JSON.stringify(seen.slice(-20)));
-  if(window.cmEvent)cmEvent('purchase',{transaction_id:sid,currency:'JPY'});
+  // 決済前に控えた内容(金額・商品・経路)を載せる。
+  // value が無いとGA4の収益が0のままで、何がいくら売れたのか一切追えない。
+  var pend=null;
+  try{ pend=JSON.parse(localStorage.getItem('cm_pending')||'null'); }catch(e){}
+  var p={transaction_id:sid,currency:'JPY'};
+  if(pend && Date.now()-(pend.ts||0) < 6*3600*1000){
+    p.value=pend.value; p.items=pend.items; p.checkout_type=pend.type;
+  }
+  if(window.cmEvent)cmEvent('purchase',p);
+  // Redisにも購入完了を記録（GA4が落ちても件数だけは残る）
+  try{
+    (pend&&pend.items||[]).forEach(function(i){
+      if(!i.character_id)return;
+      fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({id:i.character_id+'_paid',type:'like',op:'add'})});
+    });
+  }catch(e){}
+  try{ localStorage.removeItem('cm_pending'); }catch(e){}
 }catch(e){}},600);</script>
 </head>
 <body>

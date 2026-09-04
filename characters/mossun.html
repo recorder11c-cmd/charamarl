@@ -115,7 +115,7 @@ const CHAR_ID = "mossun", CHAR_NAME = "MOSSUN", PRICE = 1500;
 const ARTIST_ID = "dinorenny";
 // FUNNEL_TRACK: カート追加/購入ボタンの回数を匿名計測
 function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}
-  if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});}
+  if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{checkout_type:(ev==='cart'?undefined:'buynow'),item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});}
 setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});},400);
 const IMG_DIR = "../img/colors_nobg";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
 const IMG_ROOT = "/img/products_t";  // カート/決済用(ルート相対)
@@ -148,6 +148,9 @@ async function checkout() {
   btn.textContent = '処理中...'; btn.disabled = true;
   try {
     ftrack('buy');
+    // 決済完了ページで purchase に金額と商品を載せるため、遷移前に控えておく（経路=今すぐ購入）
+    try{ localStorage.setItem('cm_pending', JSON.stringify({value:PRICE, type:'buynow', ts:Date.now(),
+      items:[{item_id:CHAR_ID+'_item', item_name:CHAR_NAME, character_id:CHAR_ID, price:PRICE, quantity:1}]})); }catch(e){}
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ items: [{ name:`${CHAR_NAME} アクリルキーホルダー ${selected.name}`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_ROOT}/${CHAR_ID}_${selected.key}.png`] }] }),

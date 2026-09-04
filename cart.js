@@ -84,9 +84,11 @@
     const btn=document.getElementById('cartCheckout'); btn.textContent='処理中...'; btn.disabled=true;
     try{ cart.forEach(function(i){ fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({id:i.char+'_buy',type:'like',op:'add'})}); }); }catch(e){}
-    if(window.cmEvent)cmEvent('begin_checkout',{currency:'JPY',
-      value: cart.reduce(function(a,i){return a+(i.price||1500)*(i.qty||1);},0),
-      items: cart.map(function(i){return {item_id:i.char+'_keyring',item_name:i.name,character_id:i.char,price:i.price,quantity:i.qty};})});
+    var _val = cart.reduce(function(a,i){return a+(i.price||1500)*(i.qty||1);},0);
+    var _items = cart.map(function(i){return {item_id:i.char+'_keyring',item_name:i.name,character_id:i.char,price:i.price,quantity:i.qty};});
+    if(window.cmEvent)cmEvent('begin_checkout',{currency:'JPY',checkout_type:'cart',value:_val,items:_items});
+    // 決済完了ページ(success.html)で purchase に金額と商品を載せるため、遷移前に控えておく
+    try{ localStorage.setItem('cm_pending', JSON.stringify({value:_val, items:_items, type:'cart', ts:Date.now()})); }catch(e){}
     try{
       const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({ items: cart.map(i=>({ name:`${i.name} アクリルキーホルダー ${i.colorName}`, price:i.price, quantity:i.qty, images:[i.img ? PROD_BASE+i.img : imgAbs(i.char,i.color)] })) })});
