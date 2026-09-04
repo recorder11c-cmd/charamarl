@@ -958,6 +958,19 @@
     return ['.pin-title','.pin-sub','.pin-cat'].map(s=>{const el=pin.querySelector(s);return el?el.textContent:'';}).join(' ').toLowerCase();
   }
   // 表示中のピンを作家ごとに散らす（CSS columnsは縦流しなので、列数を考慮して縦・横とも隣り合わないよう配置）
+  // 7日以内に掲載された作品を先頭に固定する。
+  // interleaveVisible()が作家バラけ順に並べ直すので、その「後」に効かせる必要がある。
+  // 並び替えが「おすすめ順」のときだけ適用（人気順・新着順を選んだら邪魔しない）。
+  function hoistNewVisible(){
+    const act=document.querySelector('.sort-opt.active');
+    if(act&&act.dataset.sort!=='reco')return;
+    const WEEK=Date.now()-7*864e5;
+    const fresh=[...masonryEl.querySelectorAll('.pin:not(.cat-hide)')]
+      .filter(p=>Number(p.dataset.ts||0)>WEEK);
+    if(!fresh.length)return;
+    fresh.reverse().forEach(p=>masonryEl.insertBefore(p,masonryEl.firstChild));
+  }
+
   function interleaveVisible(){
     const vis=[...masonryEl.querySelectorAll('.pin:not(.cat-hide)')];
     if(vis.length<3)return;
@@ -998,6 +1011,7 @@
       if(hit)shown++;
     });
     interleaveVisible();
+    hoistNewVisible();
     masonryEl.classList.remove('filtering');void masonryEl.offsetWidth;masonryEl.classList.add('filtering');
     masonryEl.style.display=shown?'':'none';
     catEmpty.hidden=shown>0;
