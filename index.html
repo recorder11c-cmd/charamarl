@@ -1036,7 +1036,10 @@
 
   // 通知ベル（サイトのお知らせ・最新未読は赤ドット）
   const NEWS=[
-    {d:'2026-08-26',t:'🆕 トップに「あたらしく仲間入りした作品」が登場！マイページでは、自分の作品の♥・保存・送客数が見られるようになりました',href:'#newarrivals'},
+    {d:'2026-09-04',t:'✨ サイトをリニューアルしました！作品がいちばん上に来る形に変え、掲載したその日からトップの最上段に並びます。並び替えに「新着順」も追加しました',href:'#discover'},
+    {d:'2026-09-02',t:'👕 メカニャンパーカー（カゲチヨ）発売。フルグラフィックの受注生産・ワンサイズ',href:'./characters/kagechiyo-hoodie.html'},
+    {d:'2026-09-01',t:'📝 連載「市場のひとたち」スタート。第1回はハンナさん（ボストンテリアのラフ）',href:'https://note.com/charamarl/n/neea4f75ccb95'},
+    {d:'2026-08-26',t:'🆕 あたらしく仲間入りした作品がトップに並ぶようになりました。マイページでは、自分の作品の♥・保存・送客数が見られます',href:'#discover'},
     {d:'2026-08-20',t:'🎪 毎月18日は「市の日」— その月に参加した新しい仲間をまとめてご紹介します。出店はいつでも受付中！',href:'./apply.html'},
     {d:'2026-08-18',t:'🎉 CHARAMARL グランドオープン！23組のアーティストの作品が並んでいます',href:'#discover'},
     {d:'2026-08-14',t:'受注販売スタート：レコマル・う〜ほ〜・dogoooooのアクリルキーホルダー（NFCタグ付き）',href:'#discover'},
@@ -1055,7 +1058,8 @@
   const newest=NEWS[0].d;
   notiDot.hidden=(localStorage.getItem(NOTI_SEEN)||'')>=newest;
   document.getElementById('notiList').innerHTML=NEWS.map(n=>
-    `<a class="noti-item" href="${n.href}"><span class="nt">${n.t}</span><span class="nd">${n.d.replace(/-/g,'.')}</span></a>`).join('');
+    // 外部リンク(note等)は別タブで開く
+    `<a class="noti-item" href="${n.href}"${/^https?:/.test(n.href)?' target="_blank" rel="noopener"':''}><span class="nt">${n.t}</span><span class="nd">${n.d.replace(/-/g,'.')}</span></a>`).join('');
   notiBtn.addEventListener('click',e=>{
     e.stopPropagation();
     notiPanel.hidden=!notiPanel.hidden;
@@ -1380,22 +1384,6 @@
     out.forEach(p=>masonryEl.appendChild(p));
   }
 
-  // 新着作品の横スクロール（掲載しても埋もれる問題への導線）
-  function renderNew(list){
-    const row=document.getElementById('newRow'),sec=document.getElementById('newarrivals');
-    if(!row||!sec)return;
-    const items=[...list].filter(a=>a.ts&&a.img).sort((a,b)=>b.ts-a.ts).slice(0,14);
-    if(items.length<4)return;
-    const WEEK=Date.now()-7*864e5;
-    const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    row.innerHTML=items.map(a=>
-      `<div class="newcard" data-id="${esc(a.id)}"><div class="ni">${a.ts>WEEK?'<span class="nb">NEW</span>':''}<img src="${esc(a.img)}" alt="${esc(a.title)}" loading="lazy"></div><div class="nt">${esc(a.title)}</div><div class="nc">${esc(a.artist)}</div></div>`
-    ).join('');
-    row.addEventListener('click',e=>{
-      const c=e.target.closest('.newcard'); if(c&&c.dataset.id)openArt(c.dataset.id);
-    });
-    sec.hidden=false;
-  }
 
   // ?g=作品ID で該当作品を直接ひらく（共有リンク用）
   function openDeepLink(){
@@ -1405,7 +1393,6 @@
   fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
     if(!d.list||!d.list.length){openDeepLink();return;}
     d.list.forEach(addGalleryItem);
-    renderNew(d.list);
     // ようこそモーダルの参加組数を実データで更新
     const wc=document.getElementById('wCount');
     if(wc){const s=new Set(d.list.map(a=>a.artist));['DinoRenny','ahoyoung'].forEach(a=>s.add(a));s.delete('CHARAMARL');wc.textContent=s.size;}
