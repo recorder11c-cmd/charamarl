@@ -59,7 +59,12 @@ module.exports = async (req, res) => {
       const char = String(q.char || 'SUE');
       if (!CHAR_RE.test(char)) return res.status(400).json({ error: 'bad char' });
       const pid = PID_RE.test(String(q.pid || '')) ? String(q.pid) : null;
-      return res.status(200).json(await board(char, pid));
+      const out = await board(char, pid);
+      if (ADMIN_KEY && q.key === ADMIN_KEY) {           // 管理用: 削除に使うpidを付けて返す
+        const raw = await redis('ZREVRANGE', `run:rank:${char}`, 0, TOP_N - 1);
+        out.top.forEach((t, i) => { t.pid = raw[i]; });
+      }
+      return res.status(200).json(out);
     }
 
     if (req.method === 'POST') {
