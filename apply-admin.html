@@ -310,17 +310,22 @@
       const {users=[]}=await ur.json();
       const gal=gr.ok?((await gr.json()).list||[]):[];
       const cnt={};
-      gal.forEach(a=>{const k=String(a.artist||'').toLowerCase();cnt[k]=(cnt[k]||0)+1;});
+      // 突き合わせは artistKey（=ニックネームの小文字）で行う。
+      // 掲載名(artist)は表示用で、アカウント名と綴りが違うことがある
+      // 例) アカウント BeernoMocca / 掲載名 'Beerno Mocca' → 表示名で数えると0件に見えてしまう
+      const disp={};
+      gal.forEach(a=>{const k=String(a.artistKey||a.artist||'').trim().toLowerCase();cnt[k]=(cnt[k]||0)+1;disp[k]=a.artist;});
       document.getElementById('uCount').textContent=users.length;
-      const zeroN=users.filter(x=>!(cnt[String(x.name||'').toLowerCase()]||0)).length;
+      const zeroN=users.filter(x=>!(cnt[String(x.name||'').trim().toLowerCase()]||0)).length;
       const tu=document.getElementById('tUser');
       tu.textContent=zeroN; tu.className='n'+(zeroN?' alert':'');
       document.getElementById('userList').innerHTML=users.map(u=>{
-        const n=cnt[String(u.name||'').toLowerCase()]||0;
+        const n=cnt[String(u.name||'').trim().toLowerCase()]||0;
         return `<div class="card" data-works="${n}" style="display:flex;align-items:center;gap:12px;">
           <div style="flex:1;min-width:0;">
             <b>${esc(u.name)}</b>
             <span class="num" style="margin-left:10px;color:${n?'#0a0':'#c00'};font-weight:800;">作品 ${n}</span>
+            ${(disp[String(u.name||'').trim().toLowerCase()]&&disp[String(u.name||'').trim().toLowerCase()]!==u.name)?`<span class="sub" style="margin-left:8px;">掲載名: ${esc(disp[String(u.name||'').trim().toLowerCase()])}</span>`:''}
             <div class="sub" style="margin:2px 0 0;">${u.created?fmt(u.created):'登録日不明'}</div>
           </div>
           <button class="del" data-user="${esc(u.name)}" title="このアカウントを削除">✕</button>
