@@ -164,7 +164,7 @@
       if(r.status===403)throw new Error('アクセス権がありません。運営アカウントでログインするか（→ login.html）、キー付きURLで開いてください');
       if(!r.ok)throw new Error('読み込みに失敗しました ('+r.status+')');
       const d=await r.json();
-      document.getElementById('tApply').textContent=(a.length||0);document.getElementById('count').textContent=d.count;
+      document.getElementById('tApply').textContent=d.count;document.getElementById('count').textContent=d.count;
       if(!d.list.length){list.innerHTML='<div class="empty">まだ応募はありません 🦖</div>';return;}
       list.innerHTML=d.list.map(a=>{
         const url=/^https?:\/\//.test(a.sns)?a.sns:(a.sns?'https://'+a.sns:'');
@@ -225,6 +225,7 @@
       const d=await r.json();
       const pend=d.list.filter(a=>a.status==='pending'), appr=d.list.filter(a=>a.status==='approved');
       document.getElementById('gpCount').textContent=pend.length;
+      document.getElementById('tGal').textContent=pend.length;
       document.getElementById('gaCount').textContent=appr.length;
       gp.innerHTML=pend.length?pend.map(a=>gcard(a,
         `<button class="gbtn ok" data-act="approve">✓ 承認して公開</button><button class="gbtn ng" data-act="reject">見送り</button>`)).join('')
@@ -283,6 +284,7 @@
       if(!r.ok)throw new Error('販売者情報の取得に失敗 ('+r.status+')');
       const d=await r.json();
       const list=d.list||[];
+      document.getElementById('tSeller').textContent=list.length;
       document.getElementById('sCount').textContent=d.count||0;
       if(!list.length){el.innerHTML='<div class="empty" style="padding:24px;">まだ登録はありません 🦖</div>';return;}
       el.innerHTML=list.map(s=>`<div class="card">
