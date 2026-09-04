@@ -54,7 +54,9 @@ module.exports = async (req, res) => {
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'KV未設定' });
 
   try {
-    if (req.method === 'GET' && req.query && (req.query.key || req.query.users)) {
+    // 管理者セッションで開いたときは key が空文字で来る。'||' で判定すると空文字が偽になり
+    // この分岐に入らず、ユーザー一覧が黙って空で返ってしまうため「パラメータの有無」で判定する。
+    if (req.method === 'GET' && req.query && ('key' in req.query || 'users' in req.query)) {
       // 管理用: 登録ユーザー一覧（APPLY_KEY または 管理者セッション）
       const { isAdminReq } = require('../lib/admin.js');
       if (!(await isAdminReq(req))) {

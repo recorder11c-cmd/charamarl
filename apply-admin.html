@@ -303,7 +303,7 @@
   async function loadUsers(){
     try{
       const [ur,gr]=await Promise.all([
-        fetch(`/api/auth?key=${encodeURIComponent(key)}`),
+        fetch(`/api/auth?users=1&key=${encodeURIComponent(key)}`),
         fetch(`/api/gallery?status=all&key=${encodeURIComponent(key)}`)
       ]);
       if(!ur.ok)throw new Error('アカウント一覧を取得できませんでした（'+ur.status+'）');
