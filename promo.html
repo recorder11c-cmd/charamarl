@@ -98,7 +98,10 @@ const wrapEl = document.getElementById('prods');
 wrapEl.innerHTML = PRODUCTS.map((p,i)=>
   `<div class="prod${i===0?' on':''}" data-i="${i}"><img src="${p.img}" alt=""><div><div class="nm">${p.name}</div><div class="cr">by ${p.cr}</div></div></div>`).join('');
 function text(p){
-  const url = BASE + p.page.replace('./','') + '?utm_source=x&utm_medium=artist_social&utm_campaign=opening_price_end&utm_content=' + p.id;
+  // utm規約(2026-09-04統一): medium は GA4 標準値 social のみ使う。
+  //   非標準値(official_social/artist_social)を入れるとチャネルに割り当てられず Unassigned に落ちる。
+  //   campaign = 何を宣伝したか(商品ID) / content = 誰が投稿したか(official|artist)
+  const url = BASE + p.page.replace('./','') + '?utm_source=x&utm_medium=social&utm_campaign=' + p.id + '&utm_content=artist';
   const price = (p.price||1500).toLocaleString();
   const kind = (p.kind!==undefined ? p.kind : 'アクリルキーホルダー');
   const nfc = p.kind ? '' : `裏面にNFCタグが入っていて、スマホでかざすと${p.name}のページがひらきます📱\n`;

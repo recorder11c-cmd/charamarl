@@ -184,7 +184,9 @@ const CONFIG = {
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
   shop: {
-    productUrl: "https://charamarl.com/characters/dino-canvas.html?utm_source=tap&utm_medium=colortap&utm_content=gotochi",
+    // サイト内リンクに utm を付けると GA4 が新しいセッション/流入元として数え直し、
+    // 本来の流入元(X等)が失われる。内部遷移の識別は utm ではなく from= を使う。
+    productUrl: "https://charamarl.com/characters/dino-canvas.html?from=gotochi",
     variants: {                              // 色名: Shopify variant ID
       "BLAZE RED":"", "SUNNY YELLOW":"", "SLIME GREEN":"",
       "ICE CYAN":"", "GALAXY BLUE":"", "NEON PINK":"",
