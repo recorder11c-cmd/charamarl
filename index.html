@@ -231,6 +231,14 @@
   .ob-chip{position:absolute;top:8px;left:8px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;background:rgba(255,255,255,.92);border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.15);pointer-events:none;transition:opacity .2s;}
   .pin:hover .ob-chip{opacity:0;}
   .pin-meta{font-size:11px;color:var(--muted);margin-top:5px;}
+  /* グリッドでは作品名・作家名を伏せ、絵だけで選んでもらう（タップすると詳細が開く）。
+     「誰の絵だろう」でタップさせるのが狙い＝作家への送客を増やすため。
+     販売中のものだけ価格バッジを残す（買えると分からないものは買われない）。 */
+  .pin-cat,.pin-title,.pin-sub{display:none;}
+  .pin-body{margin-top:0;}
+  .pin-price{margin-top:8px;}
+  .pin-new{position:absolute;top:8px;left:8px;z-index:3;background:#111;color:#fff;font-size:10px;
+    font-weight:900;letter-spacing:.06em;border-radius:11px;padding:3px 9px;box-shadow:0 2px 8px rgba(0,0,0,.25);}
   .pin.coming .pin-img{background:linear-gradient(150deg,#fff3e6,#f3e9ff);border:1px dashed #e0c9f0;}
   .pin.coming .ct{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;}
   .pin.coming .ct .ic{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--orange));display:flex;align-items:center;justify-content:center;font-size:20px;}
@@ -360,93 +368,20 @@
   </div>
 </header>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-card" id="heroCard">
-    <button class="hero-arrow prev" id="heroPrev">‹</button>
-    <button class="hero-arrow next" id="heroNext">›</button>
-    <div class="hero-left">
-      <div class="hero-name" id="heroName">SUE</div>
-      <span class="hero-by" id="heroBy">by DinoRenny</span>
-      <p class="hero-desc" id="heroDesc">人気キャラクターSUEのアクリルキーホルダーが新登場！</p>
-      <div class="hero-btns">
-        <a class="btn btn-line" id="heroArtist" href="#artist">VIEW ARTIST →</a>
-        <a class="btn btn-fill" id="heroShop" href="./characters/sue.html">SHOP NOW →</a>
-      </div>
-    </div>
-    <div class="hero-char"><img id="heroImg" src="./img/colors/sue_red.png" alt="SUE"></div>
-    <div class="hero-right">
-      <div class="drop-card">
-        <div class="drop-text">
-          <div class="drop-tag">NEW DROP</div>
-          <div class="drop-name" id="dropName">SUE アクリルキーホルダー</div>
-          <div class="drop-artist" id="dropArtist">DinoRenny</div>
-          <div class="drop-price" id="dropPrice">¥1,500 <small>(税込)</small></div>
-          <button class="drop-btn" id="dropBtn">SHOP NOW →</button>
-        </div>
-        <img class="drop-img" id="dropImg" src="./img/products_t/sue_red.png" alt="">
-      </div>
-    </div>
-  </div>
-  <div class="hero-dots" id="heroDots"></div>
-</div>
-
-<!-- FEATURED ARTIST -->
-<section class="blk" id="artist">
-  <div class="sec-head"><div><div class="sec-eyebrow">FEATURED ARTIST</div><h2 class="sec-title">今週の注目アーティスト</h2></div></div>
-  <div class="artist-card" id="artistCard"></div>
-</section>
-
 <div style="max-width:1180px;margin:18px auto 0;padding:0 24px;">
-  <a id="shopEntry" href="#discover" style="display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;border-radius:28px;background:#1a1a26;color:#fff;font-size:15px;font-weight:900;text-decoration:none;">🛒 今買えるキャラクターを見る <span style="opacity:.6;font-size:12px;">全12商品・アクキー¥1,500〜</span> →</a>
+  <a id="shopEntry" href="#discover" style="display:flex;align-items:center;gap:14px;padding:12px 18px 12px 14px;border-radius:22px;background:#1a1a26;color:#fff;text-decoration:none;overflow:hidden;">
+    <span style="display:flex;flex:none;">
+      <img src="./img/products_t/ufoo_white.png" alt="" style="width:46px;height:46px;border-radius:50%;background:#fff;object-fit:contain;padding:3px;">
+      <img src="./img/products_t/blockma.png" alt="" style="width:46px;height:46px;border-radius:50%;background:#fff;object-fit:contain;padding:3px;margin-left:-14px;">
+      <img src="./img/products_t/dogooooo_pink.png" alt="" style="width:46px;height:46px;border-radius:50%;background:#fff;object-fit:contain;padding:3px;margin-left:-14px;">
+    </span>
+    <span style="flex:1;min-width:0;line-height:1.45;">
+      <span style="display:block;font-size:15px;font-weight:900;">今買えるキャラクターを見る</span>
+      <span style="display:block;font-size:11.5px;opacity:.65;font-weight:700;">全12商品・アクキー¥1,500（税込・送料込）</span>
+    </span>
+    <span style="flex:none;font-size:18px;font-weight:900;">→</span>
+  </a>
 </div>
-
-<!-- NEW ARRIVALS -->
-<section class="blk" id="newarrivals" hidden>
-  <div class="sec-head">
-    <div><div class="sec-eyebrow">NEW ARRIVALS</div><h2 class="sec-title">🆕 あたらしく仲間入りした作品</h2></div>
-    <a class="sec-more" href="#discover">すべて見る →</a>
-  </div>
-  <div class="newrow" id="newRow"></div>
-</section>
-
-<!-- COLOR TAP LAB -->
-<section class="blk">
-  <div class="ctlab">
-    <div class="ctlab-imgs">
-      <img src="./img/colors_nobg/sue_red.png" alt="">
-      <img src="./img/colors_nobg/gmc_red.png" alt="">
-      <img src="./tap/art/ufoo.png" alt="">
-      <img src="./tap/art/kagechiyo.png" alt="">
-      <img src="./tap/art/dogooooo.png" alt="">
-      <img src="./tap/art/colors/csh_pizza.png" alt="">
-      <img src="./tap/art/colors/putti_yellow.png" alt="">
-      <img src="./tap/art/colors/mossun_blue.png" alt="">
-      <img src="./tap/art/junk/j01.jpg" alt="">
-    </div>
-    <div class="ctlab-body">
-      <span class="ctlab-eyebrow">COLOR TAP LAB</span>
-      <h2>🎨 タップで色が変わる、遊べる体験</h2>
-      <p>キャラクターをタップするたびに色が切り替わる。お気に入りのカラーを見つけて、♥で応援。グッズの購入もできます。</p>
-      <div class="ctlab-links">
-        <a class="ctlab-link" href="./tap/sue.html" target="_blank">SUE →</a>
-        <a class="ctlab-link" href="./tap/putti.html" target="_blank">PUTTI →</a>
-        <a class="ctlab-link" href="./tap/mossun.html" target="_blank">MOSSUN →</a>
-        <a class="ctlab-link" href="./tap/inkumo.html" target="_blank">インクモ →</a>
-        <a class="ctlab-link" href="./tap/gmc.html" target="_blank">レコマル →</a>
-        <a class="ctlab-link" href="./tap/ufoo.html" target="_blank">う〜ほ〜 →</a>
-        <a class="ctlab-link" href="./tap/kagechiyo.html" target="_blank">カゲチヨ →</a>
-        <a class="ctlab-link" href="./tap/dogooooo.html" target="_blank">ドグー →</a>
-        <a class="ctlab-link" href="./tap/csh.html" target="_blank">CSHヒーローズ →</a>
-        <a class="ctlab-link" href="./tap/junkeeees.html" target="_blank">JUNKeeeeS →</a>
-        <a class="ctlab-link" href="./tap/blockma.html" target="_blank">ぶろっくま →</a>
-        <a class="ctlab-link" href="./tap/gotochi.html" target="_blank">ご当地スー →</a>
-        <a class="ctlab-link" href="./tap/yurucrazy.html" target="_blank">YURU CRAZY →</a>
-        <a class="ctlab-link" href="./tap/rafu.html" target="_blank">ボストンテリアのラフ →</a>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- DISCOVER -->
 <section class="blk" id="discover">
@@ -455,6 +390,7 @@
       <div class="sec-more" id="sortBtn">おすすめ順 ▾</div>
       <div class="sort-menu" id="sortMenu" hidden>
         <div class="sort-opt active" data-sort="reco">おすすめ順</div>
+        <div class="sort-opt" data-sort="new">新着順</div>
         <div class="sort-opt" data-sort="popular">人気順（いいね数）</div>
       </div>
     </div>
@@ -607,6 +543,81 @@
 </section>
 
 <!-- TRENDING -->
+<!-- FEATURED ARTIST -->
+<section class="blk" id="artist">
+  <div class="sec-head"><div><div class="sec-eyebrow">FEATURED ARTIST</div><h2 class="sec-title">今週の注目アーティスト</h2></div></div>
+  <div class="artist-card" id="artistCard"></div>
+</section>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-card" id="heroCard">
+    <button class="hero-arrow prev" id="heroPrev">‹</button>
+    <button class="hero-arrow next" id="heroNext">›</button>
+    <div class="hero-left">
+      <div class="hero-name" id="heroName">SUE</div>
+      <span class="hero-by" id="heroBy">by DinoRenny</span>
+      <p class="hero-desc" id="heroDesc">人気キャラクターSUEのアクリルキーホルダーが新登場！</p>
+      <div class="hero-btns">
+        <a class="btn btn-line" id="heroArtist" href="#artist">VIEW ARTIST →</a>
+        <a class="btn btn-fill" id="heroShop" href="./characters/sue.html">SHOP NOW →</a>
+      </div>
+    </div>
+    <div class="hero-char"><img id="heroImg" src="./img/colors/sue_red.png" alt="SUE"></div>
+    <div class="hero-right">
+      <div class="drop-card">
+        <div class="drop-text">
+          <div class="drop-tag">NEW DROP</div>
+          <div class="drop-name" id="dropName">SUE アクリルキーホルダー</div>
+          <div class="drop-artist" id="dropArtist">DinoRenny</div>
+          <div class="drop-price" id="dropPrice">¥1,500 <small>(税込)</small></div>
+          <button class="drop-btn" id="dropBtn">SHOP NOW →</button>
+        </div>
+        <img class="drop-img" id="dropImg" src="./img/products_t/sue_red.png" alt="">
+      </div>
+    </div>
+  </div>
+  <div class="hero-dots" id="heroDots"></div>
+</div>
+
+<!-- COLOR TAP LAB -->
+<section class="blk">
+  <div class="ctlab">
+    <div class="ctlab-imgs">
+      <img src="./img/colors_nobg/sue_red.png" alt="">
+      <img src="./img/colors_nobg/gmc_red.png" alt="">
+      <img src="./tap/art/ufoo.png" alt="">
+      <img src="./tap/art/kagechiyo.png" alt="">
+      <img src="./tap/art/dogooooo.png" alt="">
+      <img src="./tap/art/colors/csh_pizza.png" alt="">
+      <img src="./tap/art/colors/putti_yellow.png" alt="">
+      <img src="./tap/art/colors/mossun_blue.png" alt="">
+      <img src="./tap/art/junk/j01.jpg" alt="">
+    </div>
+    <div class="ctlab-body">
+      <span class="ctlab-eyebrow">COLOR TAP LAB</span>
+      <h2>🎨 タップで色が変わる、遊べる体験</h2>
+      <p>キャラクターをタップするたびに色が切り替わる。お気に入りのカラーを見つけて、♥で応援。グッズの購入もできます。</p>
+      <div class="ctlab-links">
+        <a class="ctlab-link" href="./tap/sue.html" target="_blank">SUE →</a>
+        <a class="ctlab-link" href="./tap/putti.html" target="_blank">PUTTI →</a>
+        <a class="ctlab-link" href="./tap/mossun.html" target="_blank">MOSSUN →</a>
+        <a class="ctlab-link" href="./tap/inkumo.html" target="_blank">インクモ →</a>
+        <a class="ctlab-link" href="./tap/gmc.html" target="_blank">レコマル →</a>
+        <a class="ctlab-link" href="./tap/ufoo.html" target="_blank">う〜ほ〜 →</a>
+        <a class="ctlab-link" href="./tap/kagechiyo.html" target="_blank">カゲチヨ →</a>
+        <a class="ctlab-link" href="./tap/dogooooo.html" target="_blank">ドグー →</a>
+        <a class="ctlab-link" href="./tap/csh.html" target="_blank">CSHヒーローズ →</a>
+        <a class="ctlab-link" href="./tap/junkeeees.html" target="_blank">JUNKeeeeS →</a>
+        <a class="ctlab-link" href="./tap/blockma.html" target="_blank">ぶろっくま →</a>
+        <a class="ctlab-link" href="./tap/gotochi.html" target="_blank">ご当地スー →</a>
+        <a class="ctlab-link" href="./tap/yurucrazy.html" target="_blank">YURU CRAZY →</a>
+        <a class="ctlab-link" href="./tap/rafu.html" target="_blank">ボストンテリアのラフ →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="blk" id="trending">
   <div class="sec-head"><div><div class="sec-eyebrow">🔥 TRENDING</div><h2 class="sec-title">人気キャラクターランキング</h2></div><div class="sec-more" id="rankMore">作品の人気順を見る →</div></div>
   <div class="rank-grid" id="rankGrid">
@@ -1024,9 +1035,11 @@
     return (m&&ARTWORKS[m[1]])?likeTotal(m[1]):-1; // いいねを持たないピンは末尾へ
   }
   function applySort(mode){
-    const pins=mode==='popular'
-      ? baseOrder.map((p,i)=>({p,i,l:pinLikes(p)})).sort((a,b)=>(b.l-a.l)||(a.i-b.i)).map(o=>o.p)
-      : baseOrder;
+    let pins=baseOrder;
+    if(mode==='popular')
+      pins=baseOrder.map((p,i)=>({p,i,l:pinLikes(p)})).sort((a,b)=>(b.l-a.l)||(a.i-b.i)).map(o=>o.p);
+    else if(mode==='new')  // 掲載日の新しい順。日付を持たない固定ピン(グッズ等)は末尾へ
+      pins=baseOrder.map((p,i)=>({p,i,t:Number(p.dataset.ts||0)})).sort((a,b)=>(b.t-a.t)||(a.i-b.i)).map(o=>o.p);
     pins.forEach(p=>masonryEl.appendChild(p));
     masonryEl.classList.remove('filtering');void masonryEl.offsetWidth;masonryEl.classList.add('filtering');
   }
@@ -1263,6 +1276,14 @@
     // OPENING MEMBERは「人」への称号: 開場時点で作品があったアーティストの全作品に付く(新作含む)
     const members=new Set();
     pins.forEach(p=>{const ts=Number(p.dataset.ts||0);if(!ts||ts<OPEN_MOMENT)members.add(artistOf(p));});
+    // 7日以内に掲載された作品にNEWバッジ（キャプションを伏せたので、新しさは絵の上で示す）
+    const WEEK=Date.now()-7*864e5;
+    pins.forEach(p=>{
+      const im0=p.querySelector('.pin-img'), ts=Number(p.dataset.ts||0);
+      if(im0&&ts>WEEK&&!im0.querySelector('.pin-new')){
+        const b=document.createElement('span');b.className='pin-new';b.textContent='NEW';im0.appendChild(b);
+      }
+    });
     pins.forEach(p=>{
       const cat=p.querySelector('.pin-cat'), im=p.querySelector('.pin-img');
       if(!cat||!im)return;
