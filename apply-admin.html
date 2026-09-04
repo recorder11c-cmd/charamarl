@@ -96,6 +96,10 @@
   <p class="sub">登録 <b class="num" id="sCount">-</b> 件</p>
   <div id="sellerList"></div>
 
+  <h1 style="margin-top:34px;">アカウント一覧</h1>
+  <p class="sub">全 <b class="num" id="uCount">-</b> 件（新しい順）／作品数0のアカウントは代行用の仮アカウントの可能性があります</p>
+  <div id="userList"></div>
+
   <button class="refresh" id="refresh">↻ 一覧を更新する</button>
 </div>
 
@@ -244,10 +248,49 @@
     }catch(ex){err.textContent=ex.message;err.style.display='block';}
   }
 
-  document.getElementById('refresh').addEventListener('click',()=>{load();loadGallery();loadSellers();});
+  // ===== アカウント一覧（作品数つき・代行用の仮アカウントを片づけるため） =====
+  async function loadUsers(){
+    try{
+      const [ur,gr]=await Promise.all([
+        fetch(`/api/auth?key=${encodeURIComponent(key)}`),
+        fetch(`/api/gallery?status=all&key=${encodeURIComponent(key)}`)
+      ]);
+      if(!ur.ok)throw new Error('アカウント一覧を取得できませんでした（'+ur.status+'）');
+      const {users=[]}=await ur.json();
+      const gal=gr.ok?((await gr.json()).list||[]):[];
+      const cnt={};
+      gal.forEach(a=>{const k=String(a.artist||'').toLowerCase();cnt[k]=(cnt[k]||0)+1;});
+      document.getElementById('uCount').textContent=users.length;
+      document.getElementById('userList').innerHTML=users.map(u=>{
+        const n=cnt[String(u.name||'').toLowerCase()]||0;
+        return `<div class="card" style="display:flex;align-items:center;gap:12px;">
+          <div style="flex:1;min-width:0;">
+            <b>${esc(u.name)}</b>
+            <span class="num" style="margin-left:10px;color:${n?'#0a0':'#c00'};font-weight:800;">作品 ${n}</span>
+            <div class="sub" style="margin:2px 0 0;">${u.created?fmt(u.created):'登録日不明'}</div>
+          </div>
+          <button class="del" data-user="${esc(u.name)}" title="このアカウントを削除">✕</button>
+        </div>`;
+      }).join('')||'<p class="sub">アカウントがありません</p>';
+    }catch(ex){err.textContent=ex.message;err.style.display='block';}
+  }
+  document.getElementById('userList').addEventListener('click',async e=>{
+    const btn=e.target.closest('button[data-user]'); if(!btn)return;
+    const name=btn.dataset.user;
+    if(!confirm(`アカウント「${name}」を削除します。\n作品の掲載は消えません（掲載を消すときはギャラリー側で操作してください）。\nよろしいですか？`))return;
+    btn.disabled=true;
+    const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'admindel',name,key})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){alert(d.error||'削除できませんでした');btn.disabled=false;return;}
+    loadUsers();
+  });
+
+  document.getElementById('refresh').addEventListener('click',()=>{load();loadGallery();loadSellers();loadUsers();});
   load();
   loadGallery();
   loadSellers();
+  loadUsers();
 </script>
 </body>
 </html>

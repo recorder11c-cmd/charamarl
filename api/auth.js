@@ -121,6 +121,18 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true });
     }
 
+    // 管理用: アカウント削除（代行用の仮アカウントの後始末など）
+    // 本人のパスワードは不要。APPLY_KEY か管理者セッションが必要。
+    if (b.action === 'admindel') {
+      const { isAdminReq } = require('../lib/admin.js');
+      if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
+      const key = nameKey(String(b.name || ''));
+      if (!key) return res.status(400).json({ error: 'name が必要です' });
+      if (!Number(await redis('EXISTS', `user:${key}`))) return res.status(404).json({ error: 'そのアカウントはありません' });
+      await redis('DEL', `user:${key}`, `user:${key}:col`);
+      return res.status(200).json({ ok: true, deleted: key });
+    }
+
     // 以下は要ログイン
     const u = await currentUser(req);
     if (!u) return res.status(401).json({ error: 'ログインしてください' });
