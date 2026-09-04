@@ -27,7 +27,30 @@
   .logo .c1{color:var(--orange);} .logo .c2{color:var(--purple);}
   .back{color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;min-height:var(--tap-min);display:inline-flex;align-items:center;}
 
-  .wrap{max-width:640px;margin:0 auto;padding:20px 16px;}
+  .wrap{max-width:640px;margin:0 auto;padding:14px 16px;}
+  /* タブ: 4セクションを1画面ずつ切り替える（縦に積むとスクロールが長すぎるため） */
+  .tabbar{position:sticky;top:57px;z-index:9;background:var(--bg);
+    padding:10px 16px 8px;margin:0 auto;max-width:640px;
+    display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;}
+  .tabbar::-webkit-scrollbar{display:none;}
+  .tb{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;
+    padding:9px 14px;font-family:inherit;font-size:13px;font-weight:800;color:var(--muted);
+    cursor:pointer;min-height:var(--tap-min);display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .tb .n{font-variant-numeric:tabular-nums;font-size:12px;font-weight:800;
+    background:var(--line);color:var(--black);border-radius:999px;padding:1px 7px;}
+  .tb.on{background:var(--black);color:#fff;border-color:var(--black);}
+  .tb.on .n{background:rgba(255,255,255,.22);color:#fff;}
+  .tb .n.alert{background:#ffe3e8;color:#e0245e;}
+  .tb.on .n.alert{background:#ff5a7a;color:#fff;}
+  .pane[hidden]{display:none;}
+  .toolbar{display:flex;gap:8px;align-items:center;margin:0 0 14px;flex-wrap:wrap;}
+  .toolbar input[type=search]{flex:1;min-width:160px;min-height:var(--tap-min);
+    border:1px solid var(--line);border-radius:14px;padding:0 14px;font-family:inherit;font-size:14px;background:#fff;}
+  .chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;
+    color:var(--black);background:#fff;border:1px solid var(--line);border-radius:999px;
+    padding:0 14px;min-height:var(--tap-min);cursor:pointer;}
+  .fold{width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:12px 14px;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;margin-bottom:12px;}
   .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--orange);text-transform:uppercase;}
   h1{font-size:22px;font-weight:800;margin:2px 0 4px;}
   .sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
@@ -79,26 +102,52 @@
   <a class="back" href="./stats.html">📊 ダッシュボード</a>
 </header>
 
+<div class="tabbar" id="tabbar">
+  <button class="tb on" data-pane="p-gal" type="button">審査 <span class="n" id="tGal">-</span></button>
+  <button class="tb" data-pane="p-apply" type="button">応募 <span class="n" id="tApply">-</span></button>
+  <button class="tb" data-pane="p-user" type="button">アカウント <span class="n" id="tUser">-</span></button>
+  <button class="tb" data-pane="p-seller" type="button">販売者情報 <span class="n" id="tSeller">-</span></button>
+</div>
+
 <div class="wrap">
-  <div class="eyebrow">Admin</div>
-  <h1>クリエイター応募一覧</h1>
-  <p class="sub">全 <b class="num" id="count">-</b> 件（新しい順）</p>
-
   <div class="err" id="err"></div>
-  <div id="list"></div>
 
-  <h1 style="margin-top:34px;">ギャラリー投稿の審査</h1>
-  <p class="sub">審査待ち <b class="num" id="gpCount">-</b> 件 ・ 公開中 <b class="num" id="gaCount">-</b> 件</p>
-  <div id="galPending"></div>
-  <div id="galApproved"></div>
+  <section class="pane" id="p-gal">
+    <div class="eyebrow">Gallery</div>
+    <h1>ギャラリー投稿の審査</h1>
+    <p class="sub">審査待ち <b class="num" id="gpCount">-</b> 件 ・ 公開中 <b class="num" id="gaCount">-</b> 件</p>
+    <div id="galPending"></div>
+    <button class="fold" id="galToggle" type="button">▸ 公開中の作品を表示する</button>
+    <div class="toolbar" id="galTools" hidden>
+      <input type="search" id="galQ" placeholder="作品名・作家名でしぼりこむ">
+    </div>
+    <div id="galApproved" hidden></div>
+  </section>
 
-  <h1 style="margin-top:34px;">販売者情報（お支払い先）</h1>
-  <p class="sub">登録 <b class="num" id="sCount">-</b> 件</p>
-  <div id="sellerList"></div>
+  <section class="pane" id="p-apply" hidden>
+    <div class="eyebrow">Apply</div>
+    <h1>クリエイター応募一覧</h1>
+    <p class="sub">全 <b class="num" id="count">-</b> 件（新しい順）</p>
+    <div id="list"></div>
+  </section>
 
-  <h1 style="margin-top:34px;">アカウント一覧</h1>
-  <p class="sub">全 <b class="num" id="uCount">-</b> 件（新しい順）／作品数0のアカウントは代行用の仮アカウントの可能性があります</p>
-  <div id="userList"></div>
+  <section class="pane" id="p-user" hidden>
+    <div class="eyebrow">Accounts</div>
+    <h1>アカウント一覧</h1>
+    <p class="sub">全 <b class="num" id="uCount">-</b> 件（新しい順）</p>
+    <div class="toolbar">
+      <input type="search" id="userQ" placeholder="ニックネームでしぼりこむ">
+      <label class="chk"><input type="checkbox" id="userZero"> 作品0のみ</label>
+    </div>
+    <div id="userList"></div>
+  </section>
+
+  <section class="pane" id="p-seller" hidden>
+    <div class="eyebrow">Payout</div>
+    <h1>販売者情報（お支払い先）</h1>
+    <p class="sub">登録 <b class="num" id="sCount">-</b> 件</p>
+    <div id="sellerList"></div>
+  </section>
 
   <button class="refresh" id="refresh">↻ 一覧を更新する</button>
 </div>
@@ -115,7 +164,7 @@
       if(r.status===403)throw new Error('アクセス権がありません。運営アカウントでログインするか（→ login.html）、キー付きURLで開いてください');
       if(!r.ok)throw new Error('読み込みに失敗しました ('+r.status+')');
       const d=await r.json();
-      document.getElementById('count').textContent=d.count;
+      document.getElementById('tApply').textContent=(a.length||0);document.getElementById('count').textContent=d.count;
       if(!d.list.length){list.innerHTML='<div class="empty">まだ応募はありません 🦖</div>';return;}
       list.innerHTML=d.list.map(a=>{
         const url=/^https?:\/\//.test(a.sns)?a.sns:(a.sns?'https://'+a.sns:'');
@@ -261,9 +310,12 @@
       const cnt={};
       gal.forEach(a=>{const k=String(a.artist||'').toLowerCase();cnt[k]=(cnt[k]||0)+1;});
       document.getElementById('uCount').textContent=users.length;
+      const zeroN=users.filter(x=>!(cnt[String(x.name||'').toLowerCase()]||0)).length;
+      const tu=document.getElementById('tUser');
+      tu.textContent=zeroN; tu.className='n'+(zeroN?' alert':'');
       document.getElementById('userList').innerHTML=users.map(u=>{
         const n=cnt[String(u.name||'').toLowerCase()]||0;
-        return `<div class="card" style="display:flex;align-items:center;gap:12px;">
+        return `<div class="card" data-works="${n}" style="display:flex;align-items:center;gap:12px;">
           <div style="flex:1;min-width:0;">
             <b>${esc(u.name)}</b>
             <span class="num" style="margin-left:10px;color:${n?'#0a0':'#c00'};font-weight:800;">作品 ${n}</span>
@@ -285,6 +337,42 @@
     if(!r.ok){alert(d.error||'削除できませんでした');btn.disabled=false;return;}
     loadUsers();
   });
+
+  // ===== タブ切り替え =====
+  document.getElementById('tabbar').addEventListener('click',e=>{
+    const b=e.target.closest('.tb'); if(!b)return;
+    document.querySelectorAll('.tb').forEach(x=>x.classList.toggle('on',x===b));
+    document.querySelectorAll('.pane').forEach(x=>x.hidden = x.id!==b.dataset.pane);
+    window.scrollTo({top:0});
+  });
+
+  // ===== 公開中の作品は折りたたみ＋しぼりこみ（98件を毎回スクロールしないため） =====
+  const galToggle=document.getElementById('galToggle');
+  galToggle.addEventListener('click',()=>{
+    const box=document.getElementById('galApproved'), tools=document.getElementById('galTools');
+    const open=box.hidden;
+    box.hidden=!open; tools.hidden=!open;
+    galToggle.textContent=(open?'▾ 公開中の作品を隠す':'▸ 公開中の作品を表示する');
+  });
+  document.getElementById('galQ').addEventListener('input',e=>{
+    const q=e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#galApproved .card').forEach(c=>{
+      c.style.display = !q || c.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+
+  // ===== アカウントのしぼりこみ =====
+  function filterUsers(){
+    const q=document.getElementById('userQ').value.trim().toLowerCase();
+    const zeroOnly=document.getElementById('userZero').checked;
+    document.querySelectorAll('#userList .card').forEach(c=>{
+      const okQ = !q || c.textContent.toLowerCase().includes(q);
+      const okZ = !zeroOnly || c.dataset.works==='0';
+      c.style.display = (okQ&&okZ) ? '' : 'none';
+    });
+  }
+  document.getElementById('userQ').addEventListener('input',filterUsers);
+  document.getElementById('userZero').addEventListener('change',filterUsers);
 
   document.getElementById('refresh').addEventListener('click',()=>{load();loadGallery();loadSellers();loadUsers();});
   load();
