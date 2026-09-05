@@ -39,6 +39,3 @@ Disallow: /
 User-agent: *
 Allow: /
 Disallow: /apply-admin.html
-# 確認待ちの非公開ページ（本人OK後に解除）
-Disallow: /tap/mony.html
-Disallow: /characters/mony.html

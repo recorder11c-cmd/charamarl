@@ -3,8 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- 🚧 morryさんの確認待ち。公開時にこの2行を削除する -->
-<meta name="robots" content="noindex,nofollow">
 <title>モニィ — CHARAMARL</title>
 <style>
 
@@ -121,7 +119,7 @@ const ARTIST_ID = "morry";
 function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:CHAR_ID+'_'+ev,type:'like',op:'add'})});}catch(e){}
   if(window.cmEvent)cmEvent(ev==='cart'?'add_to_cart':'begin_checkout',{checkout_type:(ev==='cart'?undefined:'buynow'),item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});}
 setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});},400);
-const SALE_READY = false; // 🚧 morryさんの確認待ち。OKが出たら true にして公開する
+const SALE_READY = true;  // 本人承認済み(2026-09-05)
 const IMG_PUBLIC = "/img/products_t/mony.png"; // 決済/カート用(ルート相対)
 async function checkout() {
   if (!SALE_READY) return;
