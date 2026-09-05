@@ -1210,7 +1210,15 @@
     document.getElementById('aImg').src=a.img;
     document.getElementById('aBg').style.backgroundImage=`url("${a.img}")`;
     document.getElementById('aTitle').textContent=a.title;
-    document.getElementById('aArtist').textContent=a.artist;
+    // 作家名をタップしたら、その人の作品とグッズをまとめた作家ページへ
+    (function(){
+      var who=String(a.artist||'').replace(/^by\s+/,'').trim();
+      var el=document.getElementById('aArtist');
+      el.innerHTML = who
+        ? '<a href="./artist.html?a='+encodeURIComponent(who)+'" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">'
+          + who.replace(/&/g,'&amp;').replace(/</g,'&lt;') + ' の作品をすべて見る →</a>'
+        : '';
+    })();
     document.getElementById('aDesc').textContent=a.desc;
     const av=document.getElementById('aVisit');av.href=outUrl(curArt,a.site)||a.site||'#';av.style.display=a.site?'':'none';
     document.getElementById('aLikeCt').textContent=likeTotal(curArt);
@@ -1384,6 +1392,13 @@
     out.forEach(p=>masonryEl.appendChild(p));
   }
 
+
+  // ?a=作家名 で来たら作家ページへ転送する。
+  // 以前このパラメータには処理が無く、note記事やDMで配ったリンクが素通りしていた。
+  (function(){
+    var a=new URLSearchParams(location.search).get('a');
+    if(a) location.replace('./artist.html?a='+encodeURIComponent(a));
+  })();
 
   // ?g=作品ID で該当作品を直接ひらく（共有リンク用）
   function openDeepLink(){

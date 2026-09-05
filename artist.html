@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>アーティスト — CHARAMARL</title>
+<meta name="description" content="CHARAMARLに参加しているアーティストのページ。作品・グッズ・リンクをまとめて見られます。">
+<style>
+  :root{
+    --bg:#fbfaf7; --card:#fff; --text:#1a1a26; --muted:#6d6659;
+    --line:#e8e2d6; --orange:#ff8a00; --purple:#8e4ed9; --pink:#ff4d8d;
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Arial,'Hiragino Sans',sans-serif;line-height:1.7;}
+  a{color:inherit;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;
+    border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(251,250,247,.94);
+    backdrop-filter:blur(12px);z-index:50;}
+  .logo{font-size:19px;font-weight:900;letter-spacing:.1em;text-decoration:none;
+    background:linear-gradient(90deg,var(--orange),var(--purple));-webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;background-clip:text;}
+  .back{color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:700;}
+  .wrap{max-width:960px;margin:0 auto;padding:26px 20px 90px;}
+
+  /* --- 作家ヘッダー --- */
+  .ahero{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+  .ava{width:84px;height:84px;border-radius:50%;object-fit:cover;background:#fff;
+    border:3px solid #fff;box-shadow:0 4px 18px rgba(26,26,38,.12);flex:none;}
+  .aname{font-size:clamp(24px,6vw,34px);font-weight:900;letter-spacing:.02em;line-height:1.25;}
+  .asub{font-size:12.5px;color:var(--muted);font-weight:700;margin-top:2px;}
+  .links{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0;}
+  .lbtn{display:inline-flex;align-items:center;gap:6px;background:var(--text);color:#fff;
+    text-decoration:none;font-size:13px;font-weight:800;padding:10px 18px;border-radius:24px;}
+  .lbtn.ghost{background:#fff;color:var(--text);border:1px solid var(--line);}
+
+  /* --- 数字 --- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin:20px 0 30px;}
+  .stats div{background:var(--card);padding:14px 10px;text-align:center;}
+  .stats b{display:block;font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;}
+  .stats span{font-size:11px;color:var(--muted);font-weight:700;}
+
+  .sec{margin:0 0 34px;}
+  .sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;}
+  .sec-h h2{font-size:17px;font-weight:900;}
+  .sec-h .n{font-size:12px;color:var(--muted);font-weight:800;font-variant-numeric:tabular-nums;}
+
+  /* --- グッズ --- */
+  .goods{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+  .g{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;text-decoration:none;display:flex;flex-direction:column;transition:transform .15s;}
+  .g:hover{transform:translateY(-3px);}
+  .g img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;padding:8px;}
+  .g .gi{padding:10px 12px 12px;border-top:1px solid var(--line);}
+  .g .gn{font-size:13px;font-weight:800;line-height:1.4;}
+  .g .gk{font-size:10.5px;color:var(--muted);font-weight:700;margin-top:1px;}
+  .g .gp{display:inline-block;margin-top:7px;background:var(--orange);color:#fff;font-size:12px;
+    font-weight:900;border-radius:13px;padding:3px 11px;}
+
+  /* --- 作品 --- */
+  .works{columns:3 190px;column-gap:12px;}
+  .w{break-inside:avoid;margin-bottom:12px;display:block;text-decoration:none;position:relative;}
+  .w img{width:100%;border-radius:14px;display:block;border:1px solid var(--line);background:#fff;}
+  .w .wt{font-size:12px;font-weight:800;margin-top:6px;line-height:1.4;}
+  .w .wr{font-size:11px;color:var(--muted);font-weight:700;margin-top:1px;font-variant-numeric:tabular-nums;}
+  .badge{position:absolute;top:8px;left:8px;background:#ffd60a;color:#1a1a26;font-size:10px;
+    font-weight:900;border-radius:11px;padding:3px 9px;border:1.5px solid rgba(0,0,0,.1);}
+
+  .empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13.5px;
+    border:1px dashed var(--line);border-radius:var(--radius);background:var(--card);}
+  .cta{margin-top:36px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;text-align:center;}
+  .cta p{font-size:13px;color:var(--muted);margin-bottom:12px;}
+  footer{border-top:1px solid var(--line);padding:26px 20px;text-align:center;
+    color:var(--muted);font-size:11.5px;}
+  @media(max-width:520px){ .works{columns:2 130px;} .ava{width:66px;height:66px;} }
+</style>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/ga.js"></script>
+<script src="/js/products.js"></script>
+</head>
+<body>
+<header>
+  <a class="logo" href="./index.html">CHARAMARL</a>
+  <a class="back" href="./index.html">← 市場にもどる</a>
+</header>
+
+<div class="wrap" id="wrap">
+  <div class="empty" id="loading">読み込み中…</div>
+</div>
+
+<footer>© 2026 CHARAMARL / レコルダ合同会社</footer>
+
+<script>
+(function(){
+  var esc=function(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+  // 作家名の表記ゆれを吸収する。
+  // 例) アカウント "BeernoMocca" / 掲載名 "Beerno Mocca" のように空白の有無が違うことがある
+  var norm=function(s){return String(s||'').trim().toLowerCase().replace(/[\s'’.\-_+]/g,'');};
+  var q=new URLSearchParams(location.search);
+  var want=q.get('a')||'';
+  var wrap=document.getElementById('wrap');
+
+  function fail(msg){
+    wrap.innerHTML='<div class="empty">'+esc(msg)+
+      '<div style="margin-top:14px;"><a class="lbtn" href="./index.html">市場をのぞいてみる →</a></div></div>';
+  }
+  if(!want){ fail('アーティストが指定されていません。'); return; }
+
+  Promise.all([
+    fetch('/api/gallery').then(function(r){return r.ok?r.json():{list:[]};}).catch(function(){return {list:[]};}),
+    fetch('/api/react').then(function(r){return r.ok?r.json():{};}).catch(function(){return {};}),
+    fetch('/api/out?counts=1').then(function(r){return r.ok?r.json():{};}).catch(function(){return {};})
+  ]).then(function(res){
+    var list=res[0].list||[], rc=res[1]||{}, oc=res[2]||{};
+    var mine=list.filter(function(a){return norm(a.artist)===norm(want);});
+    if(!mine.length){
+      fail('「'+want+'」さんの作品が見つかりませんでした。');
+      return;
+    }
+    var name=mine[0].artist;
+    document.title=name+' — CHARAMARL';
+
+    mine.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+    var L=0,S=0,O=0;
+    mine.forEach(function(a){
+      L+=((rc[a.id]||{}).likes)||0; S+=((rc[a.id]||{}).saves)||0; O+=oc[a.id]||0;
+    });
+
+    // 外部リンク（送客計測を通す）
+    var linked=mine.filter(function(a){return a.link;})[0];
+    var outHref=linked?('/api/out?g='+encodeURIComponent(linked.id)):'';
+
+    var goods=(window.CM_PRODUCTS||[]).filter(function(p){return norm(p.creator)===norm(name);});
+    var taps=(window.CM_TAPS||{})[name]||[];
+    var WEEK=Date.now()-7*864e5;
+    var yen=function(n){return '¥'+Number(n).toLocaleString();};
+
+    var html='';
+    html+='<div class="ahero">'+
+      '<img class="ava" src="'+esc(mine[0].img)+'" alt="">'+
+      '<div><div class="aname">'+esc(name)+'</div>'+
+      '<div class="asub">CHARAMARL 参加アーティスト ・ 作品'+mine.length+'点'+
+        (goods.length?' ・ グッズ'+goods.length+'点':'')+'</div>'+
+      '<div class="links">'+
+        (outHref?'<a class="lbtn" href="'+esc(outHref)+'" target="_blank" rel="noopener">↗ '+esc(name)+'さんのページへ</a>':'')+
+        (taps.length?'<a class="lbtn ghost" href="'+esc(taps[0])+'">🎨 COLOR TAPで遊ぶ</a>':'')+
+      '</div></div></div>';
+
+    html+='<div class="stats">'+
+      '<div><b>'+L+'</b><span>♥ いいね</span></div>'+
+      '<div><b>'+S+'</b><span>🔖 保存</span></div>'+
+      '<div><b>'+O+'</b><span>↗ リンクへ移動</span></div>'+
+      '</div>';
+
+    if(goods.length){
+      html+='<div class="sec"><div class="sec-h"><h2>🛒 買えるもの</h2><span class="n">'+goods.length+'点</span></div><div class="goods">';
+      goods.forEach(function(p){
+        html+='<a class="g" href="'+esc(p.page)+'"><img src="'+esc(p.img)+'" alt="'+esc(p.name)+'" loading="lazy">'+
+          '<div class="gi"><div class="gn">'+esc(p.name)+'</div><div class="gk">'+esc(p.kind)+'</div>'+
+          '<span class="gp">'+yen(p.price)+'</span></div></a>';
+      });
+      html+='</div></div>';
+    }
+
+    html+='<div class="sec"><div class="sec-h"><h2>🎨 作品</h2><span class="n">'+mine.length+'点</span></div><div class="works">';
+    mine.forEach(function(a){
+      var l=((rc[a.id]||{}).likes)||0, o=oc[a.id]||0;
+      html+='<a class="w" href="./index.html?g='+esc(a.id)+'">'+
+        ((a.ts&&a.ts>WEEK)?'<span class="badge">NEW</span>':'')+
+        '<img src="'+esc(a.img)+'" alt="'+esc(a.title)+'" loading="lazy">'+
+        '<div class="wt">'+esc(a.title)+'</div>'+
+        '<div class="wr">♥ '+l+(o?' ・ ↗ '+o:'')+'</div></a>';
+    });
+    html+='</div></div>';
+
+    html+='<div class="cta"><p>CHARAMARLは、キャラクターたちが集まる小さな市場です。<br>'+
+      '掲載は無料で、販売の義務もありません。</p>'+
+      '<a class="lbtn" href="./apply.html?from=artist">🎪 出店・掲載を申し込む</a></div>';
+
+    wrap.innerHTML=html;
+  }).catch(function(){ fail('読み込みに失敗しました。時間をおいて開き直してください。'); });
+})();
+</script>
+</body>
+</html>
