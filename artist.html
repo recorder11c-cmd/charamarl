@@ -67,6 +67,18 @@
   .badge{position:absolute;top:8px;left:8px;background:#ffd60a;color:#1a1a26;font-size:10px;
     font-weight:900;border-radius:11px;padding:3px 9px;border:1.5px solid rgba(0,0,0,.1);}
 
+  /* --- シェア --- */
+  .share{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;margin:0 0 30px;}
+  .share .sh{font-size:13px;font-weight:900;margin-bottom:3px;}
+  .share .sd{font-size:11.5px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
+  .sbtns{display:flex;gap:8px;flex-wrap:wrap;}
+  .sb{display:inline-flex;align-items:center;gap:6px;border:0;cursor:pointer;font-family:inherit;
+    font-size:13px;font-weight:800;padding:11px 18px;border-radius:24px;text-decoration:none;
+    background:var(--text);color:#fff;}
+  .sb.x{background:#000;}
+  .sb.ghost{background:#fff;color:var(--text);border:1px solid var(--line);}
+  .sb.ghost.done{background:#e9f8ee;border-color:#8bd6a4;color:#1f7a45;}
   .empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:13.5px;
     border:1px dashed var(--line);border-radius:var(--radius);background:var(--card);}
   .cta{margin-top:36px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
@@ -155,6 +167,22 @@
       '<div><b>'+O+'</b><span>↗ リンクへ移動</span></div>'+
       '</div>';
 
+    // 作家さん自身がそのまま貼れるシェア枠。
+    // ここから貼られたリンクは外部→サイトの流入なので utm を付けてよい
+    //（サイト内リンクに utm を付けるとGA4が流入元を上書きしてしまうため、内部リンクには付けない）
+    var pageUrl='https://charamarl.com/artist.html?a='+encodeURIComponent(name);
+    var shareUrl=pageUrl+'&utm_source=x&utm_medium=social&utm_campaign=artist_page&utm_content=artist';
+    var shareText=name+' の作品を CHARAMARL で見られます🎪\n♥で応援できます。\n';
+    html+='<div class="share">'+
+      '<div class="sh">🚀 このページをシェア</div>'+
+      '<div class="sd">SNSやプロフィールにそのまま貼れます。'+
+      '貼っていただくと、上の「↗ リンクへ移動」の数字が動きます。</div>'+
+      '<div class="sbtns">'+
+        '<a class="sb x" id="shX" href="#" target="_blank" rel="noopener">𝕏 でシェア</a>'+
+        '<button class="sb ghost" id="shCopy" type="button">🔗 リンクをコピー</button>'+
+        '<button class="sb ghost" id="shNative" type="button" hidden>📤 ほかのアプリで</button>'+
+      '</div></div>';
+
     if(goods.length){
       html+='<div class="sec"><div class="sec-h"><h2>🛒 買えるもの</h2><span class="n">'+goods.length+'点</span></div><div class="goods">';
       goods.forEach(function(p){
@@ -181,6 +209,25 @@
       '<a class="lbtn" href="./apply.html?from=artist">🎪 出店・掲載を申し込む</a></div>';
 
     wrap.innerHTML=html;
+
+    var xa=document.getElementById('shX');
+    if(xa) xa.href='https://twitter.com/intent/tweet?text='+encodeURIComponent(shareText)
+      +'&url='+encodeURIComponent(shareUrl)+'&hashtags=CHARAMARL';
+    var cp=document.getElementById('shCopy');
+    if(cp) cp.addEventListener('click',function(){
+      var done=function(){cp.textContent='✓ コピーしました';cp.classList.add('done');
+        setTimeout(function(){cp.textContent='🔗 リンクをコピー';cp.classList.remove('done');},1800);};
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(pageUrl).then(done).catch(function(){prompt('コピーしてください',pageUrl);});
+      }else{ prompt('コピーしてください',pageUrl); }
+    });
+    var nb=document.getElementById('shNative');
+    if(nb&&navigator.share){
+      nb.hidden=false;
+      nb.addEventListener('click',function(){
+        navigator.share({title:name+' — CHARAMARL',text:shareText,url:pageUrl}).catch(function(){});
+      });
+    }
   }).catch(function(){ fail('読み込みに失敗しました。時間をおいて開き直してください。'); });
 })();
 </script>
