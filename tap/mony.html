@@ -243,7 +243,7 @@ stage.addEventListener("pointerdown", () => {           // タッチした瞬間
 });
 
 // ♥ いいね（CHARAMARLのカゲチヨ作品と共通集計）
-const CM_API="/api/react", LIKE_ID="gf25715341b4f", LIKE_BASE=0;
+const CM_API="/api/react", LIKE_ID="mony_tap", LIKE_BASE=0;
 const LIKE_KEY="colortap_likes";
 const likeSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(LIKE_KEY)||"[]"));}catch(e){return new Set();}};
 let likeServer=0, likeKnown=false;
