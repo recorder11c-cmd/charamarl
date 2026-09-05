@@ -13,6 +13,8 @@ window.CM_PRODUCTS = [
   { id:'inkumo',           name:'インクモ',                 creator:"Ink'z Monster",  price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/inkumo_mono.png',            page:'./characters/inkumo.html' },
   { id:'danna',            name:'だんな',                   creator:'赤猫かるま',      price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/danna_blue.png',             page:'./characters/danna.html' },
   { id:'blockma',          name:'ぶろっくま',               creator:'チンチロ',        price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/blockma.png',                page:'./characters/blockma.html' },
+  // 🚧 morryさんの確認待ち。OKが出たら characters/mony.html の SALE_READY を true にして、この行を有効化する
+  // { id:'mony', name:'モニィ', creator:'morry', price:1500, kind:'アクリルキーホルダー', img:'./img/products_t/mony.png', page:'./characters/mony.html' },
   { id:'yurucrazy',        name:'ユルクレイジー',            creator:'CRAZY',          price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/yurucrazy.png',              page:'./characters/yurucrazy.html' },
 ];
 
