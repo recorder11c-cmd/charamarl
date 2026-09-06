@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>かざすと、うごく。 — CHARAMARL AR</title>
+<meta name="description" content="アクキーの台紙にスマホをかざすと、キャラクターがとびだすCHARAMARLのAR。">
+<meta property="og:title" content="かざすと、うごく。 — CHARAMARL AR">
+<meta property="og:description" content="アクキーの台紙にスマホをかざすと、キャラクターがとびだします。">
+<meta property="og:image" content="https://charamarl.com/img/og.png">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&display=swap">
+<style>
+  :root{ --orange:#FF8A00; --purple:#A855F7; --black:#111; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; background:#111; overflow:hidden; }
+  body{ font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Kaku Gothic ProN',sans-serif; color:#111; -webkit-tap-highlight-color:transparent; }
+  a-scene{ position:fixed; inset:0; }
+  .ui{ position:fixed; inset:0; pointer-events:none; z-index:10; }
+  .top{ position:absolute; top:max(14px, env(safe-area-inset-top)); left:0; right:0; text-align:center; }
+  .brand{ display:inline-block; background:#fff; border-radius:30px; padding:8px 16px; font-weight:900; letter-spacing:.1em; font-size:14px; font-family:'Helvetica Neue',Arial,sans-serif; box-shadow:0 4px 0 rgba(0,0,0,.18); }
+  .brand .a{ color:var(--orange);} .brand .b{ color:var(--purple);}
+  .hint{ display:inline-block; margin-top:12px; background:#fff; border-radius:30px; padding:12px 22px; font-weight:900; font-size:clamp(14px,3.8vmin,18px); box-shadow:0 6px 0 rgba(0,0,0,.18); animation:bob 1.4s ease-in-out infinite; transition:opacity .35s; max-width:88vw; }
+  .hint.hide{ opacity:0; }
+  @keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+  .bottom{ position:absolute; left:0; right:0; bottom:max(12px, env(safe-area-inset-bottom)); display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .strip{ display:flex; gap:8px; overflow-x:auto; max-width:100vw; padding:6px 14px; pointer-events:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .strip::-webkit-scrollbar{ display:none; }
+  .chip{ flex:0 0 auto; width:56px; height:56px; border-radius:50%; border:3px solid #fff; background:#fff; padding:0; overflow:hidden; box-shadow:0 4px 0 rgba(0,0,0,.2); cursor:pointer; transition:transform .12s, border-color .12s; }
+  .chip img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .chip.on{ border-color:var(--orange); transform:scale(1.12); }
+  .row{ display:flex; gap:8px; pointer-events:auto; }
+  .btn{ display:inline-flex; align-items:center; gap:6px; background:#111; color:#fff; font-weight:900; font-family:inherit; text-decoration:none; border:3px solid #111; padding:12px 20px; border-radius:30px; font-size:clamp(13px,3.4vmin,16px); box-shadow:0 5px 0 rgba(0,0,0,.28); cursor:pointer; transition:transform .12s; }
+  .btn.w{ background:#fff; color:#111; }
+  .btn:active{ transform:scale(.96); }
+  .name{ position:absolute; top:28%; left:0; right:0; text-align:center; font-size:clamp(22px,6vmin,36px); font-weight:900; letter-spacing:.1em; color:#111; text-shadow:3px 3px 0 rgba(255,138,0,.85), -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff; opacity:0; }
+  .name.show{ animation:flash 1.2s ease forwards; }
+  @keyframes flash{ 0%{opacity:0; transform:translateY(8px) scale(.9);} 15%{opacity:1; transform:translateY(0) scale(1.06);} 25%{transform:scale(1);} 80%{opacity:1;} 100%{opacity:0;} }
+
+  /* 起動前のカバー */
+  .cover{ position:fixed; inset:0; z-index:20; background:#FFFDF9; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:28px 24px; gap:14px; }
+  .cover.hide{ display:none; }
+  .cover .logo{ font-family:'Helvetica Neue',Arial,sans-serif; font-weight:900; font-size:64px; line-height:1; letter-spacing:-.02em; }
+  .cover .logo .a{ color:var(--orange);} .cover .logo .b{ color:var(--purple);}
+  .cover .wm{ font-family:'Helvetica Neue',Arial,sans-serif; font-weight:900; letter-spacing:.14em; font-size:16px; }
+  .cover h1{ font-size:clamp(24px,7vmin,34px); font-weight:900; margin-top:10px; }
+  .cover p{ font-size:15px; font-weight:700; color:#555; line-height:1.6; }
+  .cover .pick{ font-size:16px; font-weight:900; margin-top:6px; }
+  .grid{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px; max-width:420px; }
+  .grid .chip{ width:64px; height:64px; }
+  .start{ margin-top:8px; background:var(--orange); color:#fff; border:none; font-family:inherit; font-weight:900; font-size:18px; padding:16px 36px; border-radius:40px; box-shadow:0 6px 0 rgba(0,0,0,.18); cursor:pointer; }
+  .start:disabled{ opacity:.4; }
+  .start:active{ transform:scale(.97); }
+  .small{ font-size:12px; color:#888; font-weight:700; }
+  .err{ display:none; }
+  .err.show{ display:block; }
+  .err a{ color:var(--purple); font-weight:900; }
+</style>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/ga.js"></script>
+<script src="/js/products.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe-master.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+<body>
+
+<!-- 起動前: キャラ選択 + カメラ開始(iOSはユーザー操作が必要) -->
+<div class="cover" id="cover">
+  <div class="logo"><span class="a">C</span><span class="b">M</span></div>
+  <div class="wm">CHARAMARL</div>
+  <h1>かざすと、うごく。</h1>
+  <p>台紙の<b>おもて</b>にカメラをむけると<br>キャラクターがとびだします。</p>
+  <div class="pick">どの子を連れてかえった？</div>
+  <div class="grid" id="grid"></div>
+  <button class="start" id="start" type="button" disabled>カメラをはじめる</button>
+  <div class="small">カメラの映像は端末の中だけで使い、送信・保存はしません</div>
+  <div class="small err" id="err">カメラを起動できませんでした。<br>XやLINEの中で開いている場合は、<a href="#" id="openSafari">SafariやChromeで開く</a>とうまくいきます。</div>
+</div>
+
+<a-scene id="scene"
+  mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001;"
+  color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true"
+  vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" embedded>
+  <a-assets id="assets"></a-assets>
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <a-entity id="target" mindar-image-target="targetIndex: 0">
+    <a-circle id="shadow" position="0 -0.05 0.01" radius="0.36" scale="1 0.35 1" color="#000" opacity="0.22" transparent="true"></a-circle>
+    <a-entity id="holder" position="0 0 0.25">
+      <a-image id="chara" width="0.95" height="0.95" position="0 0.05 0" transparent="true"
+        animation__bob="property: position; from: 0 0.02 0; to: 0 0.12 0; dir: alternate; dur: 900; loop: true; easing: easeInOutSine"
+        animation__sway="property: rotation; from: 0 0 -4; to: 0 0 4; dir: alternate; dur: 1300; loop: true; easing: easeInOutSine"></a-image>
+    </a-entity>
+  </a-entity>
+</a-scene>
+
+<div class="ui" id="ui" hidden>
+  <div class="top">
+    <div class="brand"><span class="a">CHARA</span><span class="b">MARL</span></div><br>
+    <div class="hint" id="hint">台紙の おもて にカメラをむけてね</div>
+  </div>
+  <div class="name" id="name"></div>
+  <div class="bottom">
+    <div class="strip" id="strip"></div>
+    <div class="row">
+      <a class="btn" id="pageBtn" href="/">この子のページ</a>
+      <button class="btn w" id="shareBtn" type="button">シェア</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // 販売中のアクキー(作家を問わず全員同じ扱い)。順番は毎回シャッフル
+  var ALL=(window.CM_PRODUCTS||[]).filter(function(p){ return p.kind==='アクリルキーホルダー'; });
+  for(var i=ALL.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=ALL[i]; ALL[i]=ALL[j]; ALL[j]=t; }
+  var byId={}; ALL.forEach(function(p){ byId[p.id]=p; });
+  var abs=function(rel){ return rel.replace(/^\.\//,'/'); };
+  var pfp=function(p){ return '/img/pfp/'+p.id+'.png'; };
+
+  var q=new URLSearchParams(location.search);
+  var cur=byId[q.get('c')||'']||null;
+
+  var grid=document.getElementById('grid'), strip=document.getElementById('strip');
+  var startBtn=document.getElementById('start'), cover=document.getElementById('cover');
+  var ui=document.getElementById('ui'), hint=document.getElementById('hint'), nameEl=document.getElementById('name');
+  var pageBtn=document.getElementById('pageBtn');
+  var chara=document.getElementById('chara'), holder=document.getElementById('holder'), assets=document.getElementById('assets');
+  var found=false;
+
+  function chip(p, onPick){
+    var b=document.createElement('button'); b.type='button'; b.className='chip'; b.dataset.id=p.id; b.title=p.name;
+    var im=document.createElement('img'); im.src=pfp(p); im.alt=p.name; im.loading='lazy'; b.appendChild(im);
+    b.addEventListener('click', function(){ onPick(p); });
+    return b;
+  }
+  function mark(){ document.querySelectorAll('.chip').forEach(function(b){ b.classList.toggle('on', !!cur && b.dataset.id===cur.id); }); }
+
+  function setChara(p, announce){
+    cur=p; mark();
+    startBtn.disabled=false;
+    // 画像は縦横比を保つ
+    var img=new Image(); img.onload=function(){
+      var r=img.naturalWidth/img.naturalHeight, w=0.95, h=0.95;
+      if(r>1) h=w/r; else w=h*r;
+      chara.setAttribute('width',w); chara.setAttribute('height',h);
+      chara.setAttribute('src', img.src);
+    }; img.src=abs(p.img);
+    pageBtn.href=abs(p.page)+'?utm_source=ar&utm_medium=daishi';
+    if(announce){ nameEl.textContent=p.name; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); }
+    if(window.gtag) gtag('event','ar_select',{character:p.id});
+  }
+
+  ALL.forEach(function(p){ grid.appendChild(chip(p, function(x){ setChara(x,false); })); strip.appendChild(chip(p, function(x){ setChara(x,true); pop(); })); });
+  if(cur) setChara(cur,false);
+
+  // タップでぴょん
+  function pop(){
+    if(!found) return;
+    holder.removeAttribute('animation__pop');
+    holder.setAttribute('animation__pop','property: position; from: 0 0 0.25; to: 0 0 0.6; dir: alternate; dur: 260; loop: 1; easing: easeOutCubic');
+    chara.removeAttribute('animation__spin');
+    chara.setAttribute('animation__spin','property: rotation; from: 0 0 0; to: 0 360 0; dur: 520; easing: easeOutCubic');
+    nameEl.textContent=cur?cur.name:''; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show');
+    if(window.gtag) gtag('event','ar_tap',{character:cur?cur.id:''});
+  }
+  document.getElementById('scene').addEventListener('click', pop);
+
+  // 起動
+  var scene=document.getElementById('scene');
+  startBtn.addEventListener('click', function(){
+    if(!cur) return;
+    startBtn.disabled=true; startBtn.textContent='起動中…';
+    var sys=scene.systems['mindar-image-system'];
+    try{ sys.start(); }catch(e){ fail(); }
+    if(window.gtag) gtag('event','ar_start',{character:cur.id});
+  });
+  scene.addEventListener('arReady', function(){ cover.classList.add('hide'); ui.hidden=false; });
+  scene.addEventListener('arError', fail);
+  function fail(){
+    startBtn.disabled=false; startBtn.textContent='もう一度ためす';
+    document.getElementById('err').classList.add('show');
+    if(window.gtag) gtag('event','ar_error');
+  }
+  document.getElementById('openSafari').addEventListener('click', function(e){
+    e.preventDefault();
+    var u=location.href;
+    if(navigator.clipboard) navigator.clipboard.writeText(u).catch(function(){});
+    alert('リンクをコピーしました。SafariやChromeのアドレス欄に貼りつけて開いてください。\n'+u);
+  });
+
+  var target=document.getElementById('target');
+  target.addEventListener('targetFound', function(){ found=true; hint.classList.add('hide'); if(cur){ nameEl.textContent=cur.name; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); } if(window.gtag) gtag('event','ar_found',{character:cur?cur.id:''}); });
+  target.addEventListener('targetLost', function(){ found=false; hint.classList.remove('hide'); });
+
+  // シェア
+  document.getElementById('shareBtn').addEventListener('click', function(){
+    var text=(cur?cur.name+'が台紙からとびだした！':'台紙にかざすとキャラがとびだす')+' #CHARAMARL';
+    var url='https://charamarl.com/ar'+(cur?'?c='+cur.id:'');
+    if(navigator.share){ navigator.share({title:'CHARAMARL AR', text:text, url:url}).catch(function(){}); }
+    else{ window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(url),'_blank'); }
+    if(window.gtag) gtag('event','share',{method:navigator.share?'native':'x', content_type:'ar', item_id:cur?cur.id:''});
+  });
+})();
+</script>
+</body>
+</html>
