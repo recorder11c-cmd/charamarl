@@ -49,7 +49,11 @@
   .grid{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px; max-width:420px; }
   .grid .chip{ width:64px; height:64px; }
   .start{ margin-top:8px; background:var(--orange); color:#fff; border:none; font-family:inherit; font-weight:900; font-size:18px; padding:16px 36px; border-radius:40px; box-shadow:0 6px 0 rgba(0,0,0,.18); cursor:pointer; }
-  .start:disabled{ opacity:.4; }
+  .start:disabled{ opacity:.6; }
+  .need{ display:none; color:var(--orange); font-weight:900; font-size:14px; }
+  .need.show{ display:block; }
+  .grid.wobble{ animation:wob .5s ease; }
+  @keyframes wob{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
   .start:active{ transform:scale(.97); }
   .small{ font-size:12px; color:#888; font-weight:700; }
   .err{ display:none; }
@@ -72,15 +76,16 @@
   <p>台紙の<b>おもて</b>にカメラをむけると<br>キャラクターがとびだします。</p>
   <div class="pick">どの子を連れてかえった？</div>
   <div class="grid" id="grid"></div>
-  <button class="start" id="start" type="button" disabled>カメラをはじめる</button>
+  <button class="start" id="start" type="button">カメラをはじめる</button>
+  <div class="small need" id="need">まず、連れてかえった子をタップしてね</div>
   <div class="small">カメラの映像は端末の中だけで使い、送信・保存はしません</div>
-  <div class="small err" id="err">カメラを起動できませんでした。<br>XやLINEの中で開いている場合は、<a href="#" id="openSafari">SafariやChromeで開く</a>とうまくいきます。</div>
+  <div class="small err" id="err">カメラを起動できませんでした。<br>XやLINEの中で開いている場合は、<a href="#" id="openSafari">SafariやChromeで開く</a>とうまくいきます。<br><span id="errDetail" style="color:#aaa"></span></div>
 </div>
 
 <a-scene id="scene"
   mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001;"
   color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true"
-  vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" embedded>
+  vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" loading-screen="enabled: false" embedded>
   <a-assets id="assets"></a-assets>
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
   <a-entity id="target" mindar-image-target="targetIndex: 0">
@@ -137,7 +142,7 @@
 
   function setChara(p, announce){
     cur=p; mark();
-    startBtn.disabled=false;
+    document.getElementById('need').classList.remove('show');
     // 画像は縦横比を保つ
     var img=new Image(); img.onload=function(){
       var r=img.naturalWidth/img.naturalHeight, w=0.95, h=0.95;
@@ -167,19 +172,29 @@
 
   // 起動
   var scene=document.getElementById('scene');
+  var startTimer=null;
   startBtn.addEventListener('click', function(){
-    if(!cur) return;
+    if(!cur){
+      document.getElementById('need').classList.add('show');
+      grid.classList.remove('wobble'); void grid.offsetWidth; grid.classList.add('wobble');
+      return;
+    }
     startBtn.disabled=true; startBtn.textContent='起動中…';
-    var sys=scene.systems['mindar-image-system'];
-    try{ sys.start(); }catch(e){ fail(); }
+    var sys=scene.systems && scene.systems['mindar-image-system'];
+    if(!sys){ fail('ARの準備ができていません。ページを読み込み直してください'); return; }
+    try{ sys.start(); }catch(e){ fail(String(e&&e.message||e)); return; }
+    clearTimeout(startTimer);
+    startTimer=setTimeout(function(){ if(cover.classList.contains('hide')) return; fail('カメラの許可待ちで止まっています'); }, 20000);
     if(window.gtag) gtag('event','ar_start',{character:cur.id});
   });
-  scene.addEventListener('arReady', function(){ cover.classList.add('hide'); ui.hidden=false; });
-  scene.addEventListener('arError', fail);
-  function fail(){
+  scene.addEventListener('arReady', function(){ clearTimeout(startTimer); cover.classList.add('hide'); ui.hidden=false; });
+  scene.addEventListener('arError', function(e){ fail(e&&e.detail&&e.detail.error?String(e.detail.error):''); });
+  function fail(msg){
+    clearTimeout(startTimer);
     startBtn.disabled=false; startBtn.textContent='もう一度ためす';
-    document.getElementById('err').classList.add('show');
-    if(window.gtag) gtag('event','ar_error');
+    var er=document.getElementById('err'); er.classList.add('show');
+    var d=document.getElementById('errDetail'); if(d) d.textContent=msg||'';
+    if(window.gtag) gtag('event','ar_error',{reason:(msg||'').slice(0,80)});
   }
   document.getElementById('openSafari').addEventListener('click', function(e){
     e.preventDefault();
