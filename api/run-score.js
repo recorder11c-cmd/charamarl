@@ -9,6 +9,9 @@
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const ADMIN_KEY = process.env.APPLY_KEY;
+const crypto = require('crypto');
+// NFCアクキー所有者トークン: HMAC(APPLY_KEY, 'run-owner:'+char) の先頭20桁。go.js が発行し、ここで検証する
+function ownerToken(char) { return ADMIN_KEY ? crypto.createHmac('sha256', ADMIN_KEY).update('run-owner:' + char).digest('hex').slice(0, 20) : null; }
 
 async function redis(...cmd) {
   const res = await fetch(KV_URL, { method: 'POST', headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(cmd) });
@@ -60,6 +63,10 @@ module.exports = async (req, res) => {
     if (req.method === 'GET') {
       const char = String(q.char || 'SUE');
       if (!charOk(char)) return res.status(400).json({ error: 'bad char' });
+      if (q.owner !== undefined) {           // 所有者トークン検証
+        const ok = !!ownerToken(char) && String(q.owner) === ownerToken(char);
+        return res.status(200).json({ owner: ok });
+      }
       const pid = PID_RE.test(String(q.pid || '')) ? String(q.pid) : null;
       const out = await board(char, pid);
       if (ADMIN_KEY && q.key === ADMIN_KEY) {           // 管理用: 削除に使うpidを付けて返す

@@ -49,7 +49,13 @@ module.exports = async (req, res) => {
   try {
     if (KV_URL && KV_TOKEN) await redis('INCR', `nfc:${c}:scans`);
   } catch (_) {} // 計測失敗でも誘導は止めない
+  // DINORENNY RUN の所有者特典トークン(SUEのみ)。characters/sue.html が RUN へのリンクに引き継ぐ
+  let extra = '';
+  if (c === 'sue' && process.env.APPLY_KEY) {
+    const tok = require('crypto').createHmac('sha256', process.env.APPLY_KEY).update('run-owner:SUE').digest('hex').slice(0, 20);
+    extra = '&owner=' + tok;
+  }
   res.statusCode = 302;
-  res.setHeader('Location', DEST[c] + (DEST[c].includes('?') ? '&' : '?') + 'from=nfc');
+  res.setHeader('Location', DEST[c] + (DEST[c].includes('?') ? '&' : '?') + 'from=nfc' + extra);
   return res.end();
 };
