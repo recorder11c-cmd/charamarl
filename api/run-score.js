@@ -22,6 +22,8 @@ async function pipeline(cmds) {
 }
 
 const CHAR_RE = /^[a-z0-9_-]{1,20}$/i;
+const ALLOWED_CHARS = ['SUE'];   // 公開キャラのみ受け付ける(プロンプト公開後のコピー流入対策)
+const charOk = c => CHAR_RE.test(c) && ALLOWED_CHARS.includes(c);
 const PID_RE = /^[a-f0-9]{16,32}$/;
 const MAX_SCORE = 999999;
 const TOP_N = 20;
@@ -57,7 +59,7 @@ module.exports = async (req, res) => {
     const q = req.query || {};
     if (req.method === 'GET') {
       const char = String(q.char || 'SUE');
-      if (!CHAR_RE.test(char)) return res.status(400).json({ error: 'bad char' });
+      if (!charOk(char)) return res.status(400).json({ error: 'bad char' });
       const pid = PID_RE.test(String(q.pid || '')) ? String(q.pid) : null;
       const out = await board(char, pid);
       if (ADMIN_KEY && q.key === ADMIN_KEY) {           // 管理用: 削除に使うpidを付けて返す
@@ -73,7 +75,7 @@ module.exports = async (req, res) => {
       const pid = String(b.pid || '');
       const name = cleanName(b.name);
       const score = Math.floor(Number(b.score));
-      if (!CHAR_RE.test(char) || !PID_RE.test(pid)) return res.status(400).json({ error: 'bad id' });
+      if (!charOk(char) || !PID_RE.test(pid)) return res.status(400).json({ error: 'bad id' });
       if (!name) return res.status(400).json({ error: 'name required' });
       if (!Number.isFinite(score) || score < 1 || score > MAX_SCORE) return res.status(400).json({ error: 'bad score' });
 
@@ -101,7 +103,7 @@ module.exports = async (req, res) => {
     if (req.method === 'DELETE') {
       if (!ADMIN_KEY || q.key !== ADMIN_KEY) return res.status(403).json({ error: 'forbidden' });
       const char = String(q.char || ''), pid = String(q.pid || '');
-      if (!CHAR_RE.test(char) || !PID_RE.test(pid)) return res.status(400).json({ error: 'bad id' });
+      if (!charOk(char) || !PID_RE.test(pid)) return res.status(400).json({ error: 'bad id' });
       await pipeline([['ZREM', `run:rank:${char}`, pid], ['DEL', `run:player:${char}:${pid}`]]);
       return res.status(200).json({ ok: true });
     }
