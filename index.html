@@ -705,9 +705,26 @@
   </div>
 </section>
 
+<style>
+/* 公式Xへの導線(2026-09-08) */
+.foot-follow{display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
+  margin:0 auto 18px;padding:11px 20px;border-radius:28px;text-decoration:none;
+  background:#1a1a26;color:#fff;font-size:13px;font-weight:700;line-height:1.5;max-width:92%;}
+.foot-follow b{background:#fff;color:#1a1a26;border-radius:16px;padding:4px 14px;font-size:12.5px;font-weight:900;white-space:nowrap;}
+.foot-follow:hover{opacity:.88;}
+.art-follow{display:inline-block;margin-top:14px;padding:9px 16px;border-radius:22px;
+  background:#1a1a26;color:#fff;text-decoration:none;font-size:12.5px;font-weight:800;}
+.art-follow:hover{opacity:.88;}
+</style>
 <footer>
   <div class="foot-logo"><span class="a">CHARA</span><span class="b">MARL</span></div>
   <p class="foot-tag">Discover Characters. Support Creators.</p>
+  <!-- 公式Xへの導線(2026-09-08追加)。サイトに来た人がフォローする場所が無かった -->
+  <a class="foot-follow" href="https://x.com/charamarl" target="_blank" rel="noopener"
+     onclick="if(window.cmEvent)cmEvent('follow_click',{place:'footer'});">
+    𝕏 新しい作家と新商品は、公式Xでお知らせします
+    <b>フォローする</b>
+  </a>
   <div class="foot-links">
     <a href="#discover">ギャラリー</a><span>·</span>
     <a href="./about.html">ABOUT</a><span>·</span>
@@ -717,6 +734,7 @@
     <a href="./terms.html">利用規約</a><span>·</span>
     <a href="./privacy.html">プライバシー</a><span>·</span>
     <a href="./tokushoho.html">特定商取引法に基づく表記</a><span>·</span>
+    <a href="https://x.com/charamarl" target="_blank" rel="noopener">公式X</a><span>·</span>
     <a href="mailto:charamarlinfo@gmail.com">お問い合わせ</a>
   </div>
   <p class="foot-copy">© 2026 CHARAMARL. All rights reserved.</p>
@@ -794,6 +812,8 @@
       <a class="art-visit" id="aVisit" href="#" target="_blank">サイトにアクセス →</a>
       <div class="art-desc-h">説明</div>
       <div class="modal-desc" id="aDesc"></div>
+      <a class="art-follow" href="https://x.com/charamarl" target="_blank" rel="noopener"
+         onclick="if(window.cmEvent)cmEvent('follow_click',{place:'artwork_modal'});">𝕏 新しい作品の入荷を受け取る</a>
     </div>
   </div>
 </div>
