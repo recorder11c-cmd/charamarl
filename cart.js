@@ -55,7 +55,7 @@
       <div class="cart-item">
         <img src="${i.img || img(i.char,i.color)}" alt="${i.name}">
         <div class="cart-item-info">
-          <div class="cart-item-name">${i.name} アクキー</div>
+          <div class="cart-item-name">${(i.name+" "+(i.kind===undefined?"アクキー":i.kind)).trim()}</div>
           <div class="cart-item-color">${i.colorName}</div>
           <div class="cart-item-price">¥${i.price.toLocaleString()}</div>
         </div>
@@ -91,7 +91,7 @@
     try{ localStorage.setItem('cm_pending', JSON.stringify({value:_val, items:_items, type:'cart', ts:Date.now()})); }catch(e){}
     try{
       const res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ items: cart.map(i=>({ name:`${i.name} アクリルキーホルダー ${i.colorName}`, price:i.price, quantity:i.qty, images:[i.img ? PROD_BASE+i.img : imgAbs(i.char,i.color)] })) })});
+        body:JSON.stringify({ items: cart.map(i=>({ name:`${i.name} ${i.kind===undefined?'アクリルキーホルダー':i.kind} ${i.colorName}`.replace(/\s+/g,' ').trim(), price:i.price, quantity:i.qty, images:[i.img ? PROD_BASE+i.img : imgAbs(i.char,i.color)] })) })});
       const data=await res.json();
       if(data.url){ window.location.href=data.url; }
       else { alert('エラー: '+(data.error||'不明')); btn.textContent='まとめて購入する →'; btn.disabled=false; }
@@ -100,15 +100,16 @@
 
   // 公開API
   window.CHARAMARL_CART = {
-    add(char, color, name, colorName, price, imgPath){
+    // kind: 商品種別の表示名。未指定なら従来どおりアクキー扱い（ピンズ等はここに渡す）
+    add(char, color, name, colorName, price, imgPath, kind){
       const cart=get(); const id=char+'_'+color;
       const ex=cart.find(i=>i.id===id);
-      if(ex) ex.qty++; else cart.push({ id, char, color, name, colorName, price:price||1500, qty:1, img:imgPath||null });
+      if(ex) ex.qty++; else { const it={ id, char, color, name, colorName, price:price||1500, qty:1, img:imgPath||null }; if(kind!==undefined) it.kind=kind; cart.push(it); }
       save(cart);
       // 計測(全経路をここに集約: 商品ページ / トップのモーダル 両方)
       try{ fetch('/api/react',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({id:char+'_cart',type:'like',op:'add'})}); }catch(e){}
-      if(window.cmEvent)cmEvent('add_to_cart',{item_id:char+'_keyring',item_name:(name||char)+' アクリルキーホルダー',
+      if(window.cmEvent)cmEvent('add_to_cart',{item_id:char+'_'+(kind===undefined?'keyring':'item'),item_name:((name||char)+' '+(kind===undefined?'アクリルキーホルダー':kind)).trim(),
         character_id:char,price:price||1500,quantity:1,currency:'JPY'});
     },
     open: openCart

@@ -39,3 +39,5 @@ Disallow: /
 User-agent: *
 Allow: /
 Disallow: /apply-admin.html
+# 準備中のページ（公開時にこの行を消す）
+Disallow: /characters/pins.html

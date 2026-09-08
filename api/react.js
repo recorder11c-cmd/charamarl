@@ -13,8 +13,8 @@ const ART_IDS = [
 // カラーリクエスト投票用ID（定番色以外の商品化リクエスト）
 const COLOR_REQ = /^(sue|putti|mossun|gmc|ufoo|dogooooo)_[a-z]{2,15}$/;
 const EXTRA_TAP = /^(crazy_tap|gotochi_tap|mony_tap)$/;
-const FUNNEL = /^(sue|putti|mossun|gmc|ufoo|dogooooo|inkumo|danna|blockma|yurucrazy|kagechiyo_hoodie|dino_canvas|mony)_(cart|buy|paid)$/; // 購入ファネル計測（paid=決済完了）
-const INTEREST = /^(sue|putti|mossun|gmc|ufoo|dogooooo|inkumo|danna|blockma|yurucrazy|kagechiyo_hoodie)_interest$/;
+const FUNNEL = /^(sue|putti|mossun|gmc|ufoo|dogooooo|inkumo|danna|blockma|yurucrazy|kagechiyo_hoodie|dino_canvas|mony|pins)_(cart|buy|paid)$/; // 購入ファネル計測（paid=決済完了）
+const INTEREST = /^(sue|putti|mossun|gmc|ufoo|dogooooo|inkumo|danna|blockma|yurucrazy|kagechiyo_hoodie|pins)_interest$/;
 const COLOR_IDS = ['sue','putti','mossun','gmc'].flatMap(c =>
   ['red','yellow','green','cyan','blue','pink'].map(k => `${c}_${k}`));
 // 投稿ギャラリー(api/gallery.js)で承認された作品IDは react:extra 集合で許可
