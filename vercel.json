@@ -2,15 +2,44 @@
   "redirects": [
     {
       "source": "/:path((?!api/).*)",
-      "has": [{ "type": "host", "value": "charamarl.vercel.app" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "charamarl.vercel.app"
+        }
+      ],
       "destination": "https://charamarl.com/:path",
       "permanent": false
     },
     {
       "source": "/:path(.*)",
-      "has": [{ "type": "host", "value": "www.charamarl.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "www.charamarl.com"
+        }
+      ],
       "destination": "https://charamarl.com/:path",
       "permanent": true
     }
-  ]
+  ],
+  "images": {
+    "sizes": [
+      128,
+      256,
+      384,
+      640,
+      828
+    ],
+    "formats": [
+      "image/webp"
+    ],
+    "minimumCacheTTL": 2678400,
+    "remotePatterns": [
+      {
+        "protocol": "https",
+        "hostname": "*.public.blob.vercel-storage.com"
+      }
+    ]
+  }
 }
