@@ -1411,6 +1411,18 @@
     wireArtPin(div,a.id);
     baseOrder.push(div);
   }
+  // 作品の並びを読み込みのたびに入れ替える(2026-09-08)。
+  // それまで「おすすめ順」がAPIの返り順のまま固定で、同じ人が毎回最下部にいた
+  // （らすべっとさん112/120位・かるきさん81位が何度読み込んでも同じ）。
+  // 誰にも順番が回ってこないので、作品ピンだけシャッフルする。
+  // 商品ピン(.prod)は売り場なので位置を動かさない。
+  function shuffleArt(){
+    const idx=[], art=[];
+    baseOrder.forEach((p,i)=>{ if(!p.querySelector('.pin-img.prod')){ idx.push(i); art.push(p); } });
+    for(let i=art.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [art[i],art[j]]=[art[j],art[i]]; }
+    idx.forEach((pos,k)=>{ baseOrder[pos]=art[k]; });
+  }
+
   // 同一アーティストが連続しないように交互配置（多い人から順に間隔を空けて散らす）
   function interleaveByArtist(){
     const key=p=>{const el=p.querySelector('.pin-sub');return el?el.textContent.trim():p.dataset.site||'';};
@@ -1456,6 +1468,7 @@
   fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
     if(!d.list||!d.list.length){openDeepLink();return;}
     d.list.forEach(addGalleryItem);
+    shuffleArt();
     // ようこそモーダルの参加組数を実データで更新
     const wc=document.getElementById('wCount');
     if(wc){const s=new Set(d.list.map(a=>a.artist));['DinoRenny','ahoyoung'].forEach(a=>s.add(a));s.delete('CHARAMARL');wc.textContent=s.size;}
