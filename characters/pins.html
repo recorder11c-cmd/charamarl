@@ -261,7 +261,8 @@ function current(){
 $('#addCartBtn').addEventListener('click', function(){
   if (picked.length !== limit()) return;
   const c = current();
-  window.CHARAMARL_CART.add(CHAR_ID, c.id, c.label, c.detail, c.price, c.img, 'ピンズ');
+  // kind は空文字。label 側に「ピンズ」が入っているので、付けると重複する
+  window.CHARAMARL_CART.add(CHAR_ID, c.id, c.label, c.detail, c.price, c.img, '');
   const o = this.textContent; this.textContent = '✓ 追加しました';
   setTimeout(() => this.textContent = o, 1200);
 });
