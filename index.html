@@ -1027,11 +1027,12 @@
     for(let i=0;i<vis.length;i++){
       const above = out[i-1] ? key(out[i-1]) : '';          // 同じ列の1つ上
       const left  = (i>=rows && out[i-rows]) ? key(out[i-rows]) : ''; // 左隣の列の同じ高さ
-      let best=null,bestLen=-1;
-      for(const [k,arr] of groups){
-        if(!arr.length||k===above||k===left)continue;
-        if(arr.length>bestLen){best=k;bestLen=arr.length;}
-      }
+      // 「残りが多い作家を優先」だと、作品が1点の人は必ず最後尾に固定される
+      // （らすべっとさんが何度読み込んでも112/120位だった 2026-09-08）。
+      // 作家ごとに均等な抽選にして、全員に上位の目が回るようにする。
+      const cand=[];
+      for(const [k,arr] of groups){ if(!arr.length||k===above||k===left)continue; cand.push(k); }
+      let best=cand.length?cand[Math.floor(Math.random()*cand.length)]:null;
       if(best===null){ // 避けられない場合は縦だけ避ける
         for(const [k,arr] of groups){ if(arr.length&&k!==above){best=k;break;} }
       }
