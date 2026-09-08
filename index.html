@@ -1428,14 +1428,22 @@
     const key=p=>{const el=p.querySelector('.pin-sub');return el?el.textContent.trim():p.dataset.site||'';};
     const groups=new Map();
     baseOrder.forEach(p=>{const k=key(p);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);});
+    // 残り点数が「多い順」に固定で選ぶと、作品が1点の作家は必ず最後尾になる。
+    // （らすべっとさんが何度読み込んでも112/120位だった 2026-09-08）
+    // 残り点数を重みにしたランダム抽選に変更。多い人がよく出て散る性質は保ったまま、
+    // 1点の人にも先頭に出る目が回ってくる。
     const out=[];let last='';
     while(out.length<baseOrder.length){
-      let best=null,bestLen=-1;
-      for(const [k,arr] of groups){
-        if(!arr.length||k===last)continue;
-        if(arr.length>bestLen){best=k;bestLen=arr.length;}
+      let total=0;const cand=[];
+      for(const [k,arr] of groups){ if(!arr.length||k===last)continue; cand.push([k,arr.length]); total+=arr.length; }
+      let best=null;
+      if(cand.length){
+        let r=Math.random()*total;
+        for(const [k,w] of cand){ r-=w; if(r<=0){best=k;break;} }
+        if(best===null)best=cand[cand.length-1][0];
+      } else {
+        for(const [k,arr] of groups){if(arr.length){best=k;break;}}
       }
-      if(best===null){for(const [k,arr] of groups){if(arr.length){best=k;break;}}}
       out.push(groups.get(best).shift());last=best;
     }
     baseOrder.length=0;baseOrder.push(...out);
