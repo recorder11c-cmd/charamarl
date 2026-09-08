@@ -58,6 +58,8 @@
   .pick .thumb img{width:94%;height:94%;object-fit:contain;}
   .pick .nm{font-size:12.5px;font-weight:800;letter-spacing:.03em;}
   .pick .by{font-size:11px;color:var(--muted);margin-top:2px;}
+  .pick .cr{font-size:9.5px;color:var(--muted);opacity:.7;margin-top:3px;line-height:1.4;}
+  .pick .pending{position:absolute;top:8px;left:8px;background:#3a2a12;color:var(--accent);font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:9px;letter-spacing:.02em;}
   .pick .badge{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#111;font-size:12px;font-weight:900;display:none;align-items:center;justify-content:center;}
   .pick.on .badge{display:flex;}
   .soon{border:1px dashed rgba(255,255,255,.16);border-radius:var(--radius);padding:16px;font-size:12px;color:var(--muted);line-height:1.8;margin-top:16px;}
@@ -138,8 +140,11 @@
   <div class="section-note" id="pickNote">ひとつ選んでください。</div>
   <div class="grid" id="grid"></div>
   <div class="soon">
-    いま選べるのは4種類です。ピンズを作る作家さんが増えるたびに、ここに絵柄が追加されます。<br>
+    ピンズを作る作家さんが増えるたびに、ここに絵柄が追加されます。<br>
     「自分のキャラでも作りたい」という作家さんは、<a href="../apply.html" style="color:var(--accent);">こちら</a>からご連絡ください。
+    <div style="margin-top:10px;color:var(--accent);opacity:.85;">
+      🔒 <b>公開前のメモ</b> — 「承諾待ち」の絵柄は、本人の返事が来るまで公開しないこと。公開は絵柄が10種前後そろってから（2026-09-08 方針）。
+    </div>
   </div>
 </section>
 
@@ -168,13 +173,18 @@
 <script>
 // ===== ピンズ 販売ロジック =====
 // 絵柄は本人の許可が取れたものだけをここに足す。
-// 済: スー/モッスン/プッチィ(自社) / ユルクレイジー(CRAZYさん 2026-09-08 一任)
-// 待ち: カゲチヨ(描き下ろし) / う〜ほ〜(ちゅいさんの新イラスト)
+// 済: スー/モッスン/プッチィ(自社) / ユルクレイジー(CRAZYさん 2026-09-08 一任) / だんな(赤猫かるまさん 2026-09-08 顔アップ希望)
+// ⚠️ モニィ: morryさんはピンズの案内に未返信。CC BYなので技術的には作れるが、
+//    CHARAMARLは商品化を個別合意で進める方針なので、返事が来るまで公開しない(pending:true)。
+// 待ち: カゲチヨ(描き下ろし5種) / う〜ほ〜(ちゅいさんの新イラスト)
 const DESIGNS = [
   { key:'sue',       name:'スー',           artist:'DinoRenny', img:'/img/pins/sue.png' },
   { key:'mossun',    name:'モッスン',        artist:'DinoRenny', img:'/img/pins/mossun.png' },
   { key:'putti',     name:'プッチィ',        artist:'DinoRenny', img:'/img/pins/putti.png' },
   { key:'yurucrazy', name:'ユルクレイジー',   artist:'CRAZY',     img:'/img/pins/yurucrazy.png' },
+  { key:'danna',     name:'だんな',          artist:'赤猫かるま',  img:'/img/pins/danna.png' },
+  { key:'mony',      name:'モニィ',          artist:'morry',     img:'/img/pins/mony.png',
+    credit:'モニィ © morry369 / CC BY', pending:true },
 ];
 const PRICE_SINGLE = 1800, PRICE_SET = 4400, SET_SIZE = 4;
 const CHAR_ID = 'pins';
@@ -188,9 +198,11 @@ const gridEl = $('#grid');
 gridEl.innerHTML = DESIGNS.map(d => `
   <button class="pick" type="button" data-key="${d.key}">
     <span class="badge" data-badge="${d.key}"></span>
+    ${d.pending ? '<span class="pending">承諾待ち</span>' : ''}
     <div class="thumb"><img src="..${d.img}" alt="${d.name}"></div>
     <div class="nm">${d.name}</div>
     <div class="by">${d.artist}</div>
+    ${d.credit ? `<div class="cr">${d.credit}</div>` : ''}
   </button>`).join('');
 
 function limit(){ return mode === 'set' ? SET_SIZE : 1; }
