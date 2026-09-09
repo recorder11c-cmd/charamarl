@@ -85,6 +85,9 @@ module.exports = async (req, res) => {
       return res.status(200).json(out);
     }
 
+    if (req.method === 'POST' && typeof req.body === 'string') {   // sendBeacon(text/plain) 対策
+      try { req.body = JSON.parse(req.body); } catch (_) { req.body = {}; }
+    }
     if (req.method === 'POST' && req.body && req.body.event) {   // 計測ビーコン: play / over / share / shop
       const b = req.body; const char = String(b.char || '');
       const ev = String(b.event);
