@@ -165,7 +165,7 @@
       if(!r.ok)throw new Error('読み込みに失敗しました ('+r.status+')');
       const d=await r.json();
       document.getElementById('tApply').textContent=d.count;document.getElementById('count').textContent=d.count;
-      if(!d.list.length){list.innerHTML='<div class="empty">まだ応募はありません 🦖</div>';return;}
+      if(!d.list.length){list.innerHTML='<div class="empty">まだ応募はありません 🎪</div>';return;}
       list.innerHTML=d.list.map(a=>{
         const url=/^https?:\/\//.test(a.sns)?a.sns:(a.sns?'https://'+a.sns:'');
         return `<div class="card">
@@ -229,7 +229,7 @@
       document.getElementById('gaCount').textContent=appr.length;
       gp.innerHTML=pend.length?pend.map(a=>gcard(a,
         `<button class="gbtn ok" data-act="approve">✓ 承認して公開</button><button class="gbtn ng" data-act="reject">見送り</button>`)).join('')
-        :'<div class="empty" style="padding:24px;margin-bottom:12px;">審査待ちはありません 🦖</div>';
+        :'<div class="empty" style="padding:24px;margin-bottom:12px;">審査待ちはありません 🎪</div>';
       ga.innerHTML=appr.map(a=>gcard(a,
         `<button class="gbtn rm" data-act="remove">✕ 掲載終了</button>`)).join('');
     }catch(ex){err.textContent=ex.message;err.style.display='block';}
@@ -286,7 +286,7 @@
       const list=d.list||[];
       document.getElementById('tSeller').textContent=list.length;
       document.getElementById('sCount').textContent=d.count||0;
-      if(!list.length){el.innerHTML='<div class="empty" style="padding:24px;">まだ登録はありません 🦖</div>';return;}
+      if(!list.length){el.innerHTML='<div class="empty" style="padding:24px;">まだ登録はありません 🎪</div>';return;}
       el.innerHTML=list.map(s=>`<div class="card">
         <div class="nm">${esc(s.userName)}<span class="genre">${s.agree?'✅ 条件同意済み':'⚠️ 未同意'}</span></div>
         <div class="ts">${fmt(s.ts)} 登録</div>

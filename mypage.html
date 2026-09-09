@@ -96,7 +96,7 @@
 <div class="wrap">
   <div class="err" id="err"></div>
   <div class="profile">
-    <div class="pfp" id="pfp">🦖</div>
+    <div class="pfp" id="pfp">🎪</div>
     <div>
       <div class="pname" id="pname">…</div>
       <div class="pstat"><span class="num" id="nLike">0</span> いいね ・ <span class="num" id="nSave">0</span> 保存</div>
@@ -153,7 +153,7 @@
     <button class="post-btn" id="postBtn" type="button">審査に出す →</button>
     <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px;">投稿すると<a href="./terms.html" style="color:var(--purple);font-weight:700;">利用規約・投稿ガイドライン</a>に同意したものとみなされます</div>
     <button class="post-cancel" id="postCancel" type="button">編集をやめる</button>
-    <div class="post-done" id="postDone">投稿を受け付けました！運営の承認後にギャラリーへ公開されます 🦖</div>
+    <div class="post-done" id="postDone">投稿を受け付けました！運営の承認後にギャラリーへ公開されます 🎪</div>
   </div>
 
   <div id="statSec" hidden>
@@ -208,7 +208,7 @@
       <span>上記の販売条件を確認し、<b>同意します</b></span>
     </label>
     <button class="post-btn" id="sellerBtn" type="button">販売者情報を保存する</button>
-    <div class="post-done" id="sellerDone">保存しました！お支払いの際はこの情報を使用します 🦖</div>
+    <div class="post-done" id="sellerDone">保存しました！お支払いの際はこの情報を使用します 🎪</div>
   </div>
   </div>
 
@@ -385,8 +385,8 @@
       const wasEdit=!!editingId;
       endEdit();
       $('postDone').textContent=wasEdit
-        ?(d.status==='pending'?'変更を保存しました。画像を差し替えたため、再承認後に公開されます 🦖':'変更を保存しました！公開中の作品にも反映されています 🦖')
-        :'投稿を受け付けました！運営の承認後にギャラリーへ公開されます 🦖';
+        ?(d.status==='pending'?'変更を保存しました。画像を差し替えたため、再承認後に公開されます 🎪':'変更を保存しました！公開中の作品にも反映されています 🎪')
+        :'投稿を受け付けました！運営の承認後にギャラリーへ公開されます 🎪';
       $('postDone').style.display='block';
       loadMine();
     }catch(ex){postErr(ex.message==='Failed to fetch'?'通信に失敗しました。時間をおいてお試しください':ex.message);}
