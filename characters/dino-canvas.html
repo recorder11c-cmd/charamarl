@@ -78,7 +78,7 @@
     <div class="tag-row"><span class="tag">DinoRenny</span><span class="tag">キャンバスアート</span><span class="tag">100×100×37mm</span><span class="tag">6種</span></div>
     <h1>ご当地スー</h1>
     <div class="char-creator">by DinoRenny</div>
-    <p class="char-desc">DinoRennyの看板恐竜「SUE」が、日本各地をめぐるシリーズ。<br>その土地の名物や文化をまとった姿を、木枠張りのミニキャンバスにプリントしました。<br><br>W100×H100×D37mm。厚みがあるので、置いても掛けても飾れます。<br>現在は関西6県。順次エリアを増やしていきます。</p>
+    <p class="char-desc">DinoRennyの看板恐竜「SUE」が、日本各地をめぐる<b style="color:var(--text);">「旅する恐竜スーさん」</b>シリーズ。<br>その土地の名物や文化をまとった姿を、木枠張りのミニキャンバスにプリントしました。<br><br>W100×H100×D37mm。厚みがあるので、置いても掛けても飾れます。<br>現在は関西6県。順次エリアを増やしていきます。</p>
     <div class="asr-block" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 16px;font-size:11.5px;font-weight:700;line-height:1.6;">
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🛒 <b>¥3,300</b> 税込・送料込<br><span style="opacity:.7;">追加費用なし・そのままのお値段です</span></div>
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">📦 在庫ありは即発送<br><span style="opacity:.7;">完売分は受注生産／約2〜3週間でお届け</span></div>
@@ -86,6 +86,11 @@
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🗾 ご当地シリーズ<br><span style="opacity:.7;">関西6県から順次拡大予定</span></div>
     </div>
     <div class="selected-color-label" id="selectedLabel">京都</div>
+    <div id="selDetail" style="margin-top:10px;border-left:3px solid var(--accent);padding:2px 0 2px 12px;">
+      <div id="selTitle" style="font-size:14.5px;font-weight:900;line-height:1.5;"></div>
+      <div id="selLead" style="font-size:11.5px;font-weight:700;color:var(--accent);letter-spacing:.02em;margin-top:4px;"></div>
+      <div id="selDesc" style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:6px;"></div>
+    </div>
         <div style="margin-top:12px;"><button class="like-btn" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span><span>いいね</span><b class="num" id="likeCt"></b></button></div>
   </div>
 </div>
@@ -125,12 +130,24 @@ const IMG_ROOT = "/img/canvas";  // カート/決済用(ルート相対)
 const MADE_TO_ORDER_NOTE = "受注生産｜約2〜3週間でお届け";
 const IN_STOCK_NOTE = "在庫あり｜ご注文後すぐ発送します";
 const colors = [
- {"key":"kyoto","name":"京都","accent":"#f5b500","stock":1},
- {"key":"osaka","name":"大阪","accent":"#00b3dc","stock":0},
- {"key":"nara","name":"奈良","accent":"#ff8a2a","stock":1},
- {"key":"hyogo","name":"兵庫","accent":"#8e4ed9","stock":1},
- {"key":"shiga","name":"滋賀","accent":"#ff4d4d","stock":1},
- {"key":"wakayama","name":"和歌山","accent":"#ff5aa8","stock":1}];
+ {"key":"kyoto","name":"京都","accent":"#f5b500","stock":1,
+  "title":"旅する恐竜舞妓スーさん＠京都","lead":"京都の伝統 × 恐竜 × ポップアート",
+  "desc":"ピンク顔の恐竜が、舞妓に変身。赤い和傘をさして、京の街へ。"},
+ {"key":"osaka","name":"大阪","accent":"#00b3dc","stock":0,
+  "title":"旅する恐竜スーさん＠大阪 たこ焼きコラボ","lead":"大阪の魂 × 恐竜 × ポップアート",
+  "desc":"赤い恐竜が、たこ焼きパーティー。頭に鉄板、手にソースとマヨネーズ。"},
+ {"key":"nara","name":"奈良","accent":"#ff8a2a","stock":1,
+  "title":"旅する恐竜スーさん＠奈良 大仏コラボ","lead":"奈良の祈り × 恐竜 × ポップアート",
+  "desc":"恐竜が、大仏に変身。螺髪をのせて、大きな目でこちらを見ています。"},
+ {"key":"hyogo","name":"兵庫","accent":"#8e4ed9","stock":1,
+  "title":"旅する恐竜スーさん＠神戸 神戸牛コラボ","lead":"神戸の誇り × 恐竜 × ポップアート",
+  "desc":"黒い恐竜が、神戸牛を抱えてる。高級神戸牛を、がぶりと両手に。"},
+ {"key":"shiga","name":"滋賀","accent":"#ff4d4d","stock":1,
+  "title":"旅する恐竜スーさん＠滋賀 忍者コラボ","lead":"滋賀の忍び × 恐竜 × ポップアート",
+  "desc":"恐竜が、忍者に変身。手裏剣を構えて、音もなく現れます。"},
+ {"key":"wakayama","name":"和歌山","accent":"#ff5aa8","stock":1,
+  "title":"旅する恐竜スーさん＠和歌山 みかんコラボ","lead":"和歌山の実り × 恐竜 × ポップアート",
+  "desc":"恐竜が、みかんの箱をかかえてる。頭にもひとつ、のせています。"}];
 const HERO_COLOR = null; // 全種販売（リクエスト制なし）
 let selected = colors[0];
 const grid = document.getElementById('colorGrid');
@@ -150,15 +167,23 @@ colors.forEach((c, i) => {
     document.getElementById('charImg').src = `${IMG_DIR}/photo_${c.key}.jpg`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
+    renderDetail(c);
     updateBuyBar();
   });
   grid.appendChild(card);
 });
+// 選択中のご当地の詳細（タイトル・リード・説明）を出す
+function renderDetail(c){
+  document.getElementById('selTitle').textContent = c.title || '';
+  document.getElementById('selLead').textContent  = c.lead  || '';
+  document.getElementById('selDesc').textContent  = c.desc  || '';
+}
 // COLOR TAPから ?p=キー で来たら、その県を初期選択（無ければ先頭のまま）
 (function(){
   const q = new URLSearchParams(location.search).get('p');
   const i = colors.findIndex(c => c.key === q);
   if (i >= 0) { grid.children[i].click(); return; }
+  renderDetail(selected);
   updateBuyBar();
 })();
 async function checkout() {
