@@ -67,6 +67,15 @@ module.exports = async (req, res) => {
         const ok = !!ownerToken(char) && String(q.owner) === ownerToken(char);
         return res.status(200).json({ owner: ok });
       }
+      if (q.stats !== undefined) {           // 管理用: 日別のプレイ数・ゲームオーバー数(直近14日)
+        if (!ADMIN_KEY || q.key !== ADMIN_KEY) return res.status(403).json({ error: 'forbidden' });
+        const days = []; const d = new Date();
+        for (let i = 0; i < 14; i++) { days.push(new Date(d.getTime() - i * 864e5).toISOString().slice(0, 10)); }
+        const vals = await redis('MGET', ...days.flatMap(day => [`run:stat:${char}:play:${day}`, `run:stat:${char}:over:${day}`, `run:stat:${char}:share:${day}`, `run:stat:${char}:shop:${day}`]));
+        const total = await redis('ZCARD', `run:rank:${char}`);
+        const daily = days.map((day, i) => ({ day, play: +vals[i*4] || 0, over: +vals[i*4+1] || 0, share: +vals[i*4+2] || 0, shop: +vals[i*4+3] || 0 }));
+        return res.status(200).json({ char, registered: Number(total) || 0, daily });
+      }
       const pid = PID_RE.test(String(q.pid || '')) ? String(q.pid) : null;
       const out = await board(char, pid);
       if (ADMIN_KEY && q.key === ADMIN_KEY) {           // 管理用: 削除に使うpidを付けて返す
@@ -74,6 +83,18 @@ module.exports = async (req, res) => {
         out.top.forEach((t, i) => { t.pid = raw[i]; });
       }
       return res.status(200).json(out);
+    }
+
+    if (req.method === 'POST' && req.body && req.body.event) {   // 計測ビーコン: play / over / share / shop
+      const b = req.body; const char = String(b.char || '');
+      const ev = String(b.event);
+      if (!charOk(char) || !['play', 'over', 'share', 'shop'].includes(ev)) return res.status(400).json({ error: 'bad event' });
+      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+      const rl = `run:rl:ev:${ip}`; const n = await redis('INCR', rl); if (n === 1) await redis('EXPIRE', rl, 60);
+      if (n > 60) return res.status(429).json({ error: 'too many' });
+      const day = new Date().toISOString().slice(0, 10);
+      await redis('INCR', `run:stat:${char}:${ev}:${day}`);
+      return res.status(200).json({ ok: true });
     }
 
     if (req.method === 'POST') {
