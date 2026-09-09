@@ -3,7 +3,7 @@
 //    商品を増やしたら両方を更新してください。
 window.CM_PRODUCTS = [
   { id:'kagechiyo_hoodie', name:'メカニャンパーカー',      creator:'カゲチヨ',        price:14800, kind:'フルグラフィックパーカー', img:'./img/products_t/kagechiyo_hoodie_front.png', page:'./characters/kagechiyo-hoodie.html' },
-  { id:'dino_canvas',      name:'ご当地スー キャンバス',    creator:'DinoRenny',      price:3300,  kind:'キャンバスアート',        img:'./img/canvas/dino_kyoto.jpg',                 page:'./characters/dino-canvas.html' },
+  { id:'dino_canvas',      name:'旅する恐竜スーさん キャンバス',    creator:'DinoRenny',      price:3300,  kind:'キャンバスアート',        img:'./img/canvas/dino_kyoto.jpg',                 page:'./characters/dino-canvas.html' },
   { id:'sue',              name:'SUE',                     creator:'DinoRenny',      price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/sue_red.png',                page:'./characters/sue.html' },
   { id:'putti',            name:'PUTTI',                   creator:'DinoRenny',      price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/putti_yellow.png',           page:'./characters/putti.html' },
   { id:'mossun',           name:'MOSSUN',                  creator:'DinoRenny',      price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/mossun_blue.png',            page:'./characters/mossun.html' },
