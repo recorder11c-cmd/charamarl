@@ -121,8 +121,10 @@ const mindarThree = new MindARThree({
 });
 const { renderer, scene, camera } = mindarThree;
 if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace; else renderer.outputEncoding = THREE.sRGBEncoding;  // MindAR 1.2.5はthree r151までしか読めない
-scene.add(new THREE.AmbientLight(0xffffff, 1.2));
-const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(1, 2, 3); scene.add(sun);
+// r151の旧ライティングだと同じ強さでも数倍明るくなり肌が白飛びするので、物理ベースの光量に揃える
+if ('useLegacyLights' in renderer) renderer.useLegacyLights = false; else renderer.physicallyCorrectLights = true;
+scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+const sun = new THREE.DirectionalLight(0xffffff, 2.0); sun.position.set(1, 2, 3); scene.add(sun);
 const anchor = mindarThree.addAnchor(0);   // マーカー中心が原点。幅1・高さ約1.43、zがカメラ側
 const stage = new THREE.Group(); anchor.group.add(stage);
 const FLOOR_Y = -0.5;                       // 台紙の下の方に立たせる
