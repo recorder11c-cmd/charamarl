@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>台紙の上で踊る — CHARAMARL AR</title>
+<meta name="description" content="アクキーの台紙にスマホをかざすと、3Dアバターが台紙の上で踊ります。">
+<meta property="og:title" content="台紙の上で踊る — CHARAMARL AR">
+<meta property="og:image" content="https://charamarl.com/img/og.png">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&display=swap">
+<style>
+  :root{ --orange:#FF8A00; --purple:#A855F7; --black:#111; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; background:#111; overflow:hidden; }
+  body{ font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Kaku Gothic ProN',sans-serif; color:#111; -webkit-tap-highlight-color:transparent; }
+  #ar{ position:fixed; inset:0; }
+  .ui{ position:fixed; inset:0; pointer-events:none; z-index:10; }
+  .top{ position:absolute; top:max(14px, env(safe-area-inset-top)); left:0; right:0; text-align:center; }
+  .brand{ display:inline-block; background:#fff; border-radius:30px; padding:8px 16px; font-weight:900; letter-spacing:.1em; font-size:14px; font-family:'Helvetica Neue',Arial,sans-serif; box-shadow:0 4px 0 rgba(0,0,0,.18); }
+  .brand .a{ color:var(--orange);} .brand .b{ color:var(--purple);}
+  .hint{ display:inline-block; margin-top:12px; background:#fff; border-radius:30px; padding:12px 22px; font-weight:900; font-size:clamp(14px,3.8vmin,18px); box-shadow:0 6px 0 rgba(0,0,0,.18); animation:bob 1.4s ease-in-out infinite; transition:opacity .35s; max-width:88vw; }
+  .hint.hide{ opacity:0; }
+  @keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+  .bottom{ position:absolute; left:0; right:0; bottom:max(16px, env(safe-area-inset-bottom)); display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .row{ display:flex; gap:8px; pointer-events:auto; }
+  .btn{ display:inline-flex; align-items:center; gap:6px; background:#111; color:#fff; font-weight:900; font-family:inherit; text-decoration:none; border:3px solid #111; padding:12px 20px; border-radius:30px; font-size:clamp(13px,3.4vmin,16px); box-shadow:0 5px 0 rgba(0,0,0,.28); cursor:pointer; transition:transform .12s; }
+  .btn.w{ background:#fff; color:#111; }
+  .btn:active{ transform:scale(.96); }
+  .name{ position:absolute; top:26%; left:0; right:0; text-align:center; font-size:clamp(22px,6vmin,36px); font-weight:900; letter-spacing:.1em; color:#111; text-shadow:3px 3px 0 rgba(255,138,0,.85), -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff; opacity:0; }
+  .name.show{ animation:flash 1.2s ease forwards; }
+  @keyframes flash{ 0%{opacity:0; transform:translateY(8px) scale(.9);} 15%{opacity:1; transform:translateY(0) scale(1.06);} 25%{transform:scale(1);} 80%{opacity:1;} 100%{opacity:0;} }
+  .cover{ position:fixed; inset:0; z-index:20; background:#FFFDF9; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:28px 24px; gap:14px; }
+  .cover.hide{ display:none; }
+  .cover .logo{ font-family:'Helvetica Neue',Arial,sans-serif; font-weight:900; font-size:64px; line-height:1; letter-spacing:-.02em; }
+  .cover .logo .a{ color:var(--orange);} .cover .logo .b{ color:var(--purple);}
+  .cover .wm{ font-family:'Helvetica Neue',Arial,sans-serif; font-weight:900; letter-spacing:.14em; font-size:16px; }
+  .cover h1{ font-size:clamp(24px,7vmin,34px); font-weight:900; margin-top:10px; }
+  .cover p{ font-size:15px; font-weight:700; color:#555; line-height:1.6; }
+  .cover .who{ font-size:18px; font-weight:900; margin-top:4px; }
+  .cover .who span{ color:#888; font-size:13px; font-weight:700; }
+  .start{ margin-top:8px; background:var(--orange); color:#fff; border:none; font-family:inherit; font-weight:900; font-size:18px; padding:16px 36px; border-radius:40px; box-shadow:0 6px 0 rgba(0,0,0,.18); cursor:pointer; min-width:230px; }
+  .start:disabled{ opacity:.6; }
+  .start:active{ transform:scale(.97); }
+  .small{ font-size:12px; color:#888; font-weight:700; }
+  .err{ display:none; }
+  .err.show{ display:block; }
+  .err a{ color:var(--purple); font-weight:900; }
+</style>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/ga.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/",
+  "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js",
+  "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"
+} }
+</script>
+</head>
+<body>
+
+<div class="cover" id="cover">
+  <div class="logo"><span class="a">C</span><span class="b">M</span></div>
+  <div class="wm">CHARAMARL</div>
+  <h1>台紙の上で、踊る。</h1>
+  <p>台紙の<b>おもて</b>にカメラをむけると<br>3Dアバターがあらわれて踊ります。</p>
+  <div class="who" id="who"></div>
+  <button class="start" id="start" type="button" disabled>読み込み中…</button>
+  <div class="small">カメラの映像は端末の中だけで使い、送信・保存はしません</div>
+  <div class="small err" id="err">カメラを起動できませんでした。<br>XやLINEの中で開いている場合は、<a href="#" id="openSafari">SafariやChromeで開く</a>とうまくいきます。<br><span id="errDetail" style="color:#aaa"></span></div>
+</div>
+
+<div id="ar"></div>
+
+<div class="ui" id="ui" hidden>
+  <div class="top">
+    <div class="brand"><span class="a">CHARA</span><span class="b">MARL</span></div><br>
+    <div class="hint" id="hint">台紙の おもて にカメラをむけてね</div>
+  </div>
+  <div class="name" id="name"></div>
+  <div class="bottom">
+    <div class="row">
+      <button class="btn" id="danceBtn" type="button">ダンス切替</button>
+      <button class="btn w" id="shareBtn" type="button">シェア</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { MindARThree } from 'mindar-image-three';
+import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
+
+// アバター一覧(?m= で指定)。台紙は全員共通のマーカー
+const MODELS = {
+  kozo: { file: '/ar/kozo.vrm', name: 'KOZO', credit: 'ahoyoung', height: 1.15 },
+};
+const q = new URLSearchParams(location.search);
+const M = MODELS[q.get('m')] || MODELS.kozo;
+const $ = (id) => document.getElementById(id);
+$('who').innerHTML = M.name + ' <span>' + M.credit + '</span>';
+
+const startBtn = $('start'), cover = $('cover'), ui = $('ui'), hint = $('hint'), nameEl = $('name');
+function fail(msg){
+  startBtn.disabled = false; startBtn.textContent = 'もう一度ためす';
+  $('err').classList.add('show'); $('errDetail').textContent = msg || '';
+  if (window.gtag) gtag('event', 'ar_error', { reason: (msg || '').slice(0, 80), page: 'avatar' });
+}
+window.addEventListener('unhandledrejection', (e) => { if (!cover.classList.contains('hide')) fail('起動エラー: ' + String(e.reason && e.reason.message || e.reason || '')); });
+$('openSafari').addEventListener('click', (e) => { e.preventDefault(); const u = location.href; if (navigator.clipboard) navigator.clipboard.writeText(u).catch(() => {}); alert('リンクをコピーしました。SafariやChromeのアドレス欄に貼りつけて開いてください。\n' + u); });
+function flashName(){ nameEl.textContent = M.name; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); }
+
+// ---- AR ----
+const mindarThree = new MindARThree({
+  container: $('ar'), imageTargetSrc: '/ar/targets.mind',
+  uiLoading: 'no', uiScanning: 'no', uiError: 'no',
+  filterMinCF: 0.0001, filterBeta: 0.001,
+});
+const { renderer, scene, camera } = mindarThree;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(1, 2, 3); scene.add(sun);
+const anchor = mindarThree.addAnchor(0);   // マーカー中心が原点。幅1・高さ約1.43、zがカメラ側
+const stage = new THREE.Group(); anchor.group.add(stage);
+const FLOOR_Y = -0.5;                       // 台紙の下の方に立たせる
+const shadow = new THREE.Mesh(new THREE.CircleGeometry(0.26, 32), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22 }));
+shadow.position.set(0, FLOOR_Y, 0.005); shadow.scale.set(1, 0.4, 1); stage.add(shadow);
+
+// ---- VRM 読み込み(ページを開いた時点で先に始める) ----
+let vrm = null, bones = null, modelRoot = new THREE.Group();
+stage.add(modelRoot);
+const loader = new GLTFLoader();
+loader.register((parser) => new VRMLoaderPlugin(parser));
+loader.load(M.file, (gltf) => {
+  vrm = gltf.userData.vrm;
+  VRMUtils.removeUnnecessaryVertices(gltf.scene);
+  if (VRMUtils.combineSkeletons) VRMUtils.combineSkeletons(gltf.scene);
+  VRMUtils.rotateVRM0(vrm);                  // 旧VRMは向きが逆なので揃える
+  vrm.scene.traverse((o) => { o.frustumCulled = false; });
+  // スキン適用後の実寸で足元を測る(setFromObjectはバインドポーズの箱しか見ない)
+  vrm.scene.updateMatrixWorld(true);
+  const box = new THREE.Box3();
+  vrm.scene.traverse((o) => {
+    if (o.isSkinnedMesh) { o.skeleton.update(); o.computeBoundingBox(); box.union(o.boundingBox.clone().applyMatrix4(o.matrixWorld)); }
+    else if (o.isMesh) { o.geometry.computeBoundingBox(); box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld)); }
+  });
+  const h = box.max.y - box.min.y || 1.6;
+  const s = M.height / h;
+  vrm.scene.scale.setScalar(s);
+  vrm.scene.position.set(0, FLOOR_Y - box.min.y * s, 0);
+  modelRoot.add(vrm.scene);
+  const hm = vrm.humanoid;
+  const b = (n) => hm.getNormalizedBoneNode(n);
+  bones = { hips: b('hips'), spine: b('spine'), chest: b('chest') || b('spine'), head: b('head'), neck: b('neck'),
+    lua: b('leftUpperArm'), rua: b('rightUpperArm'), lla: b('leftLowerArm'), rla: b('rightLowerArm'),
+    lul: b('leftUpperLeg'), rul: b('rightUpperLeg'), lll: b('leftLowerLeg'), rll: b('rightLowerLeg') };
+  startBtn.disabled = false; startBtn.textContent = 'カメラをはじめる';
+}, (ev) => { if (ev.total) startBtn.textContent = '読み込み中… ' + Math.round(ev.loaded / ev.total * 100) + '%'; },
+(e) => fail('アバターを読み込めませんでした: ' + (e && e.message || e)));
+
+// ---- 動き(汎用の踊り。ボーンを直接ゆらす) ----
+let dance = 0; const DANCES = ['bounce', 'sway', 'wave'];
+let jumpT = -1, found = false;
+const clock = new THREE.Clock();
+function setR(node, x, y, z){ if (node) node.rotation.set(x, y, z); }
+function animate(t, dt){
+  if (!bones) return;
+  const beat = 2.0;                            // 120bpm
+  const ph = t * beat * Math.PI * 2;           // 1拍で2π
+  const bounce = (1 - Math.cos(ph)) / 2;       // 0→1→0 で拍に合わせて沈む
+  const bend = bounce * (dance === 1 ? 0.35 : 0.6);
+  const sw = Math.sin(ph / 2);                 // 2拍で左右
+  // 腰と脚
+  // 腰の位置は触らない(正規化ボーンの腰は立ち位置そのもの。0にすると体ごと沈む)。上下動は膝と背骨で表現
+  setR(bones.hips, 0, 0.12 * sw * (dance === 1 ? 1.6 : 1), 0.04 * sw);
+  setR(bones.lul, bend * 0.55, 0, 0.06); setR(bones.rul, bend * 0.55, 0, -0.06);
+  setR(bones.lll, -bend * 1.1, 0, 0);    setR(bones.rll, -bend * 1.1, 0, 0);
+  // 体幹と頭
+  setR(bones.spine, 0.06 * bounce, 0.08 * sw, 0.05 * sw);
+  setR(bones.chest, 0.04 * bounce, 0.12 * sw, -0.03 * sw);
+  setR(bones.neck, 0, 0, 0);
+  setR(bones.head, 0.14 * Math.sin(ph) - 0.05, 0.1 * sw, 0.1 * sw);
+  // 腕
+  if (dance === 2) {                           // 片手を上げて振る
+    setR(bones.lua, 0.3 * Math.sin(ph), 0, -1.15);
+    setR(bones.lla, 0, -0.9, 0);
+    setR(bones.rua, -0.4, 0, -0.6 + 0.15 * Math.sin(ph * 2));
+    setR(bones.rla, 0, 0.35 * Math.sin(ph * 2), -1.3);
+  } else {
+    setR(bones.lua, 0.45 * Math.sin(ph + Math.PI), 0, -1.15);
+    setR(bones.rua, 0.45 * Math.sin(ph), 0, 1.15);
+    setR(bones.lla, 0, -0.8 - 0.3 * bounce, 0);
+    setR(bones.rla, 0, 0.8 + 0.3 * bounce, 0);
+  }
+  // タップでジャンプ+一回転
+  if (jumpT >= 0) {
+    jumpT += dt; const p = Math.min(jumpT / 0.7, 1);
+    modelRoot.position.y = 0.35 * Math.sin(p * Math.PI);
+    modelRoot.rotation.y = p * Math.PI * 2;
+    if (p >= 1) { jumpT = -1; modelRoot.position.y = 0; modelRoot.rotation.y = 0; }
+  }
+  vrm.update(dt);
+}
+renderer.setAnimationLoop(() => {
+  const dt = clock.getDelta();
+  animate(clock.elapsedTime, dt);
+  renderer.render(scene, camera);
+});
+
+anchor.onTargetFound = () => { found = true; hint.classList.add('hide'); flashName(); if (window.gtag) gtag('event', 'ar_found', { character: M.name, page: 'avatar' }); };
+anchor.onTargetLost = () => { found = false; hint.classList.remove('hide'); };
+$('ar').addEventListener('click', () => { if (!found) return; if (jumpT < 0) jumpT = 0; if (window.gtag) gtag('event', 'ar_tap', { character: M.name, page: 'avatar' }); });
+$('danceBtn').addEventListener('click', () => { dance = (dance + 1) % DANCES.length; flashName(); });
+
+// ---- 起動(iOSはボタン操作の中でカメラを開く必要がある) ----
+let startTimer = null;
+startBtn.addEventListener('click', async () => {
+  if (!vrm) return;
+  startBtn.disabled = true; startBtn.textContent = '起動中…';
+  startTimer = setTimeout(() => { if (!cover.classList.contains('hide')) fail('カメラの許可待ちで止まっています'); }, 20000);
+  try {
+    await mindarThree.start();
+    clearTimeout(startTimer);
+    cover.classList.add('hide'); ui.hidden = false;
+    if (window.gtag) gtag('event', 'ar_start', { character: M.name, page: 'avatar' });
+  } catch (e) { fail(String(e && e.message || e)); }
+});
+
+$('shareBtn').addEventListener('click', () => {
+  const text = M.name + 'が台紙の上で踊りだした！ #CHARAMARL';
+  const url = 'https://charamarl.com/ar/avatar.html?m=' + (q.get('m') || 'kozo');
+  if (navigator.share) navigator.share({ title: 'CHARAMARL AR', text, url }).catch(() => {});
+  else window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+});
+</script>
+</body>
+</html>
