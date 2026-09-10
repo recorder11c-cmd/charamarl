@@ -44,3 +44,36 @@ window.CM_GA_ID = 'G-PMSD6TMSJW';
 
 // 共通イベント送信ヘルパー(内部端末ではgtag未定義のため自動的に無効)
 window.cmEvent=function(name,params){try{if(window.gtag)window.gtag('event',name,params||{});}catch(e){}};
+
+// ===== 送客ボタンの分割計測 =====
+// /api/out は「何人送ったか」しか出せない(リダイレクト先が1本しか登録できないため)。
+// 作家さんに「どこへ送ったのか」を返せるように、行き先の種別をGA4側で分ける。
+//   instagram / x / shop(通販) / link(リンクまとめ) / sns(YouTube・TikTok・note・pixiv) / other
+// ※ 種別はドメインで判定する。判定できないものは other に落とす(推測で振り分けない)。
+window.cmOutKind=function(url){
+  var h='';
+  try{ h=new URL(url,location.href).hostname.replace(/^www\./,'').toLowerCase(); }catch(e){ return 'other'; }
+  var is=function(re){ return re.test(h); };
+  if(is(/(^|\.)instagram\.com$/)) return 'instagram';
+  if(is(/(^|\.)(x\.com|twitter\.com|t\.co)$/)) return 'x';
+  if(is(/(^|\.)(base\.shop|thebase\.in|theshop\.jp|booth\.pm|stores\.jp|suzuri\.jp|shop-pro\.jp|minne\.com|creema\.jp|myshopify\.com|bigcartel\.com|etsy\.com|fanbox\.cc|opensea\.io)$/)) return 'shop';
+  if(is(/(^|\.)(lit\.link|linktr\.ee|potofu\.me|profcard\.info|bio\.link|linkin\.bio)$/)) return 'link';
+  if(is(/(^|\.)(youtube\.com|youtu\.be|tiktok\.com|note\.com|pixiv\.net|nicovideo\.jp|threads\.net|bsky\.app)$/)) return 'sns';
+  return 'other';
+};
+// 送客ボタンを押したときに呼ぶ。click_artist_{種別} と、横断集計用の click_artist を両方送る。
+//   url   … 実際の行き先(/api/out?g=... ではなく、登録されている外部URLを渡すこと)
+//   opt   … { place:'どの画面か', id:'作品ID', artist:'作家名' }
+window.cmOutClick=function(url,opt){
+  opt=opt||{};
+  // サイト内リンク(作品ページ等)は送客ではない。混ぜると送客数の水増しになるので数えない。
+  // ※ 静的ピンの一部は data-site が ./characters/*.html を指している
+  var u=null; try{ u=new URL(url,location.href); }catch(e){}
+  if(!u || u.origin===location.origin) return;
+  var kind=window.cmOutKind(url), host='';
+  try{ host=u.hostname.replace(/^www\./,''); }catch(e){}
+  var p={ destination:kind, host:host, place:opt.place||'' };
+  if(opt.id) p.item_id=opt.id;
+  if(opt.artist) p.artist=opt.artist;
+  if(window.cmEvent){ window.cmEvent('click_artist_'+kind,p); window.cmEvent('click_artist',p); }
+};

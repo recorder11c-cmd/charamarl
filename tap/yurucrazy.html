@@ -115,6 +115,30 @@
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/js/ga.js"></script>
+
+<style>
+/* ===== 遊び終わったあとの行き先（結果画面） ===== */
+#nextPanel{position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(10px);
+  border-top:1px solid rgba(0,0,0,.08);box-shadow:0 -8px 28px rgba(0,0,0,.14);
+  padding:14px 16px calc(16px + env(safe-area-inset-bottom));
+  transform:translateY(110%);transition:transform .38s cubic-bezier(.2,.9,.25,1);}
+#nextPanel.open{transform:translateY(0);}
+#nextPanel .nx-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+#nextPanel .nx-t{font-size:14px;font-weight:800;letter-spacing:.02em;color:#1a1a1a;}
+#nextPanel .nx-x{border:0;background:transparent;font-size:20px;line-height:1;color:#999;cursor:pointer;padding:2px 6px;}
+#nextPanel .nx-btns{display:flex;flex-direction:column;gap:8px;max-width:520px;margin:0 auto;}
+#nextPanel a.nx{display:block;text-align:center;text-decoration:none;font-size:14px;font-weight:700;
+  padding:12px 14px;border-radius:11px;background:#1a1a1a;color:#fff;}
+#nextPanel a.nx.ghost{background:#fff;color:#1a1a1a;border:1.5px solid #1a1a1a;}
+#nextPanel a.nx.plain{background:transparent;color:#666;font-weight:600;font-size:12.5px;padding:4px;}
+@media (prefers-reduced-motion: reduce){#nextPanel{transition:none;}}
+/* パネルが出ている間は ♥/シェアのバーを持ち上げる（隠さない） */
+.ui{transition:transform .38s cubic-bezier(.2,.9,.25,1);}
+body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
+@media (prefers-reduced-motion: reduce){.ui{transition:none;}}
+
+</style>
 </head>
 <body>
 
@@ -154,6 +178,13 @@
       <button class="share-opt" data-sh="native" id="shNative"><span class="share-ic" style="background:#f0f0f0">📲</span>その他</button>
     </div>
   </div>
+</div>
+
+
+<div id="nextPanel" aria-hidden="true">
+  <div class="nx-hd"><span class="nx-t" id="nxTitle">気に入った？</span>
+    <button class="nx-x" id="nxClose" aria-label="閉じる">×</button></div>
+  <div class="nx-btns" id="nxBtns"></div>
 </div>
 
 <script>
@@ -228,6 +259,7 @@ function apply(p){
     img.style.setProperty("--bri", p.bri);
   }
   nameEl.textContent = p.name;
+  if(window.cmTapSeen)cmTapSeen(p.key);   // 全色を見たら結果画面を出す
   nameEl.classList.remove("show"); void nameEl.offsetWidth; nameEl.classList.add("show"); // ぱっと出てフェイドアウト
   if(shopReady){
     const vid = CONFIG.shop.variants[p.name];
@@ -303,6 +335,54 @@ document.querySelectorAll(".share-opt").forEach(btn=>btn.addEventListener("click
   shareOverlay.classList.remove("open");
 }));
 
+
+/* ===== 遊び終わったあとの行き先（結果画面） =====
+   6色ぜんぶをタップした時点で下からパネルを出す。遊びは止めない（そのままタップし続けられる）。
+   目的は「遊んで終わり」をなくし、作家さんの作品・SNS・ショップへ送ること。 */
+const CM_NEXT = {"artist": "CRAZY", "out": "", "goods": "yurucrazy.html"};
+(function(){
+  const panel=document.getElementById("nextPanel"), btns=document.getElementById("nxBtns");
+  if(!panel||!btns||!CM_NEXT||!CM_NEXT.artist) return;
+  const SITE="https://charamarl.com", who=CM_NEXT.artist;
+  const mk=(href,label,cls,fn)=>{
+    const a=document.createElement("a");
+    a.className="nx"+(cls?" "+cls:""); a.href=href; a.textContent=label;
+    if(/^https?:/.test(href)&&href.indexOf(SITE)!==0){a.target="_blank";a.rel="noopener";}
+    a.addEventListener("click",()=>{if(fn)fn();});
+    btns.appendChild(a); return a;
+  };
+  document.getElementById("nxTitle").textContent=who+"さんの絵です";
+  mk(SITE+"/artist.html?a="+encodeURIComponent(who), "🎪 "+who+"さんの作品をもっと見る", "",
+     ()=>window.cmEvent&&cmEvent("tap_next_click",{destination:"artist_page",artist:who}));
+  if(CM_NEXT.out)
+    mk(SITE+"/api/out?g="+CM_NEXT.out, "↗ "+who+"さんのSNS・ショップへ", "ghost",
+       ()=>window.cmEvent&&cmEvent("tap_next_click",{destination:"artist_link",artist:who}));
+  if(CM_NEXT.goods)
+    mk(SITE+"/characters/"+CM_NEXT.goods, "🛒 グッズを見る", "ghost",
+       ()=>window.cmEvent&&cmEvent("tap_next_click",{destination:"goods",artist:who}));
+  mk(SITE+"/", "ほかのキャラクターも見る →", "plain",
+     ()=>window.cmEvent&&cmEvent("tap_next_click",{destination:"home",artist:who}));
+
+  panel.addEventListener("pointerdown",e=>e.stopPropagation());
+  document.getElementById("nxClose").addEventListener("click",()=>{
+    panel.classList.remove("open"); panel.setAttribute("aria-hidden","true");
+    document.body.classList.remove("nx-open");
+  });
+  let shown=false, seen=new Set();
+  window.cmTapSeen=function(key){
+    if(shown) return;
+    seen.add(key);
+    // ひと通り遊んだ人にだけ出す。色数が多いページ(ハンナさん14点など)は6回で足切りする
+    if(seen.size < Math.min(CONFIG.palettes.length, 6)) return;
+    shown=true;
+    if(window.cmEvent)cmEvent("tap_complete",{artist:who});
+    setTimeout(()=>{
+      document.documentElement.style.setProperty("--nx-h", panel.offsetHeight+"px");
+      panel.classList.add("open"); panel.setAttribute("aria-hidden","false");
+      document.body.classList.add("nx-open");
+    },420);
+  };
+})();
 </script>
 </body>
 </html>

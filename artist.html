@@ -160,7 +160,7 @@
       '<div class="asub">CHARAMARL 参加アーティスト ・ 作品'+mine.length+'点'+
         (goods.length?' ・ グッズ'+goods.length+'点':'')+'</div>'+
       '<div class="links">'+
-        (outHref?'<a class="lbtn" href="'+esc(outHref)+'" target="_blank" rel="noopener">↗ '+esc(name)+'さんのページへ</a>':'')+
+        (outHref?'<a class="lbtn" id="outBtn" href="'+esc(outHref)+'" target="_blank" rel="noopener" data-out="'+esc(linked.link)+'">↗ '+esc(name)+'さんのページへ</a>':'')+
         (taps.length?'<a class="lbtn ghost" href="'+esc(taps[0])+'">🎨 COLOR TAPで遊ぶ</a>':'')+
       '</div></div></div>';
 
@@ -224,6 +224,12 @@
       '<p style="font-size:11.5px;opacity:.7;margin:10px 0 0;">新しい作家さんと新商品は、公式Xでお知らせしています。</p></div>';
 
     wrap.innerHTML=html;
+
+    // 送客ボタンの分割計測（href は /api/out?g= に化けるので data-out の実URLで種別を判定する）
+    var ob=document.getElementById('outBtn');
+    if(ob) ob.addEventListener('click',function(){
+      if(window.cmOutClick)cmOutClick(ob.dataset.out,{place:'artist_page',id:linked.id,artist:name});
+    });
 
     var xa=document.getElementById('shX');
     if(xa) xa.href='https://twitter.com/intent/tweet?text='+encodeURIComponent(shareText)
