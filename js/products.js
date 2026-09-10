@@ -31,4 +31,5 @@ window.CM_TAPS = {
   'morry':['./tap/mony.html'],
   'ハンナ':['./tap/rafu.html'],
   'ROKU':['./tap/junkeeees.html'],
+  'DREAMER©':['./tap/ghost.html'],
 };
