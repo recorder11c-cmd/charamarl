@@ -51,8 +51,8 @@
 <script src="/js/ga.js"></script>
 <script type="importmap">
 { "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
-  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/",
+  "three": "https://cdn.jsdelivr.net/npm/three@0.151.3/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.151.3/examples/jsm/",
   "mindar-image-three": "https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js",
   "@pixiv/three-vrm": "https://cdn.jsdelivr.net/npm/@pixiv/three-vrm@3.5.5/lib/three-vrm.module.min.js"
 } }
@@ -108,6 +108,7 @@ function fail(msg){
   $('err').classList.add('show'); $('errDetail').textContent = msg || '';
   if (window.gtag) gtag('event', 'ar_error', { reason: (msg || '').slice(0, 80), page: 'avatar' });
 }
+window.addEventListener('error', (e) => { if (!cover.classList.contains('hide')) fail('読み込みエラー: ' + String(e.message || '')); });
 window.addEventListener('unhandledrejection', (e) => { if (!cover.classList.contains('hide')) fail('起動エラー: ' + String(e.reason && e.reason.message || e.reason || '')); });
 $('openSafari').addEventListener('click', (e) => { e.preventDefault(); const u = location.href; if (navigator.clipboard) navigator.clipboard.writeText(u).catch(() => {}); alert('リンクをコピーしました。SafariやChromeのアドレス欄に貼りつけて開いてください。\n' + u); });
 function flashName(){ nameEl.textContent = M.name; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); }
@@ -119,7 +120,7 @@ const mindarThree = new MindARThree({
   filterMinCF: 0.0001, filterBeta: 0.001,
 });
 const { renderer, scene, camera } = mindarThree;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+if ('outputColorSpace' in renderer) renderer.outputColorSpace = THREE.SRGBColorSpace; else renderer.outputEncoding = THREE.sRGBEncoding;  // MindAR 1.2.5はthree r151までしか読めない
 scene.add(new THREE.AmbientLight(0xffffff, 1.2));
 const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(1, 2, 3); scene.add(sun);
 const anchor = mindarThree.addAnchor(0);   // マーカー中心が原点。幅1・高さ約1.43、zがカメラ側
@@ -225,7 +226,7 @@ startBtn.addEventListener('click', async () => {
     clearTimeout(startTimer);
     cover.classList.add('hide'); ui.hidden = false;
     if (window.gtag) gtag('event', 'ar_start', { character: M.name, page: 'avatar' });
-  } catch (e) { fail(String(e && e.message || e)); }
+  } catch (e) { fail(e ? String(e.message || e) : 'カメラを開けませんでした'); }
 });
 
 $('shareBtn').addEventListener('click', () => {
