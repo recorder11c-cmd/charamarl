@@ -4,6 +4,7 @@
 // POST /api/auth {action:'logout'}                     → { ok }
 // POST /api/auth {action:'sync', likes:[], saves:[]}   → { ok }（コレクション保存・要ログイン）
 // POST /api/auth {action:'delete', pass}               → { ok }（退会・要ログイン）
+// POST /api/auth {action:'adminpass', name, key}       → { ok, temp }（パスワード再発行・管理）
 // GET  /api/auth                                       → { user:{name}, likes, saves } or { user:null }
 //
 // セッション: httpOnlyクッキー cm_sess（60日）。パスワードはscryptハッシュ。
@@ -121,6 +122,21 @@ module.exports = async (req, res) => {
       if (token) await redis('DEL', `sess:${token}`);
       setCookie(res, 'x', 0);
       return res.status(200).json({ ok: true });
+    }
+
+    // 管理用: パスワードの再発行（本人が忘れた場合）
+    // 仮パスワードを発行して返すだけ。本人には「ログインしたら必ず変えてください」と伝える。
+    // ⚠️ 作品や♥・保存はそのまま残る（アカウントを作り直さないため）。
+    if (b.action === 'adminpass') {
+      const { isAdminReq } = require('../lib/admin.js');
+      if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
+      const key = nameKey(String(b.name || ''));
+      if (!key) return res.status(400).json({ error: 'name が必要です' });
+      if (!Number(await redis('EXISTS', `user:${key}`))) return res.status(404).json({ error: 'そのアカウントはありません' });
+      const temp = crypto.randomBytes(6).toString('base64url'); // 8文字
+      const salt = crypto.randomBytes(16).toString('hex');
+      await redis('HSET', `user:${key}`, 'salt', salt, 'hash', hashPass(temp, salt));
+      return res.status(200).json({ ok: true, name: key, temp });
     }
 
     // 管理用: アカウント削除（代行用の仮アカウントの後始末など）
