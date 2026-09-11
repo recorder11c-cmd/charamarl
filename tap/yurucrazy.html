@@ -20,22 +20,32 @@
     cursor:pointer; user-select:none;
     transform-origin: 50% 78%;
     /* 揺らぎ(boil)＋静止時は少し暗く＝映え */
-    filter:url(#boil) brightness(.94);
+    filter:brightness(.94);
     -webkit-transform: translateZ(0);          /* iOSの消失バグ回避 */
   }
-  @media (prefers-reduced-motion: reduce){ .stage{ filter:url(#boil); } }
   .stage img {
     width:100%; height:100%; object-fit:contain;
     filter: hue-rotate(var(--hue,0deg)) saturate(var(--sat,1)) brightness(var(--bri,1));
     transition: filter .3s ease;
   }
+  /* タップ前だけ、静かに一度だけゆれる。「ここを触れる」を言葉にしないで伝えるため。
+     画像を歪めるフィルターではなく transform で動かすので、作家の線には一切触らない。 */
+  .stage.nudge { animation: nudge .55s ease-in-out; }
+  @keyframes nudge {
+    0%,100% { transform: translateX(0)    rotate(0deg); }
+    18%     { transform: translateX(-4px) rotate(-.6deg); }
+    44%     { transform: translateX(4px)  rotate(.6deg); }
+    70%     { transform: translateX(-2px) rotate(-.25deg); }
+    88%     { transform: translateX(1px)  rotate(.1deg); }
+  }
+  @media (prefers-reduced-motion: reduce){ .stage.nudge{ animation:none; } }
   /* pop は .stage 自身に。filter+transform を同一要素にしてiOSの消失を防ぐ */
   .stage.pop { animation: pop .5s cubic-bezier(.2,1.6,.4,1); }
   @keyframes pop {
-    0%   { transform: translateY(0)    scale(1)    rotate(0deg); filter:url(#boil) brightness(1.12); }  /* タップ瞬間=明るく */
+    0%   { transform: translateY(0)    scale(1)    rotate(0deg); filter:brightness(1.12); }  /* タップ瞬間=明るく */
     25%  { transform: translateY(-14%) scale(1.12) rotate(-5deg); }                                     /* ぴょん */
     55%  { transform: translateY(2%)   scale(.96)  rotate(4deg); }
-    100% { transform: translateY(0)    scale(1)    rotate(0deg); filter:url(#boil) brightness(.94); }   /* 揺らぎ=少し暗く */
+    100% { transform: translateY(0)    scale(1)    rotate(0deg); filter:brightness(.94); }   /* 揺らぎ=少し暗く */
   }
 
   .ui { position:fixed; inset:0; pointer-events:none; }
@@ -142,15 +152,6 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
 </head>
 <body>
 
-<!-- 手描き風の揺らぎ（boil）フィルター -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
-    <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="1" result="n">
-      <animate attributeName="seed" values="1;2;3;4;5;6;7;8" dur="0.8s" repeatCount="indefinite" calcMode="discrete"/>
-    </feTurbulence>
-    <feDisplacementMap in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
 
 <div class="stage" id="stage">
   <img id="char" src="" alt="">
@@ -382,6 +383,21 @@ const CM_NEXT = {"artist": "CRAZY", "out": "", "goods": "yurucrazy.html"};
       document.body.classList.add("nx-open");
     },420);
   };
+})();
+
+// タップ前だけ、2.5秒後に一度ゆれる。以後は3.2秒ごと。最初のタップで止まる。
+// 動きを減らす設定の端末では出さない。
+(function(){
+  try{ if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return; }catch(e){}
+  const shake = () => {
+    if(tapped){ stage.classList.remove("nudge"); return false; }
+    stage.classList.remove("nudge"); void stage.offsetWidth; stage.classList.add("nudge");
+    return true;
+  };
+  setTimeout(()=>{
+    if(!shake()) return;
+    const t = setInterval(()=>{ if(!shake()) clearInterval(t); }, 3200);
+  }, 2500);
 })();
 </script>
 </body>

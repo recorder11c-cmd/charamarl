@@ -1225,6 +1225,7 @@
   let curArt=null;
   // サーバー集計(/api/react)。失敗時はローカルのみで動作
   let artCounts=null; // {roar:{likes,saves},...} 取得できたらオブジェクト
+  let galleryList=[];  // TRENDINGの候補に使う（掲載作品ぜんぶ）
   fetch('/api/react').then(r=>r.ok?r.json():null).then(d=>{if(d&&!d.error){artCounts=d;if(curArt)renderArt();renderRanking();}}).catch(()=>{});
   function likeTotal(id){
     const base=(ARTWORKS[id].likes||0);
@@ -1472,6 +1473,8 @@
   }
   fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
     if(!d.list||!d.list.length){openDeepLink();return;}
+    galleryList=d.list;
+    renderRanking();          // 候補が揃ったので人気順を出し直す
     d.list.forEach(addGalleryItem);
     shuffleArt();
     // ようこそモーダルの参加組数を実データで更新
@@ -1493,22 +1496,44 @@
     renderArtistCard();
   }).catch(()=>{});
 
-  // ===== TRENDING ランキング（ベース値 + サーバー実カウントで動的に並び替え）=====
-  const RANKING=[
-    {id:'sue',   name:'SUE',    cr:'DinoRenny', img:'./img/t/colors_nobg/sue_red.webp',     href:'./characters/sue.html',    likes:0},
-    {id:'putti', name:'PUTTI',  cr:'DinoRenny', img:'./img/t/colors_nobg/putti_yellow.webp',href:'./characters/putti.html',  likes:0},
-    {id:'mossun',name:'MOSSUN', cr:'DinoRenny', img:'./img/t/colors_nobg/mossun_blue.webp', href:'./characters/mossun.html', likes:0},
-    {id:'g01544b48f170', name:'う〜ほ〜', cr:'ちゅい',     img:'./tap/art/ufoo.png',      href:'./characters/ufoo.html',     likes:0},
-    {id:'g8d69be3f1e86', name:'カゲチヨ', cr:'カゲチヨ',   img:'./tap/art/kagechiyo.png', href:'./tap/kagechiyo.html',       likes:0},
-    {id:'g9487847a10e8', name:'dogooooo', cr:'SAYoooooh', img:'./tap/art/dogooooo.png',  href:'./characters/dogooooo.html', likes:0},
-    {id:'gmc',   name:'レコマル',cr:'MARU',      img:'./img/t/gallery/gmc.webp',             href:'./characters/gmc.html', likes:0}
+  // ===== TRENDING 人気キャラクターランキング =====
+  // 候補は固定しない。掲載作品ぜんぶ＋グッズ化キャラの♥を集めて上位10件を出す。
+  // （以前は7件のハードコードだったので、♥が多くても候補に無い作品は何位にもならなかった）
+  const RANK_TOP = 10;
+  // ギャラリーに作品として無いが、TAP・商品ページで♥が付くキャラクター
+  const RANK_EXTRA=[
+    {id:'sue',   name:'SUE',    cr:'DinoRenny', img:'./img/t/colors_nobg/sue_red.webp',     href:'./characters/sue.html'},
+    {id:'putti', name:'PUTTI',  cr:'DinoRenny', img:'./img/t/colors_nobg/putti_yellow.webp',href:'./characters/putti.html'},
+    {id:'mossun',name:'MOSSUN', cr:'DinoRenny', img:'./img/t/colors_nobg/mossun_blue.webp', href:'./characters/mossun.html'},
+    {id:'gmc',   name:'レコマル',cr:'MARU',      img:'./img/t/gallery/gmc.webp',              href:'./characters/gmc.html'}
   ];
+  const rkEsc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
   const fmtLikes=n=>n>=1000?(Math.round(n/100)/10)+'k':n;
-  function rankLikes(c){return c.likes+((artCounts&&artCounts[c.id]&&artCounts[c.id].likes)||0);}
+  const likesOf=id=>((artCounts&&artCounts[id]&&artCounts[id].likes)||0);
+  function rankCandidates(){
+    const seen=new Set(), out=[];
+    galleryList.forEach(w=>{
+      if(w.artist==='CHARAMARL')return;          // 連載記事のピンは作品ではない
+      if(seen.has(w.id))return; seen.add(w.id);
+      out.push({id:w.id,name:w.title,cr:w.artist,img:w.img,
+                href:'./artist.html?a='+encodeURIComponent(w.artist)});
+    });
+    RANK_EXTRA.forEach(c=>{ if(!seen.has(c.id)){ seen.add(c.id); out.push(c); } });
+    return out;
+  }
   function renderRanking(){
     const grid=document.getElementById('rankGrid'); if(!grid)return;
-    grid.innerHTML=[...RANKING].sort((a,b)=>rankLikes(b)-rankLikes(a)).map((c,i)=>
-      `<a class="rank" href="${c.href}"${c.ext?' target="_blank" rel="noopener"':''}><div class="no">${i+1}</div><img src="${c.img}" alt="${c.name}"><div><div class="nm">${c.name}${c.prep?' <span style="color:var(--muted);font-weight:600">(準備中)</span>':''}</div><div class="cr">${c.cr}</div><div class="lk">♥ ${fmtLikes(rankLikes(c))}</div></div></a>`
+    const list=rankCandidates()
+      .map(c=>({...c,lk:likesOf(c.id)}))
+      .filter(c=>c.lk>0)                          // ♥0はランキングに出さない
+      .sort((a,b)=>b.lk-a.lk)
+      .slice(0,RANK_TOP);
+    // 取得できていないときは見出しごと隠す（空の枠を出さない）
+    const sec=document.getElementById('trending');
+    if(sec)sec.hidden=!list.length;
+    if(!list.length)return;
+    grid.innerHTML=list.map((c,i)=>
+      `<a class="rank" href="${c.href}"><div class="no">${i+1}</div><img src="${c.img}" alt="${rkEsc(c.name)}" loading="lazy"><div><div class="nm">${rkEsc(c.name)}</div><div class="cr">${rkEsc(c.cr)}</div><div class="lk">♥ ${fmtLikes(c.lk)}</div></div></a>`
     ).join('');
   }
   renderRanking();
