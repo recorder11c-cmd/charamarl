@@ -127,6 +127,34 @@
   .share-grid{display:flex;flex-direction:column;gap:6px;}
   .share-opt{display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:800;color:#111;padding:10px 8px;border-radius:12px;width:100%;}
   .share-opt:hover{background:#f5f5f5;}
+  /* ===== 図鑑（みつけたカードを見返す） ===== */
+  .zu-btn{ background:#fff;color:#111;border:none;font-weight:900;font-family:inherit;
+    padding:12px 20px;border-radius:30px;font-size:clamp(13px,3.2vmin,17px);cursor:pointer;
+    box-shadow:0 6px 0 rgba(0,0,0,.15);transition:transform .12s; }
+  .zu-btn:active{ transform:scale(.96); }
+  .zu-overlay{position:fixed;inset:0;background:#15151c;z-index:800;display:none;
+    flex-direction:column;align-items:center;padding:14px 12px calc(14px + env(safe-area-inset-bottom));}
+  .zu-overlay.open{display:flex;}
+  .zu-head{display:flex;align-items:center;gap:10px;width:min(560px,100%);margin-bottom:10px;color:#fff;}
+  .zu-ttl{font-weight:900;font-size:15px;letter-spacing:.04em;}
+  .zu-sub{font-size:12px;opacity:.75;}
+  .zu-x{margin-left:auto;background:none;border:none;color:#fff;font-size:26px;line-height:1;cursor:pointer;padding:2px 8px;}
+  .zu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;width:min(560px,100%);
+    overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;}
+  @media(min-width:520px){ .zu-grid{grid-template-columns:repeat(6,1fr);} }
+  .zu-cell{position:relative;height:0;padding-top:123%;border-radius:9px;overflow:hidden;
+    background:#2a2a33;border:none;cursor:default;display:block;}
+  .zu-cell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .zu-cell .q{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;}
+  .zu-cell.got{cursor:pointer;}
+  .zu-cell .q{color:#5a5a68;font-weight:900;font-size:18px;}
+  .zu-overlay.open ~ .gacha-count, body.zu-open .gacha-count{display:none;}
+  .zu-cell .n{position:absolute;left:3px;top:3px;font-size:9px;font-weight:800;color:#fff;
+    background:rgba(0,0,0,.5);border-radius:4px;padding:1px 4px;}
+  .zu-big{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:900;display:none;
+    align-items:center;justify-content:center;padding:16px;}
+  .zu-big.open{display:flex;}
+  .zu-big img{max-width:min(560px,94vw);max-height:88vh;border-radius:12px;}
   .share-ic{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -170,6 +198,7 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
   <div class="bottom">
     <div class="hint" id="hint">タップでカードをひこう!</div><br>
     <button class="like" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span>いいね <b id="likeCt"></b></button>
+    <button class="zu-btn" id="zuBtn" type="button">📖 図鑑</button>
     <button class="share-btn" id="shareBtn" type="button">🚀 シェア</button>
     <a class="buy" id="buy" href="#" target="_blank" rel="noopener">🛒 購入する</a>
   </div>
@@ -189,6 +218,13 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
 </div>
 
 
+<div class="zu-overlay" id="zuOverlay">
+  <div class="zu-head"><span class="zu-ttl">JUNKeeeeS 図鑑</span><span class="zu-sub" id="zuSub"></span>
+    <button class="zu-x" id="zuClose" aria-label="閉じる">×</button></div>
+  <div class="zu-grid" id="zuGrid"></div>
+</div>
+<div class="zu-big" id="zuBig"><img id="zuBigImg" src="" alt=""></div>
+
 <div id="nextPanel" aria-hidden="true">
   <div class="nx-hd"><span class="nx-t" id="nxTitle">気に入った？</span>
     <button class="nx-x" id="nxClose" aria-label="閉じる">×</button></div>
@@ -201,7 +237,8 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
    ========================================================= */
 const CONFIG = {
   character: "JUNKeeeeS",                     // 表示名
-  shareText: "JUNKeeeeSをタップで色チェンジ🍟 10/24-25はJUNKeeeeS FES in KYOTO！ #CHARAMARL",
+  // シェア文は「何枚みつけたか」を入れて組み立てる（下の shareTextNow）
+  shareText: "",
   baseImage: "art/junkeeees.jpg",                 // 透過キーアートPNG（正方形・1080px推奨）
   bg: "#EAF1F6",                            // 初期背景色
   mode: "char",                             // "char"=キャラの色が変わる / "bg"=背景の色が変わる（黒系キャラ向け）
@@ -323,11 +360,31 @@ const seenSet = ()=>{try{return new Set(JSON.parse(localStorage.getItem(SEEN_KEY
 let deck = [], fesIdx = 0, completeMode = false;
 function shuffle(){ deck = CARDS.map((c,i)=>i); for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];} }
 shuffle();
+// FES本番までの残り日数。当日と会期中は文言を変える。
+const FES_START = new Date("2026-10-24T00:00:00+09:00");
+const FES_END   = new Date("2026-10-25T23:59:59+09:00");
+function fesLine(){
+  const now = new Date();
+  if(now > FES_END) return "";
+  if(now >= FES_START) return " ・ FES開催中🍟";
+  const d = Math.ceil((FES_START - now) / 86400000);
+  return d <= 0 ? " ・ FESは今日🍟" : " ・ FESまであと" + d + "日";
+}
 function updateCounter(){
   const n = seenSet().size;
   const el = document.getElementById("gachaCount");
   if(!el) return;
-  el.innerHTML = n >= 36 ? "🎉 <b>COMPLETE!!</b> 10/24-25 京都で会おう🍟" : "みつけたJUNKeeeeS <b>" + n + "</b> / 36";
+  el.innerHTML = n >= 36
+    ? "🎉 <b>COMPLETE!!</b> 10/24-25 京都で会おう🍟"
+    : "みつけた <b>" + n + "</b> / 36 ・ あと" + (36 - n) + "枚" + fesLine();
+  const zs = document.getElementById("zuSub");
+  if(zs) zs.textContent = n + " / 36 みつけた";
+}
+// シェア文は「何枚みつけたか」を入れる。画像は作らない（借りている作品を外に出さないため）
+function shareTextNow(){
+  const n = seenSet().size;
+  if(n >= 36) return "JUNKeeeeS 36人ぜんぶ集めた🍟 10/24-25はJUNKeeeeS FES in KYOTO！ #CHARAMARL";
+  return "JUNKeeeeSを" + n + "/36人みつけた🍟 タップで1枚ずつ引けます。10/24-25はJUNKeeeeS FES in KYOTO！ #CHARAMARL";
 }
 function prefetchNext(){ if(deck.length){ const im2 = new Image(); im2.src = CARDS[deck[deck.length-1]].img; } }
 function drawCard(){
@@ -346,7 +403,14 @@ function drawCard(){
   const card = CARDS[deck.pop()];
   const s = seenSet();
   const isNew = !s.has(card.key);
-  if(isNew){ s.add(card.key); localStorage.setItem(SEEN_KEY, JSON.stringify([...s])); }
+  if(isNew){
+    s.add(card.key); localStorage.setItem(SEEN_KEY, JSON.stringify([...s]));
+    if(window.cmEvent){
+      cmEvent("card_new",{character:"JUNKeeeeS",card:card.key,found:s.size});
+      if(s.size===36) cmEvent("collection_complete",{character:"JUNKeeeeS"});
+    }
+  }
+  if(window.cmEvent)cmEvent("card_view",{character:"JUNKeeeeS",card:card.key,is_new:isNew});
   apply(card);
   nameEl.textContent = isNew ? "✨ NEW!" : "";
   if(isNew){ nameEl.classList.remove("show"); void nameEl.offsetWidth; nameEl.classList.add("show"); }
@@ -404,7 +468,9 @@ shareOverlay.addEventListener("pointerdown",e=>e.stopPropagation());
 shareOverlay.addEventListener("click",e=>{if(e.target===shareOverlay)shareOverlay.classList.remove("open");});
 document.querySelectorAll(".share-opt").forEach(btn=>btn.addEventListener("click",()=>{
   const url=location.origin+location.pathname;
-  const text=CONFIG.shareText||(CONFIG.character+" COLOR TAP | CHARAMARL");
+  const text=(typeof shareTextNow==="function")?shareTextNow()
+             :(CONFIG.shareText||(CONFIG.character+" COLOR TAP | CHARAMARL"));
+  if(window.cmEvent)cmEvent("tap_share",{character:CONFIG.character,how:btn.dataset.sh});
   const kind=btn.dataset.sh;
   if(kind==="x")window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(url),"_blank");
   else if(kind==="line")window.open("https://social-plugins.line.me/lineit/share?url="+encodeURIComponent(url),"_blank");
@@ -457,7 +523,7 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
     if(shown) return;
     seen.add(key);
     // ひと通り遊んだ人にだけ出す。色数が多いページ(ハンナさん14点など)は6回で足切りする
-    if(seen.size < Math.min(CONFIG.palettes.length, 6)) return;
+    if(seen.size < 12) return;   // 36枚あるページなので、6枚では早すぎる
     shown=true;
     if(window.cmEvent)cmEvent("tap_complete",{artist:who});
     setTimeout(()=>{
@@ -481,6 +547,44 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
     if(!shake()) return;
     const t = setInterval(()=>{ if(!shake()) clearInterval(t); }, 3200);
   }, 2500);
+})();
+
+// ===== 図鑑 =====
+// カードには名前もプロフィールも焼き込まれている。一度引いて流れたら戻れないのはもったいないので、
+// みつけた分だけ並べて見返せるようにする。未発見は「?」のまま（中身は見せない）。
+(function(){
+  const ov=document.getElementById("zuOverlay"), grid=document.getElementById("zuGrid");
+  const big=document.getElementById("zuBig"), bigImg=document.getElementById("zuBigImg");
+  const btn=document.getElementById("zuBtn"), close=document.getElementById("zuClose");
+  if(!ov||!grid||!btn) return;
+  function render(){
+    const got=seenSet();
+    grid.innerHTML="";
+    CARDS.forEach((c,i)=>{
+      const cell=document.createElement("button");
+      cell.type="button"; cell.className="zu-cell"+(got.has(c.key)?" got":"");
+      const no=document.createElement("span"); no.className="n"; no.textContent=i+1; cell.appendChild(no);
+      if(got.has(c.key)){
+        const im=document.createElement("img"); im.src=c.img; im.loading="lazy"; im.alt="";
+        cell.appendChild(im);
+        cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); });
+      }else{
+        const q=document.createElement("span"); q.className="q"; q.textContent="?"; cell.appendChild(q);
+      }
+      grid.appendChild(cell);
+    });
+  }
+  btn.addEventListener("pointerdown",e=>e.stopPropagation());
+  btn.addEventListener("click",()=>{
+    render(); updateCounter(); ov.classList.add("open"); document.body.classList.add("zu-open");
+    if(window.cmEvent)cmEvent("zukan_open",{character:"JUNKeeeeS",found:seenSet().size});
+  });
+  ov.addEventListener("pointerdown",e=>e.stopPropagation());
+  const shut=()=>{ ov.classList.remove("open"); document.body.classList.remove("zu-open"); };
+  close.addEventListener("click",shut);
+  ov.addEventListener("click",e=>{ if(e.target===ov) shut(); });
+  big.addEventListener("pointerdown",e=>e.stopPropagation());
+  big.addEventListener("click",()=>big.classList.remove("open"));
 })();
 </script>
 
