@@ -151,6 +151,15 @@
   .zu-overlay.open ~ .gacha-count, body.zu-open .gacha-count{display:none;}
   .zu-cell .n{position:absolute;left:3px;top:3px;font-size:9px;font-weight:800;color:#fff;
     background:rgba(0,0,0,.5);border-radius:4px;padding:1px 4px;}
+  /* ===== 会場スタンプ（NFC 3か所） ===== */
+  .spot-toast{position:fixed;left:50%;top:56px;transform:translateX(-50%) translateY(-14px);
+    z-index:850;background:#111;color:#fff;font-weight:900;font-size:clamp(12px,3.3vw,15px);
+    padding:10px 20px;border-radius:22px;box-shadow:0 6px 0 rgba(0,0,0,.22);
+    opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;}
+  .spot-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .zu-cell.fes{outline:2px solid #FF8A00;outline-offset:-2px;}
+  .zu-cell .fesx{position:absolute;right:3px;top:3px;font-size:8.5px;font-weight:900;color:#111;
+    background:#FF8A00;border-radius:4px;padding:1px 4px;letter-spacing:.02em;z-index:2;}
   .zu-big{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:900;display:none;
     align-items:center;justify-content:center;padding:16px;}
   .zu-big.open{display:flex;}
@@ -223,6 +232,7 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
     <button class="zu-x" id="zuClose" aria-label="閉じる">×</button></div>
   <div class="zu-grid" id="zuGrid"></div>
 </div>
+<div class="spot-toast" id="spotToast"></div>
 <div class="zu-big" id="zuBig"><img id="zuBigImg" src="" alt=""></div>
 
 <div id="nextPanel" aria-hidden="true">
@@ -370,13 +380,17 @@ function fesLine(){
   const d = Math.ceil((FES_START - now) / 86400000);
   return d <= 0 ? " ・ FESは今日🍟" : " ・ FESまであと" + d + "日";
 }
+function spotLine(){
+  try{ const k=spotSet(); if(!k.size) return "";
+       return k.size>=3 ? " ・ 会場スタンプ✅" : " ・ 会場スタンプ"+k.size+"/3"; }catch(e){ return ""; }
+}
 function updateCounter(){
   const n = seenSet().size;
   const el = document.getElementById("gachaCount");
   if(!el) return;
   el.innerHTML = n >= 36
     ? "🎉 <b>COMPLETE!!</b> 10/24-25 京都で会おう🍟"
-    : "みつけた <b>" + n + "</b> / 36 ・ あと" + (36 - n) + "枚" + fesLine();
+    : "みつけた <b>" + n + "</b> / 36 ・ あと" + (36 - n) + "枚" + spotLine() + fesLine();
   const zs = document.getElementById("zuSub");
   if(zs) zs.textContent = n + " / 36 みつけた";
 }
@@ -560,11 +574,15 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
   function render(){
     const got=seenSet();
     grid.innerHTML="";
-    CARDS.forEach((c,i)=>{
+    const list = (typeof spotDone==="function" && spotDone()) ? CARDS.concat([FES_CARD]) : CARDS;
+    list.forEach((c,i)=>{
       const cell=document.createElement("button");
-      cell.type="button"; cell.className="zu-cell"+(got.has(c.key)?" got":"");
+      const isFes = c.key==="fes_only";
+      const have = isFes ? true : got.has(c.key);
+      cell.type="button"; cell.className="zu-cell"+(have?" got":"")+(isFes?" fes":"");
       const no=document.createElement("span"); no.className="n"; no.textContent=i+1; cell.appendChild(no);
-      if(got.has(c.key)){
+      if(isFes){ const t=document.createElement("span"); t.className="fesx"; t.textContent="会場限定"; cell.appendChild(t); }
+      if(have){
         const im=document.createElement("img"); im.src=c.img; im.loading="lazy"; im.alt="";
         cell.appendChild(im);
         cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); });
@@ -585,6 +603,34 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
   ov.addEventListener("click",e=>{ if(e.target===ov) shut(); });
   big.addEventListener("pointerdown",e=>e.stopPropagation());
   big.addEventListener("click",()=>big.classList.remove("open"));
+})();
+
+// ===== 会場スタンプ（NFC 3か所） =====
+// FES会場に置いたNFCを読むと ?spot=a|b|c でこのページが開く。
+// 3つそろうと、図鑑に「会場限定」の1枚が増える。ウォレットもアプリも要らない。
+const SPOT_KEY="junk_fes_spots", SPOTS=["a","b","c"];
+// 会場限定カード。ROKUさんから絵をもらえたら img を差し替える（いまはFES面を仮に使う）
+const FES_CARD={ key:"fes_only", name:"会場限定カード", img:"art/junkeeees_fes1.jpg" };
+const spotSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(SPOT_KEY)||"[]"));}catch(e){return new Set();}};
+const spotDone=()=>spotSet().size>=SPOTS.length;
+function toast(msg){
+  const el=document.getElementById("spotToast"); if(!el)return;
+  el.textContent=msg; el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"), 3600);
+}
+(function(){
+  let q=""; try{ q=(new URLSearchParams(location.search).get("spot")||"").toLowerCase(); }catch(e){}
+  if(!SPOTS.includes(q)) return;
+  const s=spotSet(); const isNew=!s.has(q);
+  s.add(q); try{ localStorage.setItem(SPOT_KEY, JSON.stringify([...s])); }catch(e){}
+  if(window.cmEvent)cmEvent("fes_spot",{spot:q,found:s.size,is_new:isNew});
+  if(s.size>=SPOTS.length){
+    toast("🎉 会場スタンプ 3/3 コンプリート！図鑑に1枚ふえました");
+    if(isNew && window.cmEvent)cmEvent("fes_complete",{});
+  }else{
+    toast("会場スタンプ "+s.size+" / 3 ・ あと"+(SPOTS.length-s.size)+"か所");
+  }
+  if(typeof updateCounter==="function") updateCounter();
 })();
 </script>
 
