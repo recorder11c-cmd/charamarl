@@ -377,7 +377,7 @@ const CARDS = CONFIG.palettes.filter(p=>p.key.startsWith("j"));
 const FES = CONFIG.palettes.filter(p=>p.key.startsWith("fes"));
 const SEEN_KEY = "junk_gacha_seen";
 const seenSet = ()=>{try{return new Set(JSON.parse(localStorage.getItem(SEEN_KEY)||"[]"));}catch(e){return new Set();}};
-let deck = [], fesIdx = 0, completeMode = false;
+let deck = [], fesIdx = 0, completeMode = false, curCardKey = null;
 function shuffle(){ deck = CARDS.map((c,i)=>i); for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];} }
 shuffle();
 // FES本番までの残り日数。当日と会期中は文言を変える。
@@ -419,6 +419,8 @@ function drawCard(){
     if(fesIdx < FES.length){
       const f = FES[fesIdx++];
       apply(f);
+      curCardKey = f.key;
+      try{ setLikeTarget(f.key); }catch(e){}
       stage.style.filter = "none";
       stage.classList.remove("flip","bang"); void stage.offsetWidth; stage.classList.add("bang");
       return;
@@ -440,6 +442,8 @@ function drawCard(){
   }
   if(window.cmEvent)cmEvent("card_view",{character:"JUNKeeeeS",card:card.key,is_new:isNew});
   apply(card);
+  curCardKey = card.key;
+  try{ setLikeTarget(card.key); }catch(e){}   // ♥の定義より前に1枚目を引くため
   nameEl.textContent = isNew ? "✨ NEW!" : "";
   if(isNew){ nameEl.classList.remove("show"); void nameEl.offsetWidth; nameEl.classList.add("show"); }
   updateCounter();
@@ -454,35 +458,52 @@ updateCounter();
 prefetchNext();
 drawCard();
 
-// ♥ いいね（CHARAMARLのカゲチヨ作品と共通集計）
-const CM_API="/api/react", LIKE_ID="g9769aa4b0d9b", LIKE_BASE=0;
-const LIKE_KEY="colortap_likes";
-const likeSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(LIKE_KEY)||"[]"));}catch(e){return new Set();}};
-let likeServer=0, likeKnown=false;
-const likeBtn=document.getElementById("likeBtn");
+// ♥ いいね ＝ いま出ているカード1枚への「推し」
+// これまではページ全体で1つ（ROKUさんの「FUEL UP」と共通）だったが、
+// 押している人は画面に出ているカードに反応しているので、カード単位に変えた。
+// 集計IDは junk_j01〜junk_j36。サイトのランキング候補には入らない（junk_*は対象外）。
+// ※ 端末ごとの記録なので、端末を変えれば増やせる。厳密な投票ではなく「人気の目安」。
+var CM_API="/api/react", LIKE_KEY="colortap_likes";
+var likeSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(LIKE_KEY)||"[]"));}catch(e){return new Set();}};
+var likeBtn=document.getElementById("likeBtn");
+var likeCounts={}, likeLoaded=false, curLikeId=null;
+var likeIdOf=key=>"junk_"+key;
 function renderLike(){
-  const liked=likeSet().has(LIKE_ID);
+  if(!curLikeId){ likeBtn.style.visibility="hidden"; return; }
+  likeBtn.style.visibility="";
+  const liked=likeSet().has(curLikeId);
   likeBtn.classList.toggle("on",liked);
   likeBtn.setAttribute("aria-pressed",String(liked));
   document.getElementById("likeIc").textContent=liked?"♥":"♡";
-  document.getElementById("likeCt").textContent=LIKE_BASE+likeServer+((!likeKnown&&liked)?1:0);
+  // 押した瞬間に likeCounts を先に足しているので、ここで二重に足さない
+  document.getElementById("likeCt").textContent = likeCounts[curLikeId]||0;
 }
-fetch(CM_API+"?id="+LIKE_ID).then(r=>r.ok?r.json():null).then(d=>{
-  if(d&&typeof d.likes==="number"){likeServer=d.likes;likeKnown=true;renderLike();}
+// いま出ているカードに合わせて♥を切り替える（drawCard から呼ぶ）
+function setLikeTarget(key){
+  curLikeId = key && key.startsWith("j") ? likeIdOf(key) : null;  // FES面には♥を出さない
+  renderLike();
+}
+fetch(CM_API).then(r=>r.ok?r.json():null).then(d=>{
+  if(!d||d.error)return;
+  Object.keys(d).forEach(k=>{ likeCounts[k]=(d[k]&&d[k].likes)||0; });
+  likeLoaded=true; renderLike();
 }).catch(()=>{});
 likeBtn.addEventListener("pointerdown",e=>e.stopPropagation());
 likeBtn.addEventListener("click",()=>{
-  const s=likeSet();const had=s.has(LIKE_ID);
-  had?s.delete(LIKE_ID):s.add(LIKE_ID);
-  localStorage.setItem(LIKE_KEY,JSON.stringify([...s]));
-  fetch(CM_API,{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({id:LIKE_ID,type:"like",op:had?"remove":"add"})})
-    .then(r=>r.ok?r.json():null)
-    .then(d=>{if(d&&typeof d.count==="number"){likeServer=d.count;likeKnown=true;renderLike();}})
-    .catch(()=>{});
+  if(!curLikeId)return;
+  const id=curLikeId, s=likeSet(), had=s.has(id);
+  had?s.delete(id):s.add(id);
+  try{ localStorage.setItem(LIKE_KEY,JSON.stringify([...s])); }catch(e){}
+  likeCounts[id]=Math.max(0,(likeCounts[id]||0)+(had?-1:1));
   renderLike();
+  if(window.cmEvent)cmEvent("card_like",{character:"JUNKeeeeS",card:id.replace("junk_",""),op:had?"remove":"add"});
+  fetch(CM_API,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({id,type:"like",op:had?"remove":"add"})})
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{ if(d&&typeof d.count==="number"){ likeCounts[id]=d.count; renderLike(); } })
+    .catch(()=>{});
 });
-renderLike();
+setLikeTarget(curCardKey);   // 最初の1枚はこのブロックより前に引かれている
 // 🚀 シェア
 const shareOverlay=document.getElementById("shareOverlay");
 const shareBtn=document.getElementById("shareBtn");
