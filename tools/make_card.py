@@ -5,13 +5,15 @@
 COLOR TAP がある作家は、色違いを並べて「タップで色が変わる」を画像だけで伝える。
 
 ■ 使い方
-    python3 tools/make_card.py <作家名> [出力先ディレクトリ]
+    python3 tools/make_card.py <作家名> [出力先ディレクトリ] [--work=<作品ID>]
 
     例)  python3 tools/make_card.py エリー
          python3 tools/make_card.py 'DREAMER©' ~/Downloads/charamarl_share
+         python3 tools/make_card.py ハンナ --work=g880d0bb94576
 
     作家名は /api/gallery の artist と完全一致させる。
-    その作家のいちばん新しい作品が使われる。
+    既定はその作家のいちばん新しい作品。--work で1点を指名できる。
+    COLOR TAP がある作家は TAPS 側で作品を固定しているので、新作が出ても差し替わらない。
 
 ■ 仕組み
     HTMLを組み立てて、ヘッドレスChromeでスクリーンショットを撮る。
@@ -28,9 +30,14 @@ API = 'https://charamarl.com/api/gallery'
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 TAPDIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'tap', 'art', 'colors')
 
-# COLOR TAP があり、事前生成PNGを並べられる作家 → (imageKey, 色キーの順番, TAPページ)
+# COLOR TAP があり、事前生成PNGを並べられる作家 → (imageKey, 色キーの順番, TAPページ, 作品ID)
+# ⚠️ 色見本と主役の絵は同じキャラでないと成立しない。作家が新作を出すと「いちばん新しい作品」は
+#    TAPと別のキャラになるので、TAPがある作家はここで作品を固定する。
 TAPS = {
-    'DREAMER©': ('ghost', ['orig', 'pumpkin', 'poison', 'blood', 'midnight', 'ice'], 'tap/ghost.html'),
+    'DREAMER©': ('ghost', ['orig', 'pumpkin', 'poison', 'blood', 'midnight', 'ice'], 'tap/ghost.html', 'g0ba427b52450'),
+    'チンチロ': ('blockma', ['orig', 'candy', 'neon', 'flame', 'ocean', 'gold'], 'tap/blockma.html', 'g53905fbdc117'),
+    'CryptoSuperHeroes': ('csh', ['pizza', 'shark', 'fly', 'water', 'drdangerous', 'ultimate'], 'tap/csh.html', 'g4df484fa9830'),
+    'MARU_GMC': ('gmc', ['red', 'yellow', 'green', 'cyan', 'blue', 'pink'], 'tap/gmc.html', None),
 }
 # 作品の地を暗くする作家（白いキャラで、明るい地だと消えるもの）
 DARK_BG = {'DREAMER©'}
@@ -40,19 +47,24 @@ def b64(path):
     return base64.b64encode(open(path, 'rb').read()).decode()
 
 
-def build(artist, outdir):
+def build(artist, outdir, work_id=None):
     works = json.load(urllib.request.urlopen(API))['list']
     mine = [w for w in works if (w.get('artist') or '') == artist]
     if not mine:
         raise SystemExit(f'「{artist}」の作品が見つかりません（artist名を完全一致で指定する）')
     mine.sort(key=lambda w: -(w.get('ts') or 0))
-    w = mine[0]
 
     tap = TAPS.get(artist)
+    pin = work_id or (tap[3] if tap and len(tap) > 3 else None)
+    w = next((x for x in mine if x['id'] == pin), None) if pin else None
+    if pin and not w:
+        raise SystemExit(f'作品ID {pin} が「{artist}」の作品にありません')
+    if not w:
+        w = mine[0]
     dark = artist in DARK_BG
     sws = ''
     if tap:
-        key, colors, _ = tap
+        key, colors = tap[0], tap[1]
         sws = '<div class="sws">' + ''.join(
             f'<img class="sw" src="data:image/png;base64,{b64(f"{TAPDIR}/{key}_{c}.png")}">'
             for c in colors) + '</div>'
@@ -117,7 +129,9 @@ img.sw{{width:58px;height:58px;object-fit:contain;image-rendering:pixelated;
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        raise SystemExit('使い方: python3 tools/make_card.py <作家名> [出力先]')
-    build(sys.argv[1], os.path.expanduser(sys.argv[2] if len(sys.argv) > 2
-                                          else '~/Downloads/charamarl_share'))
+    args = [a for a in sys.argv[1:] if not a.startswith('--work=')]
+    wid = next((a[7:] for a in sys.argv[1:] if a.startswith('--work=')), None)
+    if not args:
+        raise SystemExit('使い方: python3 tools/make_card.py <作家名> [出力先] [--work=<作品ID>]')
+    build(args[0], os.path.expanduser(args[1] if len(args) > 1
+                                      else '~/Downloads/charamarl_share'), wid)
