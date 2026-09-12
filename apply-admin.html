@@ -83,6 +83,7 @@
   .gbtn.rm{background:#fff0f2;color:#e0245e;}
   .gbtn:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
   .badge-live{display:inline-block;font-size:9px;font-weight:800;color:#1a7f4b;background:#e8f8ee;border-radius:8px;padding:2px 8px;margin-left:6px;vertical-align:middle;}
+  .badge-wait{display:inline-block;font-size:9px;font-weight:800;color:#946200;background:#fff3d6;border-radius:8px;padding:2px 8px;margin-left:6px;vertical-align:middle;}
   .editbox{margin-top:8px;background:var(--bg);border-radius:12px;padding:10px;}
   .editbox label{display:block;font-size:10px;font-weight:800;color:var(--muted);margin:6px 0 2px;}
   .editbox input,.editbox textarea{width:100%;padding:8px 10px;font-family:inherit;font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:8px;background:#fff;}
@@ -195,17 +196,27 @@
   });
   // ===== ギャラリー投稿の審査 =====
   const gp=document.getElementById('galPending'), ga=document.getElementById('galApproved');
+  const gSched=a=>Number(a.publishAt)>Date.now();
+  const gSchedLbl=a=>{const d=new Date(Number(a.publishAt));
+    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} 公開`;};
+  // datetime-local は現地時刻の文字列。ローカル時刻のまま埋める（Zを付けるとUTCになりずれる）
+  const gLocal=a=>{ if(!a.publishAt)return '';
+    const d=new Date(Number(a.publishAt)), z=n=>String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`;};
   function gcard(a,btns){
     return `<div class="gcard" data-id="${esc(a.id)}">
       <img src="${esc(a.img)}" alt="">
       <div class="gi">
-        <div class="gt">${esc(a.title)}${a.status==='approved'?'<span class="badge-live">公開中</span>':''}</div>
+        <div class="gt">${esc(a.title)}${a.status==='approved'?(gSched(a)?`<span class="badge-wait">📅 ${gSchedLbl(a)}</span>`:'<span class="badge-live">公開中</span>'):''}</div>
         <div class="ga">by ${esc(a.artist)} ・ ${fmt(a.ts)}${a.aiFree?' ・ ✍️ 生成AI不使用宣言済み':' ・ ⚠️ AI宣言なし(旧投稿)'}</div>
         <div style="margin-top:6px;">📂 <select class="gcat" data-id="${esc(a.id)}" style="min-height:36px;padding:4px 10px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:11px;font-weight:700;">
           ${['ARTWORK','CHARACTER','PRODUCT','MAKING','EVENT','INTERVIEW'].map(c=>`<option value="${c}"${(a.cat||'ARTWORK')===c?' selected':''}>${{ARTWORK:'アート作品',CHARACTER:'キャラクター',PRODUCT:'グッズ・商品',MAKING:'制作風景',EVENT:'イベント',INTERVIEW:'インタビュー'}[c]}</option>`).join('')}
         </select></div>
         ${a.link?`<div class="gl">🔗 <a href="${esc(a.link)}" target="_blank" rel="noopener nofollow">${esc(a.link)}</a></div>`:''}
         ${a.desc?`<div class="gd">${esc(a.desc)}</div>`:''}
+        <div style="margin-top:8px;font-size:11px;font-weight:800;color:var(--muted);">📅 公開日時（空欄＝すぐ公開）</div>
+        <input type="datetime-local" class="gwhen" id="gw_${esc(a.id)}" value="${gLocal(a)}" style="margin-top:3px;min-height:36px;padding:4px 8px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:12px;">
+        ${a.status==='approved'?`<button class="gbtn ok" data-resched="${esc(a.id)}" type="button" style="margin-left:6px;">📅 この日時にする</button>`:''}
         <button class="ebtn" data-edit="${esc(a.id)}" type="button" style="margin-top:8px;">✏️ 編集</button>
         <div class="editbox" id="ed_${esc(a.id)}" hidden>
           <label>タイトル</label><input type="text" id="et_${esc(a.id)}" value="${esc(a.title)}" maxlength="60">
@@ -228,15 +239,15 @@
       document.getElementById('tGal').textContent=pend.length;
       document.getElementById('gaCount').textContent=appr.length;
       gp.innerHTML=pend.length?pend.map(a=>gcard(a,
-        `<button class="gbtn ok" data-act="approve">✓ 承認して公開</button><button class="gbtn ng" data-act="reject">見送り</button>`)).join('')
+        `<button class="gbtn ok" data-act="approve">✓ 承認</button><button class="gbtn ng" data-act="reject">見送り</button>`)).join('')
         :'<div class="empty" style="padding:24px;margin-bottom:12px;">審査待ちはありません 🎪</div>';
       ga.innerHTML=appr.map(a=>gcard(a,
         `<button class="gbtn rm" data-act="remove">✕ 掲載終了</button>`)).join('');
     }catch(ex){err.textContent=ex.message;err.style.display='block';}
   }
-  async function galAction(id,act){
+  async function galAction(id,act,extra){
     const r=await fetch('/api/gallery',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:act,id,key})});
+      body:JSON.stringify(Object.assign({action:act,id,key},extra||{}))});
     if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.error||'操作に失敗しました');}
   }
   document.addEventListener('change',async e=>{
@@ -247,6 +258,14 @@
       if(!r.ok)throw new Error('カテゴリ変更に失敗しました');
       sel.style.background='#e8f8ee';setTimeout(()=>sel.style.background='',800);
     }catch(ex){err.textContent=ex.message;err.style.display='block';}
+  });
+  document.addEventListener('click',async e=>{
+    const rb=e.target.closest('[data-resched]'); if(!rb)return;
+    const id=rb.dataset.resched, when=(document.getElementById('gw_'+id)||{}).value||'';
+    if(!confirm(when?`${when.replace('T',' ')} に公開する予約に変更しますか？`:'予約を解除して、いますぐ公開しますか？'))return;
+    rb.disabled=true;
+    try{await galAction(id,'approve',{publishAt:when});loadGallery();}
+    catch(ex){err.textContent=ex.message;err.style.display='block';rb.disabled=false;}
   });
   document.addEventListener('click',e=>{
     const eb=e.target.closest('[data-edit]'); if(!eb)return;
@@ -269,10 +288,13 @@
   document.addEventListener('click',async e=>{
     const btn=e.target.closest('.gbtn'); if(!btn||btn.dataset.save)return;
     const id=btn.closest('.gcard').dataset.id, act=btn.dataset.act;
-    const msg={approve:'この作品を承認してギャラリーに公開しますか？',reject:'この投稿を見送りますか？',remove:'この作品の掲載を終了しますか？（画像も削除されます）'}[act];
+    const when=(document.getElementById('gw_'+id)||{}).value||'';
+    const msg=act==='approve'
+      ? (when?`${when.replace('T',' ')} に公開する予約でよろしいですか？（その時刻まで市場には出ません）`:'この作品を承認して、いますぐギャラリーに公開しますか？')
+      : {reject:'この投稿を見送りますか？',remove:'この作品の掲載を終了しますか？（画像も削除されます）'}[act];
     if(!confirm(msg))return;
     btn.disabled=true;
-    try{await galAction(id,act);loadGallery();}
+    try{await galAction(id,act,act==='approve'?{publishAt:when}:null);loadGallery();}
     catch(ex){err.textContent=ex.message;err.style.display='block';btn.disabled=false;}
   });
 

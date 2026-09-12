@@ -449,6 +449,10 @@
     try{
       const d=await fetch('/api/gallery?mine=1').then(r=>r.ok?r.json():{list:[]});
       const lbl={pending:'審査待ち',approved:'公開中',rejected:'見送り'};
+      // 公開日を決めてある作品は「◯/◯ 公開予定」と出す（承認済みだが、まだ市場には並んでいない）
+      const sched=a=>Number(a.publishAt)>Date.now();
+      const schedLbl=a=>{const d=new Date(Number(a.publishAt));
+        return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} 公開予定`;};
       const catLbl={ARTWORK:'アート作品',CHARACTER:'キャラクター',PRODUCT:'グッズ・商品',MAKING:'制作風景',EVENT:'イベント',INTERVIEW:'インタビュー'};
       mineItems={};
       if(d.list&&d.list.length){
@@ -461,11 +465,13 @@
         const st=a=>({l:((rc[a.id]||{}).likes)||0,s:((rc[a.id]||{}).saves)||0,o:oc[a.id]||0});
         $('mineList').innerHTML=d.list.map(a=>{
           const x=st(a);
-          const nums=a.status==='approved'
+          const nums=(a.status==='approved'&&!sched(a))
             ?`<span class="ml" style="color:#555;font-weight:800;">♥ ${x.l} ・ 🔖 ${x.s} ・ ↗ ${x.o}人があなたのリンクへ</span>`:'';
-          return `<div class="mine"><img src="${esc(a.img)}" alt=""><div class="mt">${esc(a.title)}<span class="ml">📂 ${catLbl[a.cat]||'アート作品'}${a.link?` ・ 🔗 ${esc(a.link)}`:''}</span>${nums}</div><span class="st ${esc(a.status)}">${lbl[a.status]||esc(a.status)}</span><button class="ebtn" data-id="${esc(a.id)}" type="button">✏️ 編集</button></div>`;
+          const stCls=sched(a)?'pending':esc(a.status);
+          const stTxt=sched(a)?schedLbl(a):(lbl[a.status]||esc(a.status));
+          return `<div class="mine"><img src="${esc(a.img)}" alt=""><div class="mt">${esc(a.title)}<span class="ml">📂 ${catLbl[a.cat]||'アート作品'}${a.link?` ・ 🔗 ${esc(a.link)}`:''}</span>${nums}</div><span class="st ${stCls}">${stTxt}</span><button class="ebtn" data-id="${esc(a.id)}" type="button">✏️ 編集</button></div>`;
         }).join('');
-        renderStats(d.list.filter(a=>a.status==='approved').map(st));
+        renderStats(d.list.filter(a=>a.status==='approved'&&!sched(a)).map(st));
       }
     }catch(e){}
   }

@@ -42,6 +42,15 @@ async function currentUser(req) {
 const trim = (v, max) => String(v || '').trim().slice(0, max);
 const isAdmin = (q) => process.env.APPLY_KEY && q && q.key === process.env.APPLY_KEY;
 
+// 予約公開。publishAt(epoch ms) が未来のあいだは、承認済みでも公開一覧に出さない。
+const isScheduled = (a) => Number(a && a.publishAt) > Date.now();
+// 空文字・null は「予約なし＝すぐ公開」。過去の時刻もすぐ公開として扱う。
+function readPublishAt(v) {
+  if (v === '' || v === null) return 0;
+  const t = typeof v === 'number' ? v : Date.parse(v);
+  return Number.isFinite(t) && t > Date.now() ? t : 0;
+}
+
 async function loadAll() {
   const ids = (await redis('LRANGE', 'gal:ids', '0', '199')) || [];
   if (!ids.length) return [];
@@ -81,7 +90,9 @@ module.exports = async (req, res) => {
         return res.status(200).json({ list });
       }
       // 公開一覧（承認済みのみ・内部キーは出さない）
-      const list = (await loadAll()).filter(a => a.status === 'approved')
+      // publishAt が未来の作品は、時刻が来るまでここに出さない（予約公開）。
+      // 読むたびに判定するのでcronは要らない。取りこぼしも、ずれもない。
+      const list = (await loadAll()).filter(a => a.status === 'approved' && !isScheduled(a))
         .map(({ artistKey, ...pub }) => pub);
       return res.status(200).json({ list });
     }
@@ -204,6 +215,7 @@ module.exports = async (req, res) => {
     // 例: 1週間に1点ずつ出す約束をしている作家の、2点目以降。
     if (b.action === 'unapprove') {
       item.status = 'pending';
+      delete item.publishAt;
       await redis('SET', `gal:${id}`, JSON.stringify(item));
       await redis('SREM', 'react:extra', id);
       return res.status(200).json({ ok: true, status: item.status });
@@ -211,9 +223,16 @@ module.exports = async (req, res) => {
 
     if (b.action === 'approve' || b.action === 'reject') {
       item.status = b.action === 'approve' ? 'approved' : 'rejected';
+      // 承認と同時に公開日時を決められる。1週間に1点ずつ出す約束の作家のため。
+      // publishAt を送らなければ、いまの予約はそのまま。'' を送ると予約を消してすぐ公開。
+      if (b.action === 'approve' && b.publishAt !== undefined) {
+        const at = readPublishAt(b.publishAt);
+        if (at) item.publishAt = at; else delete item.publishAt;
+      }
+      if (b.action === 'reject') delete item.publishAt;
       await redis('SET', `gal:${id}`, JSON.stringify(item));
       await redis(b.action === 'approve' ? 'SADD' : 'SREM', 'react:extra', id);
-      return res.status(200).json({ ok: true, status: item.status });
+      return res.status(200).json({ ok: true, status: item.status, publishAt: item.publishAt || null });
     }
 
     if (b.action === 'remove') {
