@@ -1507,6 +1507,13 @@
     {id:'mossun',name:'MOSSUN', cr:'DinoRenny', img:'./img/t/colors_nobg/mossun_blue.webp', href:'./characters/mossun.html'},
     {id:'gmc',   name:'レコマル',cr:'MARU',      img:'./img/t/gallery/gmc.webp',              href:'./characters/gmc.html'}
   ];
+  // キャラクターではない作品はランキングから外す（この枠は「人気キャラクター」なので）
+  // ⚠️ cat で切らない。ARTWORK にもキャラクターを描いた作品が多く、逆に CHARACTER 指定でも
+  //    グッズやジャケットが入る。作家の自己申告では分けられないので、ここで個別に除く。
+  const RANK_EXCLUDE=new Set([
+    'gf8cd61663d26', // theM.U.G「マグロック台風直撃記念 L/S Tee」＝Tシャツのデザイン
+    'gf637a7adcb34'  // theM.U.G「The M.U.G 2nd EP ジャケットデザイン」＝ジャケット
+  ]);
   const rkEsc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
   const fmtLikes=n=>n>=1000?(Math.round(n/100)/10)+'k':n;
   const likesOf=id=>((artCounts&&artCounts[id]&&artCounts[id].likes)||0);
@@ -1514,6 +1521,7 @@
     const seen=new Set(), out=[];
     galleryList.forEach(w=>{
       if(w.artist==='CHARAMARL')return;          // 連載記事のピンは作品ではない
+      if(RANK_EXCLUDE.has(w.id))return;          // キャラクターではない作品
       if(seen.has(w.id))return; seen.add(w.id);
       out.push({id:w.id,name:w.title,cr:w.artist,img:w.img,
                 href:'./artist.html?a='+encodeURIComponent(w.artist)});
