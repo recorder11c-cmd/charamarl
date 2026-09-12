@@ -199,6 +199,16 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, img: item.img });
     }
 
+    // 公開を取り消して「審査待ち」に戻す（管理）。
+    // reject は作家のマイページに「見送り」と出てしまうので、公開順を待ってもらう作品には使わない。
+    // 例: 1週間に1点ずつ出す約束をしている作家の、2点目以降。
+    if (b.action === 'unapprove') {
+      item.status = 'pending';
+      await redis('SET', `gal:${id}`, JSON.stringify(item));
+      await redis('SREM', 'react:extra', id);
+      return res.status(200).json({ ok: true, status: item.status });
+    }
+
     if (b.action === 'approve' || b.action === 'reject') {
       item.status = b.action === 'approve' ? 'approved' : 'rejected';
       await redis('SET', `gal:${id}`, JSON.stringify(item));
