@@ -41,5 +41,15 @@
         "hostname": "*.public.blob.vercel-storage.com"
       }
     ]
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/tap/:name([a-z0-9_-]+)",
+      "destination": "/tap/:name.html"
+    },
+    {
+      "source": "/ar/avatar",
+      "destination": "/ar/avatar.html"
+    }
+  ]
 }

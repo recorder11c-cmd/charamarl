@@ -49,7 +49,7 @@
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/js/ga.js"></script>
-<script src="/ar/share.js"></script>
+<script src="/ar/share.js?v=2"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.151.3/build/three.module.js",
@@ -96,7 +96,7 @@ import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 
 // アバター一覧(?m= で指定)。台紙は全員共通のマーカー
 const MODELS = {
-  kozo: { file: '/ar/kozo.vrm', name: 'KOZO', credit: 'ahoyoung', height: 1.15 },
+  kozo: { file: '/ar/kozo.vrm', name: 'KOZO', credit: 'ahoyoung', height: 1.15 },   // tap: 'sue' のようにCOLOR TAPのIDを入れると写真と文面のリンクがそのTAPになる
 };
 const q = new URLSearchParams(location.search);
 const M = MODELS[q.get('m')] || MODELS.kozo;
@@ -127,6 +127,7 @@ if ('useLegacyLights' in renderer) renderer.useLegacyLights = false; else render
 scene.add(new THREE.AmbientLight(0xffffff, 1.8));
 const sun = new THREE.DirectionalLight(0xffffff, 2.0); sun.position.set(1, 2, 3); scene.add(sun);
 const anchor = mindarThree.addAnchor(0);   // マーカー中心が原点。幅1・高さ約1.43、zがカメラ側
+const anchor2 = mindarThree.addAnchor(1);  // 名刺サイズ版の台紙(55x91mm)。同じ絵を縮めたもの
 const holder = new THREE.Group(); holder.matrixAutoUpdate = false; holder.visible = false; scene.add(holder);  // 台紙を外しても最後の位置に残す
 const stage = new THREE.Group(); holder.add(stage);
 const FLOOR_Y = -0.5;                       // 台紙の下の方に立たせる
@@ -210,7 +211,8 @@ function animate(t, dt){
 }
 renderer.setAnimationLoop(() => {
   const dt = clock.getDelta();
-  if (anchor.group.visible) { holder.matrix.copy(anchor.group.matrix); holder.matrixWorldNeedsUpdate = true; holder.visible = true; }
+  const live = anchor.group.visible ? anchor.group : (anchor2.group.visible ? anchor2.group : null);
+  if (live) { holder.matrix.copy(live.matrix); holder.matrixWorldNeedsUpdate = true; holder.visible = true; }
   animate(clock.elapsedTime, dt);
   renderer.render(scene, camera);
   if (wantShot) { const cb = wantShot; wantShot = null; cb(); }   // 描画直後にだけ写真が撮れる
@@ -218,6 +220,8 @@ renderer.setAnimationLoop(() => {
 
 anchor.onTargetFound = () => { found = true; everSeen = true; hint.classList.add('hide'); flashName(); if (window.gtag) gtag('event', 'ar_found', { character: M.name, page: 'avatar' }); };
 anchor.onTargetLost = () => { found = false; if (everSeen) { hint.textContent = '台紙を外しても、そのまま写真が撮れます'; hint.classList.remove('hide'); setTimeout(() => hint.classList.add('hide'), 2500); } else hint.classList.remove('hide'); };
+anchor2.onTargetFound = () => anchor.onTargetFound();
+anchor2.onTargetLost = () => anchor.onTargetLost();
 $('ar').addEventListener('click', () => { if (!everSeen) return; if (jumpT < 0) jumpT = 0; if (window.gtag) gtag('event', 'ar_tap', { character: M.name, page: 'avatar' }); });
 $('danceBtn').addEventListener('click', () => { dance = (dance + 1) % DANCES.length; flashName(); });
 
@@ -238,10 +242,12 @@ startBtn.addEventListener('click', async () => {
 // シェア = いまの画面の写真(カメラ映像+アバター)。リンクは台紙が要らないサイトのトップ
 $('shareBtn').addEventListener('click', () => {
   const text = M.name + 'が飛び出した！ #CHARAMARL';
-  const url = 'https://charamarl.com/?utm_source=ar&utm_medium=share';
+  const short = M.tap ? 'charamarl.com/tap/' + M.tap : 'charamarl.com';
+  const url = 'https://' + short + '?utm_source=ar&utm_medium=share';
+  const copied = CM_AR_SHARE.copyText(text + '\n' + url);   // 画像を渡すと文章が落ちるアプリ向けの保険
   wantShot = () => {
-    const canvas = CM_AR_SHARE.snapshot({ video: document.querySelector('#ar video') || document.querySelector('video'), gl: renderer.domElement });
-    CM_AR_SHARE.share({ canvas, text, url }).then((m) => { if (window.gtag) gtag('event', 'share', { method: m, content_type: 'ar_photo', item_id: M.name }); });
+    const canvas = CM_AR_SHARE.snapshot({ video: document.querySelector('#ar video') || document.querySelector('video'), gl: renderer.domElement, label: short });
+    CM_AR_SHARE.share({ canvas, text, url, copied }).then((m) => { if (window.gtag) gtag('event', 'share', { method: m, content_type: 'ar_photo', item_id: M.name }); });
   };
 });
 </script>

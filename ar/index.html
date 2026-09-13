@@ -62,7 +62,7 @@
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/js/ga.js"></script>
-<script src="/ar/share.js"></script>
+<script src="/ar/share.js?v=2"></script>
 <script src="/js/products.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe-master.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -86,9 +86,10 @@
 <script>
 // 台紙(target)の位置を毎フレーム写し、見失っても最後の位置に残す
 AFRAME.registerComponent('stay-put', {
-  init: function(){ this.target = document.getElementById('target'); this.el.object3D.matrixAutoUpdate = false; },
+  init: function(){ this.targets = [document.getElementById('target'), document.getElementById('target2')]; this.el.object3D.matrixAutoUpdate = false; },
   tick: function(){
-    var t = this.target && this.target.object3D; if(!t || !t.visible) return;
+    var t = null; for(var i=0;i<this.targets.length;i++){ var o=this.targets[i]&&this.targets[i].object3D; if(o&&o.visible){ t=o; break; } }
+    if(!t) return;
     this.el.object3D.matrix.copy(t.matrix); this.el.object3D.matrixWorldNeedsUpdate = true; this.el.object3D.visible = true;
   }
 });
@@ -100,6 +101,7 @@ AFRAME.registerComponent('stay-put', {
   <a-assets id="assets"></a-assets>
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
   <a-entity id="target" mindar-image-target="targetIndex: 0"></a-entity>
+  <a-entity id="target2" mindar-image-target="targetIndex: 1"></a-entity>  <!-- 名刺サイズ版の台紙 -->
   <!-- 台紙を外しても最後の位置に残すため、キャラはtargetの外に置き、毎フレーム位置だけ写す -->
   <a-entity id="stay" stay-put visible="false">
     <a-circle id="shadow" position="0 -0.05 0.01" radius="0.36" scale="1 0.35 1" color="#000" opacity="0.22" transparent="true"></a-circle>
@@ -222,15 +224,22 @@ AFRAME.registerComponent('stay-put', {
 
   var target=document.getElementById('target'), everSeen=false;
   target.addEventListener('targetFound', function(){ found=true; everSeen=true; hint.classList.add('hide'); if(cur){ nameEl.textContent=cur.name; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); } if(window.gtag) gtag('event','ar_found',{character:cur?cur.id:''}); });
+  var target2=document.getElementById('target2');
+  target2.addEventListener('targetFound', function(){ target.dispatchEvent(new Event('targetFound')); });
+  target2.addEventListener('targetLost', function(){ target.dispatchEvent(new Event('targetLost')); });
   target.addEventListener('targetLost', function(){ found=false; if(everSeen){ hint.textContent='台紙を外しても、そのまま写真が撮れます'; hint.classList.remove('hide'); setTimeout(function(){ hint.classList.add('hide'); }, 2500); } else hint.classList.remove('hide'); });
 
   // シェア
   // シェア = いまの画面の写真(カメラ映像+キャラ)。リンクは台紙が要らないサイトのトップ
+  // COLOR TAPがあるキャラは、写真の透かしと文面のリンクをそのキャラのTAPにする(短いURLはvercel.jsonの書き換えで .html なしでも開く)
+  var TAP_IDS={sue:1,putti:1,mossun:1,gmc:1,ufoo:1,dogooooo:1,inkumo:1,blockma:1,mony:1,yurucrazy:1};
   document.getElementById('shareBtn').addEventListener('click', function(){
     var text=(cur?cur.name+'が飛び出した！':'キャラが飛び出した！')+' #CHARAMARL';
-    var url='https://charamarl.com/?utm_source=ar&utm_medium=share';
-    var canvas=CM_AR_SHARE.snapshot({ video: document.querySelector('video'), gl: scene.canvas || scene.renderer.domElement });
-    CM_AR_SHARE.share({ canvas:canvas, text:text, url:url }).then(function(m){ if(window.gtag) gtag('event','share',{method:m, content_type:'ar_photo', item_id:cur?cur.id:''}); });
+    var short=(cur&&TAP_IDS[cur.id])?'charamarl.com/tap/'+cur.id:'charamarl.com';
+    var url='https://'+short+'?utm_source=ar&utm_medium=share';
+    var copied=CM_AR_SHARE.copyText(text+'\n'+url);
+    var canvas=CM_AR_SHARE.snapshot({ video: document.querySelector('video'), gl: scene.canvas || scene.renderer.domElement, label: short });
+    CM_AR_SHARE.share({ canvas:canvas, text:text, url:url, copied:copied }).then(function(m){ if(window.gtag) gtag('event','share',{method:m, content_type:'ar_photo', item_id:cur?cur.id:''}); });
   });
 })();
 </script>
