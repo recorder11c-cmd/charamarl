@@ -13,7 +13,9 @@
 <style>
   :root{ --orange:#FF8A00; --purple:#A855F7; --black:#111; }
   *{ margin:0; padding:0; box-sizing:border-box; }
-  html,body{ height:100%; background:#111; overflow:hidden; }
+  /* 背景はhtmlにだけ付ける。bodyにも付けるとMindARのカメラ映像(z-index:-2でbody直下)がbodyの背景の下に隠れて真っ暗になる */
+  html{ height:100%; background:#111; overflow:hidden; }
+  body{ height:100%; background:transparent; overflow:hidden; }
   body{ font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Kaku Gothic ProN',sans-serif; color:#111; -webkit-tap-highlight-color:transparent; }
   a-scene{ position:fixed; inset:0; }
   .ui{ position:fixed; inset:0; pointer-events:none; z-index:10; }
