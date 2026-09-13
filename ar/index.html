@@ -62,6 +62,7 @@
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/js/ga.js"></script>
+<script src="/ar/share.js"></script>
 <script src="/js/products.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe-master.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -82,13 +83,25 @@
   <div class="small err" id="err">カメラを起動できませんでした。<br>XやLINEの中で開いている場合は、<a href="#" id="openSafari">SafariやChromeで開く</a>とうまくいきます。<br><span id="errDetail" style="color:#aaa"></span></div>
 </div>
 
+<script>
+// 台紙(target)の位置を毎フレーム写し、見失っても最後の位置に残す
+AFRAME.registerComponent('stay-put', {
+  init: function(){ this.target = document.getElementById('target'); this.el.object3D.matrixAutoUpdate = false; },
+  tick: function(){
+    var t = this.target && this.target.object3D; if(!t || !t.visible) return;
+    this.el.object3D.matrix.copy(t.matrix); this.el.object3D.matrixWorldNeedsUpdate = true; this.el.object3D.visible = true;
+  }
+});
+</script>
 <a-scene id="scene"
   mindar-image="imageTargetSrc: /ar/targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001;"
-  color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true"
+  color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true, preserveDrawingBuffer: true"
   vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" loading-screen="enabled: false" embedded>
   <a-assets id="assets"></a-assets>
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-  <a-entity id="target" mindar-image-target="targetIndex: 0">
+  <a-entity id="target" mindar-image-target="targetIndex: 0"></a-entity>
+  <!-- 台紙を外しても最後の位置に残すため、キャラはtargetの外に置き、毎フレーム位置だけ写す -->
+  <a-entity id="stay" stay-put visible="false">
     <a-circle id="shadow" position="0 -0.05 0.01" radius="0.36" scale="1 0.35 1" color="#000" opacity="0.22" transparent="true"></a-circle>
     <a-entity id="holder" position="0 0 0.25">
       <a-image id="chara" width="0.95" height="0.95" position="0 0.05 0" transparent="true"
@@ -207,17 +220,17 @@
   window.addEventListener('unhandledrejection', function(e){ if(!cover.classList.contains('hide')) fail('起動エラー: '+String(e.reason&&e.reason.message||e.reason||'')); });
   window.addEventListener('error', function(e){ if(!cover.classList.contains('hide') && startBtn.textContent==='起動中…') fail('起動エラー: '+String(e.message||'')); });
 
-  var target=document.getElementById('target');
-  target.addEventListener('targetFound', function(){ found=true; hint.classList.add('hide'); if(cur){ nameEl.textContent=cur.name; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); } if(window.gtag) gtag('event','ar_found',{character:cur?cur.id:''}); });
-  target.addEventListener('targetLost', function(){ found=false; hint.classList.remove('hide'); });
+  var target=document.getElementById('target'), everSeen=false;
+  target.addEventListener('targetFound', function(){ found=true; everSeen=true; hint.classList.add('hide'); if(cur){ nameEl.textContent=cur.name; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); } if(window.gtag) gtag('event','ar_found',{character:cur?cur.id:''}); });
+  target.addEventListener('targetLost', function(){ found=false; if(everSeen){ hint.textContent='台紙を外しても、そのまま写真が撮れます'; hint.classList.remove('hide'); setTimeout(function(){ hint.classList.add('hide'); }, 2500); } else hint.classList.remove('hide'); });
 
   // シェア
+  // シェア = いまの画面の写真(カメラ映像+キャラ)。リンクは台紙が要らないサイトのトップ
   document.getElementById('shareBtn').addEventListener('click', function(){
-    var text=(cur?cur.name+'が台紙からとびだした！':'台紙にかざすとキャラがとびだす')+' #CHARAMARL';
-    var url='https://charamarl.com/ar'+(cur?'?c='+cur.id:'');
-    if(navigator.share){ navigator.share({title:'CHARAMARL AR', text:text, url:url}).catch(function(){}); }
-    else{ window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(url),'_blank'); }
-    if(window.gtag) gtag('event','share',{method:navigator.share?'native':'x', content_type:'ar', item_id:cur?cur.id:''});
+    var text=(cur?cur.name+'が飛び出した！':'キャラが飛び出した！')+' #CHARAMARL';
+    var url='https://charamarl.com/?utm_source=ar&utm_medium=share';
+    var canvas=CM_AR_SHARE.snapshot({ video: document.querySelector('video'), gl: scene.canvas || scene.renderer.domElement });
+    CM_AR_SHARE.share({ canvas:canvas, text:text, url:url }).then(function(m){ if(window.gtag) gtag('event','share',{method:m, content_type:'ar_photo', item_id:cur?cur.id:''}); });
   });
 })();
 </script>
