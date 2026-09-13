@@ -26,6 +26,7 @@ window.CM_TAPS = {
   "Ink'z Monster":['./tap/inkumo.html'],
   'チンチロ':['./tap/blockma.html'],
   'CRAZY':['./tap/yurucrazy.html'],
+  '赤猫かるま':['./tap/danna.html'],
   'カゲチヨ':['./tap/kagechiyo.html'],
   'CryptoSuperHeroes':['./tap/csh.html'],
   'morry':['./tap/mony.html'],
