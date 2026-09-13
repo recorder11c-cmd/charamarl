@@ -205,13 +205,14 @@ const CONFIG = {
   imageKey: "danna",
 
   // 6色パレット。体は白なので色は変わらず、シャツ・くちばし・足・ほほが変わる＝着替えに見える。
+  // ※ mode:"char" では背景は CONFIG.bg に固定。パレット側の bg は使われないので持たせていない。
   palettes: [
-    { key:"orig",   name:"ORIGINAL", hue:0,   sat:1.0,  bri:1.0,  bg:"#26364A" },
-    { key:"rose",   name:"ROSE",     hue:105, sat:1.25, bri:1.02, bg:"#2C1C2A" },
-    { key:"flame",  name:"VERMILION",hue:150, sat:1.25, bri:1.05, bg:"#2B1A16" },
-    { key:"sepia",  name:"SEPIA",    hue:180, sat:1.15, bri:1.0,  bg:"#1C2430" },
-    { key:"forest", name:"FOREST",   hue:255, sat:1.2,  bri:1.0,  bg:"#16241C" },
-    { key:"violet", name:"VIOLET",   hue:45,  sat:1.2,  bri:1.0,  bg:"#221B33" },
+    { key:"orig",   name:"ORIGINAL", hue:0,   sat:1.0,  bri:1.0, },
+    { key:"rose",   name:"ROSE",     hue:105, sat:1.25, bri:1.02, },
+    { key:"flame",  name:"VERMILION",hue:150, sat:1.25, bri:1.05, },
+    { key:"sepia",  name:"SEPIA",    hue:180, sat:1.15, bri:1.0, },
+    { key:"forest", name:"FOREST",   hue:255, sat:1.2,  bri:1.0, },
+    { key:"violet", name:"VIOLET",   hue:45,  sat:1.2,  bri:1.0, },
   ],
 
   // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
