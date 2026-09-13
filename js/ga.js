@@ -45,6 +45,18 @@ window.CM_GA_ID = 'G-PMSD6TMSJW';
 // 共通イベント送信ヘルパー(内部端末ではgtag未定義のため自動的に無効)
 window.cmEvent=function(name,params){try{if(window.gtag)window.gtag('event',name,params||{});}catch(e){}};
 
+// ===== NFCタグ / QR経由の来訪 =====
+// /n/{key} から 302 で着地すると ?nfc=1 が付く。GA4のページ別レポートでも読めるが、
+// イベントにしておくと「アクキーが何人連れてきたか」を1行で出せる。
+(function(){
+  try{
+    if(new URLSearchParams(location.search).get('nfc')!=='1') return;
+    var p=location.pathname.replace(/^\/|\.html$/g,'');
+    // gtag の読み込みより先に走ることがあるので、少し待ってから送る
+    setTimeout(function(){ if(window.cmEvent) window.cmEvent('nfc_scan',{ page:p }); },1200);
+  }catch(e){}
+})();
+
 // ===== 送客ボタンの分割計測 =====
 // /api/out は「何人送ったか」しか出せない(リダイレクト先が1本しか登録できないため)。
 // 作家さんに「どこへ送ったのか」を返せるように、行き先の種別をGA4側で分ける。

@@ -44,6 +44,10 @@
   },
   "rewrites": [
     {
+      "source": "/n/:c([A-Za-z0-9_-]+)",
+      "destination": "/api/n?c=:c"
+    },
+    {
       "source": "/tap/:name([a-z0-9_-]+)",
       "destination": "/tap/:name.html"
     },
