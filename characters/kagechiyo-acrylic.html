@@ -79,7 +79,7 @@
     <div class="tag-row"><span class="tag">カゲチヨ</span><span class="tag">アクキー</span><span class="tag">60mm</span><span class="tag">数量限定</span></div>
     <h1>メカニャン</h1>
     <div class="char-creator">by カゲチヨ (@MechaMeow_CAT01)</div>
-    <p class="char-desc">画面の目をしたロボットたち。犬、りす、兎、猫。<br>5体それぞれに名前と性格と、出身の街があります。<br><br>作家さんご本人が作ったアクリルキーホルダーを、CHARAMARLでお預かりして販売しています。<b>各3個だけ</b>です。</p>
+    <p class="char-desc">画面の目をしたロボットたち。猫、犬、りす、兎。<br><b>八王子・稲城・府中・武蔵野・多摩。</b>5体はそれぞれ、東京の三多摩のどこかから来ています。<br>「サンタマ探検！メカニャン」に出てくる仲間たちです。<br><br>作家さんご本人が作ったアクリルキーホルダーを、CHARAMARLでお預かりして販売しています。<b>各3個だけ</b>です。</p>
     <div class="asr-block" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 16px;font-size:11.5px;font-weight:700;line-height:1.6;">
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🛒 <b>¥1,200</b> 税込・送料込<br><span style="opacity:.7;">追加費用なし・そのままのお値段です</span></div>
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">📦 在庫あり<br><span style="opacity:.7;">5種×各3個。ご注文後すぐ発送します</span></div>
@@ -106,6 +106,7 @@
 <section style="padding-top:0;">
   <div style="font-size:11.5px;color:var(--muted);line-height:1.9;border:1px dashed rgba(255,255,255,.22);border-radius:14px;padding:14px 18px;">
     <b style="color:var(--text);">この商品について</b> — カゲチヨさんご本人が作られたアクリルキーホルダーを、CHARAMARLがお預かりして販売しています（委託販売）。売上の大半は作家さんに渡ります。<br>
+    <b style="color:var(--text);">サンタマ探検！メカニャン</b> — 東京の三多摩エリアを、ロボ猫のメカニャンたちが探検するシリーズです。5体の出身地は、そのまま物語の舞台になっています。<br>
     <b style="color:var(--text);">在庫</b> — 5種類×各3個の数量限定です。売り切れの場合はご容赦ください。<br>
     <b style="color:var(--text);">掲載画像</b> — 現在はイメージ画像を使用しています。実物の写真に差し替え予定です。
   </div>
@@ -131,9 +132,9 @@ function ftrack(ev){try{fetch('/api/react',{method:'POST',headers:{'Content-Type
 setTimeout(function(){if(window.cmEvent)cmEvent('view_product',{item_id:CHAR_ID+'_keyring',item_name:CHAR_NAME+' アクリルキーホルダー',character_id:CHAR_ID,artist_id:ARTIST_ID,price:PRICE,quantity:1,currency:'JPY'});},400);
 const IMG_DIR = "../img/kagechiyo_ac";    // 表示用(相対)  実物=../img/products / イラスト=../img/colors_nobg
 const IMG_ROOT = "/img/kagechiyo_ac";  // カート/決済用(ルート相対)
-// 名前と設定はカゲチヨさんの資料より（2026-09-14）。⚠️カゲチヨ本体の設定だけ未取得。
+// 名前と設定はカゲチヨさんの資料より（2026-09-14）。5体そろっている。
 const colors = [
-  {key:"kagechiyo", name:"カゲチヨ", accent:"#2a55ff"},
+  {key:"kagechiyo", name:"カゲチヨ", accent:"#2a55ff", type:"猫型ロボット",  seikaku:"明るい、よく喋る", suki:"パスタ",       from:"八王子市", memo:"お調子者で陽気、よく失敗する。DJやイラストを描いたり配信なども行うマルチな猫型ロボット。"},
   {key:"muchiko",   name:"ムチコ",   accent:"#e0a800", type:"犬型ロボット",  seikaku:"好奇心旺盛",       suki:"ドギーマン",   from:"稲城市",   memo:"何処でも一緒についてきたがる、弟みたいな子。思い出になる、綺麗な場所が大好き！"},
   {key:"kimi",      name:"キミ",     accent:"#e6337f", type:"りす型ロボット", seikaku:"少し天然、面白い", suki:"かりんとう",   from:"府中市",   memo:"たまに言ってる事がわからないけど、そこが面白い。外出する事が好きで、基本的に家にいる事が少ない。"},
   {key:"promu",     name:"プロム",   accent:"#00b4dc", type:"兎型ロボット",  seikaku:"少しイジワル",     suki:"きゅうり",     from:"武蔵野市", memo:"少しイジワルだけど、ちゃんとフォローをかかさない。おしゃれで、老若男女に大人気！特技はかわいい。"},
