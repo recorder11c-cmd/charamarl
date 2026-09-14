@@ -87,6 +87,10 @@
 
 <script>
 // 台紙(target)の位置を毎フレーム写し、見失っても最後の位置に残す
+// シェア用: A-Frameが1フレーム描き終えた直後(tock)にだけWebGLの中身が読めるので、そこで写真を撮る
+AFRAME.registerComponent('shot-hook', {
+  tock: function(){ if(window._cmWantShot){ var f = window._cmWantShot; window._cmWantShot = null; f(); } }
+});
 AFRAME.registerComponent('stay-put', {
   init: function(){ this.targets = [document.getElementById('target'), document.getElementById('target2')]; this.el.object3D.matrixAutoUpdate = false; },
   tick: function(){
@@ -96,7 +100,7 @@ AFRAME.registerComponent('stay-put', {
   }
 });
 </script>
-<a-scene id="scene"
+<a-scene id="scene" shot-hook
   mindar-image="imageTargetSrc: /ar/targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001;"
   color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true, preserveDrawingBuffer: true"
   vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" loading-screen="enabled: false" embedded>
@@ -240,10 +244,11 @@ AFRAME.registerComponent('stay-put', {
     var short=(cur&&TAP_IDS[cur.id])?'charamarl.com/tap/'+cur.id:'charamarl.com';
     var url='https://'+short+'?utm_source=ar&utm_medium=share';
     var copied=CM_AR_SHARE.copyText(text+'\n'+url);
-    // WebGLの描画内容はフレームが終わると消えるので、撮る直前にもう一度描いてから写す(A-FrameはpreserveDrawingBufferを受け付けない)
-    try{ scene.renderer.render(scene.object3D, scene.camera); }catch(e){}
-    var canvas=CM_AR_SHARE.snapshot({ video: document.querySelector('video'), gl: scene.canvas || scene.renderer.domElement, label: short });
-    CM_AR_SHARE.share({ canvas:canvas, text:text, url:url, copied:copied }).then(function(m){ if(window.gtag) gtag('event','share',{method:m, content_type:'ar_photo', item_id:cur?cur.id:''}); });
+    // WebGLの中身はフレームが終わると消えるので、次の描画直後(shot-hookのtock)に写す
+    window._cmWantShot = function(){
+      var canvas=CM_AR_SHARE.snapshot({ video: document.querySelector('video'), gl: scene.canvas || scene.renderer.domElement, label: short });
+      CM_AR_SHARE.share({ canvas:canvas, text:text, url:url, copied:copied }).then(function(m){ if(window.gtag) gtag('event','share',{method:m, content_type:'ar_photo', item_id:cur?cur.id:''}); });
+    };
   });
 })();
 </script>
