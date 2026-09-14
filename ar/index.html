@@ -240,6 +240,8 @@ AFRAME.registerComponent('stay-put', {
     var short=(cur&&TAP_IDS[cur.id])?'charamarl.com/tap/'+cur.id:'charamarl.com';
     var url='https://'+short+'?utm_source=ar&utm_medium=share';
     var copied=CM_AR_SHARE.copyText(text+'\n'+url);
+    // WebGLの描画内容はフレームが終わると消えるので、撮る直前にもう一度描いてから写す(A-FrameはpreserveDrawingBufferを受け付けない)
+    try{ scene.renderer.render(scene.object3D, scene.camera); }catch(e){}
     var canvas=CM_AR_SHARE.snapshot({ video: document.querySelector('video'), gl: scene.canvas || scene.renderer.domElement, label: short });
     CM_AR_SHARE.share({ canvas:canvas, text:text, url:url, copied:copied }).then(function(m){ if(window.gtag) gtag('event','share',{method:m, content_type:'ar_photo', item_id:cur?cur.id:''}); });
   });
