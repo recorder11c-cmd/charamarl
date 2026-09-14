@@ -206,16 +206,15 @@ const CONFIG = {
 
   // 6色パレット。体は白なので色は変わらず、シャツ・くちばし・足・ほほが変わる＝着替えに見える。
   // ※ mode:"char" では背景は CONFIG.bg に固定。パレット側の bg は使われないので持たせていない。
+  // 2026-09-15 赤猫かるまさんのご希望で青系を増やした（ORIGINAL／NAVY／TEAL）。SEPIAとVIOLETを外した。
   palettes: [
-    { key:"orig",   name:"ORIGINAL", hue:0,   sat:1.0,  bri:1.0, },
-    { key:"rose",   name:"ROSE",     hue:105, sat:1.25, bri:1.02, },
-    { key:"flame",  name:"VERMILION",hue:150, sat:1.25, bri:1.05, },
-    { key:"sepia",  name:"SEPIA",    hue:180, sat:1.15, bri:1.0, },
-    { key:"forest", name:"FOREST",   hue:255, sat:1.2,  bri:1.0, },
-    { key:"violet", name:"VIOLET",   hue:45,  sat:1.2,  bri:1.0, },
-  ],
-
-  // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
+    { key:"orig",   name:"ORIGINAL", hue:0,   sat:1.0,  bri:1.0  },
+    { key:"navy",   name:"NAVY",     hue:20,  sat:1.25, bri:1.0  },
+    { key:"teal",   name:"TEAL",     hue:340, sat:1.3,  bri:1.0  },
+    { key:"rose",   name:"ROSE",     hue:105, sat:1.25, bri:1.02 },
+    { key:"flame",  name:"VERMILION",hue:150, sat:1.25, bri:1.05 },
+    { key:"forest", name:"FOREST",   hue:255, sat:1.2,  bri:1.0  },
+  ],  // 購入リンク（Shopify or CHARAMARL）。variants 空なら productUrl のみ
   shop: {
     productUrl: "../characters/danna.html",
     variants: {}
