@@ -39,15 +39,23 @@ def img_tag(path):
 def linkify(s):
     return re.sub(r'(https?://[^\s<）」]+)', r'<a href="\1">\1</a>', s)
 
+def bold(s):
+    """**強調** を <strong> にする。
+
+    これをやらないと ** がそのまま文字として note に貼り付く。
+    エスケープ済みの文字列に対して使うので、タグを新たに生む心配はない。
+    """
+    return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', s)
+
 def convert(md):
     out, quote, para = [], [], []
     def flush_para():
         if para:
-            out.append('<p>' + '<br>'.join(linkify(html.escape(x)) for x in para) + '</p>')
+            out.append('<p>' + '<br>'.join(bold(linkify(html.escape(x))) for x in para) + '</p>')
             para.clear()
     def flush_quote():
         if quote:
-            inner = ''.join(f'<p>{linkify(html.escape(x))}</p>' for x in quote)
+            inner = ''.join(f'<p>{bold(linkify(html.escape(x)))}</p>' for x in quote)
             out.append(f'<blockquote>{inner}</blockquote>')
             quote.clear()
     for raw in md.split('\n'):
@@ -58,7 +66,7 @@ def convert(md):
         if m:
             flush_quote(); flush_para(); out.append(img_tag(m.group(1))); continue
         if line.startswith('## '):
-            flush_quote(); flush_para(); out.append(f'<h2>{html.escape(line[3:].strip())}</h2>'); continue
+            flush_quote(); flush_para(); out.append(f'<h2>{bold(html.escape(line[3:].strip()))}</h2>'); continue
         if line.startswith('> '):
             flush_para(); quote.append(line[2:].strip()); continue
         flush_quote(); para.append(line.strip())
