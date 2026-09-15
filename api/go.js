@@ -15,6 +15,11 @@ const DEST = {
   ufoo: '/characters/ufoo.html',
   kagechiyo: '/tap/kagechiyo.html',
   yurucrazy: '/characters/yurucrazy.html',
+  dogooooo: '/characters/dogooooo.html',
+  inkumo: '/characters/inkumo.html',
+  danna: '/characters/danna.html',
+  blockma: '/characters/blockma.html',
+  mony: '/characters/mony.html',
   top: '/',
 };
 
