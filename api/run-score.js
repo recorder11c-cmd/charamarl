@@ -25,7 +25,7 @@ async function pipeline(cmds) {
 }
 
 const CHAR_RE = /^[a-z0-9_-]{1,20}$/i;
-const ALLOWED_CHARS = ['SUE', 'PUTTI', 'MOSSUN'];   // 公開キャラのみ受け付ける(プロンプト公開後のコピー流入対策)
+const ALLOWED_CHARS = ['SUE', 'PUTTI', 'MOSSUN', 'GMC', 'UFOO', 'KAGECHIYO', 'YURUCRAZY'];   // 公開キャラのみ受け付ける(プロンプト公開後のコピー流入対策)
 // 週間ランキング: 日本時間の月曜始まり。キー = run:rank:{char}:w:{その週の月曜 YYYY-MM-DD}
 function weekKey(now = new Date()) {
   const jst = new Date(now.getTime() + 9 * 3600e3);
