@@ -25,7 +25,14 @@ async function pipeline(cmds) {
 }
 
 const CHAR_RE = /^[a-z0-9_-]{1,20}$/i;
-const ALLOWED_CHARS = ['SUE'];   // 公開キャラのみ受け付ける(プロンプト公開後のコピー流入対策)
+const ALLOWED_CHARS = ['SUE', 'PUTTI', 'MOSSUN'];   // 公開キャラのみ受け付ける(プロンプト公開後のコピー流入対策)
+// 週間ランキング: 日本時間の月曜始まり。キー = run:rank:{char}:w:{その週の月曜 YYYY-MM-DD}
+function weekKey(now = new Date()) {
+  const jst = new Date(now.getTime() + 9 * 3600e3);
+  const dow = (jst.getUTCDay() + 6) % 7;            // 月=0 … 日=6
+  const mon = new Date(jst.getTime() - dow * 864e5);
+  return mon.toISOString().slice(0, 10);
+}
 const charOk = c => CHAR_RE.test(c) && ALLOWED_CHARS.includes(c);
 const PID_RE = /^[a-f0-9]{16,32}$/;
 const MAX_SCORE = 999999;
@@ -35,8 +42,7 @@ function cleanName(n) {
   return String(n || '').replace(/[\x00-\x1f\x7f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 12);
 }
 
-async function board(char, pid) {
-  const key = `run:rank:${char}`;
+async function boardOf(char, key, pid) {
   const [raw, total] = await Promise.all([redis('ZREVRANGE', key, 0, TOP_N - 1, 'WITHSCORES'), redis('ZCARD', key)]);
   const rows = [];
   for (let i = 0; i < (raw || []).length; i += 2) rows.push({ pid: raw[i], score: Number(raw[i + 1]) });
@@ -48,6 +54,12 @@ async function board(char, pid) {
     if (rank !== null && rank !== undefined) me = { rank: Number(rank) + 1, best: Number(best) };
   }
   return { top, me, total: Number(total) || 0 };
+}
+// 累計(top/me/total)＋今週(week:{key,top,me,total})を返す
+async function board(char, pid) {
+  const wk = weekKey();
+  const [all, week] = await Promise.all([boardOf(char, `run:rank:${char}`, pid), boardOf(char, `run:rank:${char}:w:${wk}`, pid)]);
+  return Object.assign(all, { week: Object.assign({ key: wk }, week) });
 }
 
 module.exports = async (req, res) => {
@@ -117,25 +129,22 @@ module.exports = async (req, res) => {
       if (n === 1) await redis('EXPIRE', rl, 60);
       if (n > 12) return res.status(429).json({ error: 'too many' });
 
-      const key = `run:rank:${char}`, pkey = `run:player:${char}:${pid}`;
-      const prev = Number(await redis('ZSCORE', key, pid)) || 0;
-      if (score > prev) {
-        await pipeline([
-          ['ZADD', key, score, pid],
-          ['HSET', pkey, 'name', name, 'score', score, 'at', Date.now()],
-        ]);
-      } else {
-        await redis('HSET', pkey, 'name', name); // 名前だけ更新
-      }
+      const key = `run:rank:${char}`, wkey = `run:rank:${char}:w:${weekKey()}`, pkey = `run:player:${char}:${pid}`;
+      const [prevRaw, prevWRaw] = await Promise.all([redis('ZSCORE', key, pid), redis('ZSCORE', wkey, pid)]);
+      const prev = Number(prevRaw) || 0, prevW = Number(prevWRaw) || 0;
+      const cmds = [['HSET', pkey, 'name', name]];
+      if (score > prev) cmds.push(['ZADD', key, score, pid], ['HSET', pkey, 'score', score, 'at', Date.now()]);
+      if (score > prevW) cmds.push(['ZADD', wkey, score, pid], ['EXPIRE', wkey, 60 * 86400]);   // 週間キーは60日で自然消滅
+      await pipeline(cmds);
       const out = await board(char, pid);
-      return res.status(200).json({ rank: out.me ? out.me.rank : null, best: Math.max(prev, score), total: out.total, top: out.top });
+      return res.status(200).json({ rank: out.me ? out.me.rank : null, best: Math.max(prev, score), total: out.total, top: out.top, week: out.week, weekBest: Math.max(prevW, score) });
     }
 
     if (req.method === 'DELETE') {
       if (!ADMIN_KEY || q.key !== ADMIN_KEY) return res.status(403).json({ error: 'forbidden' });
       const char = String(q.char || ''), pid = String(q.pid || '');
       if (!charOk(char) || !PID_RE.test(pid)) return res.status(400).json({ error: 'bad id' });
-      await pipeline([['ZREM', `run:rank:${char}`, pid], ['DEL', `run:player:${char}:${pid}`]]);
+      await pipeline([['ZREM', `run:rank:${char}`, pid], ['ZREM', `run:rank:${char}:w:${weekKey()}`, pid], ['DEL', `run:player:${char}:${pid}`]]);
       return res.status(200).json({ ok: true });
     }
 
