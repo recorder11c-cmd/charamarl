@@ -862,7 +862,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     }catch(e){ showMsg('登録できませんでした'); rankForm.hidden = false; }
   }
   function onGameOverRank(score, isNew){
-    if (!RANK_API){ rankBox.hidden = true; return; }
+    if (!RANK_API || window.DR_INTERNAL){ rankBox.hidden = true; return; }   // 内部端末(?internal=1)はランキングにも登録しない
     rankBox.hidden = false; rankMsg.hidden = true; rankForm.hidden = false;
     if (score < 1){ rankBox.hidden = true; return; }
     if (savedName && isNew) submitScore(score);                       // 名前登録済みならベスト更新時に自動登録
