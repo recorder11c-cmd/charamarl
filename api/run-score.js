@@ -88,6 +88,16 @@ module.exports = async (req, res) => {
         const daily = days.map((day, i) => ({ day, play: +vals[i*4] || 0, over: +vals[i*4+1] || 0, share: +vals[i*4+2] || 0, shop: +vals[i*4+3] || 0 }));
         return res.status(200).json({ char, registered: Number(total) || 0, daily });
       }
+      if (q.week !== undefined) {            // 指定週の順位表(管理用)。week=YYYY-MM-DD(その週の月曜) / week=last で先週
+        if (!ADMIN_KEY || q.key !== ADMIN_KEY) return res.status(403).json({ error: 'forbidden' });
+        let wk = String(q.week);
+        if (wk === 'last') wk = weekKey(new Date(Date.now() - 7 * 864e5));
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(wk)) return res.status(400).json({ error: 'bad week' });
+        const b = await boardOf(char, `run:rank:${char}:w:${wk}`, null);
+        const raw = await redis('ZREVRANGE', `run:rank:${char}:w:${wk}`, 0, TOP_N - 1);
+        b.top.forEach((t, i) => { t.pid = raw[i]; });
+        return res.status(200).json({ char, week: wk, top: b.top, total: b.total });
+      }
       const pid = PID_RE.test(String(q.pid || '')) ? String(q.pid) : null;
       const out = await board(char, pid);
       if (ADMIN_KEY && q.key === ADMIN_KEY) {           // 管理用: 削除に使うpidを付けて返す
