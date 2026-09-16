@@ -167,6 +167,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   .perk img{width:56px;height:56px;object-fit:contain;background:#fff;border:2px solid var(--ink);border-radius:12px;}
   .perk b{display:block;font-size:13px;line-height:1.3;} .perk small{display:block;font-size:11px;font-weight:800;color:var(--ink-soft);}
   .perk[hidden]{display:none;}
+  .btn.like{background:#fff;} .btn.like[aria-pressed="true"]{background:#FFE1E3;} .btn.like b{color:var(--accent-2);}
   .over-panel{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:14px;}
   .over-panel[hidden],.rank-form[hidden],.rank-box[hidden],.btn[hidden],.rank-msg[hidden]{display:none;}
   .gameover{gap:6px;}
@@ -233,6 +234,9 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       <span><b>NFCアクキーを持ってると、金の世界で走れる</b><small>かざして開いたページから遊ぶと ★OWNER 特典</small></span>
     </a>
     <div class="row">
+      <button class="btn sm like" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span> <span id="likeLb">いいね</span> <b class="num" id="likeCt"></b></button>
+    </div>
+    <div class="row">
       <button class="btn main" id="retryBtn" type="button">↻ もう一回</button>
       <button class="btn" id="shareBtn" type="button">🚀 シェア</button>
       <button class="btn" id="rankBtnOver" type="button">🏆 順位表</button>
@@ -245,7 +249,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     <span>タップ / <kbd>SPACE</kbd> ジャンプ</span>
     <span><kbd>↓</kbd> / 下スワイプ / ボタン長押し しゃがむ</span>
     <span>100点ごとに世界の色がかわる</span>
-    <span>★を取ると15秒 空を飛べる（押して上昇）</span>
+    <span>★を取ると15秒 空を飛べて点が2倍（押して上昇・ライバルにぶつかると飛行おわり）</span>
+    <span>ライバルをかわすと +10</span>
   </div>
   <footer id="credit">© CHARAMARL</footer>
 </div>
@@ -286,34 +291,34 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   //   敵役は「主人公以外のキャラ」がランダムで飛んでくる(enemySize で大きさ調整)
   const CHARS = {
     sue:       { id:'SUE',       name:'SUE',           sprite:'art/sue_pixel.png',     facing:'right', artist:'DinoRenny',     enemySize:80,
-                 trait:{ label:'バランス型' },
+                 trait:{ label:'オールラウンダー' }, like:'sue',
                  shop:'https://charamarl.com/tap/sue.html?utm_source=charamarl_run',            goods:'https://charamarl.com/img/products_t/sue_red.png' },
     gmc:       { id:'GMC',       name:'レコマル',       sprite:'art/run_gmc.png',       facing:'left',  artist:'MARU',          enemySize:78,
-                 trait:{ label:'ジャンプ力アップ', jump:1.12 },
+                 trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:'gmc',
                  shop:'https://charamarl.com/characters/gmc.html?utm_source=charamarl_run',     goods:'https://charamarl.com/img/products_t/gmc_red.png' },
     ufoo:      { id:'UFOO',      name:'う〜ほ〜',       sprite:'art/run_ufoo.png',      facing:'right', artist:'ちゅい',         enemySize:78,
-                 trait:{ label:'ふわふわ落下', grav:.82 },
+                 trait:{ label:'ふわっと長く跳べる', grav:.82 }, like:'g01544b48f170',
                  shop:'https://charamarl.com/characters/ufoo.html?utm_source=charamarl_run',    goods:'https://charamarl.com/img/products_t/ufoo_white.png' },
     kagechiyo: { id:'KAGECHIYO', name:'カゲチヨ',       sprite:'art/run_kagechiyo.png', facing:'right', artist:'カゲチヨ',       enemySize:82,
-                 trait:{ label:'すばしっこい（当たり判定が小さい）', hit:.82 },
+                 trait:{ label:'すばしっこい（ギリギリでかわせる）', hit:.82 }, like:'g8d69be3f1e86',
                  shop:'https://charamarl.com/tap/kagechiyo.html?utm_source=charamarl_run',      goods:'https://charamarl.com/img/products_t/kagechiyo_hoodie_front.png' },
     yurucrazy: { id:'YURUCRAZY', name:'ユルクレイジー', sprite:'art/run_yurucrazy.png', facing:'left',  artist:'CRAZY',         enemySize:84,
-                 trait:{ label:'足が速い（点が入りやすい）', speed:1.1 },
+                 trait:{ label:'最速ランナー（同じ時間で点が多く入る）', speed:1.1 }, like:'gcc4fb65e4f7a',
                  shop:'https://charamarl.com/characters/yurucrazy.html?utm_source=charamarl_run', goods:'https://charamarl.com/img/products_t/yurucrazy.png' },
     dogooooo:  { id:'DOGOOOOO',  name:'ドグー',         sprite:'art/run_dogooooo.png',  facing:'right', artist:'SAYoooooh',     enemySize:80,
-                 trait:{ label:'★の飛行が長い（+5秒）', fly:5 },
+                 trait:{ label:'★の飛行が長い（+5秒）', fly:5 }, like:'g9487847a10e8',
                  shop:'https://charamarl.com/characters/dogooooo.html?utm_source=charamarl_run', goods:'https://charamarl.com/img/products_t/dogooooo_pink.png' },
     inkumo:    { id:'INKUMO',    name:'インクモ',       sprite:'art/run_inkumo.png',    facing:'left',  artist:"Ink'z Monster", enemySize:82,
-                 trait:{ label:'★が低く飛んでくる（取りやすい）', starY:30 },
+                 trait:{ label:'★が近くに来る（取りやすい）', starY:30 }, like:'gf25715341b4f',
                  shop:'https://charamarl.com/characters/inkumo.html?utm_source=charamarl_run',   goods:'https://charamarl.com/img/products_t/inkumo.png' },
     danna:     { id:'DANNA',     name:'だんな',         sprite:'art/run_danna.png',     facing:'right', artist:'赤猫かるま',     enemySize:80,
-                 trait:{ label:'着地後の無敵が長い', grace:180 },
+                 trait:{ label:'タフ（着地後しばらく無敵）', grace:180 }, like:'g689e0d8a3b5b',
                  shop:'https://charamarl.com/characters/danna.html?utm_source=charamarl_run',    goods:'https://charamarl.com/img/products_t/danna_blue.png' },
     blockma:   { id:'BLOCKMA',   name:'ぶろっくま',     sprite:'art/run_blockma.png?v=2', facing:'right', artist:'チンチロ',       enemySize:78,
-                 trait:{ label:'頑丈（1回だけ耐える）', shield:true },
+                 trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:'g53905fbdc117',
                  shop:'https://charamarl.com/characters/blockma.html?utm_source=charamarl_run',  goods:'https://charamarl.com/img/products_t/blockma.png' },
     mony:      { id:'MONY',      name:'mony',          sprite:'art/run_mony.png',      facing:'left',  artist:'morry',         enemySize:80,
-                 trait:{ label:'スピードの上がり方がゆるやか', ramp:230 },
+                 trait:{ label:'マイペース（長く走りやすい）', ramp:230 }, like:'gfcb2fe5a8952',
                  shop:'https://charamarl.com/characters/mony.html?utm_source=charamarl_run',     goods:'https://charamarl.com/img/products_t/mony.png' },
   };
   // キャラ特性(trait)の既定値。数値を変えるだけで調整できる
@@ -326,6 +331,9 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const RIVALS = Object.keys(CHARS).filter(k => CHARS[k] !== CHAR);   // 敵役の候補(主人公以外)
   // 星の飛行(500点ごとに★が飛来。取ると FLY_SEC 秒間、障害物を無視して空を飛べる)
   const STAR_EVERY = 500, FLY_SEC = 15;
+  const FLY_MULT = 2;          // 飛行中はスコア2倍
+  const FLY_HIT = 'drop';      // 飛行中にライバルにぶつかったら: 'drop'=飛行が終わる(ゲームオーバーにならない) / 'ignore'=素通り
+  const DODGE_BONUS = 10;      // ライバルをかわしたときのボーナス点
   const DIR = RUN_DIR === 'right' ? 1 : -1;   // 主人公の進行方向。世界は -DIR に流れる
   // NFCアクキー所有者特典: ?owner=<token> をAPIで検証 → 端末に記憶 → 金のオーラ＋GOLD WORLDから開始
   const OWNER_KEY = 'dr_run_owner_' + CHAR.id;
@@ -375,7 +383,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     { sky:['#E4E0FF','#9C8CFF'], ground:'#6C4BFF', far:'#C6BDFF', cactus:'#FFE000', cactus2:'#00D4FF', page:'#6C4BFF', name:'GALAXY PURPLE' },
   ];
   const GOLD = { sky:['#FFF6D5','#FFD65C'], ground:'#E0A800', far:'#FFE9A0', cactus:'#1B1B1F', cactus2:'#FF3EA5', page:'#E0A800', name:'GOLD OWNER' };
-  const worldAt = i => (isOwner && i === 0) ? GOLD : WORLDS[i];   // 所有者は最初の100点がGOLD WORLD
+  const worldAt = i => ((isOwner && i === 0) || S.goldPreview > 0) ? GOLD : WORLDS[i];   // 所有者は最初の100点がGOLD WORLD。非所有者はゲームオーバー時に数秒だけチラ見せ
 
   // ================= DOM =================
   const cv = document.getElementById('game');
@@ -444,7 +452,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   }
 
   // ================= ゲーム状態 =================
-  const S = { state:'title', t:0, speed:6, dist:0, score:0, hi:0, worldIdx:0, worldMix:0, shake:0, fly:0, nextStar:STAR_EVERY, hold:false, grace:0, shieldUsed:false };
+  const S = { state:'title', t:0, speed:6, dist:0, score:0, hi:0, worldIdx:0, worldMix:0, shake:0, fly:0, nextStar:STAR_EVERY, hold:false, grace:0, shieldUsed:false, goldPreview:0, dodges:0 };
   let star = null;   // 飛来中の★ {x,y,rot,t}
   const dino = { x:80, y:GROUND, vy:0, size:118, duck:false, onGround:true, runT:0, squash:0 };
   fit(); window.addEventListener('resize', fit);
@@ -463,7 +471,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   resetWorld();
 
   function start(){
-    S.state = 'play'; S.t = 0; S.speed = 6; S.dist = 0; S.score = 0; S.worldIdx = 0; S.worldMix = 0; S.shake = 0; S.fly = 0; S.nextStar = STAR_EVERY; S.hold = false; S.grace = 0; S.shieldUsed = false; star = null;
+    S.state = 'play'; S.t = 0; S.speed = 6; S.dist = 0; S.score = 0; S.worldIdx = 0; S.worldMix = 0; S.shake = 0; S.fly = 0; S.nextStar = STAR_EVERY; S.hold = false; S.grace = 0; S.shieldUsed = false; S.goldPreview = 0; S.dodges = 0; star = null;
     dino.y = GROUND; dino.vy = 0; dino.duck = false; dino.onGround = true; dino.squash = 0;
     resetWorld();
     startOv.classList.add('hide'); overOv.classList.add('hide'); document.getElementById('overPanel').hidden = true; document.getElementById('charBar').hidden = true;
@@ -472,7 +480,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     drEvent('game_start', { character: CHAR.id, owner: isOwner ? 1 : 0 }); beacon('play');
   }
   function gameOver(){
-    S.state = 'over'; S.shake = 14;
+    S.state = 'over'; S.shake = 14; if (!isOwner) S.goldPreview = 240;   // 4秒だけ金の世界を見せる
     beep(220, .35, 'sawtooth', .09, -160);
     burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 28, ['#E5484D','#FFD400','#fff']);
     if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
@@ -566,6 +574,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     particles = particles.filter(p => p.life > 0);
     flashes.forEach(f => f.life -= dt); flashes = flashes.filter(f => f.life > 0);
     if (S.shake > 0) S.shake = Math.max(0, S.shake - dt*1.2);
+    if (S.goldPreview > 0){ S.goldPreview -= dt; if (S.goldPreview <= 0) S.goldPreview = 0; }
 
     // 走りアニメ
     dino.runT += dt * (S.state==='play' ? S.speed*.06 : .12);
@@ -589,7 +598,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 
     // 速度・スコア
     S.speed = Math.min(14, 6 + S.dist / T.ramp) * T.speed;
-    S.dist += S.speed * dt * .03;
+    S.dist += S.speed * dt * .03 * (S.fly > 0 ? FLY_MULT : 1);
     const prev = S.score;
     S.score = Math.floor(S.dist);
     if (S.score !== prev) scoreNowEl.textContent = S.score;
@@ -611,6 +620,12 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     }
     obstacles.forEach(o => { o.x -= DIR * S.speed * dt; if (o.type==='bird'){ o.x -= DIR * 1.2*dt; o.flap += dt*.25; } });
     obstacles = obstacles.filter(o => DIR > 0 ? o.x + o.w > -10 : o.x < W + 10);
+    // ライバルをかわしたらボーナス(通り過ぎた瞬間に1回だけ)
+    obstacles.forEach(o => {
+      if (o.type !== 'bird' || o.passed) return;
+      const passed = DIR > 0 ? (o.x + o.w < dino.x + dino.size*.2) : (o.x > dino.x + dino.size*.8);
+      if (passed){ o.passed = true; S.dist += DODGE_BONUS / 1; S.dodges = (S.dodges || 0) + 1; flashes.push({ text:'かわした！ +' + DODGE_BONUS, life:35, small:true }); beep(740, .08, 'triangle', .04); }
+    });
 
     // ★スター: 500点ごとに飛来。ジャンプの頂点あたりの高さを、ゆらゆら飛ぶ
     if (!star && S.fly <= 0 && S.score >= S.nextStar){ S.nextStar += STAR_EVERY; star = { x: DIR > 0 ? W + 40 : -40, y: GROUND - 120 + T.starY, rot: 0, t: 0 }; beep(1040, .12, 'triangle', .05); }
@@ -625,6 +640,13 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
         beep(880, .1, 'square', .06); setTimeout(()=>beep(1175,.1,'square',.06),90); setTimeout(()=>beep(1568,.2,'square',.06),180);
         drEvent('star_catch', { character: CHAR.id, score: S.score });
       } else if (DIR > 0 ? star.x < -40 : star.x > W + 40) star = null;
+    }
+    if (S.fly > 0 && FLY_HIT === 'drop' && S.grace <= 0){
+      for (const o of obstacles){
+        if (o.type !== 'bird') continue;   // 飛行中はライバルだけが当たる(サボテンは足元なので高く飛べば無関係)
+        const ob = { x:o.x+10, y:o.y-o.h+8, w:o.w-20, h:o.h-14 };
+        if (hit(db, ob)){ S.fly = 0; S.grace = T.grace; S.shake = 8; flashes.push({ text:'ぶつかった！ 飛行おわり', life:60 }); beep(260, .2, 'sawtooth', .07, -100); S.nextStar = S.score + STAR_EVERY; break; }
+      }
     }
     if (S.fly <= 0 && S.grace <= 0){
       for (const o of obstacles){
@@ -758,7 +780,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       const sec = Math.ceil(S.fly / 60), blink = sec <= 3 && Math.floor(S.t / 8) % 2 === 0;
       ctx.save(); ctx.font = '900 18px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
       ctx.lineWidth = 5; ctx.strokeStyle = '#1B1B1F'; ctx.fillStyle = blink ? '#E5484D' : '#FFE000';
-      ctx.strokeText(`★ FLY ${sec}`, W*.5, 10); ctx.fillText(`★ FLY ${sec}`, W*.5, 10); ctx.restore();
+      ctx.strokeText(`★ FLY ${sec}  点×${FLY_MULT}`, W*.5, 10); ctx.fillText(`★ FLY ${sec}  点×${FLY_MULT}`, W*.5, 10); ctx.restore();
     }
 
     // パーティクル
@@ -767,20 +789,27 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 
     // 100点フラッシュ
     flashes.forEach(f => {
-      const a = Math.min(1, f.life/25), sc = 1 + (1 - Math.min(1, (70 - f.life)/10))*.6;
-      ctx.save(); ctx.globalAlpha = a; ctx.translate(W*.5, 92); ctx.scale(sc, sc);
-      ctx.font = '900 34px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const a = Math.min(1, f.life/25), sc = f.small ? 1 : 1 + (1 - Math.min(1, (70 - f.life)/10))*.6;
+      ctx.save(); ctx.globalAlpha = a; ctx.translate(f.small ? dino.x + dino.size*.5 : W*.5, f.small ? dino.y - dino.size - 10 : 92); ctx.scale(sc, sc);
+      ctx.font = f.small ? '900 16px "M PLUS Rounded 1c", sans-serif' : '900 34px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.lineWidth = 8; ctx.strokeStyle = '#1B1B1F'; ctx.strokeText(f.text, 0, 0);
       ctx.fillStyle = '#FFE000'; ctx.fillText(f.text, 0, 0);
       ctx.restore();
     });
 
-    // キャンバス内スコア（小さく）
+    if (S.goldPreview > 0){
+      ctx.save(); ctx.globalAlpha = Math.min(1, S.goldPreview/30); ctx.font = '900 15px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.lineWidth = 4; ctx.strokeStyle = '#1B1B1F'; ctx.fillStyle = '#FFE000';
+      ctx.strokeText('★ NFCアクキーを持ってると、ずっとこの金の世界で走れる', W*.5, 10); ctx.fillText('★ NFCアクキーを持ってると、ずっとこの金の世界で走れる', W*.5, 10); ctx.restore();
+    }
+    // キャンバス内スコア（小さく）。金の世界チラ見せ中は見出しと重なるので出さない
+    if (S.goldPreview <= 0){
     ctx.font = '900 16px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = DIR > 0 ? 'right' : 'left'; ctx.textBaseline = 'top';
     ctx.lineWidth = 4; ctx.strokeStyle = '#1B1B1F'; ctx.fillStyle = '#fff';
     const st = String(S.score).padStart(5, '0');
     const sx0 = DIR > 0 ? W - 14 : 14;
     ctx.strokeText(st, sx0, 10); ctx.fillText(st, sx0, 10);
+    }
     ctx.restore();
   }
 
@@ -871,6 +900,25 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   document.getElementById('rankBtnOver').addEventListener('click', openBoard);
   rankOverlay.addEventListener('click', e => { if (e.target === rankOverlay) rankOverlay.classList.remove('open'); });
   window.addEventListener('keydown', e => { if (e.code === 'Space' && rankOverlay.classList.contains('open')) e.stopImmediatePropagation(); }, true);
+
+  // ================= ♥ いいね（CHARAMARLのキャラ/作品の♥と同じカウンター） =================
+  (function(){
+    const CM_REACT = 'https://charamarl.com/api/react', id = CHAR.like;
+    const btn = document.getElementById('likeBtn'), ic = document.getElementById('likeIc'), ct = document.getElementById('likeCt'), lb = document.getElementById('likeLb');
+    if (!id){ btn.hidden = true; return; }
+    const LK = 'cm_likes'; const getSet = () => { try{ return new Set(JSON.parse(localStorage.getItem(LK) || '[]')); }catch(e){ return new Set(); } };
+    const render = (liked, n) => { ic.textContent = liked ? '♥' : '♡'; lb.textContent = liked ? `${CHAR.name} にいいね済み` : `${CHAR.name} にいいね`; btn.setAttribute('aria-pressed', liked ? 'true' : 'false'); if (n !== undefined) ct.textContent = n; };
+    render(getSet().has(id));
+    fetch(CM_REACT + '?id=' + id).then(r => r.ok ? r.json() : null).then(d => { if (d) render(getSet().has(id), d.likes); }).catch(() => {});
+    btn.addEventListener('click', async () => {
+      const set = getSet(), liked = set.has(id), op = liked ? 'remove' : 'add';
+      if (liked) set.delete(id); else set.add(id);
+      try{ localStorage.setItem(LK, JSON.stringify([...set])); }catch(e){}
+      render(!liked);
+      try{ const r = await fetch(CM_REACT, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ id, type:'like', op }) }); const d = await r.json(); if (d && d.count !== undefined) ct.textContent = d.count; }catch(e){}
+      drEvent('like', { character: CHAR.id, op });
+    });
+  })();
 
   // ================= 🚀 シェア =================
   const shareOverlay = document.getElementById('shareOverlay');
