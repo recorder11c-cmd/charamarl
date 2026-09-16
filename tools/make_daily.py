@@ -4,7 +4,7 @@
     python3 tools/make_daily.py <作品ID> [出力先ディレクトリ] [--n=015]
 
     例)  python3 tools/make_daily.py gc84efe2895f9
-         python3 tools/make_daily.py gc84efe2895f9 ~/Downloads/charamarl_daily_img --n=015
+         python3 tools/make_daily.py gc84efe2895f9 ~/Downloads/CHARAMARL/03_画像/charamarl_daily_img --n=015
 
 ■ 何をするか
     作品画像を 1200×1596 いっぱいに収め、その上に 96px の帯を重ねて
@@ -18,7 +18,7 @@
 
 ■ 出力名
     --n を渡すと NNN_<作品ID>.jpg（キューの番号つき）。無ければ <作品ID>.jpg。
-    既存の99枚は ~/Downloads/charamarl_daily_img/ にある。
+    既存の99枚は ~/Downloads/CHARAMARL/03_画像/charamarl_daily_img/ にある。
 """
 import sys, os, json, html, base64, subprocess, urllib.request, io
 from PIL import Image
@@ -26,7 +26,7 @@ from PIL import Image
 API = 'https://charamarl.com/api/gallery'
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 W, H, BAND = 1200, 1596, 96          # 帯は下から96px（うち5pxがグラデーション）
-OUT_DEFAULT = os.path.expanduser('~/Downloads/charamarl_daily_img')
+OUT_DEFAULT = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_daily_img')
 
 
 def corner_bg(im):

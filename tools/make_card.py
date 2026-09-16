@@ -8,7 +8,7 @@ COLOR TAP がある作家は、色違いを並べて「タップで色が変わ�
     python3 tools/make_card.py <作家名> [出力先ディレクトリ] [--work=<作品ID>]
 
     例)  python3 tools/make_card.py エリー
-         python3 tools/make_card.py 'DREAMER©' ~/Downloads/charamarl_share
+         python3 tools/make_card.py 'DREAMER©' ~/Downloads/CHARAMARL/03_画像/charamarl_share
          python3 tools/make_card.py ハンナ --work=g880d0bb94576
 
     作家名は /api/gallery の artist と完全一致させる。
@@ -134,4 +134,4 @@ if __name__ == '__main__':
     if not args:
         raise SystemExit('使い方: python3 tools/make_card.py <作家名> [出力先] [--work=<作品ID>]')
     build(args[0], os.path.expanduser(args[1] if len(args) > 1
-                                      else '~/Downloads/charamarl_share'), wid)
+                                      else '~/Downloads/CHARAMARL/03_画像/charamarl_share'), wid)

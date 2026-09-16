@@ -179,7 +179,7 @@ h1{{font-size:{px(5.2)}px;font-weight:800;color:#1D1A28;line-height:1.5;letter-s
 
 
 def main():
-    outdir = os.path.expanduser(sys.argv[1]) if len(sys.argv) > 1 else os.path.expanduser('~/Downloads/charamarl_print')
+    outdir = os.path.expanduser(sys.argv[1]) if len(sys.argv) > 1 else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_print')
     os.makedirs(outdir, exist_ok=True)
     W, H = px(CARD_MM[0] + BLEED_MM * 2), px(CARD_MM[1] + BLEED_MM * 2)
 
