@@ -191,7 +191,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 <body>
 <div class="wrap">
   <header>
-    <a class="logo" href="https://charamarl.com/tap/kagechiyo.html?utm_source=kagechiyo_run" title="カゲチヨのページへ">KAGECHIYO<small>RUN</small></a>
+    <a class="logo" href="https://lit.link/kagechiyo" title="カゲチヨさんのページへ">KAGECHIYO<small>RUN</small></a>
     <div class="scores">
       <div class="chip num">SCORE <b id="scoreNow">0</b></div>
       <div class="chip num">HI <b id="scoreHi">0</b></div>
@@ -232,10 +232,6 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       <div class="rank-msg num" id="rankMsg" hidden></div>
       <button class="btn sm" id="rankRename" type="button" hidden>✎ 名前を変える</button>
     </div>
-    <a class="perk" id="perk" target="_blank" rel="noopener" hidden>
-      <img id="perkImg" alt="" width="56" height="56">
-      <span><b>NFCアクキーを持ってると、金の世界で走れる</b><small>かざして開いたページから遊ぶと ★OWNER 特典</small></span>
-    </a>
     <div class="row">
       <button class="btn sm like" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span> <span id="likeLb">いいね</span> <b class="num" id="likeCt"></b></button>
     </div>
@@ -251,6 +247,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   <div class="help">
     <span>タップ / <kbd>SPACE</kbd> ジャンプ</span>
     <span><kbd>↓</kbd> / 下スワイプ / ボタン長押し しゃがむ</span>
+    <span>100点ごとに世界の色がかわる</span>
     <span>★を取ると15秒 空を飛べて点が2倍（押して上昇・ライバルにぶつかると飛行おわり）</span>
     <span>ライバルをかわすと +10</span>
   </div>
@@ -294,15 +291,15 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const CHARS = {
     kagechiyo: { id:'SANTAMA_KAGECHIYO', name:'カゲチヨ', sprite:'art/kagechiyo.png', facing:'right', artist:'カゲチヨ', enemySize:82,
                  trait:{ label:'すばしっこい（ギリギリでかわせる）', hit:.82 }, like:'g8d69be3f1e86',
-                 shop:'https://charamarl.com/tap/kagechiyo.html?utm_source=kagechiyo_run', goods:null },
+                 shop:'https://lit.link/kagechiyo', goods:null },
     kimi:      { id:'SANTAMA_KIMI',      name:'キミ',     sprite:'art/kimi.png',      facing:'right', artist:'カゲチヨ', enemySize:80,
-                 trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:null, shop:'https://charamarl.com/tap/kagechiyo.html?utm_source=kagechiyo_run', goods:null },
+                 trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:null, shop:'https://lit.link/kagechiyo', goods:null },
     shigure:   { id:'SANTAMA_SHIGURE',   name:'シグレ',   sprite:'art/shigure.png',   facing:'right', artist:'カゲチヨ', enemySize:80,
-                 trait:{ label:'★が近くに来る（取りやすい）', starY:30 }, like:null, shop:'https://charamarl.com/tap/kagechiyo.html?utm_source=kagechiyo_run', goods:null },
+                 trait:{ label:'★が近くに来る（取りやすい）', starY:30 }, like:null, shop:'https://lit.link/kagechiyo', goods:null },
     prom:      { id:'SANTAMA_PROM',      name:'プロム',   sprite:'art/prom.png',      facing:'right', artist:'カゲチヨ', enemySize:80,
-                 trait:{ label:'ふわっと長く跳べる', grav:.82 }, like:null, shop:'https://charamarl.com/tap/kagechiyo.html?utm_source=kagechiyo_run', goods:null },
+                 trait:{ label:'ふわっと長く跳べる', grav:.82 }, like:null, shop:'https://lit.link/kagechiyo', goods:null },
     muchiko:   { id:'SANTAMA_MUCHIKO',   name:'ムチコ',   sprite:'art/muchiko.png',   facing:'right', artist:'カゲチヨ', enemySize:80,
-                 trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:null, shop:'https://charamarl.com/tap/kagechiyo.html?utm_source=kagechiyo_run', goods:null },
+                 trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:null, shop:'https://lit.link/kagechiyo', goods:null },
   };
   const charKey = (new URLSearchParams(location.search).get('char') || 'kagechiyo').toLowerCase();
   const CHAR  = CHARS[charKey] || CHARS.kagechiyo;
@@ -347,18 +344,23 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const logoEl = document.querySelector('.logo'); if (logoEl && CHAR.shop) logoEl.href = CHAR.shop;
   if (logoEl) logoEl.addEventListener('click', () => { drEvent('shop_click', { character: CHAR.id }); beacon('shop'); });
   const perkEl = document.getElementById('perk');
-  if (CHAR.goods && CHAR.shop && !isOwner){ perkEl.hidden = false; perkEl.href = CHAR.shop; document.getElementById('perkImg').src = CHAR.goods;
+  if (perkEl && CHAR.goods && CHAR.shop && !isOwner){ perkEl.hidden = false; perkEl.href = CHAR.shop; document.getElementById('perkImg').src = CHAR.goods;
     perkEl.addEventListener('click', () => { drEvent('perk_click', { character: CHAR.id }); beacon('shop'); }); }
   document.title = 'KAGECHIYO RUN | ' + CHAR.name;
   document.getElementById('traitLabel').textContent = `${CHAR.name}：${T.label}`;
   document.getElementById('charSelect').innerHTML = Object.keys(CHARS).map(k => `<a href="?char=${k}" class="${k === charKey ? 'on' : ''}">${CHARS[k].name}</a>`).join('');
   if (CHAR.sponsor){ const sp = document.getElementById('sponsor'); sp.hidden = false; sp.href = CHAR.sponsor.url || '#'; sp.textContent = 'presented by ' + CHAR.sponsor.name; }
   // 100点ごとに切り替わる世界の色（DinoRennyパレット）
+  // 100点ごとに切り替わる世界。虹の帯の配色と、空・地面の色が変わる
   const WORLDS = [
-    { sky:['#FEE2CA','#FEE2CA'], ground:'#3B8391', far:'#9AA16E', cactus:'#DE5B03', cactus2:'#F1A72A', page:'#FEE2CA', name:'SANTAMA' },
+    { name:'SANTAMA',   sky:['#FEE2CA','#FEE2CA'], bands:['#DE5B03','#F1A72A','#9AA16E','#3B8391'], ground:'#3B8391', far:'#9AA16E', cactus:'#DE5B03', cactus2:'#F1A72A', page:'#FEE2CA' },
+    { name:'SUNSET',    sky:['#FFD9C2','#FFD9C2'], bands:['#C2185B','#E8641E','#F4B33B','#6A4C93'], ground:'#6A4C93', far:'#E8A07A', cactus:'#F4B33B', cactus2:'#C2185B', page:'#FFD9C2' },
+    { name:'MINT',      sky:['#E4F5EC','#E4F5EC'], bands:['#2E8B57','#66C2A5','#F4B33B','#3B8391'], ground:'#2E8B57', far:'#A8DCC3', cactus:'#F4B33B', cactus2:'#DE5B03', page:'#E4F5EC' },
+    { name:'PINK',      sky:['#FFE4EC','#FFE4EC'], bands:['#FF6F91','#FFB3C6','#FFD166','#3B8391'], ground:'#C2185B', far:'#FFB3C6', cactus:'#3B8391', cactus2:'#FFD166', page:'#FFE4EC' },
+    { name:'LEMON',     sky:['#FFF6D5','#FFF6D5'], bands:['#F4B33B','#E8641E','#9AA16E','#3B8391'], ground:'#9AA16E', far:'#F1D28A', cactus:'#3B8391', cactus2:'#DE5B03', page:'#FFF6D5' },
+    { name:'NIGHT',     sky:['#2B2D42','#2B2D42'], bands:['#5A3E8E','#8E5EA2','#E76F51','#F4A261'], ground:'#3D2C6B', far:'#5A3E8E', cactus:'#F4A261', cactus2:'#E76F51', page:'#2B2D42' },
   ];
-  // 「あら、チヨさん。」の背景に合わせた、レトロな虹の帯
-  const BANDS = ['#DE5B03','#F1A72A','#9AA16E','#3B8391'];
+  const BANDS = WORLDS[0].bands;
   const GOLD = { sky:['#FFF6D5','#FFD65C'], ground:'#E0A800', far:'#FFE9A0', cactus:'#1B1B1F', cactus2:'#FF3EA5', page:'#E0A800', name:'GOLD OWNER' };
   const worldAt = i => ((isOwner && i === 0) || S.goldPreview > 0) ? GOLD : WORLDS[i];   // 所有者は最初の100点がGOLD WORLD。非所有者はゲームオーバー時に数秒だけチラ見せ
 
@@ -457,7 +459,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     drEvent('game_start', { character: CHAR.id, owner: isOwner ? 1 : 0 }); beacon('play');
   }
   function gameOver(){
-    S.state = 'over'; S.shake = 14; if (!isOwner) S.goldPreview = 240;   // 4秒だけ金の世界を見せる
+    S.state = 'over'; S.shake = 14;   // 特別版: アクキー特典の案内(金の世界チラ見せ)は出さない
     beep(220, .35, 'sawtooth', .09, -160);
     burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 28, ['#E5484D','#FFD400','#fff']);
     if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
@@ -714,7 +716,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     ctx.fillStyle = world.sky[0]; ctx.fillRect(-20, -20, W+40, H+40);
     // 虹の帯: ゆるやかな波で、走った距離に合わせてゆっくり流れる
     const off = (S.dist * 1.2) % 600, bandH = 44;
-    BANDS.forEach((col, i) => {
+    (world.bands || BANDS).forEach((col, i) => {
       const y0 = 40 + i * bandH;
       ctx.beginPath(); ctx.moveTo(-40, y0);
       for (let x = -40; x <= W + 40; x += 20){ ctx.lineTo(x, y0 + Math.sin((x + off) / 110) * 26 + Math.sin((x + off) / 260) * 14); }
@@ -781,11 +783,6 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       ctx.restore();
     });
 
-    if (S.goldPreview > 0){
-      ctx.save(); ctx.globalAlpha = Math.min(1, S.goldPreview/30); ctx.font = '900 15px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.lineWidth = 4; ctx.strokeStyle = '#1B1B1F'; ctx.fillStyle = '#FFE000';
-      ctx.strokeText('★ NFCアクキーを持ってると、ずっとこの金の世界で走れる', W*.5, 10); ctx.fillText('★ NFCアクキーを持ってると、ずっとこの金の世界で走れる', W*.5, 10); ctx.restore();
-    }
     // キャンバス内スコア（小さく）。金の世界チラ見せ中は見出しと重なるので出さない
     if (S.goldPreview <= 0){
     ctx.font = '900 16px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = DIR > 0 ? 'right' : 'left'; ctx.textBaseline = 'top';
