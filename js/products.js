@@ -15,6 +15,8 @@ window.CM_PRODUCTS = [
   { id:'blockma',          name:'ぶろっくま',               creator:'チンチロ',        price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/blockma.png',                page:'./characters/blockma.html' },
   { id:'mony', name:'モニィ', creator:'morry', price:1500, kind:'アクリルキーホルダー', img:'./img/products_t/mony.png', page:'./characters/mony.html' },
   { id:'yurucrazy',        name:'ユルクレイジー',            creator:'CRAZY',          price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/yurucrazy.png',              page:'./characters/yurucrazy.html' },
+  // ピンズ（丸25mm）。絵柄12種から選ぶ形なので、作家ごとではなく1商品として並べる
+  { id:'pins',             name:'ピンズ（丸25mm）',          creator:'12種の絵柄から',  price:1800,  kind:'ピンズ',                  img:'./img/pins/kg_kagechiyo.png',                 page:'./characters/pins.html' },
 ];
 
 // COLOR TAP（遊べるページ）。作家ページから「遊ぶ」導線を出すため

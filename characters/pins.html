@@ -176,7 +176,7 @@
 // 済: スー/モッスン/プッチィ(自社) / ユルクレイジー(CRAZYさん 2026-09-08 一任) / だんな(赤猫かるまさん 2026-09-08 顔アップ希望)
 // ⚠️ モニィ: morryさんはピンズの案内に未返信。CC BYなので技術的には作れるが、
 //    CHARAMARLは商品化を個別合意で進める方針なので、返事が来るまで公開しない(pending:true)。
-// 待ち: カゲチヨ(描き下ろし5種) / う〜ほ〜(ちゅいさんの新イラスト)
+// 待ち: う〜ほ〜(ちゅいさんの新イラスト・本人が用意中)
 const DESIGNS = [
   { key:'sue',       name:'スー',           artist:'DinoRenny', img:'/img/pins/sue.png' },
   { key:'mossun',    name:'モッスン',        artist:'DinoRenny', img:'/img/pins/mossun.png' },
@@ -185,7 +185,15 @@ const DESIGNS = [
   { key:'danna',     name:'だんな',          artist:'赤猫かるま',  img:'/img/pins/danna.png' },
   { key:'inkumo',    name:'インクモ',        artist:"Ink'z Monster", img:'/img/pins/inkumo.png' },
   { key:'mony',      name:'モニィ',          artist:'morry',     img:'/img/pins/mony.png',
-    credit:'モニィ © morry369 / CC BY', pending:true },
+    credit:'モニィ © morry369 / CC BY' },   // 2026-09-17 本人からOK。pending を外した
+  // カゲチヨさん 5種（2026-09-17 本人確認済み・顔アップのBパターンで確定）
+  // キミ/シグレ/プロム/ムチコ は AI生成のモデルをこちらでイラストに書き起こしたもの。
+  // カゲチヨ本体だけ素材が違い、TAP用の絵をそのまま使っている。
+  { key:'kg_kagechiyo', name:'カゲチヨ', artist:'カゲチヨ', img:'/img/pins/kg_kagechiyo.png' },
+  { key:'kg_kimi',      name:'キミ',     artist:'カゲチヨ', img:'/img/pins/kg_kimi.png' },
+  { key:'kg_shigure',   name:'シグレ',   artist:'カゲチヨ', img:'/img/pins/kg_shigure.png' },
+  { key:'kg_promu',     name:'プロム',   artist:'カゲチヨ', img:'/img/pins/kg_promu.png' },
+  { key:'kg_muchiko',   name:'ムチコ',   artist:'カゲチヨ', img:'/img/pins/kg_muchiko.png' },
 ];
 const PRICE_SINGLE = 1800, PRICE_SET = 4400, SET_SIZE = 4;
 const CHAR_ID = 'pins';
