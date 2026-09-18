@@ -314,6 +314,18 @@ $('#buyBtn').addEventListener('click', async function(){
   }catch(e){ alert('通信エラー'); this.textContent = '今すぐ購入 →'; this.disabled = false; }
 });
 
+// キャラページから ?k=<key> で来たら、その絵柄を最初から選んでおく。
+// 「ユルクレイジーのピンズを見に来た人」に、また探させない。
+(function(){
+  var k = new URLSearchParams(location.search).get('k');
+  if (!k) return;
+  var d = DESIGNS.find(function(x){ return x.key === k; });
+  if (!d) return;                       // 知らないキーは無視（URLをいじられても壊れない）
+  picked = [k];
+  var el = document.querySelector('.pick[data-key="' + CSS.escape(k) + '"]');
+  if (el) el.scrollIntoView({block:'center'});
+})();
+
 render();
 </script>
 <script src="../cart.js"></script>
