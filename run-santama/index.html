@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>KAGECHIYO RUN</title>
+<title>サンタマRUN</title>
 <meta name="description" content="カゲチヨさんお誕生日記念。サンタマ探検！メカニャンの5体で走るランゲーム。">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://charamarl.com/run-kagechiyo/">
-<meta property="og:title" content="KAGECHIYO RUN">
+<meta property="og:url" content="https://charamarl.com/run-santama/">
+<meta property="og:title" content="サンタマRUN">
 <meta property="og:description" content="🎂 カゲチヨ・キミ・シグレ・プロム・ムチコで、かけっこ">
-<meta property="og:image" content="https://charamarl.com/run-kagechiyo/og.png">
+<meta property="og:image" content="https://charamarl.com/run-santama/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="KAGECHIYO RUN">
+<meta name="twitter:title" content="サンタマRUN">
 <meta name="twitter:description" content="🎂 カゲチヨ・キミ・シグレ・プロム・ムチコで、かけっこ">
-<meta name="twitter:image" content="https://charamarl.com/run-kagechiyo/og.png">
+<meta name="twitter:image" content="https://charamarl.com/run-santama/og.png">
 <script>
 // 計測(GA4・CHARAMARLと同じプロパティ)。?internal=1 を一度開いた端末は以後計測しない(解除=?internal=0)
 (function(){
@@ -192,7 +192,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 <body>
 <div class="wrap">
   <header>
-    <a class="logo" href="https://charamarl.com/artist.html?a=%E3%82%AB%E3%82%B2%E3%83%81%E3%83%A8" title="CHARAMARLのカゲチヨさんのページへ">KAGECHIYO<small>RUN</small></a>
+    <a class="logo" href="https://charamarl.com/artist.html?a=%E3%82%AB%E3%82%B2%E3%83%81%E3%83%A8" title="CHARAMARLのカゲチヨさんのページへ">サンタマ<small>RUN</small></a>
     <div class="scores">
       <div class="chip num">SCORE <b id="scoreNow">0</b></div>
       <div class="chip num">HI <b id="scoreHi">0</b></div>
@@ -203,10 +203,10 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   <div class="bday"><span>🎂 9/18 カゲチヨさん、</span><span>お誕生日おめでとうございます！</span><br><span>サンタマの5体だけの特別版です</span></div>
 
   <div class="card" id="card">
-    <canvas id="game" width="720" height="300" aria-label="CHARAMARL RUN ゲーム画面"></canvas>
+    <canvas id="game" width="720" height="300" aria-label="サンタマRUN ゲーム画面"></canvas>
 
     <div class="overlay" id="startOv">
-      <div class="ttl">KAGECHIYO <span>RUN</span></div>
+      <div class="ttl">サンタマ <span>RUN</span></div>
       <div class="sub">タップ / スペースで スタート！</div>
       <button class="btn main" id="startBtn" type="button">▶ はしる！</button>
       <button class="btn sm" id="rankBtnTitle" type="button">🏆 ランキング</button>
@@ -347,7 +347,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const perkEl = document.getElementById('perk');
   if (perkEl && CHAR.goods && CHAR.shop && !isOwner){ perkEl.hidden = false; perkEl.href = CHAR.shop; document.getElementById('perkImg').src = CHAR.goods;
     perkEl.addEventListener('click', () => { drEvent('perk_click', { character: CHAR.id }); beacon('shop'); }); }
-  document.title = 'KAGECHIYO RUN | ' + CHAR.name;
+  document.title = 'サンタマRUN | ' + CHAR.name;
   document.getElementById('traitLabel').textContent = `${CHAR.name}：${T.label}`;
   document.getElementById('charSelect').innerHTML = Object.keys(CHARS).map(k => `<a href="?char=${k}" class="${k === charKey ? 'on' : ''}">${CHARS[k].name}</a>`).join('');
   if (CHAR.sponsor){ const sp = document.getElementById('sponsor'); sp.hidden = false; sp.href = CHAR.sponsor.url || '#'; sp.textContent = 'presented by ' + CHAR.sponsor.name; }
@@ -913,7 +913,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   document.querySelectorAll('.share-opt').forEach(btn => btn.addEventListener('click', async () => {
     const url = location.origin + location.pathname;
     const m = rankMsg.hidden ? null : rankMsg.textContent.match(/(\d+)位/);
-    const text = `KAGECHIYO RUN（${CHAR.name}）で ${S.score} 点${m ? `（${m[1]}位）` : ''}！ 🎂`;
+    const text = `サンタマRUN（${CHAR.name}）で ${S.score} 点${m ? `（${m[1]}位）` : ''}！ 🎂`;
     const kind = btn.dataset.sh;
     drEvent('share', { method: kind, score: S.score }); beacon('share');
     if (kind === 'x') window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
@@ -922,7 +922,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       try{ await navigator.clipboard.writeText(url); document.getElementById('shCopyLb').textContent = 'コピーしました！'; }catch(e){ prompt('URLをコピー', url); }
       return;
     }
-    else if (kind === 'native'){ try{ await navigator.share({ title:'KAGECHIYO RUN', text, url }); }catch(e){} }
+    else if (kind === 'native'){ try{ await navigator.share({ title:'サンタマRUN', text, url }); }catch(e){} }
     shareOverlay.classList.remove('open');
   }));
 })();
