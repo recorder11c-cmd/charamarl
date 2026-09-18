@@ -191,7 +191,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 <body>
 <div class="wrap">
   <header>
-    <a class="logo" href="https://lit.link/kagechiyo" title="カゲチヨさんのページへ">KAGECHIYO<small>RUN</small></a>
+    <a class="logo" href="https://charamarl.com/artist.html?a=%E3%82%AB%E3%82%B2%E3%83%81%E3%83%A8" title="CHARAMARLのカゲチヨさんのページへ">KAGECHIYO<small>RUN</small></a>
     <div class="scores">
       <div class="chip num">SCORE <b id="scoreNow">0</b></div>
       <div class="chip num">HI <b id="scoreHi">0</b></div>
@@ -291,15 +291,15 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const CHARS = {
     kagechiyo: { id:'SANTAMA_KAGECHIYO', name:'カゲチヨ', sprite:'art/kagechiyo.png', facing:'right', artist:'カゲチヨ', enemySize:82,
                  trait:{ label:'すばしっこい（ギリギリでかわせる）', hit:.82 }, like:'g8d69be3f1e86',
-                 shop:'https://lit.link/kagechiyo', goods:null },
+                 shop:'https://charamarl.com/artist.html?a=%E3%82%AB%E3%82%B2%E3%83%81%E3%83%A8', goods:null },
     kimi:      { id:'SANTAMA_KIMI',      name:'キミ',     sprite:'art/kimi.png',      facing:'right', artist:'カゲチヨ', enemySize:80,
-                 trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:null, shop:'https://lit.link/kagechiyo', goods:null },
+                 trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:null, shop:'https://charamarl.com/artist.html?a=%E3%82%AB%E3%82%B2%E3%83%81%E3%83%A8', goods:null },
     shigure:   { id:'SANTAMA_SHIGURE',   name:'シグレ',   sprite:'art/shigure.png',   facing:'right', artist:'カゲチヨ', enemySize:80,
-                 trait:{ label:'★が近くに来る（取りやすい）', starY:30 }, like:null, shop:'https://lit.link/kagechiyo', goods:null },
+                 trait:{ label:'★が近くに来る（取りやすい）', starY:30 }, like:null, shop:'https://charamarl.com/artist.html?a=%E3%82%AB%E3%82%B2%E3%83%81%E3%83%A8', goods:null },
     prom:      { id:'SANTAMA_PROM',      name:'プロム',   sprite:'art/prom.png',      facing:'right', artist:'カゲチヨ', enemySize:80,
-                 trait:{ label:'ふわっと長く跳べる', grav:.82 }, like:null, shop:'https://lit.link/kagechiyo', goods:null },
+                 trait:{ label:'ふわっと長く跳べる', grav:.82 }, like:null, shop:'https://charamarl.com/artist.html?a=%E3%82%AB%E3%82%B2%E3%83%81%E3%83%A8', goods:null },
     muchiko:   { id:'SANTAMA_MUCHIKO',   name:'ムチコ',   sprite:'art/muchiko.png',   facing:'right', artist:'カゲチヨ', enemySize:80,
-                 trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:null, shop:'https://lit.link/kagechiyo', goods:null },
+                 trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:null, shop:'https://charamarl.com/artist.html?a=%E3%82%AB%E3%82%B2%E3%83%81%E3%83%A8', goods:null },
   };
   const charKey = (new URLSearchParams(location.search).get('char') || 'kagechiyo').toLowerCase();
   const CHAR  = CHARS[charKey] || CHARS.kagechiyo;
