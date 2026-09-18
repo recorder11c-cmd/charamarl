@@ -114,7 +114,7 @@
     {id:'sue',      title:'SUE',    artist:'DinoRenny', type:'char', img:'./img/colors_nobg/sue_red.png'},
     {id:'putti',    title:'PUTTI',  artist:'DinoRenny', type:'char', img:'./img/colors_nobg/putti_yellow.png'},
     {id:'mossun',   title:'MOSSUN', artist:'DinoRenny', type:'char', img:'./img/colors_nobg/mossun_blue.png'},
-    {id:'gmc',      title:'レコマル', artist:'MARU',     type:'char', img:'./img/gallery/gmc.png'},
+    {id:'gmc',      title:'レコマル', artist:'MARU_GMC', type:'char', img:'./img/gallery/gmc.png'},
   ];
   const list=document.getElementById('list');
   const escS=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -186,6 +186,8 @@
     }).forEach(el=>list.appendChild(el));
 
     // カラーリクエスト投票（定番色以外の商品化リクエスト）
+    // この6キャラだけが色を選べる（＝リクエスト投票が発生しうる）。
+    // 他のキャラページに色の選択肢を足したら、下の CHAR_N と reqs の正規表現にも足す。
     const CHAR_N={sue:'SUE',putti:'PUTTI',mossun:'MOSSUN',gmc:'レコマル',ufoo:'う〜ほ〜',dogooooo:'dogooooo'};
     const COLOR_N={red:'BLAZE RED',yellow:'SUNNY YELLOW',green:'SLIME GREEN',cyan:'ICE CYAN',blue:'GALAXY BLUE',pink:'NEON PINK'};
     const SPECIAL_N={'ufoo_red':'COSMIC RED','ufoo_yellow':'SUNNY UFO','ufoo_green':'ALIEN GREEN','ufoo_cyan':'ICE PLANET','ufoo_blue':'GALAXY BLUE','ufoo_pink':'LOVE PINK','dogooooo_sunrise':'SUNRISE','dogooooo_matcha':'MATCHA','dogooooo_deepsea':'DEEP SEA','dogooooo_cosmic':'COSMIC','dogooooo_aurora':'AURORA'};
@@ -218,13 +220,23 @@
   // NFCスキャン集計（アクキー裏タグからの流入）
   fetch('/api/go?stats=1').then(r=>r.ok?r.json():null).then(d=>{
     if(!d)return;
-    const N={sue:'SUE',putti:'PUTTI',mossun:'MOSSUN',gmc:'レコマル',top:'サイトトップ'};
-    const IMG={sue:'./img/colors_nobg/sue_red.png',putti:'./img/colors_nobg/putti_yellow.png',mossun:'./img/colors_nobg/mossun_blue.png',gmc:'./img/gallery/gmc.png'};
+    // 🔴 NFCタグを新しいキャラに発行したら、必ずこの2つに足す。
+    //    足し忘れると、そのキャラだけ「mony」のような生のIDとDinoRennyのロゴで並ぶ。
+    //    現在のキー一覧は /api/go?stats=1 で確認できる。
+    const N={sue:'SUE',putti:'PUTTI',mossun:'MOSSUN',gmc:'レコマル',ufoo:'う〜ほ〜',
+      dogooooo:'dogooooo',inkumo:'インクモ',danna:'だんな',blockma:'ぶろっくま',
+      mony:'モニィ',yurucrazy:'ユルクレイジー',kagechiyo:'カゲチヨ',top:'サイトトップ'};
+    const IMG={sue:'./img/colors_nobg/sue_red.png',putti:'./img/colors_nobg/putti_yellow.png',
+      mossun:'./img/colors_nobg/mossun_blue.png',gmc:'./img/gallery/gmc.png',
+      ufoo:'./img/products_t/ufoo_white.png',dogooooo:'./img/products_t/dogooooo_pink.png',
+      inkumo:'./img/products_t/inkumo_mono.png',danna:'./img/products_t/danna_blue.png',
+      blockma:'./img/products_t/blockma.png',mony:'./img/products_t/mony.png',
+      yurucrazy:'./img/products_t/yurucrazy.png',kagechiyo:'./img/pfp/kagechiyo.png'};
     const rows=Object.entries(d).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
     if(!rows.length)return;
     document.getElementById('nfcSec').hidden=false;
     document.getElementById('nfcList').innerHTML=rows.map(([k,v])=>
-      `<div class="row"><img src="${IMG[k]||'./img/gallery/dinorenny_logo.png'}" alt=""><div style="min-width:0;flex:1;"><div class="ttl">${N[k]||k}</div><div class="who">NFCタップ流入</div></div><div class="counts"><div class="cnt like"><div class="n num">${v}</div><div class="l">回</div></div></div></div>`).join('');
+      `<div class="row"><img src="${IMG[k]||'./img/icon-192.png'}" alt=""><div style="min-width:0;flex:1;"><div class="ttl">${N[k]||k}</div><div class="who">NFCタップ流入</div></div><div class="counts"><div class="cnt like"><div class="n num">${v}</div><div class="l">回</div></div></div></div>`).join('');
   }).catch(()=>{});
 
   document.getElementById('refresh').addEventListener('click',load);
