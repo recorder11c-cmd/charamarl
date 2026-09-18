@@ -15,8 +15,23 @@ window.CM_PRODUCTS = [
   { id:'blockma',          name:'ぶろっくま',               creator:'チンチロ',        price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/blockma.png',                page:'./characters/blockma.html' },
   { id:'mony', name:'モニィ', creator:'morry', price:1500, kind:'アクリルキーホルダー', img:'./img/products_t/mony.png', page:'./characters/mony.html' },
   { id:'yurucrazy',        name:'ユルクレイジー',            creator:'CRAZY',          price:1500,  kind:'アクリルキーホルダー',    img:'./img/products_t/yurucrazy.png',              page:'./characters/yurucrazy.html' },
-  // ピンズ（丸25mm）。絵柄12種から選ぶ形なので、作家ごとではなく1商品として並べる
-  { id:'pins',             name:'ピンズ（丸25mm）',          creator:'12種の絵柄から',  price:1800,  kind:'ピンズ',                  img:'./img/pins/kg_kagechiyo.png',                 page:'./characters/pins.html' },
+  // ピンズ（丸25mm）は絵柄12種から選ぶ商品だが、ここは**絵柄ごとに1行**で持つ。
+  // artist.html は creator が作家名と一致した行だけを「買えるもの」に出すので、
+  // creator:'12種の絵柄から' のような1行にまとめると、どの作家のページにも出ない。
+  // （実際その状態で、カゲチヨさんのページがパーカー1点だけになっていた）
+  // 単品¥1,800。?k= でその絵柄を選んだ状態のピンズページへ飛ぶ。
+  { id:'pin_sue',          name:'ピンズ スー',               creator:'DinoRenny',      price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/sue.png',          page:'./characters/pins.html?k=sue&utm_source=charamarl_artist' },
+  { id:'pin_mossun',       name:'ピンズ モッスン',            creator:'DinoRenny',      price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/mossun.png',       page:'./characters/pins.html?k=mossun&utm_source=charamarl_artist' },
+  { id:'pin_putti',        name:'ピンズ プッチィ',            creator:'DinoRenny',      price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/putti.png',        page:'./characters/pins.html?k=putti&utm_source=charamarl_artist' },
+  { id:'pin_yurucrazy',    name:'ピンズ ユルクレイジー',       creator:'CRAZY',          price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/yurucrazy.png',    page:'./characters/pins.html?k=yurucrazy&utm_source=charamarl_artist' },
+  { id:'pin_danna',        name:'ピンズ だんな',              creator:'赤猫かるま',      price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/danna.png',        page:'./characters/pins.html?k=danna&utm_source=charamarl_artist' },
+  { id:'pin_inkumo',       name:'ピンズ インクモ',            creator:"Ink'z Monster",  price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/inkumo.png',       page:'./characters/pins.html?k=inkumo&utm_source=charamarl_artist' },
+  { id:'pin_mony',         name:'ピンズ モニィ',              creator:'morry',          price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/mony.png',         page:'./characters/pins.html?k=mony&utm_source=charamarl_artist' },
+  { id:'pin_kg_kagechiyo', name:'ピンズ カゲチヨ',            creator:'カゲチヨ',        price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/kg_kagechiyo.png', page:'./characters/pins.html?k=kg_kagechiyo&utm_source=charamarl_artist' },
+  { id:'pin_kg_kimi',      name:'ピンズ キミ',                creator:'カゲチヨ',        price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/kg_kimi.png',      page:'./characters/pins.html?k=kg_kimi&utm_source=charamarl_artist' },
+  { id:'pin_kg_shigure',   name:'ピンズ シグレ',              creator:'カゲチヨ',        price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/kg_shigure.png',   page:'./characters/pins.html?k=kg_shigure&utm_source=charamarl_artist' },
+  { id:'pin_kg_promu',     name:'ピンズ プロム',              creator:'カゲチヨ',        price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/kg_promu.png',     page:'./characters/pins.html?k=kg_promu&utm_source=charamarl_artist' },
+  { id:'pin_kg_muchiko',   name:'ピンズ ムチコ',              creator:'カゲチヨ',        price:1800,  kind:'ピンズ（丸25mm）',        img:'./img/pins/kg_muchiko.png',   page:'./characters/pins.html?k=kg_muchiko&utm_source=charamarl_artist' },
 ];
 
 // COLOR TAP（遊べるページ）。作家ページから「遊ぶ」導線を出すため
