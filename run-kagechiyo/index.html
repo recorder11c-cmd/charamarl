@@ -87,7 +87,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   .sponsor{pointer-events:auto;font-size:11px;font-weight:900;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 10px;text-decoration:none;position:absolute;right:10px;bottom:8px;}
   .sponsor[hidden]{display:none;}
 
-  .bday{margin:0 0 12px;text-align:center;font-weight:900;font-size:clamp(12px,3.4vw,15px);background:#fff;border:3px solid var(--ink);border-radius:999px;padding:6px 14px;box-shadow:3px 3px 0 var(--ink);}
+  .bday{margin:0 0 12px;text-align:center;font-weight:900;font-size:clamp(12px,3.4vw,15px);background:#fff;border:3px solid var(--ink);border-radius:22px;padding:6px 14px;box-shadow:3px 3px 0 var(--ink);line-height:1.5;}
+  .bday span{display:inline-block;white-space:nowrap;}   /* 語の途中で折り返さない */
   .card{
     position:relative;background:var(--surface);border:3px solid var(--ink);border-radius:var(--radius);
     box-shadow:6px 6px 0 var(--ink);overflow:hidden;
@@ -199,7 +200,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     </div>
   </header>
 
-  <div class="bday">🎂 9/18 カゲチヨさん、お誕生日おめでとうございます！ サンタマの5体だけの特別版です</div>
+  <div class="bday"><span>🎂 9/18 カゲチヨさん、</span><span>お誕生日おめでとうございます！</span><br><span>サンタマの5体だけの特別版です</span></div>
 
   <div class="card" id="card">
     <canvas id="game" width="720" height="300" aria-label="CHARAMARL RUN ゲーム画面"></canvas>
