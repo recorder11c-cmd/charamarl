@@ -98,6 +98,11 @@
 </section>
 <div style="max-width:1100px;margin:28px auto 0;padding:0 24px;">
   <a href="../tap/danna.html" style="display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border-radius:28px;background:#1a1a26;color:#fff;font-size:14px;font-weight:900;text-decoration:none;">🎨 だんなのCOLOR TAPで遊ぶ →</a>
+  <a id="runLink" href="../run.html?char=danna&utm_source=charamarl_danna" style="display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border-radius:28px;background:#ff8a00;color:#111;font-size:14px;font-weight:900;text-decoration:none;margin-top:8px;">🎮 だんなでCHARAMARL RUNを走る →</a>
+<script>
+// NFCアクキーからの来訪(api/go.js が owner トークンを付与) → RUNの所有者特典リンクに切り替え
+(function(){ var o=new URLSearchParams(location.search).get('owner'); if(!o) return; var a=document.getElementById('runLink'); if(!a) return; a.href='../run.html?char=danna&owner='+encodeURIComponent(o)+'&utm_source=nfc'; a.textContent='🎮 RUN で走る（★オーナー特典つき）'; a.style.background='linear-gradient(135deg,#FFE27A,#E0A800)'; a.style.color='#111'; })();
+</script>
   <div style="text-align:center;font-size:11px;color:var(--muted,#8a8a97);font-weight:700;margin-top:8px;">タップするたびに、だんなが着替えます</div>
 </div>
 <footer>© 2026 CHARAMARL / 赤猫かるま. All rights reserved.</footer>

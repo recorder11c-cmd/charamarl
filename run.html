@@ -2,21 +2,20 @@
 <html lang="ja" data-theme="dino">
 <head>
 <meta charset="UTF-8">
-<meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>CHARAMARL RUN</title>
 <meta name="description" content="CHARAMARLのキャラクターで走るランゲーム。タップでジャンプ！仲間のキャラをかわして、ハイスコアをねらえ。">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://dinorenny-colortap.vercel.app/run.html">
+<meta property="og:url" content="https://charamarl.com/run.html">
 <meta property="og:title" content="CHARAMARL RUN">
 <meta property="og:description" content="タップでジャンプ！100点ごとに世界の色がかわる、CHARAMARLのキャラで走るランゲーム">
-<meta property="og:image" content="https://dinorenny-colortap.vercel.app/art/og_run.png">
+<meta property="og:image" content="https://charamarl.com/run-art/og_run.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="CHARAMARL RUN">
 <meta name="twitter:description" content="タップでジャンプ！100点ごとに世界の色がかわる、CHARAMARLのキャラで走るランゲーム">
-<meta name="twitter:image" content="https://dinorenny-colortap.vercel.app/art/og_run.png">
+<meta name="twitter:image" content="https://charamarl.com/run-art/og_run.png">
 <script>
 // 計測(GA4・CHARAMARLと同じプロパティ)。?internal=1 を一度開いた端末は以後計測しない(解除=?internal=0)
 (function(){
@@ -281,7 +280,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   // ================= キャラ設定（差し替えはここだけ） =================
   // RUN_DIR : 主人公が走る向き 'right'（左→右。障害物は右から来る）/ 'left'（右→左）
   // sprite  : 正方形・背景透過PNG / facing : その絵の体の向き（走る向きと違えば自動で反転）
-  // 例) 別キャラにするとき: { name:'XXX', sprite:'art/xxx.png', facing:'right', credit:'XXX by ...' }
+  // 例) 別キャラにするとき: { name:'XXX', sprite:'run-art/xxx.png', facing:'right', credit:'XXX by ...' }
   // name    : シェア文・OGに使う名前 / credit : フッターのクレジット
   const RUN_DIR = 'right';
   // キャラ一覧: ?char=xxx で切り替え（作家キャラ版はここに追加＋CHARAMARLのrun-score APIの許可リストにも追加）
@@ -290,34 +289,34 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   //   id      : API・保存キー用(英字)。name : 表示名。artist : クレジット
   //   敵役は「主人公以外のキャラ」がランダムで飛んでくる(enemySize で大きさ調整)
   const CHARS = {
-    sue:       { id:'SUE',       name:'SUE',           sprite:'art/sue_pixel.png',     facing:'right', artist:'DinoRenny',     enemySize:80,
+    sue:       { id:'SUE',       name:'SUE',           sprite:'run-art/sue_pixel.png',     facing:'right', artist:'DinoRenny',     enemySize:80,
                  trait:{ label:'オールラウンダー' }, like:'sue',
                  shop:'https://charamarl.com/tap/sue.html?utm_source=charamarl_run',            goods:'https://charamarl.com/img/products_t/sue_red.png' },
-    gmc:       { id:'GMC',       name:'レコマル',       sprite:'art/run_gmc.png',       facing:'left',  artist:'MARU',          enemySize:78,
+    gmc:       { id:'GMC',       name:'レコマル',       sprite:'run-art/run_gmc.png',       facing:'left',  artist:'MARU',          enemySize:78,
                  trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:'gmc',
                  shop:'https://charamarl.com/characters/gmc.html?utm_source=charamarl_run',     goods:'https://charamarl.com/img/products_t/gmc_red.png' },
-    ufoo:      { id:'UFOO',      name:'う〜ほ〜',       sprite:'art/run_ufoo.png',      facing:'right', artist:'ちゅい',         enemySize:78,
+    ufoo:      { id:'UFOO',      name:'う〜ほ〜',       sprite:'run-art/run_ufoo.png',      facing:'right', artist:'ちゅい',         enemySize:78,
                  trait:{ label:'ふわっと長く跳べる', grav:.82 }, like:'g01544b48f170',
                  shop:'https://charamarl.com/characters/ufoo.html?utm_source=charamarl_run',    goods:'https://charamarl.com/img/products_t/ufoo_white.png' },
-    kagechiyo: { id:'KAGECHIYO', name:'カゲチヨ',       sprite:'art/run_kagechiyo.png', facing:'right', artist:'カゲチヨ',       enemySize:82,
+    kagechiyo: { id:'KAGECHIYO', name:'カゲチヨ',       sprite:'run-art/run_kagechiyo.png', facing:'right', artist:'カゲチヨ',       enemySize:82,
                  trait:{ label:'すばしっこい（ギリギリでかわせる）', hit:.82 }, like:'g8d69be3f1e86',
                  shop:'https://charamarl.com/tap/kagechiyo.html?utm_source=charamarl_run',      goods:'https://charamarl.com/img/products_t/kagechiyo_hoodie_front.png' },
-    yurucrazy: { id:'YURUCRAZY', name:'ユルクレイジー', sprite:'art/run_yurucrazy.png', facing:'left',  artist:'CRAZY',         enemySize:84,
+    yurucrazy: { id:'YURUCRAZY', name:'ユルクレイジー', sprite:'run-art/run_yurucrazy.png', facing:'left',  artist:'CRAZY',         enemySize:84,
                  trait:{ label:'最速ランナー（同じ時間で点が多く入る）', speed:1.1 }, like:'gcc4fb65e4f7a',
                  shop:'https://charamarl.com/characters/yurucrazy.html?utm_source=charamarl_run', goods:'https://charamarl.com/img/products_t/yurucrazy.png' },
-    dogooooo:  { id:'DOGOOOOO',  name:'ドグー',         sprite:'art/run_dogooooo.png',  facing:'right', artist:'SAYoooooh',     enemySize:80,
+    dogooooo:  { id:'DOGOOOOO',  name:'ドグー',         sprite:'run-art/run_dogooooo.png',  facing:'right', artist:'SAYoooooh',     enemySize:80,
                  trait:{ label:'★の飛行が長い（+5秒）', fly:5 }, like:'g9487847a10e8',
                  shop:'https://charamarl.com/characters/dogooooo.html?utm_source=charamarl_run', goods:'https://charamarl.com/img/products_t/dogooooo_pink.png' },
-    inkumo:    { id:'INKUMO',    name:'インクモ',       sprite:'art/run_inkumo.png?v=2', facing:'right', artist:"Ink'z Monster", enemySize:82,
+    inkumo:    { id:'INKUMO',    name:'インクモ',       sprite:'run-art/run_inkumo.png?v=2', facing:'right', artist:"Ink'z Monster", enemySize:82,
                  trait:{ label:'★が近くに来る（取りやすい）', starY:30 }, like:'gf25715341b4f',
                  shop:'https://charamarl.com/characters/inkumo.html?utm_source=charamarl_run',   goods:'https://charamarl.com/img/products_t/inkumo.png' },
-    danna:     { id:'DANNA',     name:'だんな',         sprite:'art/run_danna.png',     facing:'right', artist:'赤猫かるま',     enemySize:80,
+    danna:     { id:'DANNA',     name:'だんな',         sprite:'run-art/run_danna.png',     facing:'right', artist:'赤猫かるま',     enemySize:80,
                  trait:{ label:'タフ（着地後しばらく無敵）', grace:180 }, like:'g689e0d8a3b5b',
                  shop:'https://charamarl.com/characters/danna.html?utm_source=charamarl_run',    goods:'https://charamarl.com/img/products_t/danna_blue.png' },
-    blockma:   { id:'BLOCKMA',   name:'ぶろっくま',     sprite:'art/run_blockma.png?v=2', facing:'right', artist:'チンチロ',       enemySize:78,
+    blockma:   { id:'BLOCKMA',   name:'ぶろっくま',     sprite:'run-art/run_blockma.png?v=2', facing:'right', artist:'チンチロ',       enemySize:78,
                  trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:'g53905fbdc117',
                  shop:'https://charamarl.com/characters/blockma.html?utm_source=charamarl_run',  goods:'https://charamarl.com/img/products_t/blockma.png' },
-    mony:      { id:'MONY',      name:'mony',          sprite:'art/run_mony.png',      facing:'left',  artist:'morry',         enemySize:80,
+    mony:      { id:'MONY',      name:'mony',          sprite:'run-art/run_mony.png',      facing:'left',  artist:'morry',         enemySize:80,
                  trait:{ label:'マイペース（長く走りやすい）', ramp:230 }, like:'gfcb2fe5a8952',
                  shop:'https://charamarl.com/characters/mony.html?utm_source=charamarl_run',     goods:'https://charamarl.com/img/products_t/mony.png' },
   };
@@ -343,7 +342,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const SPRITE_SRC = CHAR.sprite;
   const HI_KEY = 'dr_run_hi_' + CHAR.id;
   // ランキングAPI(CHARAMARLのVercel/Upstash Redis)。空文字にするとランキング機能ごと非表示
-  const RANK_API = 'https://charamarl.com/api/run-score';
+  const RANK_API = '/api/run-score';
   // サーバー側の実数カウント(play/over/share/shop)。内部端末は送らない
   function beacon(event, extra){
     if (!RANK_API || window.DR_INTERNAL) return;

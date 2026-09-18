@@ -87,7 +87,11 @@
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🤝 売上は作家さんと折半<br><span style="opacity:.7;">実費を除いた粗利を分配</span></div>
     </div>
     <div class="selected-color-label">PINK DOGU</div>
-    <div><a href="../tap/dogooooo.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(162,89,255,.12);border:1px solid rgba(162,89,255,.4);color:var(--accent2);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎨 COLOR TAP で遊ぶ</a></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;"><a href="../tap/dogooooo.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(162,89,255,.12);border:1px solid rgba(162,89,255,.4);color:var(--accent2);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎨 COLOR TAP で遊ぶ</a><a id="runLink" href="../run.html?char=dogooooo&utm_source=charamarl_dogooooo" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,138,0,.12);border:1px solid rgba(255,138,0,.5);color:var(--accent);font-weight:800;font-size:13px;padding:10px 20px;border-radius:24px;text-decoration:none;">🎮 CHARAMARL RUN で走る</a></div>
+<script>
+// NFCアクキーからの来訪(api/go.js が owner トークンを付与) → RUNの所有者特典リンクに切り替え
+(function(){ var o=new URLSearchParams(location.search).get('owner'); if(!o) return; var a=document.getElementById('runLink'); if(!a) return; a.href='../run.html?char=dogooooo&owner='+encodeURIComponent(o)+'&utm_source=nfc'; a.textContent='🎮 RUN で走る（★オーナー特典つき）'; a.style.background='linear-gradient(135deg,#FFE27A,#E0A800)'; a.style.color='#111'; })();
+</script>
     <div style="margin-top:12px;"><button class="like-btn" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span><span>いいね</span><b class="num" id="likeCt"></b></button></div>
   </div>
 </div>
