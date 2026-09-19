@@ -22,15 +22,9 @@ window.CM_LEGACY_WORKS = [
   { id:'mossun',   title:'MOSSUN',             artist:'DinoRenny', handle:'@dino_renny', cat:'CHARACTER',
     img:'./img/colors_nobg/mossun_blue.png',   site:'./characters/mossun.html',
     desc:'海を泳ぐモササウルス「MOSSUN」。クールな表情と力強い存在感が魅力。' },
-  { id:'roar',     title:'ROAR!',              artist:'DinoRenny', handle:'@dino_renny', cat:'ARTWORK',
-    img:'./img/gallery/gallery_roar.png',      site:'https://x.com/dino_renny',
-    desc:'ネオンピンクに吠えるDinoRenny。稲妻とビビッドカラーが弾ける、エネルギー全開のアートワーク。' },
   { id:'worldcup', title:'WORLD CUP EDITION',  artist:'DinoRenny', handle:'@dino_renny', cat:'ARTWORK',
     img:'./img/gallery/gallery_worldcup.png',  site:'https://x.com/dino_renny',
     desc:'サッカーユニフォーム姿のSUE。"PLAY FOR THE PRIDE" ―ワールドカップ・エディション。' },
-  { id:'nodino',   title:'NO DINO NO LIFE',    artist:'DinoRenny', handle:'@dino_renny', cat:'ARTWORK',
-    img:'./img/gallery/gallery_nodino.png',    site:'https://x.com/dino_renny',
-    desc:'"NO DINO NO LIFE." 王冠をかぶったブラックダイナソーのエンブレム。EST.2023。' },
 ];
 
 // index.html のモーダルが使う形（id をキーにした連想配列）に変換する。
