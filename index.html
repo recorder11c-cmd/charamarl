@@ -352,6 +352,7 @@
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/js/ga.js"></script>
 <script src="/js/protect.js"></script>
+<script src="/js/works_legacy.js"></script>
 </head>
 <body>
 
@@ -1214,15 +1215,9 @@
     pin.addEventListener('click',()=>location.href=href);
   });
   // ===== アートワーク・データ / モーダル =====
-  const ARTWORKS={
-    gmc:{img:'./img/gallery/gmc.png',title:'レコマル',artist:'by MARU (@maru_nft_)',site:'./characters/gmc.html',desc:'DJ MARUが生んだレコードのキャラクター「レコマル」。音楽とともに歩くレコード盤のボディがトレードマーク。公式カラーは赤。',likes:0},
-    sue:{img:'./img/colors_nobg/sue_red.png',title:'SUE',artist:'by DinoRenny (@dino_renny)',site:'./characters/sue.html',desc:'DinoRennyを代表するティラノサウルス「SUE」。力強い表情とポップなカラーが魅力の、市場1号店の看板キャラクター。',likes:0},
-    putti:{img:'./img/colors_nobg/putti_yellow.png',title:'PUTTI',artist:'by DinoRenny (@dino_renny)',site:'./characters/putti.html',desc:'空を自由に舞うプテラノドン「PUTTI」。元気いっぱいの表情と鮮やかなイエローが魅力。',likes:0},
-    mossun:{img:'./img/colors_nobg/mossun_blue.png',title:'MOSSUN',artist:'by DinoRenny (@dino_renny)',site:'./characters/mossun.html',desc:'海を泳ぐモササウルス「MOSSUN」。クールな表情と力強い存在感が魅力。',likes:0},
-    roar:{img:'./img/gallery/gallery_roar.png',title:'ROAR!',artist:'by DinoRenny (@dino_renny)',site:'https://x.com/dino_renny',desc:'ネオンピンクに吠えるDinoRenny。稲妻とビビッドカラーが弾ける、エネルギー全開のアートワーク。',likes:0},
-    worldcup:{img:'./img/gallery/gallery_worldcup.png',title:'WORLD CUP EDITION',artist:'by DinoRenny (@dino_renny)',site:'https://x.com/dino_renny',desc:'サッカーユニフォーム姿のSUE。"PLAY FOR THE PRIDE" ―ワールドカップ・エディション。',likes:0},
-    nodino:{img:'./img/gallery/gallery_nodino.png',title:'NO DINO NO LIFE',artist:'by DinoRenny (@dino_renny)',site:'https://x.com/dino_renny',desc:'"NO DINO NO LIFE." 王冠をかぶったブラックダイナソーのエンブレム。EST.2023。',likes:0},
-  };
+  // 実体は js/works_legacy.js（artist.html も同じファイルを読む）。
+  // ここに直接書くと、作家ページ側に出なくなる。
+  const ARTWORKS=Object.assign({}, window.CM_LEGACY_MAP||{});
   const LK='charamarl_art_likes', SV='charamarl_art_saves';
   const getSet=k=>{try{return new Set(JSON.parse(localStorage.getItem(k)||'[]'));}catch(e){return new Set();}};
   const putSet=(k,s)=>localStorage.setItem(k,JSON.stringify([...s]));
@@ -1245,7 +1240,9 @@
     document.getElementById('aTitle').textContent=a.title;
     // 作家名をタップしたら、その人の作品とグッズをまとめた作家ページへ
     (function(){
-      var who=String(a.artist||'').replace(/^by\s+/,'').trim();
+      // artistName があればそれを使う。表示名（「DinoRenny (@dino_renny)」）を
+      // そのままリンクに入れると、作家ページが「作品が見つかりません」になる。
+      var who=String(a.artistName||a.artist||'').replace(/^by\s+/,'').trim();
       var el=document.getElementById('aArtist');
       el.innerHTML = who
         ? '<a href="./artist.html?a='+encodeURIComponent(who)+'" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">'

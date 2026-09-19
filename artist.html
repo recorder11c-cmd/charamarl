@@ -94,6 +94,7 @@
 <script src="/js/ga.js"></script>
 <script src="/js/protect.js"></script>
 <script src="/js/products.js"></script>
+<script src="/js/works_legacy.js"></script>
 </head>
 <body>
 <header>
@@ -131,6 +132,17 @@
   ]).then(function(res){
     var list=res[0].list||[], rc=res[1]||{}, oc=res[2]||{};
     var mine=list.filter(function(a){return norm(a.artist)===norm(want);});
+
+    // ギャラリーAPIより前からある作品（SUE・PUTTI・MOSSUN・レコマル等）は
+    // /api/gallery に入っていないので、js/works_legacy.js から足す。
+    // これが無いと DinoRenny さんのページが DR POP 4点だけになり、
+    // ♥と送客の合計もその7点ぶん少なく出る。
+    (window.CM_LEGACY_WORKS||[]).forEach(function(w){
+      if(norm(w.artist)!==norm(want))return;
+      if(mine.some(function(a){return a.id===w.id;}))return;
+      mine.push({id:w.id,title:w.title,artist:w.artist,img:w.img,link:w.link||'',ts:0});
+    });
+
     if(!mine.length){
       fail('「'+want+'」さんの作品が見つかりませんでした。');
       return;
