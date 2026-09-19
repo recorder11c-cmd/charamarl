@@ -22,9 +22,6 @@ window.CM_LEGACY_WORKS = [
   { id:'mossun',   title:'MOSSUN',             artist:'DinoRenny', handle:'@dino_renny', cat:'CHARACTER',
     img:'./img/colors_nobg/mossun_blue.png',   site:'./characters/mossun.html',
     desc:'海を泳ぐモササウルス「MOSSUN」。クールな表情と力強い存在感が魅力。' },
-  { id:'worldcup', title:'WORLD CUP EDITION',  artist:'DinoRenny', handle:'@dino_renny', cat:'ARTWORK',
-    img:'./img/gallery/gallery_worldcup.png',  site:'https://x.com/dino_renny',
-    desc:'サッカーユニフォーム姿のSUE。"PLAY FOR THE PRIDE" ―ワールドカップ・エディション。' },
 ];
 
 // index.html のモーダルが使う形（id をキーにした連想配列）に変換する。
