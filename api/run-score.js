@@ -3,7 +3,8 @@
 // POST   /api/run-score {char, pid, name, score}  → { rank, best, total, top }  (ベスト更新時のみ上書き)
 // DELETE /api/run-score?char=SUE&pid=xxx&key=APPLY_KEY → 削除(管理用)
 //
-// Redis: run:rank:{char} = ZSET(pid→best) / run:player:{char}:{pid} = HASH(name,score,at)
+// Redis: run:rank:{char} = ZSET(pid→best) / run:player:{char}:{pid} = HASH(name,score,at,owner)
+//        run:rank:{char}:own = NFCアクキー所有者だけの ZSET(週間は :own:w:{monday})。POSTに owner=<token> が付いて検証OKのときだけ入る
 // 特典なしの共有用ランキングなので不正対策は軽め(レート制限・値の妥当性チェック・管理削除のみ)
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -46,8 +47,8 @@ async function boardOf(char, key, pid) {
   const [raw, total] = await Promise.all([redis('ZREVRANGE', key, 0, TOP_N - 1, 'WITHSCORES'), redis('ZCARD', key)]);
   const rows = [];
   for (let i = 0; i < (raw || []).length; i += 2) rows.push({ pid: raw[i], score: Number(raw[i + 1]) });
-  const names = rows.length ? await pipeline(rows.map(r => ['HGET', `run:player:${char}:${r.pid}`, 'name'])) : [];
-  const top = rows.map((r, i) => ({ rank: i + 1, name: names[i] || '???', score: r.score, me: r.pid === pid }));
+  const names = rows.length ? await pipeline(rows.map(r => ['HMGET', `run:player:${char}:${r.pid}`, 'name', 'owner'])) : [];
+  const top = rows.map((r, i) => ({ rank: i + 1, name: (names[i] && names[i][0]) || '???', score: r.score, me: r.pid === pid, own: !!(names[i] && names[i][1] === '1') }));
   let me = null;
   if (pid) {
     const [rank, best] = await Promise.all([redis('ZREVRANK', key, pid), redis('ZSCORE', key, pid)]);
@@ -55,11 +56,11 @@ async function boardOf(char, key, pid) {
   }
   return { top, me, total: Number(total) || 0 };
 }
-// 累計(top/me/total)＋今週(week:{key,top,me,total})を返す
+// 累計(top/me/total)＋今週(week:{key,top,me,total})＋所有者だけ(own:{top,me,total,week})を返す
 async function board(char, pid) {
   const wk = weekKey();
-  const [all, week] = await Promise.all([boardOf(char, `run:rank:${char}`, pid), boardOf(char, `run:rank:${char}:w:${wk}`, pid)]);
-  return Object.assign(all, { week: Object.assign({ key: wk }, week) });
+  const [all, week, own, ownW] = await Promise.all([boardOf(char, `run:rank:${char}`, pid), boardOf(char, `run:rank:${char}:w:${wk}`, pid), boardOf(char, `run:rank:${char}:own`, pid), boardOf(char, `run:rank:${char}:own:w:${wk}`, pid)]);
+  return Object.assign(all, { week: Object.assign({ key: wk }, week), own: Object.assign(own, { week: Object.assign({ key: wk }, ownW) }) });
 }
 
 module.exports = async (req, res) => {
@@ -140,21 +141,28 @@ module.exports = async (req, res) => {
       if (n > 12) return res.status(429).json({ error: 'too many' });
 
       const key = `run:rank:${char}`, wkey = `run:rank:${char}:w:${weekKey()}`, pkey = `run:player:${char}:${pid}`;
-      const [prevRaw, prevWRaw] = await Promise.all([redis('ZSCORE', key, pid), redis('ZSCORE', wkey, pid)]);
-      const prev = Number(prevRaw) || 0, prevW = Number(prevWRaw) || 0;
+      const okey = `run:rank:${char}:own`, owkey = `run:rank:${char}:own:w:${weekKey()}`;
+      const owner = !!(b.owner && ownerToken(char) && String(b.owner) === ownerToken(char));   // NFCアクキー所有者(トークン検証OK)
+      const [prevRaw, prevWRaw, prevORaw, prevOWRaw] = await Promise.all([redis('ZSCORE', key, pid), redis('ZSCORE', wkey, pid), owner ? redis('ZSCORE', okey, pid) : null, owner ? redis('ZSCORE', owkey, pid) : null]);
+      const prev = Number(prevRaw) || 0, prevW = Number(prevWRaw) || 0, prevO = Number(prevORaw) || 0, prevOW = Number(prevOWRaw) || 0;
       const cmds = [['HSET', pkey, 'name', name]];
       if (score > prev) cmds.push(['ZADD', key, score, pid], ['HSET', pkey, 'score', score, 'at', Date.now()]);
       if (score > prevW) cmds.push(['ZADD', wkey, score, pid], ['EXPIRE', wkey, 60 * 86400]);   // 週間キーは60日で自然消滅
+      if (owner) {
+        cmds.push(['HSET', pkey, 'owner', '1']);
+        if (score > prevO) cmds.push(['ZADD', okey, score, pid]);
+        if (score > prevOW) cmds.push(['ZADD', owkey, score, pid], ['EXPIRE', owkey, 60 * 86400]);
+      }
       await pipeline(cmds);
       const out = await board(char, pid);
-      return res.status(200).json({ rank: out.me ? out.me.rank : null, best: Math.max(prev, score), total: out.total, top: out.top, week: out.week, weekBest: Math.max(prevW, score) });
+      return res.status(200).json({ rank: out.me ? out.me.rank : null, best: Math.max(prev, score), total: out.total, top: out.top, week: out.week, weekBest: Math.max(prevW, score), own: out.own, owner });
     }
 
     if (req.method === 'DELETE') {
       if (!ADMIN_KEY || q.key !== ADMIN_KEY) return res.status(403).json({ error: 'forbidden' });
       const char = String(q.char || ''), pid = String(q.pid || '');
       if (!charOk(char) || !PID_RE.test(pid)) return res.status(400).json({ error: 'bad id' });
-      await pipeline([['ZREM', `run:rank:${char}`, pid], ['ZREM', `run:rank:${char}:w:${weekKey()}`, pid], ['DEL', `run:player:${char}:${pid}`]]);
+      await pipeline([['ZREM', `run:rank:${char}`, pid], ['ZREM', `run:rank:${char}:w:${weekKey()}`, pid], ['ZREM', `run:rank:${char}:own`, pid], ['ZREM', `run:rank:${char}:own:w:${weekKey()}`, pid], ['DEL', `run:player:${char}:${pid}`]]);
       return res.status(200).json({ ok: true });
     }
 
