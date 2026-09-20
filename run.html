@@ -68,7 +68,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     text-decoration:none;line-height:1.2;
   }
   .logo small{display:block;font-size:10px;letter-spacing:.3em;font-weight:800;color:var(--accent);}
-  .scores{display:flex;gap:6px;}
+  .scores{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}   /* ★OWNERチップが増えてもスマホ幅で折り返す */
+  @media (max-width:430px){ .chip{padding:4px 9px;} }
   .chip{
     background:#fff;border:3px solid var(--ink);border-radius:999px;padding:4px 12px;
     font-weight:900;font-size:clamp(12px,3.4vw,15px);box-shadow:3px 3px 0 var(--ink);white-space:nowrap;
@@ -76,6 +77,10 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   .chip b{color:var(--accent-2);}
   .chip.owner{background:linear-gradient(135deg,#FFE27A,#E0A800);}
   .chip[hidden]{display:none;}
+  .ownermode{flex-basis:100%;width:fit-content;margin:6px auto 0;font-family:inherit;font-weight:900;font-size:12px;color:var(--ink);background:linear-gradient(135deg,#FFE27A,#E0A800);border:2px solid var(--ink);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--ink);cursor:pointer;line-height:1.3;}
+  .ownermode small{display:block;font-size:10px;font-weight:800;}
+  .ownermode.off{background:#fff;}
+  .ownermode[hidden]{display:none;}
   .char-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;font-weight:900;font-size:12px;color:#fff;text-shadow:1px 1px 0 var(--ink);flex-wrap:wrap;}
   .char-bar > span{white-space:nowrap;}
   .trait{flex-basis:100%;text-align:center;font-size:12px;font-weight:900;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 12px;box-shadow:2px 2px 0 var(--ink);margin:2px auto 0;width:fit-content;}
@@ -160,6 +165,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   .rank-tabs button{font-family:inherit;font-weight:900;font-size:13px;padding:4px 16px;border-radius:999px;border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;min-height:32px;}
   .rank-tabs button.on{background:var(--accent);}
   .rank-week{text-align:center;font-size:11px;font-weight:800;color:var(--ink-soft);margin-bottom:4px;}
+  .rank-list .own{color:#E0A800;margin-right:3px;text-shadow:0 0 0 #E0A800;}
   .rank-list{list-style:none;display:flex;flex-direction:column;gap:4px;margin:10px 0;}
   .rank-list li{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;font-weight:900;font-size:15px;}
   .rank-list li.me{background:#FFF3B0;border:2px solid var(--ink);}
@@ -225,7 +231,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   </div>
 
   <!-- キャラ選択（キャンバスの外。切り替えはページ移動） -->
-  <div class="char-bar" id="charBar"><span>キャラ</span><div class="char-select" id="charSelect" aria-label="キャラクターをえらぶ"></div><div class="trait" id="traitLabel"></div></div>
+  <div class="char-bar" id="charBar"><span>キャラ</span><div class="char-select" id="charSelect" aria-label="キャラクターをえらぶ"></div><div class="trait" id="traitLabel"></div><button type="button" class="ownermode" id="ownerMode" hidden>★ オーナーモード <b id="ownerModeState">ON</b><small id="ownerModeHint"></small></button></div>
 
   <!-- ゲームオーバー後の操作パネル（キャンバスの外に出してスマホでもはみ出さない） -->
   <div class="over-panel" id="overPanel" hidden>
@@ -266,7 +272,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 <div class="share-overlay" id="rankOverlay">
   <div class="rank-menu">
     <div class="share-title">🏆 RANKING <span id="rankChar"></span></div>
-    <div class="rank-tabs"><button type="button" class="on" data-scope="week">今週</button><button type="button" data-scope="all">累計</button></div>
+    <div class="rank-tabs"><button type="button" class="on" data-scope="week">今週</button><button type="button" data-scope="all">累計</button><button type="button" data-scope="own">★オーナー</button></div>
     <div class="rank-week" id="rankWeek"></div>
     <ol class="rank-list" id="rankList"><li><span class="rk">…</span><span class="nm">読み込み中</span><span></span></li></ol>
     <div class="rank-foot" id="rankFoot"></div>
@@ -344,8 +350,9 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const DODGE_BONUS = 10;      // ライバルをかわしたときのボーナス点
   const DIR = RUN_DIR === 'right' ? 1 : -1;   // 主人公の進行方向。世界は -DIR に流れる
   // NFCアクキー所有者特典: ?owner=<token> をAPIで検証 → 端末に記憶 → 金のオーラ＋GOLD WORLDから開始
-  const OWNER_KEY = 'dr_run_owner_' + CHAR.id;
-  let isOwner = false; try { isOwner = localStorage.getItem(OWNER_KEY) === '1'; } catch(e){}
+  const OWNER_KEY = 'dr_run_owner_' + CHAR.id, OWNER_TOK_KEY = 'dr_run_owner_tok_' + CHAR.id;
+  let isOwner = false, ownerTok = '';   // ownerTok はランキング登録時に送り、サーバーが★オーナー印と所有者ランキングに使う
+  try { isOwner = localStorage.getItem(OWNER_KEY) === '1'; ownerTok = localStorage.getItem(OWNER_TOK_KEY) || ''; } catch(e){}
   // ================= 設定 =================
   let W = 720; const H = 300, GROUND = 248;   // スマホでは W を狭めて縦長に
   const SPRITE_SRC = CHAR.sprite;
@@ -360,17 +367,33 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       if (!(navigator.sendBeacon && navigator.sendBeacon(RANK_API, body)))
         fetch(RANK_API, { method:'POST', headers:{ 'Content-Type':'text/plain' }, body, keepalive:true }).catch(()=>{}); }catch(e){}
   }
+  // ★オーナーモードの状態(IIFEより前に宣言しておく。トークン無しで所有者フラグだけある端末では同期的に initOwnerMode が呼ばれるため)
+  const OWNER_MODE_KEY = 'dr_run_ownermode_' + CHAR.id;
+  let ownerMode = false;
   (async () => {
     const tok = new URLSearchParams(location.search).get('owner');
     if (tok && RANK_API){
       try{
         const r = await fetch(`${RANK_API}?char=${encodeURIComponent(CHAR.id)}&owner=${encodeURIComponent(tok)}`);
         const d = await r.json();
-        if (d && d.owner){ isOwner = true; try{ localStorage.setItem(OWNER_KEY, '1'); }catch(e){} drEvent('owner_unlock', { character: CHAR.id }); }
+        if (d && d.owner){ isOwner = true; ownerTok = tok; try{ localStorage.setItem(OWNER_KEY, '1'); localStorage.setItem(OWNER_TOK_KEY, tok); }catch(e){} drEvent('owner_unlock', { character: CHAR.id }); }
       }catch(e){}
     }
-    if (isOwner){ document.getElementById('ownerChip').hidden = false; }
+    if (isOwner){ document.getElementById('ownerChip').hidden = false; initOwnerMode(); }
   })();
+  // ★オーナーモード(持ち主だけ): 二段ジャンプ＋金の★。点数は★オーナーの順位表にだけ入る(通常の今週/累計には入らない)。OFFにすれば通常どおり
+  function applyOwnerMode(){
+    const btn = document.getElementById('ownerMode');
+    btn.classList.toggle('off', !ownerMode); btn.setAttribute('aria-pressed', ownerMode ? 'true' : 'false');
+    document.getElementById('ownerModeState').textContent = ownerMode ? 'ON' : 'OFF';
+    document.getElementById('ownerModeHint').textContent = ownerMode ? '二段ジャンプ・金の★・記録は★オーナー順位表へ' : 'OFF: 通常ルールで今週/累計の順位表へ';
+    document.getElementById('traitLabel').textContent = `${CHAR.name}：${T.label}` + (ownerMode ? '＋二段ジャンプ（★オーナー）' : '');
+  }
+  function initOwnerMode(){
+    try{ ownerMode = localStorage.getItem(OWNER_MODE_KEY) !== '0'; }catch(e){ ownerMode = true; }
+    const btn = document.getElementById('ownerMode'); btn.hidden = false; applyOwnerMode();
+    btn.addEventListener('click', () => { if (S.state === 'play') return; ownerMode = !ownerMode; try{ localStorage.setItem(OWNER_MODE_KEY, ownerMode ? '1' : '0'); }catch(e){} applyOwnerMode(); drEvent('owner_mode', { character: CHAR.id, on: ownerMode ? 1 : 0 }); });
+  }
   const creditEl = document.getElementById('credit'); if (creditEl) creditEl.textContent = '© CHARAMARL / ' + CHAR.credit;
   const logoEl = document.querySelector('.logo'); if (logoEl && CHAR.shop) logoEl.href = CHAR.shop;
   if (logoEl) logoEl.addEventListener('click', () => { drEvent('shop_click', { character: CHAR.id }); beacon('shop'); });
@@ -391,7 +414,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     { sky:['#E4E0FF','#9C8CFF'], ground:'#6C4BFF', far:'#C6BDFF', cactus:'#FFE000', cactus2:'#00D4FF', page:'#6C4BFF', name:'GALAXY PURPLE' },
   ];
   const GOLD = { sky:['#FFF6D5','#FFD65C'], ground:'#E0A800', far:'#FFE9A0', cactus:'#1B1B1F', cactus2:'#FF3EA5', page:'#E0A800', name:'GOLD OWNER' };
-  const worldAt = i => ((isOwner && i === 0) || S.goldPreview > 0) ? GOLD : WORLDS[i];   // 所有者は最初の100点がGOLD WORLD。非所有者はゲームオーバー時に数秒だけチラ見せ
+  const worldAt = i => ((isOwner && (i === 0 || S.goldFly || S.score < S.goldUntil)) || S.goldPreview > 0) ? GOLD : WORLDS[i];   // 所有者は最初の100点＋金の★の飛行中＋着地後100点がGOLD WORLD。非所有者はゲームオーバー時に数秒だけチラ見せ
 
   // ================= DOM =================
   const cv = document.getElementById('game');
@@ -438,6 +461,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     };
     img.src = ch.sprite;
   });
+  function endGoldFly(){ if (S.goldFly){ S.goldFly = false; S.goldUntil = S.score + 100; } }   // 金の★の飛行が終わったら、さらに100点は金の世界
   // ★スター(飛行アイテム)の描画用パス
   function drawStar(cx, cy, r, rot){
     ctx.beginPath();
@@ -460,7 +484,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   }
 
   // ================= ゲーム状態 =================
-  const S = { state:'title', t:0, speed:6, dist:0, score:0, hi:0, worldIdx:0, worldMix:0, shake:0, fly:0, nextStar:STAR_EVERY, hold:false, grace:0, shieldUsed:false, goldPreview:0, dodges:0 };
+  const S = { state:'title', t:0, speed:6, dist:0, score:0, hi:0, worldIdx:0, worldMix:0, shake:0, fly:0, nextStar:STAR_EVERY, hold:false, grace:0, shieldUsed:false, goldPreview:0, dodges:0, goldFly:false, goldUntil:0 };
   let star = null;   // 飛来中の★ {x,y,rot,t}
   const dino = { x:80, y:GROUND, vy:0, size:118, duck:false, onGround:true, runT:0, squash:0 };
   fit(); window.addEventListener('resize', fit);
@@ -479,13 +503,13 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   resetWorld();
 
   function start(){
-    S.state = 'play'; S.t = 0; S.speed = 6; S.dist = 0; S.score = 0; S.worldIdx = 0; S.worldMix = 0; S.shake = 0; S.fly = 0; S.nextStar = STAR_EVERY; S.hold = false; S.grace = 0; S.shieldUsed = false; S.goldPreview = 0; S.dodges = 0; star = null;
-    dino.y = GROUND; dino.vy = 0; dino.duck = false; dino.onGround = true; dino.squash = 0;
+    S.state = 'play'; S.t = 0; S.speed = 6; S.dist = 0; S.score = 0; S.worldIdx = 0; S.worldMix = 0; S.shake = 0; S.fly = 0; S.nextStar = STAR_EVERY; S.hold = false; S.grace = 0; S.shieldUsed = false; S.goldPreview = 0; S.dodges = 0; S.goldFly = false; S.goldUntil = 0; star = null;
+    dino.y = GROUND; dino.vy = 0; dino.duck = false; dino.onGround = true; dino.squash = 0; dino.dj = false;
     resetWorld();
     startOv.classList.add('hide'); overOv.classList.add('hide'); document.getElementById('overPanel').hidden = true; document.getElementById('charBar').hidden = true;
     setPageColor(worldAt(0).page);
     beep(660, .12, 'square', .06, 300);
-    drEvent('game_start', { character: CHAR.id, owner: isOwner ? 1 : 0 }); beacon('play');
+    drEvent('game_start', { character: CHAR.id, owner: isOwner ? 1 : 0, mode: ownerMode ? 'owner' : 'normal' }); beacon('play');
   }
   function gameOver(){
     S.state = 'over'; S.shake = 14; if (!isOwner) S.goldPreview = 240;   // 4秒だけ金の世界を見せる
@@ -504,9 +528,14 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   function jump(){
     if (S.state !== 'play' || S.fly > 0) return;
     if (dino.onGround){
-      dino.vy = (dino.duck ? -15 : -16.5) * T.jump; dino.onGround = false; dino.duck = false;
+      dino.vy = (dino.duck ? -15 : -16.5) * T.jump; dino.onGround = false; dino.duck = false; dino.dj = false;
       beep(520, .14, 'square', .05, 260);
       burst(dino.x + dino.size*.6, GROUND, 8, ['#fff', '#FFD400']);
+    } else if (ownerMode && !dino.dj){   // ★オーナーモード: 空中でもう一回(二段ジャンプ)
+      dino.dj = true; dino.vy = -13.5 * T.jump;
+      beep(700, .12, 'square', .05, 320);
+      burst(dino.x + dino.size*.5, dino.y - dino.size*.35, 14, ['#FFD23F', '#fff', '#E0A800']);
+      flashes.push({ text:'二段ジャンプ！', life:30, small:true });
     }
   }
   function setPageColor(c){ document.body.style.backgroundColor = c; }
@@ -598,11 +627,11 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       dino.vy += (S.hold ? -.9 : .7) * dt; dino.vy = Math.max(-5, Math.min(4.5, dino.vy)); dino.y += dino.vy * dt;
       const top = 120; if (dino.y < top){ dino.y = top; dino.vy = 0; } if (dino.y > GROUND){ dino.y = GROUND; dino.vy = 0; }
       if (Math.random() < .5) particles.push({ x:dino.x + dino.size*.2, y:dino.y - dino.size*.45 + (Math.random()-.5)*40, vx:-DIR*(2+Math.random()*2), vy:(Math.random()-.5), life:24, c:['#FFE000','#fff','#FFB3DE'][Math.floor(Math.random()*3)], r:2+Math.random()*3 });
-      if (S.fly <= 0){ S.fly = 0; S.grace = T.grace; flashes.push({ text:'LANDING', life:50 }); S.nextStar = S.score + STAR_EVERY; }   // 次の★は着地からさらに500点走ってから。着地後1.5秒は無敵
+      if (S.fly <= 0){ S.fly = 0; S.grace = T.grace; flashes.push({ text:'LANDING', life:50 }); S.nextStar = S.score + STAR_EVERY; endGoldFly(); }   // 次の★は着地からさらに500点走ってから。着地後1.5秒は無敵
     } else {
       if (S.grace > 0) S.grace -= dt;
       dino.vy += .8 * T.grav * dt; dino.y += dino.vy * dt;
-      if (dino.y >= GROUND){ if(!dino.onGround){ dino.squash = 1; burst(dino.x + dino.size*.4, GROUND, 6, ['#fff','#1B1B1F']); } dino.y = GROUND; dino.vy = 0; dino.onGround = true; }
+      if (dino.y >= GROUND){ if(!dino.onGround){ dino.squash = 1; burst(dino.x + dino.size*.4, GROUND, 6, ['#fff','#1B1B1F']); } dino.y = GROUND; dino.vy = 0; dino.onGround = true; dino.dj = false; }
     }
 
     // 速度・スコア
@@ -611,6 +640,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     const prev = S.score;
     S.score = Math.floor(S.dist);
     if (S.score !== prev) scoreNowEl.textContent = S.score;
+    if (S.goldUntil && !S.goldFly && S.score >= S.goldUntil){ S.goldUntil = 0; setPageColor(worldAt(S.worldIdx).page); }   // 金の★の余韻(100点)が切れたら元の世界へ
     if (Math.floor(S.score/100) !== Math.floor(prev/100) && S.score > 0){
       S.worldIdx = Math.floor(S.score/100) % WORLDS.length;
       setPageColor(worldAt(S.worldIdx).page);
@@ -645,7 +675,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       const sb = { x:star.x-22, y:star.y-22, w:44, h:44 };
       if (hit(db, sb)){
         const flySec = FLY_SEC + T.fly; S.fly = flySec * 60; star = null;
-        flashes.push({ text:`FLY ${flySec}s!`, life:80 }); burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 40, ['#FFE000','#fff','#FF3EA5','#00D4FF']);
+        if (ownerMode){ S.goldFly = true; setPageColor(GOLD.page); }   // オーナーモードの★は金の★: 飛行中＋着地後100点は金の世界
+        flashes.push({ text: ownerMode ? `GOLD ★ FLY ${flySec}s!` : `FLY ${flySec}s!`, life:80 }); burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 40, ['#FFE000','#fff','#FF3EA5','#00D4FF']);
         beep(880, .1, 'square', .06); setTimeout(()=>beep(1175,.1,'square',.06),90); setTimeout(()=>beep(1568,.2,'square',.06),180);
         drEvent('star_catch', { character: CHAR.id, score: S.score });
       } else if (DIR > 0 ? star.x < -40 : star.x > W + 40) star = null;
@@ -654,7 +685,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       for (const o of obstacles){
         if (o.type !== 'bird') continue;   // 飛行中はライバルだけが当たる(サボテンは足元なので高く飛べば無関係)
         const ob = { x:o.x+10, y:o.y-o.h+8, w:o.w-20, h:o.h-14 };
-        if (hit(db, ob)){ S.fly = 0; S.grace = T.grace; S.shake = 8; flashes.push({ text:'ぶつかった！ 飛行おわり', life:60 }); beep(260, .2, 'sawtooth', .07, -100); S.nextStar = S.score + STAR_EVERY; break; }
+        if (hit(db, ob)){ S.fly = 0; S.grace = T.grace; S.shake = 8; endGoldFly(); flashes.push({ text:'ぶつかった！ 飛行おわり', life:60 }); beep(260, .2, 'sawtooth', .07, -100); S.nextStar = S.score + STAR_EVERY; break; }
       }
     }
     if (S.fly <= 0 && S.grace <= 0){
@@ -781,7 +812,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     obstacles.forEach(o => o.type==='bird' ? drawBird(o) : drawCactus(o, world));
     if (star){
       ctx.save(); ctx.shadowColor = 'rgba(255,224,0,.9)'; ctx.shadowBlur = 18;
-      drawStar(star.x, star.y, 24, star.rot); ctx.fillStyle = '#FFE000'; ctx.fill(); ctx.shadowBlur = 0; ctx.lineWidth = 3; ctx.strokeStyle = '#1B1B1F'; ctx.stroke();
+      if (ownerMode){ drawStar(star.x, star.y, 34, -star.rot * .5); ctx.fillStyle = 'rgba(255,180,0,.35)'; ctx.fill(); }   // オーナーモードは金の★(ひとまわり大きな金の光つき)
+      drawStar(star.x, star.y, 24, star.rot); ctx.fillStyle = ownerMode ? '#FFB300' : '#FFE000'; ctx.fill(); ctx.shadowBlur = 0; ctx.lineWidth = 3; ctx.strokeStyle = '#1B1B1F'; ctx.stroke();
       drawStar(star.x - 5, star.y - 5, 8, star.rot); ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fill(); ctx.restore();
     }
     drawDino();
@@ -835,7 +867,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   }
   requestAnimationFrame(loop);
   // テスト用フック
-  window.DRRUN = { S, dino, step, draw, start, jump, get obstacles(){ return obstacles; }, get star(){ return star; } };
+  window.DRRUN = { S, dino, step, draw, start, jump, CHAR, get obstacles(){ return obstacles; }, get star(){ return star; }, setOwner(v){ isOwner = !!v; if (v) initOwnerMode(); }, setMode(v){ ownerMode = !!v; applyOwnerMode(); }, get ownerMode(){ return ownerMode; } };
 
   // ================= 🏆 ランキング =================
   const NAME_KEY = 'dr_run_name', PID_KEY = 'dr_run_pid';
@@ -861,13 +893,20 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     if (name !== savedName){ savedName = name; try{ localStorage.setItem(NAME_KEY, name); }catch(e){} }
     showMsg('登録中…'); rankForm.hidden = true;
     try{
-      const r = await fetch(RANK_API, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ char: CHAR.id, pid, name, score }) });
+      const r = await fetch(RANK_API, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ char: CHAR.id, pid, name, score, owner: ownerTok || undefined, mode: ownerMode ? 'owner' : undefined }) });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || r.status);
       const wr = d.week && d.week.me ? d.week.me.rank : null;
-      showMsg(`${esc(name)} さん：今週 <b>${wr ?? '-'}位</b>（累計 ${d.rank}位 / ${d.total}人・ベスト ${d.best}）`);
-      drEvent('rank_submit', { character: CHAR.id, score, rank: d.rank, week_rank: wr });
-      lastBoard = { top: d.top, total: d.total, me: { rank: d.rank, best: d.best }, week: d.week }; renderScope();
+      if (d.mode === 'owner'){
+        showMsg(`${esc(name)} さん：★オーナー順位 <b>${d.ownRank ?? '-'}位</b> / ${d.own ? d.own.total : '-'}人（ベスト ${d.ownBest}）<br><small>オーナーモードの記録は★オーナーの順位表に入ります</small>`);
+        drEvent('rank_submit', { character: CHAR.id, score, mode: 'owner', own_rank: d.ownRank });
+        rankScope = 'own';
+      } else {
+        showMsg(`${esc(name)} さん：今週 <b>${wr ?? '-'}位</b>（累計 ${d.rank}位 / ${d.total}人・ベスト ${d.best}）`);
+        drEvent('rank_submit', { character: CHAR.id, score, rank: d.rank, week_rank: wr });
+        if (rankScope === 'own') rankScope = 'week';
+      }
+      lastBoard = { top: d.top, total: d.total, me: d.rank ? { rank: d.rank, best: d.best } : null, week: d.week, own: d.own }; renderScope();
     }catch(e){ showMsg('登録できませんでした'); rankForm.hidden = false; }
   }
   function onGameOverRank(score, isNew){
@@ -886,14 +925,16 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   function renderScope(){
     if (!lastBoard) return;
     document.querySelectorAll('.rank-tabs button').forEach(b => b.classList.toggle('on', b.dataset.scope === rankScope));
-    const w = lastBoard.week || {};
-    document.getElementById('rankWeek').textContent = rankScope === 'week' ? weekLabel(w.key) : '全期間のベスト';
-    if (rankScope === 'week') renderBoard(w.top, w.total, w.me); else renderBoard(lastBoard.top, lastBoard.total, lastBoard.me);
+    const w = lastBoard.week || {}, o = lastBoard.own || {};
+    document.getElementById('rankWeek').textContent = rankScope === 'week' ? weekLabel(w.key) : rankScope === 'own' ? '★オーナーモード（二段ジャンプ）の記録・持ち主どうしの順位（全期間）' : '全期間のベスト';
+    if (rankScope === 'week') renderBoard(w.top, w.total, w.me);
+    else if (rankScope === 'own') renderBoard(o.top, o.total, o.me, 'NFCアクキーをかざして、オーナーモードで走ると載ります');
+    else renderBoard(lastBoard.top, lastBoard.total, lastBoard.me);
   }
   document.querySelectorAll('.rank-tabs button').forEach(b => b.addEventListener('click', () => { rankScope = b.dataset.scope; renderScope(); }));
-  function renderBoard(top, total, me){
-    rankList.innerHTML = (top && top.length) ? top.map(t => `<li${t.me ? ' class="me"' : ''}><span class="rk num">${t.rank <= 3 ? ['🥇','🥈','🥉'][t.rank-1] : t.rank + '位'}</span><span class="nm">${esc(t.name)}</span><span class="sc num">${t.score}</span></li>`).join('')
-      : '<li><span class="rk">—</span><span class="nm">まだ登録がありません</span><span></span></li>';
+  function renderBoard(top, total, me, emptyMsg){
+    rankList.innerHTML = (top && top.length) ? top.map(t => `<li${t.me ? ' class="me"' : ''}><span class="rk num">${t.rank <= 3 ? ['🥇','🥈','🥉'][t.rank-1] : t.rank + '位'}</span><span class="nm">${t.own ? '<b class="own" title="NFCアクキーの持ち主">★</b>' : ''}${esc(t.name)}</span><span class="sc num">${t.score}</span></li>`).join('')
+      : `<li><span class="rk">—</span><span class="nm">${emptyMsg || 'まだ登録がありません'}</span><span></span></li>`;
     rankFoot.textContent = (me && me.rank ? `あなた：${me.rank}位（ベスト ${me.best}）｜` : '') + `登録 ${total || 0}人`;
   }
   function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
