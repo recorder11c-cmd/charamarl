@@ -4,7 +4,8 @@
 // DELETE /api/run-score?char=SUE&pid=xxx&key=APPLY_KEY → 削除(管理用)
 //
 // Redis: run:rank:{char} = ZSET(pid→best) / run:player:{char}:{pid} = HASH(name,score,at,owner)
-//        run:rank:{char}:own = NFCアクキー所有者だけの ZSET(週間は :own:w:{monday})。POSTに owner=<token> が付いて検証OKのときだけ入る
+//        run:rank:{char}:own = ★オーナーモード(二段ジャンプ)の記録だけの ZSET(週間は :own:w:{monday})。POST {mode:'owner', owner:<token>} で検証OKのときだけ入り、通常の順位表には入らない
+//        通常モードのPOSTに owner=<token> が付いていれば player HASH に owner=1 を立てる(順位表の★印用)
 // 特典なしの共有用ランキングなので不正対策は軽め(レート制限・値の妥当性チェック・管理削除のみ)
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -143,19 +144,23 @@ module.exports = async (req, res) => {
       const key = `run:rank:${char}`, wkey = `run:rank:${char}:w:${weekKey()}`, pkey = `run:player:${char}:${pid}`;
       const okey = `run:rank:${char}:own`, owkey = `run:rank:${char}:own:w:${weekKey()}`;
       const owner = !!(b.owner && ownerToken(char) && String(b.owner) === ownerToken(char));   // NFCアクキー所有者(トークン検証OK)
-      const [prevRaw, prevWRaw, prevORaw, prevOWRaw] = await Promise.all([redis('ZSCORE', key, pid), redis('ZSCORE', wkey, pid), owner ? redis('ZSCORE', okey, pid) : null, owner ? redis('ZSCORE', owkey, pid) : null]);
+      const ownerMode = String(b.mode || '') === 'owner';
+      if (ownerMode && !owner) return res.status(403).json({ error: 'not owner' });
+      const [prevRaw, prevWRaw, prevORaw, prevOWRaw] = await Promise.all([redis('ZSCORE', key, pid), redis('ZSCORE', wkey, pid), redis('ZSCORE', okey, pid), redis('ZSCORE', owkey, pid)]);
       const prev = Number(prevRaw) || 0, prevW = Number(prevWRaw) || 0, prevO = Number(prevORaw) || 0, prevOW = Number(prevOWRaw) || 0;
       const cmds = [['HSET', pkey, 'name', name]];
-      if (score > prev) cmds.push(['ZADD', key, score, pid], ['HSET', pkey, 'score', score, 'at', Date.now()]);
-      if (score > prevW) cmds.push(['ZADD', wkey, score, pid], ['EXPIRE', wkey, 60 * 86400]);   // 週間キーは60日で自然消滅
-      if (owner) {
-        cmds.push(['HSET', pkey, 'owner', '1']);
-        if (score > prevO) cmds.push(['ZADD', okey, score, pid]);
+      if (owner) cmds.push(['HSET', pkey, 'owner', '1']);
+      if (ownerMode) {   // ★オーナーモード: 所有者の順位表にだけ入る(二段ジャンプありの記録なので通常には混ぜない)
+        if (score > prevO) cmds.push(['ZADD', okey, score, pid], ['HSET', pkey, 'oscore', score, 'oat', Date.now()]);
         if (score > prevOW) cmds.push(['ZADD', owkey, score, pid], ['EXPIRE', owkey, 60 * 86400]);
+      } else {
+        if (score > prev) cmds.push(['ZADD', key, score, pid], ['HSET', pkey, 'score', score, 'at', Date.now()]);
+        if (score > prevW) cmds.push(['ZADD', wkey, score, pid], ['EXPIRE', wkey, 60 * 86400]);   // 週間キーは60日で自然消滅
       }
       await pipeline(cmds);
       const out = await board(char, pid);
-      return res.status(200).json({ rank: out.me ? out.me.rank : null, best: Math.max(prev, score), total: out.total, top: out.top, week: out.week, weekBest: Math.max(prevW, score), own: out.own, owner });
+      return res.status(200).json({ mode: ownerMode ? 'owner' : 'normal', rank: out.me ? out.me.rank : null, best: Math.max(prev, ownerMode ? 0 : score), total: out.total, top: out.top, week: out.week, weekBest: Math.max(prevW, ownerMode ? 0 : score),
+        own: out.own, ownRank: out.own && out.own.me ? out.own.me.rank : null, ownBest: Math.max(prevO, ownerMode ? score : 0), owner });
     }
 
     if (req.method === 'DELETE') {
