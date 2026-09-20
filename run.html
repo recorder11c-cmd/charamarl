@@ -164,6 +164,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   .rank-tabs{display:flex;gap:6px;justify-content:center;margin:4px 0 2px;}
   .rank-tabs button{font-family:inherit;font-weight:900;font-size:13px;padding:4px 16px;border-radius:999px;border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;min-height:32px;}
   .rank-tabs button.on{background:var(--accent);}
+  .rank-tabs button[hidden]{display:none;}
   .rank-week{text-align:center;font-size:11px;font-weight:800;color:var(--ink-soft);margin-bottom:4px;}
   .rank-list .own{color:#E0A800;margin-right:3px;text-shadow:0 0 0 #E0A800;}
   .rank-list{list-style:none;display:flex;flex-direction:column;gap:4px;margin:10px 0;}
@@ -924,6 +925,9 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   function weekLabel(key){ if (!key) return ''; const d = new Date(key + 'T00:00:00+09:00'); const e = new Date(d.getTime() + 6*864e5); const f = x => `${x.getMonth()+1}/${x.getDate()}`; return `${f(d)}〜${f(e)} の記録（毎週月曜リセット）`; }
   function renderScope(){
     if (!lastBoard) return;
+    // ★オーナータブは、持ち主の端末か、誰か1人でも登録があるときだけ出す(一般の人に空の表を見せない)
+    const ownTab = document.querySelector('.rank-tabs [data-scope="own"]'), showOwn = isOwner || !!(lastBoard.own && lastBoard.own.total > 0);
+    ownTab.hidden = !showOwn; if (!showOwn && rankScope === 'own') rankScope = 'week';
     document.querySelectorAll('.rank-tabs button').forEach(b => b.classList.toggle('on', b.dataset.scope === rankScope));
     const w = lastBoard.week || {}, o = lastBoard.own || {};
     document.getElementById('rankWeek').textContent = rankScope === 'week' ? weekLabel(w.key) : rankScope === 'own' ? '★オーナーモード（二段ジャンプ）の記録・持ち主どうしの順位（全期間）' : '全期間のベスト';
