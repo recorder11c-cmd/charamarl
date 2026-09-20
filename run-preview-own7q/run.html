@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dino">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CHARAMARL RUN</title>
+<meta name="description" content="CHARAMARLのキャラクターで走るランゲーム。タップでジャンプ！仲間のキャラをかわして、ハイスコアをねらえ。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://charamarl.com/run.html">
+<meta property="og:title" content="CHARAMARL RUN">
+<meta property="og:description" content="タップでジャンプ！100点ごとに世界の色がかわる、CHARAMARLのキャラで走るランゲーム">
+<meta property="og:image" content="https://charamarl.com/run-art/og_run.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CHARAMARL RUN">
+<meta name="twitter:description" content="タップでジャンプ！100点ごとに世界の色がかわる、CHARAMARLのキャラで走るランゲーム">
+<meta name="twitter:image" content="https://charamarl.com/run-art/og_run.png">
+<script>
+// 計測(GA4・CHARAMARLと同じプロパティ)。?internal=1 を一度開いた端末は以後計測しない(解除=?internal=0)
+(function(){
+  try{ var q=new URLSearchParams(location.search);
+    if(q.get('internal')==='1') localStorage.setItem('cm_internal','1');
+    if(q.get('internal')==='0') localStorage.removeItem('cm_internal');
+    if(localStorage.getItem('cm_internal')==='1'){ window.DR_INTERNAL=true; return; } }catch(e){}
+  var id='G-PMSD6TMSJW', s=document.createElement('script'); s.async=true; s.src='https://www.googletagmanager.com/gtag/js?id='+id; document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[]; window.gtag=function(){dataLayer.push(arguments);}; gtag('js',new Date()); gtag('config',id);
+})();
+window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',name,params||{}); }catch(e){} };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px;
+    --tap-min:44px; --content-max:640px;
+    --font-display:"M PLUS Rounded 1c",sans-serif;
+    --font-body:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;
+    --bg:#FFF6E5; --surface:#FFFFFF; --ink:#1B1B1F; --ink-soft:#6B6660; --line:#1B1B1F;
+    --accent:#FFD400; --accent-2:#E5484D; --radius:16px;
+    --pink:#FF3EA5; --cyan:#00D4FF; --yellow:#FFE000; --lime:#7FE000; --orange:#FF7A00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    font-family:var(--font-body); color:var(--ink); background:var(--pink);
+    min-height:100dvh; line-height:1.6; font-feature-settings:"palt";
+    -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none;
+    overflow-x:hidden; touch-action:manipulation;
+  }
+  body::before{
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,.18) 6px, transparent 6px),
+      radial-gradient(circle, rgba(0,212,255,.15) 4px, transparent 4px);
+    background-size:80px 80px, 40px 40px; background-position:0 0, 20px 20px;
+    transition:background-color .6s;
+  }
+  .num{font-variant-numeric:tabular-nums;}
+  :focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
+
+  .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:18px 12px 40px;}
+  header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;}
+  .logo{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(18px,5vw,26px);letter-spacing:.06em;
+    color:#fff;background:var(--ink);padding:6px 14px;border:3px solid #fff;box-shadow:4px 4px 0 #fff;
+    text-decoration:none;line-height:1.2;
+  }
+  .logo small{display:block;font-size:10px;letter-spacing:.3em;font-weight:800;color:var(--accent);}
+  .scores{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}   /* ★OWNERチップが増えてもスマホ幅で折り返す */
+  @media (max-width:430px){ .chip{padding:4px 9px;} }
+  .chip{
+    background:#fff;border:3px solid var(--ink);border-radius:999px;padding:4px 12px;
+    font-weight:900;font-size:clamp(12px,3.4vw,15px);box-shadow:3px 3px 0 var(--ink);white-space:nowrap;
+  }
+  .chip b{color:var(--accent-2);}
+  .chip.owner{background:linear-gradient(135deg,#FFE27A,#E0A800);}
+  .chip[hidden]{display:none;}
+  .ownermode{flex-basis:100%;width:fit-content;margin:6px auto 0;font-family:inherit;font-weight:900;font-size:12px;color:var(--ink);background:linear-gradient(135deg,#FFE27A,#E0A800);border:2px solid var(--ink);border-radius:999px;padding:5px 14px;box-shadow:2px 2px 0 var(--ink);cursor:pointer;line-height:1.3;}
+  .ownermode small{display:block;font-size:10px;font-weight:800;}
+  .ownermode.off{background:#fff;}
+  .ownermode[hidden]{display:none;}
+  .char-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;font-weight:900;font-size:12px;color:#fff;text-shadow:1px 1px 0 var(--ink);flex-wrap:wrap;}
+  .char-bar > span{white-space:nowrap;}
+  .trait{flex-basis:100%;text-align:center;font-size:12px;font-weight:900;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 12px;box-shadow:2px 2px 0 var(--ink);margin:2px auto 0;width:fit-content;}
+  .char-bar[hidden]{display:none;}
+  .char-select{display:flex;gap:6px;pointer-events:auto;flex-wrap:wrap;justify-content:center;}
+  .char-select a{font-weight:900;font-size:12px;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 12px;text-decoration:none;box-shadow:2px 2px 0 var(--ink);}
+  .char-select a.on{background:var(--accent);}
+  .sponsor{pointer-events:auto;font-size:11px;font-weight:900;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:999px;padding:2px 10px;text-decoration:none;position:absolute;right:10px;bottom:8px;}
+  .sponsor[hidden]{display:none;}
+
+  .card{
+    position:relative;background:var(--surface);border:3px solid var(--ink);border-radius:var(--radius);
+    box-shadow:6px 6px 0 var(--ink);overflow:hidden;
+  }
+  canvas{display:block;width:100%;aspect-ratio:720/300;cursor:pointer;touch-action:none;background:#FFE0F1;}
+
+  /* スマホ用しゃがみボタン：タッチ端末のみ表示。押している間しゃがむ */
+  .duck-btn{
+    display:none;width:100%;margin-top:14px;min-height:56px;padding:10px 14px;border-radius:999px;
+    background:#fff;border:3px solid var(--ink);box-shadow:0 5px 0 var(--ink);
+    font-family:inherit;font-weight:900;font-size:16px;color:var(--ink);touch-action:none;user-select:none;-webkit-user-select:none;
+  }
+  .duck-btn.on{background:var(--accent-2);color:#fff;transform:translateY(3px);box-shadow:0 1px 0 var(--ink);}
+  @media (hover:none) and (pointer:coarse){ .duck-btn{display:block;} }
+  .overlay{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;text-align:center;padding:12px;pointer-events:none;
+  }
+  .overlay.hide{display:none;}
+  .ttl{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(22px,7vw,44px);line-height:1.05;
+    color:#fff;-webkit-text-stroke:1.5px var(--ink);
+    text-shadow:3px 3px 0 var(--ink);letter-spacing:.02em;
+    animation:bob 1.6s ease-in-out infinite;
+  }
+  .ttl span{color:var(--accent);}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+  .sub{font-weight:900;font-size:clamp(12px,3.6vw,16px);background:#fff;border:3px solid var(--ink);
+       border-radius:999px;padding:4px 14px;box-shadow:3px 3px 0 var(--ink);}
+  .btn{
+    pointer-events:auto;min-height:var(--tap-min);font-family:inherit;font-weight:900;font-size:clamp(14px,4vw,18px);
+    padding:10px 26px;border-radius:999px;border:3px solid var(--ink);cursor:pointer;color:var(--ink);
+    box-shadow:0 5px 0 var(--ink);transition:transform .12s,box-shadow .12s;background:#fff;
+  }
+  .btn.main{background:var(--accent);}
+  .btn:active{transform:translateY(3px) scale(.97);box-shadow:0 2px 0 var(--ink);}
+  .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;pointer-events:auto;}
+  .result{
+    background:#fff;border:3px solid var(--ink);border-radius:var(--radius);box-shadow:4px 4px 0 var(--ink);
+    padding:8px 20px;font-weight:900;font-size:clamp(13px,3.8vw,18px);
+  }
+  .result .big{font-size:clamp(28px,9vw,52px);line-height:1;color:var(--accent-2);display:block;}
+  .result .new{display:inline-block;background:var(--accent);border:2px solid var(--ink);border-radius:8px;
+               padding:0 8px;font-size:12px;margin-left:6px;transform:rotate(-4deg);}
+  .result .new[hidden]{display:none;}
+  .gameover .ttl{animation:none;color:var(--accent-2);}
+
+  .help{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-weight:800;font-size:12px;}
+  .help span{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 12px;box-shadow:2px 2px 0 var(--ink);}
+  .help kbd{font-family:inherit;background:var(--accent);padding:0 5px;border-radius:5px;border:1.5px solid var(--ink);}
+  footer{margin-top:18px;text-align:center;font-size:11px;font-weight:800;color:#fff;text-shadow:1px 1px 0 var(--ink);}
+  footer a{color:#fff;}
+
+  /* ランキング */
+  .rank-box{display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:auto;}
+  .rank-form{display:flex;gap:6px;align-items:center;}
+  .rank-form input{
+    width:min(46vw,170px);min-height:var(--tap-min);padding:6px 12px;border:3px solid var(--ink);border-radius:999px;
+    font-family:inherit;font-weight:900;font-size:15px;background:#fff;color:var(--ink);
+  }
+  .rank-msg{font-weight:900;font-size:clamp(12px,3.6vw,15px);background:#fff;border:3px solid var(--ink);border-radius:999px;padding:3px 14px;box-shadow:3px 3px 0 var(--ink);}
+  .rank-msg b{color:var(--accent-2);}
+  .btn.sm{padding:8px 16px;font-size:14px;}
+  /* GAME OVER の中のシェア。ハイスコアのときだけ黄色くして目を引かせる */
+  .share-here{background:#fff;}
+  .gameover.newrec .share-here{background:var(--accent-2,#FFD400);animation:pulse 1.1s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  @media(prefers-reduced-motion:reduce){.gameover.newrec .share-here{animation:none}}
+  .rank-menu{background:#fff;border-radius:22px 22px 0 0;padding:18px 18px 28px;width:min(480px,100%);max-height:85vh;overflow:auto;}
+  @media(min-width:600px){ .rank-menu{border-radius:22px;border:3px solid var(--ink);} }
+  .rank-tabs{display:flex;gap:6px;justify-content:center;margin:4px 0 2px;}
+  .rank-tabs button{font-family:inherit;font-weight:900;font-size:13px;padding:4px 16px;border-radius:999px;border:2px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;min-height:32px;}
+  .rank-tabs button.on{background:var(--accent);}
+  .rank-week{text-align:center;font-size:11px;font-weight:800;color:var(--ink-soft);margin-bottom:4px;}
+  .rank-list .own{color:#E0A800;margin-right:3px;text-shadow:0 0 0 #E0A800;}
+  .rank-list{list-style:none;display:flex;flex-direction:column;gap:4px;margin:10px 0;}
+  .rank-list li{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;font-weight:900;font-size:15px;}
+  .rank-list li.me{background:#FFF3B0;border:2px solid var(--ink);}
+  .rank-list li:nth-child(1) .rk{color:#D4A200;} .rank-list li:nth-child(2) .rk{color:#8A8A8A;} .rank-list li:nth-child(3) .rk{color:#B4632B;}
+  .rank-list .rk{font-size:14px;} .rank-list .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rank-list .sc{color:var(--accent-2);}
+  .rank-foot{text-align:center;font-size:12px;font-weight:800;color:var(--ink-soft);}
+  .perk{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#FFF3B0,#FFE27A);border:3px solid var(--ink);border-radius:var(--radius);box-shadow:4px 4px 0 var(--ink);padding:8px 14px;text-decoration:none;color:var(--ink);max-width:420px;}
+  .perk img{width:56px;height:56px;object-fit:contain;background:#fff;border:2px solid var(--ink);border-radius:12px;}
+  .perk b{display:block;font-size:13px;line-height:1.3;} .perk small{display:block;font-size:11px;font-weight:800;color:var(--ink-soft);}
+  .perk[hidden]{display:none;}
+  .btn.like{background:#fff;} .btn.like[aria-pressed="true"]{background:#FFE1E3;} .btn.like b{color:var(--accent-2);}
+  .over-panel{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:14px;}
+  .over-panel[hidden],.rank-form[hidden],.rank-box[hidden],.btn[hidden],.rank-msg[hidden]{display:none;}
+  .gameover{gap:6px;}
+  .gameover .result{padding:4px 18px;}
+  .gameover .result .big{font-size:clamp(24px,7vw,40px);}
+  .gameover .ttl{font-size:clamp(18px,5.5vw,34px);}
+  .share-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:700;display:none;align-items:flex-end;justify-content:center;}
+  .share-overlay.open{display:flex;}
+  .share-menu{background:#fff;border-radius:22px 22px 0 0;padding:20px 22px 30px;width:min(480px,100%);}
+  @media(min-width:600px){ .share-overlay{align-items:center;} .share-menu{border-radius:22px;border:3px solid var(--ink);} }
+  .share-title{font-weight:900;font-size:15px;margin-bottom:14px;text-align:center;}
+  .share-grid{display:flex;flex-direction:column;gap:6px;}
+  .share-opt{display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:800;color:var(--ink);padding:10px 8px;border-radius:12px;width:100%;min-height:var(--tap-min);}
+  .share-opt:hover{background:#f5f5f5;}
+  .share-ic{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
+
+  @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation:none!important;transition:none!important;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="logo" href="https://charamarl.com/?utm_source=charamarl_run" title="グッズページへ">CHARAMARL<small>RUN</small></a>
+    <div class="scores">
+      <div class="chip num">SCORE <b id="scoreNow">0</b></div>
+      <div class="chip num">HI <b id="scoreHi">0</b></div>
+      <div class="chip owner" id="ownerChip" hidden>★ OWNER</div>
+    </div>
+  </header>
+
+  <div class="card" id="card">
+    <canvas id="game" width="720" height="300" aria-label="CHARAMARL RUN ゲーム画面"></canvas>
+
+    <div class="overlay" id="startOv">
+      <div class="ttl">CHARAMARL <span>RUN</span></div>
+      <div class="sub">タップ / スペースで スタート！</div>
+      <button class="btn main" id="startBtn" type="button">▶ はしる！</button>
+      <button class="btn sm" id="rankBtnTitle" type="button">🏆 ランキング</button>
+      <a class="sponsor" id="sponsor" target="_blank" rel="noopener" hidden></a>
+    </div>
+
+    <div class="overlay gameover hide" id="overOv">
+      <div class="ttl">GAME OVER</div>
+      <div class="result num">SCORE<span class="big" id="finalScore">0</span><span id="newHi" class="new" hidden>NEW RECORD!</span></div>
+      <!-- シェアはここに置く。下の操作パネルはスマホだと画面の外に出ていて、
+           しかも「タップでもう一回」に従うと即リスタートするので、
+           930プレイでシェアが3件しか出ていなかった（2026-09-20 実測して移動）。 -->
+      <button class="btn sm share-here" id="shareBtnOver" type="button">🚀 スコアをシェア</button>
+      <div class="sub">画面をタップでもう一回</div>
+    </div>
+  </div>
+
+  <!-- キャラ選択（キャンバスの外。切り替えはページ移動） -->
+  <div class="char-bar" id="charBar"><span>キャラ</span><div class="char-select" id="charSelect" aria-label="キャラクターをえらぶ"></div><div class="trait" id="traitLabel"></div><button type="button" class="ownermode" id="ownerMode" hidden>★ オーナーモード <b id="ownerModeState">ON</b><small id="ownerModeHint"></small></button></div>
+
+  <!-- ゲームオーバー後の操作パネル（キャンバスの外に出してスマホでもはみ出さない） -->
+  <div class="over-panel" id="overPanel" hidden>
+    <div class="rank-box" id="rankBox">
+      <div class="rank-form" id="rankForm">
+        <input id="rankName" type="text" maxlength="12" placeholder="ニックネーム" autocomplete="nickname" enterkeyhint="done">
+        <button class="btn sm" id="rankSubmit" type="button">🏆 登録</button>
+      </div>
+      <div class="rank-msg num" id="rankMsg" hidden></div>
+      <button class="btn sm" id="rankRename" type="button" hidden>✎ 名前を変える</button>
+    </div>
+    <a class="perk" id="perk" target="_blank" rel="noopener" hidden>
+      <img id="perkImg" alt="" width="56" height="56">
+      <span><b>NFCアクキーを持ってると、金の世界からスタートできる</b><small>かざして開いたページから遊ぶと ★OWNER 特典</small></span>
+    </a>
+    <div class="row">
+      <button class="btn sm like" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span> <span id="likeLb">いいね</span> <b class="num" id="likeCt"></b></button>
+    </div>
+    <div class="row">
+      <button class="btn main" id="retryBtn" type="button">↻ もう一回</button>
+      <button class="btn" id="shareBtn" type="button">🚀 シェア</button>
+      <button class="btn" id="rankBtnOver" type="button">🏆 順位表</button>
+    </div>
+  </div>
+
+  <button class="duck-btn" id="duckBtn" type="button" aria-label="しゃがむ（長押し）">⬇︎ 長押しで しゃがむ</button>
+
+  <div class="help">
+    <span>タップ / <kbd>SPACE</kbd> ジャンプ</span>
+    <span><kbd>↓</kbd> / 下スワイプ / ボタン長押し しゃがむ</span>
+    <span>100点ごとに世界の色がかわる</span>
+    <span>★を取ると15秒 空を飛べて点が2倍（押して上昇・ライバルにぶつかると飛行おわり）</span>
+    <span>ライバルをかわすと +10</span>
+  </div>
+  <footer id="credit">© CHARAMARL</footer>
+</div>
+
+<div class="share-overlay" id="rankOverlay">
+  <div class="rank-menu">
+    <div class="share-title">🏆 RANKING <span id="rankChar"></span></div>
+    <div class="rank-tabs"><button type="button" class="on" data-scope="week">今週</button><button type="button" data-scope="all">累計</button><button type="button" data-scope="own">★オーナー</button></div>
+    <div class="rank-week" id="rankWeek"></div>
+    <ol class="rank-list" id="rankList"><li><span class="rk">…</span><span class="nm">読み込み中</span><span></span></li></ol>
+    <div class="rank-foot" id="rankFoot"></div>
+  </div>
+</div>
+<div class="share-overlay" id="shareOverlay">
+  <div class="share-menu">
+    <div class="share-title">シェアする</div>
+    <div class="share-grid">
+      <button class="share-opt" data-sh="x"><span class="share-ic" style="background:#111;color:#fff">𝕏</span>X</button>
+      <button class="share-opt" data-sh="line"><span class="share-ic" style="background:#06C755;color:#fff">LINE</span>LINE</button>
+      <button class="share-opt" data-sh="copy"><span class="share-ic" style="background:#f0f0f0">🔗</span><span id="shCopyLb">リンクをコピー</span></button>
+      <button class="share-opt" data-sh="native" id="shNative"><span class="share-ic" style="background:#f0f0f0">📲</span>その他</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ================= キャラ設定（差し替えはここだけ） =================
+  // RUN_DIR : 主人公が走る向き 'right'（左→右。障害物は右から来る）/ 'left'（右→左）
+  // sprite  : 正方形・背景透過PNG / facing : その絵の体の向き（走る向きと違えば自動で反転）
+  // 例) 別キャラにするとき: { name:'XXX', sprite:'../run-art/xxx.png', facing:'right', credit:'XXX by ...' }
+  // name    : シェア文・OGに使う名前 / credit : フッターのクレジット
+  const RUN_DIR = 'right';
+  // キャラ一覧: ?char=xxx で切り替え（作家キャラ版はここに追加＋CHARAMARLのrun-score APIの許可リストにも追加）
+  //   shop    : ホームボタンのリンク先（アクキー販売ページ）
+  //   sponsor : スポンサー枠（任意）{ name, url } → タイトル画面に「presented by」を表示
+  //   id      : API・保存キー用(英字)。name : 表示名。artist : クレジット
+  //   敵役は「主人公以外のキャラ」がランダムで飛んでくる(enemySize で大きさ調整)
+  const CHARS = {
+    sue:       { id:'SUE',       name:'SUE',           sprite:'../run-art/sue_pixel.png',     facing:'right', artist:'DinoRenny',     enemySize:80,
+                 trait:{ label:'オールラウンダー' }, like:'sue',
+                 shop:'https://charamarl.com/tap/sue.html?utm_source=charamarl_run',            goods:'https://charamarl.com/img/products_t/sue_red.png' },
+    gmc:       { id:'GMC',       name:'レコマル',       sprite:'../run-art/run_gmc.png',       facing:'left',  artist:'MARU',          enemySize:78,
+                 trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:'gmc',
+                 shop:'https://charamarl.com/characters/gmc.html?utm_source=charamarl_run',     goods:'https://charamarl.com/img/products_t/gmc_red.png' },
+    ufoo:      { id:'UFOO',      name:'う〜ほ〜',       sprite:'../run-art/run_ufoo.png',      facing:'right', artist:'ちゅい',         enemySize:78,
+                 trait:{ label:'ふわっと長く跳べる', grav:.82 }, like:'g01544b48f170',
+                 shop:'https://charamarl.com/characters/ufoo.html?utm_source=charamarl_run',    goods:'https://charamarl.com/img/products_t/ufoo_white.png' },
+    kagechiyo: { id:'KAGECHIYO', name:'カゲチヨ',       sprite:'../run-art/run_kagechiyo.png', facing:'right', artist:'カゲチヨ',       enemySize:82,
+                 trait:{ label:'すばしっこい（ギリギリでかわせる）', hit:.82 }, like:'g8d69be3f1e86',
+                 shop:'https://charamarl.com/tap/kagechiyo.html?utm_source=charamarl_run',      goods:'https://charamarl.com/img/products_t/kagechiyo_hoodie_front.png' },
+    yurucrazy: { id:'YURUCRAZY', name:'ユルクレイジー', sprite:'../run-art/run_yurucrazy.png', facing:'left',  artist:'CRAZY',         enemySize:84,
+                 trait:{ label:'最速ランナー（同じ時間で点が多く入る）', speed:1.1 }, like:'gcc4fb65e4f7a',
+                 shop:'https://charamarl.com/characters/yurucrazy.html?utm_source=charamarl_run', goods:'https://charamarl.com/img/products_t/yurucrazy.png' },
+    dogooooo:  { id:'DOGOOOOO',  name:'ドグー',         sprite:'../run-art/run_dogooooo.png',  facing:'right', artist:'SAYoooooh',     enemySize:80,
+                 trait:{ label:'★の飛行が長い（+5秒）', fly:5 }, like:'g9487847a10e8',
+                 shop:'https://charamarl.com/characters/dogooooo.html?utm_source=charamarl_run', goods:'https://charamarl.com/img/products_t/dogooooo_pink.png' },
+    inkumo:    { id:'INKUMO',    name:'インクモ',       sprite:'../run-art/run_inkumo.png?v=2', facing:'right', artist:"Ink'z Monster", enemySize:82,
+                 trait:{ label:'★が近くに来る（取りやすい）', starY:30 }, like:'gf25715341b4f',
+                 shop:'https://charamarl.com/characters/inkumo.html?utm_source=charamarl_run',   goods:'https://charamarl.com/img/products_t/inkumo.png' },
+    danna:     { id:'DANNA',     name:'だんな',         sprite:'../run-art/run_danna.png',     facing:'right', artist:'赤猫かるま',     enemySize:80,
+                 trait:{ label:'タフ（着地後しばらく無敵）', grace:180 }, like:'g689e0d8a3b5b',
+                 shop:'https://charamarl.com/characters/danna.html?utm_source=charamarl_run',    goods:'https://charamarl.com/img/products_t/danna_blue.png' },
+    blockma:   { id:'BLOCKMA',   name:'ぶろっくま',     sprite:'../run-art/run_blockma.png?v=2', facing:'right', artist:'チンチロ',       enemySize:78,
+                 trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:'g53905fbdc117',
+                 shop:'https://charamarl.com/characters/blockma.html?utm_source=charamarl_run',  goods:'https://charamarl.com/img/products_t/blockma.png' },
+    mony:      { id:'MONY',      name:'モニィ',        sprite:'../run-art/run_mony.png',      facing:'left',  artist:'morry',         enemySize:80,
+                 trait:{ label:'マイペース（長く走りやすい）', ramp:230 }, like:'gfcb2fe5a8952',
+                 shop:'https://charamarl.com/characters/mony.html?utm_source=charamarl_run',     goods:'https://charamarl.com/img/products_t/mony.png' },
+  };
+  // キャラ特性(trait)の既定値。数値を変えるだけで調整できる
+  //   jump: ジャンプ力倍率 / grav: 重力倍率 / hit: 当たり判定の大きさ倍率 / speed: 走る速さ倍率(点も増える)
+  //   fly: ★飛行の追加秒 / starY: ★の高さ(+で低く) / grace: 着地後の無敵フレーム / shield: 1回だけ耐える / ramp: 速度上昇のゆるさ(大きいほどゆるい)
+  const charKey = (new URLSearchParams(location.search).get('char') || 'sue').toLowerCase();
+  const CHAR  = CHARS[charKey] || CHARS.sue;
+  CHAR.credit = `${CHAR.name} by ${CHAR.artist}`;
+  const T = Object.assign({ label:'', jump:1, grav:1, hit:1, speed:1, fly:0, starY:0, grace:90, shield:false, ramp:180 }, CHAR.trait || {});
+  const RIVALS = Object.keys(CHARS).filter(k => CHARS[k] !== CHAR);   // 敵役の候補(主人公以外)
+  // 星の飛行(500点ごとに★が飛来。取ると FLY_SEC 秒間、障害物を無視して空を飛べる)
+  const STAR_EVERY = 500, FLY_SEC = 15;
+  const FLY_MULT = 2;          // 飛行中はスコア2倍
+  const FLY_HIT = 'drop';      // 飛行中にライバルにぶつかったら: 'drop'=飛行が終わる(ゲームオーバーにならない) / 'ignore'=素通り
+  const DODGE_BONUS = 10;      // ライバルをかわしたときのボーナス点
+  const DIR = RUN_DIR === 'right' ? 1 : -1;   // 主人公の進行方向。世界は -DIR に流れる
+  // NFCアクキー所有者特典: ?owner=<token> をAPIで検証 → 端末に記憶 → 金のオーラ＋GOLD WORLDから開始
+  const OWNER_KEY = 'dr_run_owner_' + CHAR.id, OWNER_TOK_KEY = 'dr_run_owner_tok_' + CHAR.id;
+  let isOwner = false, ownerTok = '';   // ownerTok はランキング登録時に送り、サーバーが★オーナー印と所有者ランキングに使う
+  try { isOwner = localStorage.getItem(OWNER_KEY) === '1'; ownerTok = localStorage.getItem(OWNER_TOK_KEY) || ''; } catch(e){}
+  // ================= 設定 =================
+  let W = 720; const H = 300, GROUND = 248;   // スマホでは W を狭めて縦長に
+  const SPRITE_SRC = CHAR.sprite;
+  const HI_KEY = 'dr_run_hi_' + CHAR.id;
+  // ランキングAPI(CHARAMARLのVercel/Upstash Redis)。空文字にするとランキング機能ごと非表示
+  const RANK_API = '/api/run-score';
+  // サーバー側の実数カウント(play/over/share/shop)。内部端末は送らない
+  function beacon(event, extra){
+    if (!RANK_API || window.DR_INTERNAL) return;
+    try{ const body = JSON.stringify(Object.assign({ char: CHAR.id, event }, extra || {}));
+      // text/plain で送る(JSON型だとChromeがクロスオリジンのsendBeaconを拒否する)。サーバー側で文字列を解釈
+      if (!(navigator.sendBeacon && navigator.sendBeacon(RANK_API, body)))
+        fetch(RANK_API, { method:'POST', headers:{ 'Content-Type':'text/plain' }, body, keepalive:true }).catch(()=>{}); }catch(e){}
+  }
+  // ★オーナーモードの状態(IIFEより前に宣言しておく。トークン無しで所有者フラグだけある端末では同期的に initOwnerMode が呼ばれるため)
+  const OWNER_MODE_KEY = 'dr_run_ownermode_' + CHAR.id;
+  let ownerMode = false;
+  (async () => {
+    const tok = new URLSearchParams(location.search).get('owner');
+    if (tok && RANK_API){
+      try{
+        const r = await fetch(`${RANK_API}?char=${encodeURIComponent(CHAR.id)}&owner=${encodeURIComponent(tok)}`);
+        const d = await r.json();
+        if (d && d.owner){ isOwner = true; ownerTok = tok; try{ localStorage.setItem(OWNER_KEY, '1'); localStorage.setItem(OWNER_TOK_KEY, tok); }catch(e){} drEvent('owner_unlock', { character: CHAR.id }); }
+      }catch(e){}
+    }
+    if (isOwner){ document.getElementById('ownerChip').hidden = false; initOwnerMode(); }
+  })();
+  // ★オーナーモード(持ち主だけ): 二段ジャンプ＋金の★。点数は★オーナーの順位表にだけ入る(通常の今週/累計には入らない)。OFFにすれば通常どおり
+  function applyOwnerMode(){
+    const btn = document.getElementById('ownerMode');
+    btn.classList.toggle('off', !ownerMode); btn.setAttribute('aria-pressed', ownerMode ? 'true' : 'false');
+    document.getElementById('ownerModeState').textContent = ownerMode ? 'ON' : 'OFF';
+    document.getElementById('ownerModeHint').textContent = ownerMode ? '二段ジャンプ・金の★・記録は★オーナー順位表へ' : 'OFF: 通常ルールで今週/累計の順位表へ';
+    document.getElementById('traitLabel').textContent = `${CHAR.name}：${T.label}` + (ownerMode ? '＋二段ジャンプ（★オーナー）' : '');
+  }
+  function initOwnerMode(){
+    try{ ownerMode = localStorage.getItem(OWNER_MODE_KEY) !== '0'; }catch(e){ ownerMode = true; }
+    const btn = document.getElementById('ownerMode'); btn.hidden = false; applyOwnerMode();
+    btn.addEventListener('click', () => { if (S.state === 'play') return; ownerMode = !ownerMode; try{ localStorage.setItem(OWNER_MODE_KEY, ownerMode ? '1' : '0'); }catch(e){} applyOwnerMode(); drEvent('owner_mode', { character: CHAR.id, on: ownerMode ? 1 : 0 }); });
+  }
+  const creditEl = document.getElementById('credit'); if (creditEl) creditEl.textContent = '© CHARAMARL / ' + CHAR.credit;
+  const logoEl = document.querySelector('.logo'); if (logoEl && CHAR.shop) logoEl.href = CHAR.shop;
+  if (logoEl) logoEl.addEventListener('click', () => { drEvent('shop_click', { character: CHAR.id }); beacon('shop'); });
+  const perkEl = document.getElementById('perk');
+  if (CHAR.goods && CHAR.shop && !isOwner){ perkEl.hidden = false; perkEl.href = CHAR.shop; document.getElementById('perkImg').src = CHAR.goods;
+    perkEl.addEventListener('click', () => { drEvent('perk_click', { character: CHAR.id }); beacon('shop'); }); }
+  document.title = 'CHARAMARL RUN | ' + CHAR.name;
+  document.getElementById('traitLabel').textContent = `${CHAR.name}：${T.label}`;
+  document.getElementById('charSelect').innerHTML = Object.keys(CHARS).map(k => `<a href="?char=${k}" class="${k === charKey ? 'on' : ''}">${CHARS[k].name}</a>`).join('');
+  if (CHAR.sponsor){ const sp = document.getElementById('sponsor'); sp.hidden = false; sp.href = CHAR.sponsor.url || '#'; sp.textContent = 'presented by ' + CHAR.sponsor.name; }
+  // 100点ごとに切り替わる世界の色（DinoRennyパレット）
+  const WORLDS = [
+    { sky:['#FFE0F1','#FF9BD3'], ground:'#FF3EA5', far:'#FFB3DE', cactus:'#00D4FF', cactus2:'#7FE000', page:'#FF3EA5', name:'NEON PINK' },
+    { sky:['#DFF9FF','#7FE6FF'], ground:'#00D4FF', far:'#A6EEFF', cactus:'#FF3EA5', cactus2:'#FFE000', page:'#00D4FF', name:'ICE CYAN' },
+    { sky:['#FFF9C4','#FFE55C'], ground:'#FFE000', far:'#FFF1A6', cactus:'#E8302A', cactus2:'#00D4FF', page:'#FFE000', name:'SUNNY YELLOW' },
+    { sky:['#EAFFC9','#B9F56A'], ground:'#7FE000', far:'#D6FF9E', cactus:'#FF3EA5', cactus2:'#FF7A00', page:'#7FE000', name:'SLIME GREEN' },
+    { sky:['#FFE7CC','#FFB066'], ground:'#FF7A00', far:'#FFCF9E', cactus:'#00D4FF', cactus2:'#FF3EA5', page:'#FF7A00', name:'BLAZE ORANGE' },
+    { sky:['#E4E0FF','#9C8CFF'], ground:'#6C4BFF', far:'#C6BDFF', cactus:'#FFE000', cactus2:'#00D4FF', page:'#6C4BFF', name:'GALAXY PURPLE' },
+  ];
+  const GOLD = { sky:['#FFF6D5','#FFD65C'], ground:'#E0A800', far:'#FFE9A0', cactus:'#1B1B1F', cactus2:'#FF3EA5', page:'#E0A800', name:'GOLD OWNER' };
+  const worldAt = i => ((isOwner && (i === 0 || S.goldFly || S.score < S.goldUntil)) || S.goldPreview > 0) ? GOLD : WORLDS[i];   // 所有者は最初の100点＋金の★の飛行中＋着地後100点がGOLD WORLD。非所有者はゲームオーバー時に数秒だけチラ見せ
+
+  // ================= DOM =================
+  const cv = document.getElementById('game');
+  const ctx = cv.getContext('2d');
+  const startOv = document.getElementById('startOv');
+  const overOv = document.getElementById('overOv');
+  const scoreNowEl = document.getElementById('scoreNow');
+  const scoreHiEl = document.getElementById('scoreHi');
+  const finalEl = document.getElementById('finalScore');
+  const newHiEl = document.getElementById('newHi');
+
+  // HiDPI
+  function fit(){
+    W = window.innerWidth < 600 ? 520 : 720;
+    dino.x = DIR > 0 ? 80 : W - 200;
+    cv.style.aspectRatio = W + '/' + H;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  // ================= スプライト =================
+  const sprite = { img:null, ready:false, canvas:null, w:0, h:0 };
+  const im = new Image();
+  im.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = im.naturalWidth; c.height = im.naturalHeight;
+    const g = c.getContext('2d');
+    if (CHAR.facing !== RUN_DIR){ g.translate(c.width, 0); g.scale(-1, 1); }   // 走る向きに合わせて反転
+    g.drawImage(im, 0, 0);   // 左向きの絵はそのまま（サインが鏡文字にならないよう、世界の方を左→右に流す）
+    sprite.canvas = c; sprite.w = c.width; sprite.h = c.height; sprite.ready = true;
+  };
+  im.src = SPRITE_SRC;
+  // 敵役(主人公以外の全キャラ)を先読み。主人公と逆向きに揃える
+  const enemies = {};
+  RIVALS.forEach(k => {
+    const ch = CHARS[k], e = { canvas:null, ready:false, size: ch.enemySize || 78 }; enemies[k] = e;
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const g = c.getContext('2d');
+      if (ch.facing === RUN_DIR){ g.translate(c.width, 0); g.scale(-1, 1); }
+      g.drawImage(img, 0, 0); e.canvas = c; e.ready = true;
+    };
+    img.src = ch.sprite;
+  });
+  function endGoldFly(){ if (S.goldFly){ S.goldFly = false; S.goldUntil = S.score + 100; } }   // 金の★の飛行が終わったら、さらに100点は金の世界
+  // ★スター(飛行アイテム)の描画用パス
+  function drawStar(cx, cy, r, rot){
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++){ const a = rot + i * Math.PI / 5 - Math.PI/2, rr2 = i % 2 ? r * .45 : r; ctx.lineTo(cx + Math.cos(a) * rr2, cy + Math.sin(a) * rr2); }
+    ctx.closePath();
+  }
+
+  // ================= 音（WebAudio・小さなビープ） =================
+  let ac = null;
+  function beep(freq, dur, type='square', vol=.08, slide=0){
+    try{
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, ac.currentTime);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), ac.currentTime + dur);
+      g.gain.setValueAtTime(vol, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+      o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime + dur);
+    }catch(e){}
+  }
+
+  // ================= ゲーム状態 =================
+  const S = { state:'title', t:0, speed:6, dist:0, score:0, hi:0, worldIdx:0, worldMix:0, shake:0, fly:0, nextStar:STAR_EVERY, hold:false, grace:0, shieldUsed:false, goldPreview:0, dodges:0, goldFly:false, goldUntil:0 };
+  let star = null;   // 飛来中の★ {x,y,rot,t}
+  const dino = { x:80, y:GROUND, vy:0, size:118, duck:false, onGround:true, runT:0, squash:0 };
+  fit(); window.addEventListener('resize', fit);
+  let obstacles = [], clouds = [], particles = [], flashes = [], hills = [];
+  let spawnGap = 0, lastFrame = 0;
+
+  try { S.hi = +localStorage.getItem(HI_KEY) || 0; } catch(e){}
+  scoreHiEl.textContent = S.hi;
+
+  function resetWorld(){
+    obstacles = []; particles = []; flashes = [];
+    clouds = Array.from({length:5}, (_,i) => ({ x:i*180 + Math.random()*120, y:30 + Math.random()*90, s:.7 + Math.random()*.8 }));
+    hills = Array.from({length:7}, (_,i) => ({ x:i*140, w:120 + Math.random()*120, h:40 + Math.random()*70 }));
+    spawnGap = 60;
+  }
+  resetWorld();
+
+  function start(){
+    S.state = 'play'; S.t = 0; S.speed = 6; S.dist = 0; S.score = 0; S.worldIdx = 0; S.worldMix = 0; S.shake = 0; S.fly = 0; S.nextStar = STAR_EVERY; S.hold = false; S.grace = 0; S.shieldUsed = false; S.goldPreview = 0; S.dodges = 0; S.goldFly = false; S.goldUntil = 0; star = null;
+    dino.y = GROUND; dino.vy = 0; dino.duck = false; dino.onGround = true; dino.squash = 0; dino.dj = false;
+    resetWorld();
+    startOv.classList.add('hide'); overOv.classList.add('hide'); document.getElementById('overPanel').hidden = true; document.getElementById('charBar').hidden = true;
+    setPageColor(worldAt(0).page);
+    beep(660, .12, 'square', .06, 300);
+    drEvent('game_start', { character: CHAR.id, owner: isOwner ? 1 : 0, mode: ownerMode ? 'owner' : 'normal' }); beacon('play');
+  }
+  function gameOver(){
+    S.state = 'over'; S.shake = 14; if (!isOwner) S.goldPreview = 240;   // 4秒だけ金の世界を見せる
+    beep(220, .35, 'sawtooth', .09, -160);
+    burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 28, ['#E5484D','#FFD400','#fff']);
+    if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+    finalEl.textContent = S.score;
+    const isNew = S.score > S.hi;
+    if (isNew){ S.hi = S.score; try{ localStorage.setItem(HI_KEY, S.hi); }catch(e){} scoreHiEl.textContent = S.hi; }
+    newHiEl.hidden = !isNew;
+    overOv.classList.toggle('newrec', isNew);   // ハイスコアのときだけシェアを目立たせる
+    drEvent('game_over', { character: CHAR.id, score: S.score, world: S.worldIdx, new_record: isNew ? 1 : 0 }); beacon('over');
+    setTimeout(() => { overOv.classList.remove('hide'); document.getElementById('overPanel').hidden = false; document.getElementById('charBar').hidden = false; }, 350);
+    onGameOverRank(S.score, isNew);
+  }
+  function jump(){
+    if (S.state !== 'play' || S.fly > 0) return;
+    if (dino.onGround){
+      dino.vy = (dino.duck ? -15 : -16.5) * T.jump; dino.onGround = false; dino.duck = false; dino.dj = false;
+      beep(520, .14, 'square', .05, 260);
+      burst(dino.x + dino.size*.6, GROUND, 8, ['#fff', '#FFD400']);
+    } else if (ownerMode && !dino.dj){   // ★オーナーモード: 空中でもう一回(二段ジャンプ)
+      dino.dj = true; dino.vy = -13.5 * T.jump;
+      beep(700, .12, 'square', .05, 320);
+      burst(dino.x + dino.size*.5, dino.y - dino.size*.35, 14, ['#FFD23F', '#fff', '#E0A800']);
+      flashes.push({ text:'二段ジャンプ！', life:30, small:true });
+    }
+  }
+  function setPageColor(c){ document.body.style.backgroundColor = c; }
+
+  // ================= 入力 =================
+  let swipeY = null;
+  function pressAction(){
+    if (S.state === 'title') start();
+    else if (S.state === 'play') jump();
+    else if (S.state === 'over' && !overOv.classList.contains('hide')) start();
+  }
+  cv.addEventListener('pointerdown', e => { e.preventDefault(); swipeY = e.clientY; S.hold = true; pressAction(); });
+  window.addEventListener('pointerup', () => { S.hold = false; }); window.addEventListener('pointercancel', () => { S.hold = false; });
+  document.getElementById('startBtn').addEventListener('click', start);
+  document.getElementById('retryBtn').addEventListener('click', start);
+  window.addEventListener('keydown', e => {
+    if (e.code === 'Space' || e.code === 'ArrowUp'){ e.preventDefault(); S.hold = true; if (!e.repeat) pressAction(); }
+    if (e.code === 'ArrowDown'){ e.preventDefault(); if (S.state==='play'){ dino.duck = true; if(!dino.onGround) dino.vy += 2.5; } }
+  });
+  window.addEventListener('keyup', e => { if (e.code === 'ArrowDown') dino.duck = false; if (e.code === 'Space' || e.code === 'ArrowUp') S.hold = false; });
+  // スマホ：しゃがみボタンを押している間しゃがむ（空中なら急降下）
+  const duckBtn = document.getElementById('duckBtn');
+  const duckOn  = e => { e.preventDefault(); e.stopPropagation(); if (S.state!=='play') return; dino.duck = true; if(!dino.onGround) dino.vy += 2.5; duckBtn.classList.add('on'); };
+  const duckOff = e => { dino.duck = false; duckBtn.classList.remove('on'); };
+  duckBtn.addEventListener('pointerdown', duckOn);
+  duckBtn.addEventListener('pointerup', duckOff);
+  duckBtn.addEventListener('pointercancel', duckOff);
+  duckBtn.addEventListener('pointerleave', duckOff);
+  duckBtn.addEventListener('contextmenu', e => e.preventDefault());
+  // キャンバス上で下スワイプしても、しゃがみ/急降下（指を離すまで）
+  cv.addEventListener('pointermove', e => { if (swipeY !== null && e.clientY - swipeY > 28 && S.state==='play'){ if(!dino.duck && !dino.onGround) dino.vy += 2.5; dino.duck = true; } });
+  const swipeEnd = () => { swipeY = null; if (!duckBtn.classList.contains('on')) dino.duck = false; };
+  cv.addEventListener('pointerup', swipeEnd); cv.addEventListener('pointercancel', swipeEnd);
+
+  // ================= 生成 =================
+  function spawnObstacle(){
+    const canBird = S.score >= 250 && Math.random() < .3;
+    if (canBird){
+      const lanes = [GROUND - 22, GROUND - 78, GROUND - 130];
+      const who = RIVALS[Math.floor(Math.random()*RIVALS.length)];
+      obstacles.push({ type:'bird', who, x:DIR > 0 ? W + 40 : -120, y:lanes[Math.floor(Math.random()*lanes.length)], w:64, h:50, flap:Math.random()*6 });
+    } else {
+      const big = Math.random() < .4;
+      const n = Math.random() < .55 ? 1 : (Math.random() < .6 || big ? 2 : 3);   // 大サボテンは最大2連
+      const h = big ? 66 + Math.random()*12 : 48 + Math.random()*12;
+      const w = big ? 36 : 28;
+      obstacles.push({ type:'cactus', x:DIR > 0 ? W + 40 : -(n*w + (n-1)*4) - 40, y:GROUND, w:n*w + (n-1)*4, h, n, single:w, big });
+    }
+  }
+  function burst(x, y, n, cols){
+    for (let i=0;i<n;i++){
+      const a = Math.random()*Math.PI*2, sp = 2 + Math.random()*5;
+      particles.push({ x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 2, life:40 + Math.random()*20, c:cols[i%cols.length], r:3 + Math.random()*4 });
+    }
+  }
+
+  // ================= 当たり判定 =================
+  function dinoBox(){
+    const s = dino.size;
+    const b = (dino.duck && dino.onGround) ? { x:dino.x + s*.22, y:GROUND - s*.45, w:s*.62, h:s*.45 } : { x:dino.x + s*.24, y:dino.y - s*.78, w:s*.52, h:s*.74 };
+    if (T.hit !== 1){ const dw = b.w*(1-T.hit), dh = b.h*(1-T.hit); b.x += dw/2; b.w -= dw; b.y += dh; b.h -= dh; }   // 小さいキャラは判定も小さく(足元基準)
+    return b;
+  }
+  function hit(a, b){ return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+
+  // ================= 更新 =================
+  function update(dt){
+    S.t += dt;
+    // 雲・丘はタイトル中も流す
+    const flow = -DIR * (S.state==='play' ? S.speed : 2);
+    clouds.forEach(c => { c.x += flow * .25 * dt * c.s; if (c.x > W + 80){ c.x = -140; c.y = 30 + Math.random()*90; } if (c.x < -140){ c.x = W + 80; c.y = 30 + Math.random()*90; } });
+    hills.forEach(h => { h.x += flow * .4 * dt; if (h.x > W + 20) h.x = -h.w - 20; if (h.x + h.w < -20) h.x = W + 20; });
+    particles.forEach(p => { p.x += p.vx*dt; p.y += p.vy*dt; p.vy += .25*dt; p.life -= dt; });
+    particles = particles.filter(p => p.life > 0);
+    flashes.forEach(f => f.life -= dt); flashes = flashes.filter(f => f.life > 0);
+    if (S.shake > 0) S.shake = Math.max(0, S.shake - dt*1.2);
+    if (S.goldPreview > 0){ S.goldPreview -= dt; if (S.goldPreview <= 0) S.goldPreview = 0; }
+
+    // 走りアニメ
+    dino.runT += dt * (S.state==='play' ? S.speed*.06 : .12);
+    if (dino.squash > 0) dino.squash = Math.max(0, dino.squash - dt*.12);
+
+    if (S.state !== 'play') return;
+
+    // 物理
+    if (S.fly > 0){
+      // 飛行中: 押している間は上昇、離すと下降。地面〜上端の間を自由に
+      S.fly -= dt; dino.onGround = false; dino.duck = false;
+      dino.vy += (S.hold ? -.9 : .7) * dt; dino.vy = Math.max(-5, Math.min(4.5, dino.vy)); dino.y += dino.vy * dt;
+      const top = 120; if (dino.y < top){ dino.y = top; dino.vy = 0; } if (dino.y > GROUND){ dino.y = GROUND; dino.vy = 0; }
+      if (Math.random() < .5) particles.push({ x:dino.x + dino.size*.2, y:dino.y - dino.size*.45 + (Math.random()-.5)*40, vx:-DIR*(2+Math.random()*2), vy:(Math.random()-.5), life:24, c:['#FFE000','#fff','#FFB3DE'][Math.floor(Math.random()*3)], r:2+Math.random()*3 });
+      if (S.fly <= 0){ S.fly = 0; S.grace = T.grace; flashes.push({ text:'LANDING', life:50 }); S.nextStar = S.score + STAR_EVERY; endGoldFly(); }   // 次の★は着地からさらに500点走ってから。着地後1.5秒は無敵
+    } else {
+      if (S.grace > 0) S.grace -= dt;
+      dino.vy += .8 * T.grav * dt; dino.y += dino.vy * dt;
+      if (dino.y >= GROUND){ if(!dino.onGround){ dino.squash = 1; burst(dino.x + dino.size*.4, GROUND, 6, ['#fff','#1B1B1F']); } dino.y = GROUND; dino.vy = 0; dino.onGround = true; dino.dj = false; }
+    }
+
+    // 速度・スコア
+    S.speed = Math.min(14, 6 + S.dist / T.ramp) * T.speed;
+    S.dist += S.speed * dt * .03 * (S.fly > 0 ? FLY_MULT : 1);
+    const prev = S.score;
+    S.score = Math.floor(S.dist);
+    if (S.score !== prev) scoreNowEl.textContent = S.score;
+    if (S.goldUntil && !S.goldFly && S.score >= S.goldUntil){ S.goldUntil = 0; setPageColor(worldAt(S.worldIdx).page); }   // 金の★の余韻(100点)が切れたら元の世界へ
+    if (Math.floor(S.score/100) !== Math.floor(prev/100) && S.score > 0){
+      S.worldIdx = Math.floor(S.score/100) % WORLDS.length;
+      setPageColor(worldAt(S.worldIdx).page);
+      flashes.push({ text: worldAt(S.worldIdx).name, life: 70 });
+      beep(880, .1, 'square', .05); setTimeout(()=>beep(1320,.16,'square',.05), 90);
+      burst(W*.5, 90, 40, ['#FF3EA5','#00D4FF','#FFE000','#7FE000','#FF7A00','#fff']);
+    }
+    S.worldMix += (1 - S.worldMix) * Math.min(1, .04*dt); // (予約: 補間用)
+
+    // 障害物
+    spawnGap -= dt;
+    if (spawnGap <= 0 && !(S.fly > 0 && S.fly < 150)){   // 飛行終了の直前2.5秒は出さない(着地時の激突防止)
+      spawnObstacle();
+      const base = 75 - Math.min(35, S.speed*2.5);
+      spawnGap = base + Math.random()*70;
+    }
+    obstacles.forEach(o => { o.x -= DIR * S.speed * dt; if (o.type==='bird'){ o.x -= DIR * 1.2*dt; o.flap += dt*.25; } });
+    obstacles = obstacles.filter(o => DIR > 0 ? o.x + o.w > -10 : o.x < W + 10);
+    // ライバルをかわしたらボーナス(通り過ぎた瞬間に1回だけ)
+    obstacles.forEach(o => {
+      if (o.type !== 'bird' || o.passed) return;
+      const passed = DIR > 0 ? (o.x + o.w < dino.x + dino.size*.2) : (o.x > dino.x + dino.size*.8);
+      if (passed){ o.passed = true; S.dist += DODGE_BONUS / 1; S.dodges = (S.dodges || 0) + 1; flashes.push({ text:'かわした！ +' + DODGE_BONUS, life:35, small:true }); beep(740, .08, 'triangle', .04); }
+    });
+
+    // ★スター: 500点ごとに飛来。ジャンプの頂点あたりの高さを、ゆらゆら飛ぶ
+    if (!star && S.fly <= 0 && S.score >= S.nextStar){ S.nextStar += STAR_EVERY; star = { x: DIR > 0 ? W + 40 : -40, y: GROUND - 120 + T.starY, rot: 0, t: 0 }; beep(1040, .12, 'triangle', .05); }
+    const db = dinoBox();
+    if (star){
+      star.t += dt; star.x -= DIR * (S.speed * .8) * dt; star.rot += .06 * dt; star.y = GROUND - 120 + T.starY + Math.sin(star.t * .08) * 18;
+      if (Math.random() < .4) particles.push({ x:star.x + (Math.random()-.5)*30, y:star.y + (Math.random()-.5)*30, vx:0, vy:-.5, life:18, c:'#FFE000', r:1.5+Math.random()*2 });
+      const sb = { x:star.x-22, y:star.y-22, w:44, h:44 };
+      if (hit(db, sb)){
+        const flySec = FLY_SEC + T.fly; S.fly = flySec * 60; star = null;
+        if (ownerMode){ S.goldFly = true; setPageColor(GOLD.page); }   // オーナーモードの★は金の★: 飛行中＋着地後100点は金の世界
+        flashes.push({ text: ownerMode ? `GOLD ★ FLY ${flySec}s!` : `FLY ${flySec}s!`, life:80 }); burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 40, ['#FFE000','#fff','#FF3EA5','#00D4FF']);
+        beep(880, .1, 'square', .06); setTimeout(()=>beep(1175,.1,'square',.06),90); setTimeout(()=>beep(1568,.2,'square',.06),180);
+        drEvent('star_catch', { character: CHAR.id, score: S.score });
+      } else if (DIR > 0 ? star.x < -40 : star.x > W + 40) star = null;
+    }
+    if (S.fly > 0 && FLY_HIT === 'drop' && S.grace <= 0){
+      for (const o of obstacles){
+        if (o.type !== 'bird') continue;   // 飛行中はライバルだけが当たる(サボテンは足元なので高く飛べば無関係)
+        const ob = { x:o.x+10, y:o.y-o.h+8, w:o.w-20, h:o.h-14 };
+        if (hit(db, ob)){ S.fly = 0; S.grace = T.grace; S.shake = 8; endGoldFly(); flashes.push({ text:'ぶつかった！ 飛行おわり', life:60 }); beep(260, .2, 'sawtooth', .07, -100); S.nextStar = S.score + STAR_EVERY; break; }
+      }
+    }
+    if (S.fly <= 0 && S.grace <= 0){
+      for (const o of obstacles){
+        const ob = o.type==='bird' ? { x:o.x+10, y:o.y-o.h+8, w:o.w-20, h:o.h-14 } : { x:o.x+5, y:o.y-o.h+10, w:o.w-10, h:o.h-10 };
+        if (hit(db, ob)){
+          if (T.shield && !S.shieldUsed){   // 頑丈: 1回だけ耐える
+            S.shieldUsed = true; S.grace = 90; S.shake = 8; flashes.push({ text:'GUARD!', life:60 }); beep(300, .2, 'square', .07, -80);
+            burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 24, ['#00D4FF','#fff']); break;
+          }
+          gameOver(); break;
+        }
+      }
+    }
+  }
+
+  // ================= 描画 =================
+  function rr(x,y,w,h,r){ ctx.beginPath(); ctx.roundRect(x,y,w,h,r); }
+  function drawCactus(o, world){
+    const cols = [world.cactus, world.cactus2, '#FF3EA5', '#FFE000'];
+    for (let i=0;i<o.n;i++){
+      const x = o.x + i*(o.single+4), w = o.single, h = o.h - (i%2 ? 8 : 0);
+      const c = cols[(i + S.worldIdx) % cols.length];
+      ctx.fillStyle = c; ctx.strokeStyle = '#1B1B1F'; ctx.lineWidth = 3;
+      // 幹
+      rr(x + w*.28, o.y - h, w*.44, h, 8); ctx.fill(); ctx.stroke();
+      // 腕
+      const ay = o.y - h*.62;
+      rr(x, ay, w*.32, h*.36, 6); ctx.fill(); ctx.stroke();
+      rr(x + w*.68, ay - 10, w*.32, h*.38, 6); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#1B1B1F';
+      ctx.fillRect(x + w*.28 - 2, ay + 8, w*.32+2, 6); ctx.fillRect(x + w*.68 - 2, ay - 2, w*.34, 6);
+      // 顔
+      ctx.fillStyle = '#1B1B1F';
+      ctx.beginPath(); ctx.arc(x + w*.42, o.y - h + 16, 2.6, 0, 7); ctx.arc(x + w*.58, o.y - h + 16, 2.6, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.55)'; rr(x + w*.34, o.y - h + 6, 5, h*.5, 3); ctx.fill();
+    }
+  }
+  function drawBird(o){
+    // PUTTI：羽ばたき＝上下ゆれ＋わずかな傾き＋縦つぶれ
+    const f = Math.sin(o.flap);
+    const cx = o.x + o.w/2, cy = o.y - o.h/2 + f*5;
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(f*.08); ctx.scale(1, 1 - Math.abs(f)*.08);
+    const e = enemies[o.who];
+    if (e && e.ready){
+      const sz = e.size; ctx.drawImage(e.canvas, -sz/2, -sz/2, sz, sz);
+    } else {
+      ctx.fillStyle = '#FFE000'; ctx.strokeStyle = '#1B1B1F'; ctx.lineWidth = 3;
+      rr(-o.w/2, -o.h/2, o.w, o.h, 12); ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function drawDino(){
+    const s = dino.size;
+    ctx.save();
+    // 走り：上下バウンド＋傾き、着地でつぶれ、しゃがみで平たく
+    const run = S.state==='play' ? Math.abs(Math.sin(dino.runT)) : Math.abs(Math.sin(dino.runT))*.5;
+    const bob = dino.onGround ? -run*6 : 0;
+    const rot = S.fly > 0 ? Math.max(-.25, Math.min(.25, -DIR * dino.vy*.04)) : dino.onGround ? Math.sin(dino.runT)*.05 : Math.max(-.35, Math.min(.35, -DIR * dino.vy*.03));  // 上昇で鼻先が上がる
+    let sx = 1, sy = 1;
+    if (dino.squash > 0){ sx = 1 + dino.squash*.18; sy = 1 - dino.squash*.18; }
+    if (dino.duck && dino.onGround){ sx = 1.25; sy = .62; }
+    ctx.translate(dino.x + s*.5, dino.y + bob);
+    ctx.rotate(rot); ctx.scale(sx, sy);
+    // 影
+    ctx.restore(); ctx.save();
+    ctx.globalAlpha = .18; ctx.fillStyle = '#1B1B1F';
+    const shw = s*.55 * (1 - (GROUND - dino.y)/400);
+    ctx.beginPath(); ctx.ellipse(dino.x + s*.5, GROUND + 6, Math.max(20, shw), 7, 0, 0, 7); ctx.fill();
+    ctx.restore(); ctx.save();
+    ctx.translate(dino.x + s*.5, dino.y + bob);
+    ctx.rotate(rot); ctx.scale(sx, sy);
+    if (S.grace > 0 && Math.floor(S.t / 4) % 2 === 0) ctx.globalAlpha = .45;   // 着地後の無敵は点滅
+    if (isOwner || S.fly > 0){ ctx.shadowColor = S.fly > 0 ? 'rgba(255,255,255,.95)' : 'rgba(255,200,0,.95)'; ctx.shadowBlur = 22; }
+    if (sprite.ready){
+      ctx.drawImage(sprite.canvas, -s*.5, -s*.96, s, s);
+      if (isOwner || S.fly > 0){ ctx.shadowBlur = 0; ctx.drawImage(sprite.canvas, -s*.5, -s*.96, s, s); }
+    } else {
+      ctx.fillStyle = '#1B1B1F'; rr(-s*.3, -s*.8, s*.6, s*.8, 14); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function draw(){
+    const world = worldAt(S.worldIdx);
+    ctx.save();
+    if (S.shake > 0) ctx.translate((Math.random()-.5)*S.shake, (Math.random()-.5)*S.shake);
+
+    // 空
+    const sky = ctx.createLinearGradient(0,0,0,GROUND);
+    sky.addColorStop(0, world.sky[0]); sky.addColorStop(1, world.sky[1]);
+    ctx.fillStyle = sky; ctx.fillRect(-20, -20, W+40, H+40);
+
+    // 太陽
+    ctx.fillStyle = '#FFE000'; ctx.strokeStyle = '#1B1B1F'; ctx.lineWidth = 3;
+    const sunX = DIR > 0 ? W - 120 : 120;
+    ctx.beginPath(); ctx.arc(sunX, 70, 30, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#1B1B1F';
+    ctx.beginPath(); ctx.arc(sunX-10, 66, 3, 0, 7); ctx.arc(sunX+10, 66, 3, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(sunX, 74, 9, .2, Math.PI-.2); ctx.lineWidth = 2.5; ctx.stroke();
+
+    // 雲
+    clouds.forEach(c => {
+      ctx.save(); ctx.translate(c.x, c.y); ctx.scale(c.s, c.s);
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1B1B1F'; ctx.lineWidth = 3/c.s;
+      ctx.beginPath(); ctx.arc(0,0,18,0,7); ctx.arc(22,-8,22,0,7); ctx.arc(46,0,18,0,7); ctx.rect(0,0,46,18); ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,18,Math.PI*.5,Math.PI*1.5); ctx.arc(22,-8,22,Math.PI*1.1,Math.PI*1.9); ctx.arc(46,0,18,Math.PI*1.5,Math.PI*.5); ctx.closePath(); ctx.stroke();
+      ctx.restore();
+    });
+
+    // 遠景の丘
+    ctx.fillStyle = world.far;
+    hills.forEach(h => { ctx.beginPath(); ctx.ellipse(h.x + h.w/2, GROUND + 4, h.w/2, h.h, 0, Math.PI, 0); ctx.fill(); });
+    ctx.strokeStyle = '#1B1B1F'; ctx.lineWidth = 3;
+    hills.forEach(h => { ctx.beginPath(); ctx.ellipse(h.x + h.w/2, GROUND + 4, h.w/2, h.h, 0, Math.PI, 0); ctx.stroke(); });
+
+    // 地面
+    ctx.fillStyle = world.ground; ctx.fillRect(-20, GROUND, W+40, H-GROUND+20);
+    ctx.fillStyle = '#1B1B1F'; ctx.fillRect(-20, GROUND, W+40, 4);
+    // 地面のストライプ（流れる）
+    const off = (S.dist*33) % 60;
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    for (let x = (DIR > 0 ? -off : off) - 120; x < W + 60; x += 60){ ctx.fillRect(x, GROUND + 18, 28, 6); ctx.fillRect(x + 36, GROUND + 34, 12, 5); }
+
+    obstacles.forEach(o => o.type==='bird' ? drawBird(o) : drawCactus(o, world));
+    if (star){
+      ctx.save(); ctx.shadowColor = 'rgba(255,224,0,.9)'; ctx.shadowBlur = 18;
+      if (ownerMode){ drawStar(star.x, star.y, 34, -star.rot * .5); ctx.fillStyle = 'rgba(255,180,0,.35)'; ctx.fill(); }   // オーナーモードは金の★(ひとまわり大きな金の光つき)
+      drawStar(star.x, star.y, 24, star.rot); ctx.fillStyle = ownerMode ? '#FFB300' : '#FFE000'; ctx.fill(); ctx.shadowBlur = 0; ctx.lineWidth = 3; ctx.strokeStyle = '#1B1B1F'; ctx.stroke();
+      drawStar(star.x - 5, star.y - 5, 8, star.rot); ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fill(); ctx.restore();
+    }
+    drawDino();
+    if (S.fly > 0){
+      const sec = Math.ceil(S.fly / 60), blink = sec <= 3 && Math.floor(S.t / 8) % 2 === 0;
+      ctx.save(); ctx.font = '900 18px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.lineWidth = 5; ctx.strokeStyle = '#1B1B1F'; ctx.fillStyle = blink ? '#E5484D' : '#FFE000';
+      ctx.strokeText(`★ FLY ${sec}  点×${FLY_MULT}`, W*.5, 10); ctx.fillText(`★ FLY ${sec}  点×${FLY_MULT}`, W*.5, 10); ctx.restore();
+    }
+
+    // パーティクル
+    particles.forEach(p => { ctx.globalAlpha = Math.min(1, p.life/20); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill(); });
+    ctx.globalAlpha = 1;
+
+    // 100点フラッシュ
+    flashes.forEach(f => {
+      const a = Math.min(1, f.life/25), sc = f.small ? 1 : 1 + (1 - Math.min(1, (70 - f.life)/10))*.6;
+      ctx.save(); ctx.globalAlpha = a; ctx.translate(f.small ? dino.x + dino.size*.5 : W*.5, f.small ? dino.y - dino.size - 10 : 92); ctx.scale(sc, sc);
+      ctx.font = f.small ? '900 16px "M PLUS Rounded 1c", sans-serif' : '900 34px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 8; ctx.strokeStyle = '#1B1B1F'; ctx.strokeText(f.text, 0, 0);
+      ctx.fillStyle = '#FFE000'; ctx.fillText(f.text, 0, 0);
+      ctx.restore();
+    });
+
+    if (S.goldPreview > 0){
+      ctx.save(); ctx.globalAlpha = Math.min(1, S.goldPreview/30); ctx.font = '900 15px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.lineWidth = 4; ctx.strokeStyle = '#1B1B1F'; ctx.fillStyle = '#FFE000';
+      ctx.strokeText('★ NFCアクキーを持ってると、金の世界からスタートできる', W*.5, 10); ctx.fillText('★ NFCアクキーを持ってると、金の世界からスタートできる', W*.5, 10); ctx.restore();
+    }
+    // キャンバス内スコア（小さく）。金の世界チラ見せ中は見出しと重なるので出さない
+    if (S.goldPreview <= 0){
+    ctx.font = '900 16px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = DIR > 0 ? 'right' : 'left'; ctx.textBaseline = 'top';
+    ctx.lineWidth = 4; ctx.strokeStyle = '#1B1B1F'; ctx.fillStyle = '#fff';
+    const st = String(S.score).padStart(5, '0');
+    const sx0 = DIR > 0 ? W - 14 : 14;
+    ctx.strokeText(st, sx0, 10); ctx.fillText(st, sx0, 10);
+    }
+    ctx.restore();
+  }
+
+  // ================= ループ =================
+  // 固定タイムステップ（1/60秒単位）。遅いフレームは最大4サブステップで追いつく
+  let acc = 0;
+  function step(n){ for (let i=0;i<n;i++) update(1); }
+  function loop(ts){
+    if (lastFrame) acc += Math.min(4, (ts - lastFrame) / (1000/60));
+    lastFrame = ts;
+    while (acc >= 1){ update(1); acc -= 1; }
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  // テスト用フック
+  window.DRRUN = { S, dino, step, draw, start, jump, CHAR, get obstacles(){ return obstacles; }, get star(){ return star; }, setOwner(v){ isOwner = !!v; if (v) initOwnerMode(); }, setMode(v){ ownerMode = !!v; applyOwnerMode(); }, get ownerMode(){ return ownerMode; } };
+
+  // ================= 🏆 ランキング =================
+  const NAME_KEY = 'dr_run_name', PID_KEY = 'dr_run_pid';
+  let pid = '', savedName = '';
+  try {
+    pid = localStorage.getItem(PID_KEY) || '';
+    if (!/^[a-f0-9]{16,32}$/.test(pid)){ pid = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2,'0')).join(''); localStorage.setItem(PID_KEY, pid); }
+    savedName = localStorage.getItem(NAME_KEY) || '';
+  } catch(e){}
+  const rankBox = document.getElementById('rankBox'), rankForm = document.getElementById('rankForm');
+  const rankName = document.getElementById('rankName'), rankMsg = document.getElementById('rankMsg');
+  const rankOverlay = document.getElementById('rankOverlay'), rankList = document.getElementById('rankList'), rankFoot = document.getElementById('rankFoot');
+  document.getElementById('rankChar').textContent = CHAR.name;
+  rankName.value = savedName;
+  if (!RANK_API){ rankBox.hidden = true; document.getElementById('rankBtnTitle').hidden = true; document.getElementById('rankBtnOver').hidden = true; }
+
+  const rankRename = document.getElementById('rankRename');
+  function showMsg(html){ rankMsg.innerHTML = html; rankMsg.hidden = false; rankRename.hidden = !savedName || !rankForm.hidden; }
+  rankRename.addEventListener('click', () => { rankForm.hidden = false; rankRename.hidden = true; rankName.value = savedName; rankName.focus(); rankName.select(); });
+  async function submitScore(score){
+    const name = rankName.value.trim().slice(0, 12);
+    if (!name){ rankName.focus(); return; }
+    if (name !== savedName){ savedName = name; try{ localStorage.setItem(NAME_KEY, name); }catch(e){} }
+    showMsg('登録中…'); rankForm.hidden = true;
+    try{
+      const r = await fetch(RANK_API, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ char: CHAR.id, pid, name, score, owner: ownerTok || undefined, mode: ownerMode ? 'owner' : undefined }) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || r.status);
+      const wr = d.week && d.week.me ? d.week.me.rank : null;
+      if (d.mode === 'owner'){
+        showMsg(`${esc(name)} さん：★オーナー順位 <b>${d.ownRank ?? '-'}位</b> / ${d.own ? d.own.total : '-'}人（ベスト ${d.ownBest}）<br><small>オーナーモードの記録は★オーナーの順位表に入ります</small>`);
+        drEvent('rank_submit', { character: CHAR.id, score, mode: 'owner', own_rank: d.ownRank });
+        rankScope = 'own';
+      } else {
+        showMsg(`${esc(name)} さん：今週 <b>${wr ?? '-'}位</b>（累計 ${d.rank}位 / ${d.total}人・ベスト ${d.best}）`);
+        drEvent('rank_submit', { character: CHAR.id, score, rank: d.rank, week_rank: wr });
+        if (rankScope === 'own') rankScope = 'week';
+      }
+      lastBoard = { top: d.top, total: d.total, me: d.rank ? { rank: d.rank, best: d.best } : null, week: d.week, own: d.own }; renderScope();
+    }catch(e){ showMsg('登録できませんでした'); rankForm.hidden = false; }
+  }
+  function onGameOverRank(score, isNew){
+    if (!RANK_API || window.DR_INTERNAL){ rankBox.hidden = true; return; }   // 内部端末(?internal=1)はランキングにも登録しない
+    rankBox.hidden = false; rankMsg.hidden = true; rankForm.hidden = false;
+    if (score < 1){ rankBox.hidden = true; return; }
+    if (savedName && isNew) submitScore(score);                       // 名前登録済みならベスト更新時に自動登録
+    else if (savedName){ rankForm.hidden = true; showMsg('ベスト更新でランキングに登録されます'); }
+  }
+  document.getElementById('rankSubmit').addEventListener('click', () => submitScore(S.score));
+  rankName.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter'){ e.preventDefault(); submitScore(S.score); } });   // 入力中のSPACEでジャンプしない
+  rankName.addEventListener('keyup', e => e.stopPropagation());
+
+  let lastBoard = null, rankScope = 'week';
+  function weekLabel(key){ if (!key) return ''; const d = new Date(key + 'T00:00:00+09:00'); const e = new Date(d.getTime() + 6*864e5); const f = x => `${x.getMonth()+1}/${x.getDate()}`; return `${f(d)}〜${f(e)} の記録（毎週月曜リセット）`; }
+  function renderScope(){
+    if (!lastBoard) return;
+    document.querySelectorAll('.rank-tabs button').forEach(b => b.classList.toggle('on', b.dataset.scope === rankScope));
+    const w = lastBoard.week || {}, o = lastBoard.own || {};
+    document.getElementById('rankWeek').textContent = rankScope === 'week' ? weekLabel(w.key) : rankScope === 'own' ? '★オーナーモード（二段ジャンプ）の記録・持ち主どうしの順位（全期間）' : '全期間のベスト';
+    if (rankScope === 'week') renderBoard(w.top, w.total, w.me);
+    else if (rankScope === 'own') renderBoard(o.top, o.total, o.me, 'NFCアクキーをかざして、オーナーモードで走ると載ります');
+    else renderBoard(lastBoard.top, lastBoard.total, lastBoard.me);
+  }
+  document.querySelectorAll('.rank-tabs button').forEach(b => b.addEventListener('click', () => { rankScope = b.dataset.scope; renderScope(); }));
+  function renderBoard(top, total, me, emptyMsg){
+    rankList.innerHTML = (top && top.length) ? top.map(t => `<li${t.me ? ' class="me"' : ''}><span class="rk num">${t.rank <= 3 ? ['🥇','🥈','🥉'][t.rank-1] : t.rank + '位'}</span><span class="nm">${t.own ? '<b class="own" title="NFCアクキーの持ち主">★</b>' : ''}${esc(t.name)}</span><span class="sc num">${t.score}</span></li>`).join('')
+      : `<li><span class="rk">—</span><span class="nm">${emptyMsg || 'まだ登録がありません'}</span><span></span></li>`;
+    rankFoot.textContent = (me && me.rank ? `あなた：${me.rank}位（ベスト ${me.best}）｜` : '') + `登録 ${total || 0}人`;
+  }
+  function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  async function openBoard(){
+    rankOverlay.classList.add('open');
+    try{
+      const r = await fetch(`${RANK_API}?char=${encodeURIComponent(CHAR.id)}&pid=${pid}`);
+      const d = await r.json();
+      lastBoard = d; renderScope();
+    }catch(e){ rankList.innerHTML = '<li><span class="rk">!</span><span class="nm">読み込めませんでした</span><span></span></li>'; rankFoot.textContent = ''; }
+  }
+  document.getElementById('rankBtnTitle').addEventListener('click', openBoard);
+  document.getElementById('rankBtnOver').addEventListener('click', openBoard);
+  rankOverlay.addEventListener('click', e => { if (e.target === rankOverlay) rankOverlay.classList.remove('open'); });
+  window.addEventListener('keydown', e => { if (e.code === 'Space' && rankOverlay.classList.contains('open')) e.stopImmediatePropagation(); }, true);
+
+  // ================= ♥ いいね（CHARAMARLのキャラ/作品の♥と同じカウンター） =================
+  (function(){
+    const CM_REACT = 'https://charamarl.com/api/react', id = CHAR.like;
+    const btn = document.getElementById('likeBtn'), ic = document.getElementById('likeIc'), ct = document.getElementById('likeCt'), lb = document.getElementById('likeLb');
+    if (!id){ btn.hidden = true; return; }
+    const LK = 'cm_likes'; const getSet = () => { try{ return new Set(JSON.parse(localStorage.getItem(LK) || '[]')); }catch(e){ return new Set(); } };
+    const render = (liked, n) => { ic.textContent = liked ? '♥' : '♡'; lb.textContent = liked ? `${CHAR.name} にいいね済み` : `${CHAR.name} にいいね`; btn.setAttribute('aria-pressed', liked ? 'true' : 'false'); if (n !== undefined) ct.textContent = n; };
+    render(getSet().has(id));
+    fetch(CM_REACT + '?id=' + id).then(r => r.ok ? r.json() : null).then(d => { if (d) render(getSet().has(id), d.likes); }).catch(() => {});
+    btn.addEventListener('click', async () => {
+      const set = getSet(), liked = set.has(id), op = liked ? 'remove' : 'add';
+      if (liked) set.delete(id); else set.add(id);
+      try{ localStorage.setItem(LK, JSON.stringify([...set])); }catch(e){}
+      render(!liked);
+      try{ const r = await fetch(CM_REACT, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ id, type:'like', op }) }); const d = await r.json(); if (d && d.count !== undefined) ct.textContent = d.count; }catch(e){}
+      drEvent('like', { character: CHAR.id, op });
+    });
+  })();
+
+  // ================= 🚀 シェア =================
+  const shareOverlay = document.getElementById('shareOverlay');
+  function openShare(){
+    document.getElementById('shNative').style.display = navigator.share ? '' : 'none';
+    document.getElementById('shCopyLb').textContent = 'リンクをコピー';
+    shareOverlay.classList.add('open');
+  }
+  // パネルのボタンと、GAME OVER の中のボタン。どちらも同じところを開く
+  document.getElementById('shareBtn').addEventListener('click', openShare);
+  document.getElementById('shareBtnOver').addEventListener('click', e => {
+    e.stopPropagation();   // 背後のキャンバスに届くとリスタートしてしまう
+    openShare();
+  });
+  shareOverlay.addEventListener('click', e => { if (e.target === shareOverlay) shareOverlay.classList.remove('open'); });
+  document.querySelectorAll('.share-opt').forEach(btn => btn.addEventListener('click', async () => {
+    const url = location.origin + location.pathname;
+    const m = rankMsg.hidden ? null : rankMsg.textContent.match(/(\d+)位/);
+    const text = `CHARAMARL RUN（${CHAR.name}）で ${S.score} 点${m ? `（${m[1]}位）` : ''}！ #CHARAMARL`;
+    const kind = btn.dataset.sh;
+    drEvent('share', { method: kind, score: S.score }); beacon('share');
+    if (kind === 'x') window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+    else if (kind === 'line') window.open('https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(url), '_blank');
+    else if (kind === 'copy'){
+      try{ await navigator.clipboard.writeText(url); document.getElementById('shCopyLb').textContent = 'コピーしました！'; }catch(e){ prompt('URLをコピー', url); }
+      return;
+    }
+    else if (kind === 'native'){ try{ await navigator.share({ title:'CHARAMARL RUN', text, url }); }catch(e){} }
+    shareOverlay.classList.remove('open');
+  }));
+})();
+</script>
+</body>
+</html>
