@@ -14,23 +14,41 @@
     人が気をつける話にしない。**push する前に、これを通す。**
 
 ■ 何を見るか
-    HTMLコメント（<!-- -->）と、JS/CSS の行コメント（//）とブロックコメント（/* */）だけ。
-    本文に書いてある言葉は対象外（作品説明に「待ち」が出ることはある）。
+    コメント（<!-- -->, //, /* */）と、**画面に出る本文も**。
+
+    🔴 最初の版はコメントしか見ておらず、pins.html の本文にあった
+       「🔒 公開前のメモ — 『承諾待ち』の絵柄は、本人の返事が来るまで公開しないこと」
+       を素通りさせた。display:none でもなく、画面にそのまま出ていた。
+       隠す場所の問題ではなく、書いた内容の問題なので、置き場所で区別しない。
 """
 import sys, re, os, glob, subprocess
 
 # 🔴 交渉・検討の状態。作家さんが読んで気持ちのいいものではない
 NEGOTIATION = ['未返信', '返事待ち', '承諾待ち', '打診', '交渉', '一任', '渋', '断られ',
-               '却下', 'NGだった', 'もめ', 'クレーム', '本人が用意中', '返事が来るまで']
+               '却下', 'NGだった', 'もめ', 'クレーム', '本人が用意中', '返事が来るまで',
+               '本人の返事']
 # 🔴 社内の段取り。外から見て意味がないうえ、未公開のものの存在を漏らす
 INTERNAL = ['非公開ページ', 'トップ未リンク', '仮ページ', '見せて詰めて', '公開前', 'まだ公開しない',
-            '社内', '内緒', '関係者のみ']
+            '社内', '内緒', '関係者のみ', '公開しないこと', 'メモ —', 'メモ:', '運用メモ', '方針）']
 # 🔴 出てはいけない値
 SECRET = [r'APPLY_KEY\s*=\s*[\'"]', r'sk_live_', r'sk_test_', r'whsec_',
           r'BLOB_READ_WRITE_TOKEN', r'UPSTASH_\w+_TOKEN', r'\?owner=[0-9a-f]{8,}']
 
 # 見ないもの（配らないファイル）
 SKIP_DIRS = ('node_modules', '.git', '.vercel', 'tools', 'api')
+
+
+def visible_text(text):
+    """画面に出る本文を (行番号, 中身) で返す。script/style の中は除く。"""
+    t = re.sub(r'<script\b.*?</script>', lambda m: '\n'*m.group(0).count('\n'), text, flags=re.S|re.I)
+    t = re.sub(r'<style\b.*?</style>', lambda m: '\n'*m.group(0).count('\n'), t, flags=re.S|re.I)
+    t = re.sub(r'<!--.*?-->', lambda m: '\n'*m.group(0).count('\n'), t, flags=re.S)
+    out = []
+    for m in re.finditer(r'>([^<>]{4,})<', t):
+        body = m.group(1).strip()
+        if body:
+            out.append((t[:m.start()].count('\n') + 1, body))
+    return out
 
 
 def comments(text, path):
@@ -70,15 +88,18 @@ def main():
         for pat in SECRET:                      # 本文もコメントも問わず探す
             for m in re.finditer(pat, s):
                 hits.append(('鍵', f, s[:m.start()].count('\n') + 1, m.group(0)[:60]))
-        for line, body in comments(s, f):
+        spots = [('コメント', l, b) for l, b in comments(s, f)]
+        if f.endswith('.html'):
+            spots += [('本文', l, b) for l, b in visible_text(s)]
+        for where, line, body in spots:
             for w in NEGOTIATION:
                 if w in body:
-                    hits.append(('やり取り', f, line, body.strip().replace('\n', ' ')[:90]))
+                    hits.append((f'やり取り/{where}', f, line, body.strip().replace('\n', ' ')[:90]))
                     break
             else:
                 for w in INTERNAL:
                     if w in body:
-                        hits.append(('社内事情', f, line, body.strip().replace('\n', ' ')[:90]))
+                        hits.append((f'社内事情/{where}', f, line, body.strip().replace('\n', ' ')[:90]))
                         break
 
     if not hits:
@@ -89,7 +110,7 @@ def main():
     for kind, f, line, body in hits:
         print(f'  [{kind}] {f}:{line}')
         print(f'      {body}')
-    print('\n  HTMLとJSのコメントは View Source で誰でも読めます。画面に出ないだけです。')
+    print('\n  コメントは View Source で誰でも読めます。本文はそのまま画面に出ます。')
     print('  作家さんとのやり取りの状態は 01_記録/ 側に書いてください。')
     return 1
 
