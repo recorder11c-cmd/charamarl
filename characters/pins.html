@@ -3,8 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- 2026-09-18 21:00 発売。noindex と robots.txt の遮断、準備中バナーを外した。
-     トップの導線(index.html)だけは、同じ日の run-release マージと衝突するので後回しにしてある。 -->
 <title>ピンズ（丸25mm） — CHARAMARL</title>
 <meta name="description" content="12種の絵柄から選べるピンズ。丸25mm・金属フレーム＋ドーム加工。単品1,800円／4個セット4,400円。受注生産。">
 <!-- OGP。入れていなかったので、リンクを貼っても画像なしの小さいカードになっていた(2026-09-18) -->
@@ -179,11 +177,9 @@
 
 <script>
 // ===== ピンズ 販売ロジック =====
-// 絵柄は本人の許可が取れたものだけをここに足す。
-// 済: スー/モッスン/プッチィ(自社) / ユルクレイジー(CRAZYさん 2026-09-08 一任) / だんな(赤猫かるまさん 2026-09-08 顔アップ希望)
-// ⚠️ モニィ: morryさんはピンズの案内に未返信。CC BYなので技術的には作れるが、
-//    CHARAMARLは商品化を個別合意で進める方針なので、返事が来るまで公開しない(pending:true)。
-// 待ち: う〜ほ〜(ちゅいさんの新イラスト・本人が用意中)
+// 🔴 絵柄は、本人の許可が取れたものだけをここに足す。
+//    誰にいつ許可をもらったかは 01_記録/ 側で管理する。
+//    このファイルは公開されるので、作家さんとのやり取りの状況は書かない。
 const DESIGNS = [
   { key:'sue',       name:'スー',           artist:'DinoRenny', img:'/img/pins/sue.png' },
   { key:'mossun',    name:'モッスン',        artist:'DinoRenny', img:'/img/pins/mossun.png' },
@@ -192,10 +188,9 @@ const DESIGNS = [
   { key:'danna',     name:'だんな',          artist:'赤猫かるま',  img:'/img/pins/danna.png' },
   { key:'inkumo',    name:'インクモ',        artist:"Ink'z Monster", img:'/img/pins/inkumo.png' },
   { key:'mony',      name:'モニィ',          artist:'morry',     img:'/img/pins/mony.png',
-    credit:'モニィ © morry369 / CC BY' },   // 2026-09-17 本人からOK。pending を外した
-  // カゲチヨさん 5種（2026-09-17 本人確認済み・顔アップのBパターンで確定）
-  // キミ/シグレ/プロム/ムチコ は AI生成のモデルをこちらでイラストに書き起こしたもの。
-  // カゲチヨ本体だけ素材が違い、TAP用の絵をそのまま使っている。
+    credit:'モニィ © morry369 / CC BY' },
+  // カゲチヨさん 5種。キミ/シグレ/プロム/ムチコ は、AI生成のモデルを
+  // こちらでイラストに書き起こしたもの。カゲチヨ本体だけ素材が違い、TAP用の絵を使っている。
   { key:'kg_kagechiyo', name:'カゲチヨ', artist:'カゲチヨ', img:'/img/pins/kg_kagechiyo.png' },
   { key:'kg_kimi',      name:'キミ',     artist:'カゲチヨ', img:'/img/pins/kg_kimi.png' },
   { key:'kg_shigure',   name:'シグレ',   artist:'カゲチヨ', img:'/img/pins/kg_shigure.png' },
