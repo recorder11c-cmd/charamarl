@@ -39,3 +39,6 @@ Disallow: /
 User-agent: *
 Allow: /
 Disallow: /apply-admin.html
+
+# 検索エンジン向け（2026-09-21 追加。それまで sitemap が無く、作品126点に固有URLも無かった）
+Sitemap: https://charamarl.com/sitemap.xml
