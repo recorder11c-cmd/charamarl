@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- アクリルキーホルダーの一覧（2026-09-21 新規）
+     ピンズには pins.html という1枚があるのに、アクキーには無かった。
+     11種あるのに「買える場所」を1つのURLで示せず、トップから探してもらう形になっていた。
+     ★オーナーモードの告知で「持っていない方はこちら」の行き先が要る、というのが直接のきっかけ。
+
+     🔴 商品データは js/products.js だけを読む。ここに商品を書き足さないこと。
+        キャラ一覧が散っていて、9/19に2件の取りこぼしが出ている（開発バックログ参照）。
+     🔴 characters/kagechiyo-acrylic.html は仮ページ（noindex・価格が¥1,200のまま）。
+        products.js に入っていないので、ここにも出ない。それでよい。 -->
+<title>アクリルキーホルダー — CHARAMARL</title>
+<meta name="description" content="CHARAMARLのアクリルキーホルダー。全11種・各1,500円（税込・送料込）。裏にNFCタグが入っていて、スマートフォンをかざすとそのキャラクターのページがひらきます。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://charamarl.com/characters/keyrings.html">
+<meta property="og:title" content="アクリルキーホルダー — CHARAMARL">
+<meta property="og:description" content="全11種・各1,500円。裏にNFCタグ。かざすとキャラクターのページがひらき、CHARAMARL RUN では★オーナーモードで走れます。">
+<meta property="og:image" content="https://charamarl.com/img/og/keyrings.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{
+    --bg:#0e0e14; --surface:#1a1a26; --card:#1f1f2e;
+    --accent:#f5c842; --accent2:#a259ff; --text:#f0f0f0; --muted:#777; --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Helvetica Neue',Arial,sans-serif;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:rgba(14,14,20,.92);backdrop-filter:blur(12px);z-index:100;}
+  .logo{font-size:22px;font-weight:900;letter-spacing:.1em;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;}
+  .back{color:var(--muted);text-decoration:none;font-size:13px;letter-spacing:.06em;}
+  .back:hover{color:var(--text);}
+
+  .hero{max-width:1000px;margin:0 auto;padding:52px 32px 26px;}
+  @media(max-width:700px){.hero{padding:30px 20px 18px;}}
+  .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .tag{background:rgba(255,255,255,.07);color:var(--muted);font-size:11px;padding:4px 12px;border-radius:12px;letter-spacing:.04em;}
+  h1{font-size:clamp(32px,6.5vw,52px);font-weight:900;letter-spacing:.04em;margin-bottom:10px;}
+  .lead{color:var(--muted);font-size:14px;line-height:1.9;max-width:640px;}
+  .lead b{color:var(--text);}
+
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px;}
+  @media(max-width:640px){.facts{grid-template-columns:1fr;}}
+  .fact{background:var(--card);border-radius:var(--radius);padding:15px 17px;}
+  .fact b{display:block;font-size:14px;font-weight:900;margin-bottom:5px;}
+  .fact span{font-size:12px;color:var(--muted);line-height:1.75;}
+
+  section{max-width:1000px;margin:0 auto;padding:0 32px 48px;}
+  @media(max-width:700px){section{padding:0 20px 40px;}}
+  .section-title{font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;}
+  .section-heading{font-size:clamp(19px,4vw,26px);font-weight:900;margin-bottom:6px;}
+  .section-note{color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:22px;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;}
+  .item{background:var(--card);border:2px solid transparent;border-radius:var(--radius);padding:14px 12px 16px;text-align:center;text-decoration:none;color:inherit;display:block;transition:border-color .2s,transform .15s;}
+  .item:hover{border-color:var(--accent);transform:translateY(-3px);}
+  .thumb{background:#fff;border-radius:14px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:11px;}
+  .thumb img{width:84%;height:84%;object-fit:contain;}
+  .nm{font-size:15px;font-weight:900;line-height:1.3;}
+  .by{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4;}
+  .pr{font-size:13px;font-weight:900;color:var(--accent);margin-top:8px;letter-spacing:.02em;}
+
+  .nfc{background:var(--surface);border-radius:var(--radius);padding:22px 24px;margin-top:6px;}
+  .nfc h3{font-size:16px;font-weight:900;margin-bottom:10px;}
+  .nfc ol{margin:0 0 0 1.1em;padding:0;}
+  .nfc li{font-size:13px;color:var(--muted);line-height:1.95;}
+  .nfc li b{color:var(--text);}
+  .nfc .warn{font-size:12px;color:var(--muted);line-height:1.8;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);}
+
+  .cta{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#1a1a26;font-size:14px;font-weight:900;text-decoration:none;padding:13px 24px;border-radius:26px;margin-top:16px;}
+  .cta:hover{filter:brightness(1.06);}
+  footer{border-top:1px solid rgba(255,255,255,.08);padding:32px;text-align:center;color:var(--muted);font-size:12px;}
+</style>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/ga.js"></script>
+<script src="/js/protect.js"></script>
+<script src="/js/products.js"></script>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="../index.html">CHARAMARL</a>
+  <a class="back" href="../index.html">← 市場にもどる</a>
+</header>
+
+<div class="hero">
+  <div class="tag-row">
+    <span class="tag">全11種</span>
+    <span class="tag">NFCタグ入り</span>
+    <span class="tag">受注生産</span>
+  </div>
+  <h1>アクリルキーホルダー</h1>
+  <p class="lead">
+    CHARAMARLに並ぶキャラクターの、アクリルキーホルダーです。<br>
+    <b>裏にNFCタグが入っていて、スマートフォンをかざすとそのキャラクターのページがひらきます。</b>
+    アプリも会員登録も要りません。
+  </p>
+  <div class="facts">
+    <div class="fact"><b>各 ¥1,500</b><span>税込・送料込。色やデザインはキャラクターごとに選べます</span></div>
+    <div class="fact"><b>受注生産</b><span>ご注文から約2週間でお届けします</span></div>
+    <div class="fact"><b>売上は作家さんと折半</b><span>実費を除いた粗利を分配しています</span></div>
+  </div>
+</div>
+
+<section>
+  <div class="section-title">Line up</div>
+  <h2 class="section-heading">11種類あります</h2>
+  <p class="section-note">絵をタップすると、色やお届けの詳しいページへ進みます。</p>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section>
+  <div class="section-title">NFC</div>
+  <h2 class="section-heading">かざすと、うごく。</h2>
+  <p class="section-note">アクリルの裏に、シールくらいの大きさのタグが入っています。</p>
+
+  <div class="nfc">
+    <h3>使い方</h3>
+    <ol>
+      <li><b>アクリル本体のうらにスマートフォンをかざす</b>（iPhoneは上の端、Androidは背面の中央あたり）</li>
+      <li>そのキャラクターのページがひらきます</li>
+      <li>そこから <b>CHARAMARL RUN の「★オーナーモード」</b>で走れます。二段ジャンプができて、★が金色になります</li>
+    </ol>
+    <p class="warn">
+      ⚠️ タグは<b>アクリル本体のうら</b>に入っています。台紙にかざしても反応しません。<br>
+      読み取りに対応していない端末のために、台紙のうらに同じ行き先のQRコードも刷ってあります。
+    </p>
+  </div>
+
+  <a class="cta" href="../run.html?utm_source=charamarl_keyrings">🎮 CHARAMARL RUN で走ってみる</a>
+</section>
+
+<footer>© 2026 CHARAMARL / レコルダ合同会社</footer>
+
+<script>
+// 🔴 商品の一覧は js/products.js が唯一の出どころ。ここに書き足さない。
+// kind で絞るのは ar/index.html と同じやり方。
+(function(){
+  var list = (window.CM_PRODUCTS || []).filter(function(p){
+    return p.kind === 'アクリルキーホルダー';
+  });
+  var esc = function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+  var yen = function(n){ return '¥' + Number(n).toLocaleString(); };
+
+  document.getElementById('grid').innerHTML = list.map(function(p){
+    // products.js のパスは ./img/... （サイト直下からの相対）。ここは characters/ の下なので1つ上げる
+    var img = String(p.img || '').replace(/^\.\//, '../');
+    var page = String(p.page || '').replace(/^\.\/characters\//, './');
+    return '<a class="item" href="' + esc(page) + '?utm_source=charamarl_keyrings">' +
+      '<div class="thumb"><img src="' + esc(img) + '" alt="' + esc(p.name) + '" loading="lazy"></div>' +
+      '<div class="nm">' + esc(p.name) + '</div>' +
+      '<div class="by">' + esc(p.creator) + '</div>' +
+      '<div class="pr">' + yen(p.price) + '</div></a>';
+  }).join('');
+
+  document.querySelector('.tag-row .tag').textContent = '全' + list.length + '種';
+  document.querySelector('.section-heading').textContent = list.length + '種類あります';
+
+  if (window.cmEvent) cmEvent('view_item_list', { item_list_name: 'keyrings', items: list.length });
+})();
+</script>
+</body>
+</html>
