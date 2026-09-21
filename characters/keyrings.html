@@ -3,15 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- アクリルキーホルダーの一覧（2026-09-21 新規）
-     ピンズには pins.html という1枚があるのに、アクキーには無かった。
-     11種あるのに「買える場所」を1つのURLで示せず、トップから探してもらう形になっていた。
-     ★オーナーモードの告知で「持っていない方はこちら」の行き先が要る、というのが直接のきっかけ。
-
-     🔴 商品データは js/products.js だけを読む。ここに商品を書き足さないこと。
-        キャラ一覧が散っていて、9/19に2件の取りこぼしが出ている（開発バックログ参照）。
-     🔴 characters/kagechiyo-acrylic.html は仮ページ（noindex・価格が¥1,200のまま）。
-        products.js に入っていないので、ここにも出ない。それでよい。 -->
+<!-- アクリルキーホルダーの一覧（2026-09-21）
+     商品データは js/products.js だけを読む。kind==='アクリルキーホルダー' で絞る。
+     🔴 ここに商品を書き足さないこと。キャラ一覧が複数箇所に散っていて取りこぼしが出ている。
+     種類数も見出しも products.js の件数から出しているので、増減しても直さなくてよい。 -->
 <title>アクリルキーホルダー — CHARAMARL</title>
 <meta name="description" content="CHARAMARLのアクリルキーホルダー。全11種・各1,500円（税込・送料込）。裏にNFCタグが入っていて、スマートフォンをかざすとそのキャラクターのページがひらきます。">
 <meta property="og:type" content="website">

@@ -1,6 +1,7 @@
-// 管理者判定の共通ヘルパー
-// ・APPLY_KEY（クエリ or ボディ）での認証（従来どおり）
-// ・またはログインセッションが管理者アカウントなら許可
+// 管理者判定の共通ヘルパー（サーバー側だけで使う）
+// 🔴 api/_lib/ に置いている。_ で始まるフォルダは Vercel がルートにも静的配信にもしないため。
+//    2026-09-21 まで lib/admin.js にあり、https://charamarl.com/lib/admin.js で誰でも読めていた。
+//    秘密の値は入っていなかったが、認証の経路と管理者名が外から見える状態だった。
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 

@@ -6,7 +6,7 @@
 // 必要な環境変数: KV_REST_API_URL / KV_REST_API_TOKEN（react.jsと共通）
 //                APPLY_KEY（管理一覧の閲覧キー）
 
-const { isAdminReq } = require('../lib/admin.js');
+const { isAdminReq } = require('./_lib/admin.js');
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;

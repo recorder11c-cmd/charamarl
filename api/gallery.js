@@ -10,7 +10,7 @@
 
 const crypto = require('crypto');
 const { put, del } = require('@vercel/blob');
-const { isAdminReq } = require('../lib/admin.js');
+const { isAdminReq } = require('./_lib/admin.js');
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;

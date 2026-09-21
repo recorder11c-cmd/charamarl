@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
   const q = req.query || {};
 
   if (q.reset) { // 管理用: カウンタリセット
-    const { isAdminReq } = require('../lib/admin.js');
+    const { isAdminReq } = require('./_lib/admin.js');
     if (!(await isAdminReq(req))) {
       return res.status(403).json({ error: 'forbidden' });
     }

@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
 
     // 管理用: 集計一覧 GET /api/out?stats=1&key=...
     if (req.query && req.query.stats) {
-      const { isAdminReq } = require('../lib/admin.js');
+      const { isAdminReq } = require('./_lib/admin.js');
       if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
       let cursor = '0'; const keys = [];
       do {

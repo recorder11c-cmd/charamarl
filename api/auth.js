@@ -59,7 +59,7 @@ module.exports = async (req, res) => {
     // この分岐に入らず、ユーザー一覧が黙って空で返ってしまうため「パラメータの有無」で判定する。
     if (req.method === 'GET' && req.query && ('key' in req.query || 'users' in req.query)) {
       // 管理用: 登録ユーザー一覧（APPLY_KEY または 管理者セッション）
-      const { isAdminReq } = require('../lib/admin.js');
+      const { isAdminReq } = require('./_lib/admin.js');
       if (!(await isAdminReq(req))) {
         return res.status(403).json({ error: 'forbidden' });
       }
@@ -83,7 +83,7 @@ module.exports = async (req, res) => {
     if (req.method === 'GET') {
       const u = await currentUser(req);
       if (!u) return res.status(200).json({ user: null });
-      const { ADMIN_USERS } = require('../lib/admin.js');
+      const { ADMIN_USERS } = require('./_lib/admin.js');
       const col = await redis('GET', `user:${u.key}:col`);
       const { likes = [], saves = [] } = col ? JSON.parse(col) : {};
       return res.status(200).json({ user: { name: u.name, admin: ADMIN_USERS.includes(u.key) }, likes, saves });
@@ -128,7 +128,7 @@ module.exports = async (req, res) => {
     // 仮パスワードを発行して返すだけ。本人には「ログインしたら必ず変えてください」と伝える。
     // ⚠️ 作品や♥・保存はそのまま残る（アカウントを作り直さないため）。
     if (b.action === 'adminpass') {
-      const { isAdminReq } = require('../lib/admin.js');
+      const { isAdminReq } = require('./_lib/admin.js');
       if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
       const key = nameKey(String(b.name || ''));
       if (!key) return res.status(400).json({ error: 'name が必要です' });
@@ -142,7 +142,7 @@ module.exports = async (req, res) => {
     // 管理用: アカウント削除（代行用の仮アカウントの後始末など）
     // 本人のパスワードは不要。APPLY_KEY か管理者セッションが必要。
     if (b.action === 'admindel') {
-      const { isAdminReq } = require('../lib/admin.js');
+      const { isAdminReq } = require('./_lib/admin.js');
       if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
       const key = nameKey(String(b.name || ''));
       if (!key) return res.status(400).json({ error: 'name が必要です' });
