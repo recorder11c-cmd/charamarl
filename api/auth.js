@@ -71,10 +71,10 @@ module.exports = async (req, res) => {
       } while (cursor !== '0');
       const users = [];
       for (const k of keys) {
-        const [name, created] = await Promise.all([
-          redis('HGET', k, 'name'), redis('HGET', k, 'created'),
+        const [name, created, lastLogin] = await Promise.all([
+          redis('HGET', k, 'name'), redis('HGET', k, 'created'), redis('HGET', k, 'lastLogin'),
         ]);
-        users.push({ name, created: Number(created) || 0 });
+        users.push({ name, created: Number(created) || 0, lastLogin: Number(lastLogin) || 0 });
       }
       users.sort((a, b) => b.created - a.created);
       return res.status(200).json({ count: users.length, users });
@@ -113,6 +113,9 @@ module.exports = async (req, res) => {
       if (!obj.hash || hashPass(String(b.pass || ''), obj.salt) !== obj.hash) {
         return res.status(401).json({ error: 'ニックネームかパスワードが違います' });
       }
+      // 最終ログインを残す。作家さんがダッシュボードを見ているかを知るため
+      // （2026-09-21 追加。それまで created しか無く、誰が一度も入っていないか分からなかった）
+      await redis('HSET', `user:${key}`, 'lastLogin', String(Date.now()));
       await createSession(res, key);
       return res.status(200).json({ ok: true, name: obj.name });
     }

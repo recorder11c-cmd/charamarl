@@ -57,6 +57,23 @@
   .refresh:focus-visible{outline:3px solid var(--purple);outline-offset:2px;}
   .updated{text-align:center;font-size:11px;color:var(--muted);}
   .note{font-size:11px;color:var(--muted);line-height:1.7;margin-top:16px;background:#fff;border:1px dashed var(--line);border-radius:14px;padding:12px 14px;}
+  /* 作家さん向けのお知らせ。DMを減らすために置いた（2026-09-21）
+     全員向けの連絡を1人ずつDMしていて、9/16〜21の6日で113通になっていた。
+     ここは案内制のURLなので作家さんしか来ない。ログインも要らない。 */
+  .news{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-bottom:20px;}
+  .news h2{font-size:14px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+  .news .cnt{background:var(--orange);color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 8px;}
+  .news .lead{font-size:11.5px;color:var(--muted);margin-bottom:12px;line-height:1.7;}
+  .news ul{list-style:none;display:flex;flex-direction:column;gap:2px;}
+  .news li{border-top:1px solid var(--line);padding:11px 2px;}
+  .news li:first-child{border-top:0;}
+  .news .d{font-size:10.5px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .news .t{font-size:13px;font-weight:800;line-height:1.5;margin-top:2px;}
+  .news .b{font-size:12px;color:#555;line-height:1.8;margin-top:3px;}
+  .news a.go{display:inline-block;font-size:12px;font-weight:800;color:var(--purple);text-decoration:none;margin-top:5px;}
+  .news .new{background:#FFE9D6;color:#B35600;font-size:9.5px;font-weight:800;border-radius:8px;padding:2px 7px;margin-left:6px;vertical-align:1px;}
+  .news .seen{width:100%;min-height:var(--tap-min);margin-top:10px;background:none;border:1px solid var(--line);
+   border-radius:22px;font-size:12px;font-weight:800;color:var(--muted);font-family:inherit;cursor:pointer;}
   .err{background:#FFC7CE;color:#9C0006;border-radius:14px;padding:12px 14px;font-size:12px;font-weight:700;margin-bottom:14px;display:none;}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
 </style>
@@ -72,6 +89,13 @@
   <div class="eyebrow">Artist Dashboard</div>
   <h1>いいね・保存 集計</h1>
   <div class="sub">ギャラリー作品・キャラクターへのリアクション（全ユーザー合計・リアルタイム）</div>
+
+  <div class="news" id="newsBox" hidden>
+    <h2>📣 作家さんへのお知らせ <span class="cnt" id="newsCnt"></span></h2>
+    <div class="lead">できたものをここにまとめています。DMは、その方だけのご用件のときだけお送りします。</div>
+    <ul id="newsList"></ul>
+    <button class="seen" id="newsSeen" type="button">既読にする</button>
+  </div>
 
   <div class="chips" id="chips"></div>
 
@@ -116,6 +140,50 @@
     {id:'mossun',   title:'MOSSUN', artist:'DinoRenny', type:'char', img:'./img/colors_nobg/mossun_blue.png'},
     {id:'gmc',      title:'レコマル', artist:'MARU_GMC', type:'char', img:'./img/gallery/gmc.png'},
   ];
+
+  // ===== 作家さんへのお知らせ =====
+  // 🔴 全員向けの連絡はここに置く。1人ずつDMしない。
+  //    新しいものを足すときは配列の先頭に。d は YYYY-MM-DD。
+  const ANN = [
+    {d:'2026-09-21', t:'★オーナーモードができました',
+     b:'NFCアクキーをかざして開くと、そのキャラで二段ジャンプができて、★が金色になります。記録は持ち主だけの順位表に入るので、通常のランキングの公平さはそのままです。',
+     href:'./run.html'},
+    {d:'2026-09-21', t:'アクリルキーホルダーの一覧ページができました',
+     b:'全11種を1枚で見比べられます。ご自身のキャラのページにもそこから行けます。',
+     href:'./characters/keyrings.html'},
+    {d:'2026-09-18', t:'ピンズ（丸25mm）を発売しました',
+     b:'絵柄は12種。単品1,800円、4個セット4,400円。4個セットは作家さんをまたいで混ぜられます。',
+     href:'./characters/pins.html'},
+    {d:'2026-09-18', t:'CHARAMARL RUN を公開しました',
+     b:'アクキーになったキャラ10体で走るゲームです。キャラごとに今週のランキングがあります（月曜0時にリセット）。',
+     href:'./run.html'},
+    {d:'2026-09-05', t:'アーティストページができました',
+     b:'作品・グッズ・リンクが1ページにまとまります。プロフィールに貼れるURLです。ご自身のページは下の「すべて」から作家名を選ぶと分かります。',
+     href:'./artist.html'},
+  ];
+  (function(){
+    // escS はこの下で定義されるので、ここでは自前のものを使う
+    const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const K='cm_news_seen';
+    let seen=''; try{ seen=localStorage.getItem(K)||''; }catch(e){}
+    const box=document.getElementById('newsBox');
+    if(!ANN.length) return;
+    const fresh=ANN.filter(n=>n.d>seen).length;
+    document.getElementById('newsCnt').textContent = fresh ? fresh+'件' : '';
+    document.getElementById('newsCnt').style.display = fresh ? '' : 'none';
+    document.getElementById('newsList').innerHTML = ANN.map(n=>
+      '<li><div class="d">'+n.d.replace(/-/g,'/')+ (n.d>seen?'<span class="new">NEW</span>':'') +'</div>'+
+      '<div class="t">'+esc(n.t)+'</div><div class="b">'+esc(n.b)+'</div>'+
+      (n.href?'<a class="go" href="'+esc(n.href)+'">ひらく →</a>':'')+'</li>').join('');
+    box.hidden=false;
+    document.getElementById('newsSeen').addEventListener('click',function(){
+      try{ localStorage.setItem(K, ANN[0].d); }catch(e){}
+      document.querySelectorAll('.news .new').forEach(e=>e.remove());
+      document.getElementById('newsCnt').style.display='none';
+      this.textContent='既読にしました';
+    });
+  })();
+
   const list=document.getElementById('list');
   const escS=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   function addRow(a){
