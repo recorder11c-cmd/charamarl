@@ -24,9 +24,11 @@
 import sys, re, os, glob, subprocess
 
 # 🔴 交渉・検討の状態。作家さんが読んで気持ちのいいものではない
-NEGOTIATION = ['未返信', '返事待ち', '承諾待ち', '打診', '交渉', '一任', '渋', '断られ',
-               '却下', 'NGだった', 'もめ', 'クレーム', '本人が用意中', '返事が来るまで',
-               '本人の返事']
+# ⚠️ 1〜2文字の語を入れない。2026-09-21 に「渋」が作品説明の「渋谷」に当たって誤検出した。
+#    狼少年になるほうが、ツールが無いより悪い。**必ず前後の語まで含める。**
+NEGOTIATION = ['未返信', '返事待ち', '承諾待ち', '打診し', '打診済', '打診中', '交渉中',
+               'に一任', '渋られ', '断られ', '却下', 'NGだった', 'もめ', 'クレーム対応',
+               '本人が用意中', '返事が来るまで', '本人の返事', '承諾が取れ', '許可が取れて']
 # 🔴 社内の段取り。外から見て意味がないうえ、未公開のものの存在を漏らす
 INTERNAL = ['非公開ページ', 'トップ未リンク', '仮ページ', '見せて詰めて', '公開前', 'まだ公開しない',
             '社内', '内緒', '関係者のみ', '公開しないこと', 'メモ —', 'メモ:', '運用メモ', '方針）']
@@ -36,6 +38,9 @@ SECRET = [r'APPLY_KEY\s*=\s*[\'"]', r'sk_live_', r'sk_test_', r'whsec_',
 
 # 見ないもの（配らないファイル）
 SKIP_DIRS = ('node_modules', '.git', '.vercel', 'tools', 'api')
+# 本文を見ないディレクトリ。自動生成で、中身は /api/gallery のもともと公開されている文。
+# コメントだけは見る（生成器のバグで内部情報が混ざることはあるため）。
+NO_BODY_DIRS = ('w/',)
 
 
 def visible_text(text):
@@ -89,7 +94,7 @@ def main():
             for m in re.finditer(pat, s):
                 hits.append(('鍵', f, s[:m.start()].count('\n') + 1, m.group(0)[:60]))
         spots = [('コメント', l, b) for l, b in comments(s, f)]
-        if f.endswith('.html'):
+        if f.endswith('.html') and not f.startswith(NO_BODY_DIRS):
             spots += [('本文', l, b) for l, b in visible_text(s)]
         for where, line, body in spots:
             for w in NEGOTIATION:
