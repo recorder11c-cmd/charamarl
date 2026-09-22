@@ -1299,8 +1299,29 @@
   }));
   const artShareUrl=id=>`https://charamarl.com/?g=${encodeURIComponent(id)}`;
 
-  function openArt(id){curArt=id;renderArt();artOverlay.classList.add('open');document.body.style.overflow='hidden';}
-  function closeArt(){artOverlay.classList.remove('open');document.body.style.overflow='';}
+  // 作品を開いたら URL を ?g=<作品ID> にして page_view を送る。
+  //
+  // 2026-09-22、1か月の棚卸しで分かったこと:
+  //   GA4のページパスが「/」と「/index.html」しか無く、**作品ごとの閲覧数がどこにも無かった。**
+  //   作品はモーダルで開いていて URL が変わらないため page_view が発生していなかった。
+  //   分母が無いので「100閲覧あたり送客」が出せず、平面と立体の差が
+  //   作品の型の差なのか露出の差なのか分けられなかった。
+  //
+  // replaceState にしているのは、戻るボタンで一覧へ帰れる挙動を変えないため
+  // （pushState にすると作品を10点見た人は戻るを10回押すことになる）。
+  // ?g= は元から共有URLの形なので、リンクとしても正しいまま。
+  function artPageView(id){
+    try{
+      var u = id ? (location.pathname + '?g=' + encodeURIComponent(id)) : location.pathname;
+      // ?g= 付きで来た人は gtag('config') が既に1回送っている。
+      // その作品をそのまま開くだけなので、ここで送ると二重に数える。
+      if (location.pathname + location.search === u) return;
+      history.replaceState(null, '', u);
+      if(window.gtag) gtag('event','page_view',{ page_location: location.origin + u, page_title: document.title });
+    }catch(e){}
+  }
+  function openArt(id){curArt=id;renderArt();artOverlay.classList.add('open');document.body.style.overflow='hidden';artPageView(id);}
+  function closeArt(){artOverlay.classList.remove('open');document.body.style.overflow='';artPageView(null);}
   document.getElementById('artClose').addEventListener('click',closeArt);
   artOverlay.addEventListener('click',e=>{if(e.target===artOverlay)closeArt();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeArt();});
