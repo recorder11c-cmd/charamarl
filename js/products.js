@@ -51,3 +51,12 @@ window.CM_TAPS = {
   'ROKU':['./tap/junkeeees.html'],
   'DREAMER©':['./tap/ghost.html'],
 };
+
+// CHARAMARL RUN に出ているキャラ（run.html の CHARS のキー）。
+// アクキーの id と同じ綴りなので、そのまま照合できる。
+// ここにあるアクキーだけ、NFCでかざしたときに★オーナーモードへ行ける。
+// 🔴 PUTTI と MOSSUN はアクキーがあるが RUN にいない＝オーナーモードは使えない。
+//    2026-09-22、発表文を「RUNに出ているキャラのアクキーをかざすと」に直した理由がこれ。
+//    RUN にキャラを足したら、ここと run.html の両方に足す。
+window.CM_RUN_CHARS = ['sue','gmc','ufoo','kagechiyo','yurucrazy',
+                       'dogooooo','inkumo','danna','blockma','mony'];

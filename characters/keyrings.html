@@ -57,6 +57,9 @@
   .nm{font-size:15px;font-weight:900;line-height:1.3;}
   .by{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4;}
   .pr{font-size:13px;font-weight:900;color:var(--accent);margin-top:8px;letter-spacing:.02em;}
+  /* ★オーナーモードが使えるものだけに出す印。使えないものには何も出さない（×を並べない） */
+  .run{display:inline-block;margin-top:7px;font-size:10.5px;font-weight:900;letter-spacing:.03em;
+   background:linear-gradient(135deg,#FFE27A,#E0A800);color:#3a2b00;padding:3px 9px;border-radius:11px;}
 
   .nfc{background:var(--surface);border-radius:var(--radius);padding:22px 24px;margin-top:6px;}
   .nfc h3{font-size:16px;font-weight:900;margin-bottom:10px;}
@@ -117,11 +120,12 @@
     <ol>
       <li><b>アクリル本体のうらにスマートフォンをかざす</b>（iPhoneは上の端、Androidは背面の中央あたり）</li>
       <li>そのキャラクターのページがひらきます</li>
-      <li>そこから <b>CHARAMARL RUN の「★オーナーモード」</b>で走れます。二段ジャンプができて、★が金色になります</li>
+      <li><b>★ オーナーモード</b>の印があるものは、そこから <b>CHARAMARL RUN</b> を「★オーナーモード」で走れます。二段ジャンプができて、★が金色になり、記録は持ち主だけの順位表に入ります</li>
     </ol>
     <p class="warn">
       ⚠️ タグは<b>アクリル本体のうら</b>に入っています。台紙にかざしても反応しません。<br>
-      読み取りに対応していない端末のために、台紙のうらに同じ行き先のQRコードも刷ってあります。
+      読み取りに対応していない端末のために、台紙のうらに同じ行き先のQRコードも刷ってあります。<br>
+      ⚠️ <b>★オーナーモードは、CHARAMARL RUN にそのキャラが出ているものだけ</b>です。印のないものは、かざすとキャラクターのページがひらくところまでになります。
     </p>
   </div>
 
@@ -140,6 +144,7 @@
   var esc = function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
   var yen = function(n){ return '¥' + Number(n).toLocaleString(); };
+  var RUN = window.CM_RUN_CHARS || [];
 
   document.getElementById('grid').innerHTML = list.map(function(p){
     // products.js のパスは ./img/... （サイト直下からの相対）。ここは characters/ の下なので1つ上げる
@@ -149,7 +154,10 @@
       '<div class="thumb"><img src="' + esc(img) + '" alt="' + esc(p.name) + '" loading="lazy"></div>' +
       '<div class="nm">' + esc(p.name) + '</div>' +
       '<div class="by">' + esc(p.creator) + '</div>' +
-      '<div class="pr">' + yen(p.price) + '</div></a>';
+      '<div class="pr">' + yen(p.price) + '</div>' +
+      // ★オーナーモードが使えるものにだけ印を出す。products.js の CM_RUN_CHARS が出どころ。
+      (RUN.indexOf(p.id) >= 0 ? '<div class="run">★ オーナーモード</div>' : '') +
+      '</a>';
   }).join('');
 
   document.querySelector('.tag-row .tag').textContent = '全' + list.length + '種';
