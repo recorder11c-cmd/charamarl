@@ -34,7 +34,9 @@
 ■ 対象
     RUN にキャラがいて、かつ TAP ページがあるものだけ。
     ⚠️ PUTTI と MOSSUN はアクキーがあるが RUN にキャラがいない → ボタンを出さない。
-    ⚠️ だんなは /n/danna が characters/danna.html へ行く。あちらは既に実装済みなので触らない。
+    ⚠️ だんなは n.js の既定値だと characters/danna.html だが、**Redis で /tap/danna.html に上書きされている**
+       （TAPができたときに切り替えたもの）。実際の行き先を /api/n?stats=1 で見て入れること。
+       行き先をあとから変えられるのが /n/ を1枚挟んでいる理由なので、**既定値だけ見て判断しない。**
 
 ■ トークンが外に出ないこと
     TAPのシェアは location.origin + location.pathname だけを使っていて
@@ -44,7 +46,7 @@ import sys, os, re, glob
 
 # RUN にいるキャラ（run.html の CHARS のキー）∩ tap/*.html
 TARGETS = ['sue', 'gmc', 'ufoo', 'kagechiyo', 'yurucrazy',
-           'dogooooo', 'inkumo', 'blockma', 'mony']
+           'dogooooo', 'inkumo', 'blockma', 'mony', 'danna']
 
 CSS = """  .runbtn {
     pointer-events:auto; display:none; margin-top:14px;
@@ -139,7 +141,7 @@ def main():
     if check:
         print('※ --check なので書いていません')
     print('\n⚠️ PUTTI と MOSSUN はアクキーがあるが RUN にキャラがいないので対象外。')
-    print('⚠️ だんなは /n/danna が characters/danna.html へ行く（あちらは実装済み）。')
+    print('⚠️ だんなの行き先は Redis で /tap/danna.html に上書きされている（/api/n?stats=1 で確認）。')
     return 1 if err else 0
 
 
