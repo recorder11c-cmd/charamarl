@@ -45,6 +45,26 @@ const DEST = {
 
 const SITE = 'https://charamarl.com';
 
+// ★オーナーモード（CHARAMARL RUN）のトークンを行き先に足すキー。
+// 2026-09-22: ユーザーがユルクレイジーのアクキーで実機確認して「runへのリンクがない」と判明。
+//   かざす → /n/{key} → /tap/{key}.html?nfc=1 まで来ても、
+//   ★オーナーモードが開く唯一の入口が run.html?owner=<トークン> だったため、
+//   **かざしてもオーナーモードにならない状態**だった。トークンを付けていたのは旧ルートの go.js のほう。
+//   公式Xの発表文と作家さんへの案内が「かざすと二段ジャンプ」なので、実装をそちらに合わせる。
+// 式は run-score.js の ownerToken() と同じ（大文字ID）。検証は記録の登録時に run-score.js がやる。
+// ⚠️ RUN にキャラがいるキーだけ。putti と mossun はアクキーがあるが RUN にいないので入れない。
+const RUN_KEYS = new Set(['sue', 'gmc', 'ufoo', 'kagechiyo', 'yurucrazy',
+                          'dogooooo', 'inkumo', 'danna', 'blockma', 'mony']);
+
+function withOwner(dest, key) {
+  if (!RUN_KEYS.has(key) || !process.env.APPLY_KEY) return dest;
+  const tok = require('crypto')
+    .createHmac('sha256', process.env.APPLY_KEY)
+    .update('run-owner:' + key.toUpperCase())
+    .digest('hex').slice(0, 20);
+  return dest + (dest.includes('?') ? '&' : '?') + 'owner=' + tok;
+}
+
 async function redis(...cmd) {
   const res = await fetch(KV_URL, {
     method: 'POST',
@@ -110,7 +130,7 @@ module.exports = async (req, res) => {
       } catch (_) {}
     }
     res.setHeader('Cache-Control', 'no-store');
-    res.writeHead(302, { Location: SITE + dest });
+    res.writeHead(302, { Location: SITE + withOwner(dest, c) });
     return res.end();
   } catch (e) {
     res.writeHead(302, { Location: SITE + '/' });

@@ -97,6 +97,15 @@
     box-shadow:0 6px 0 rgba(0,0,0,.25); transition:transform .12s;
   }
   .buy:active { transform:scale(.96); }
+  .runbtn {
+    pointer-events:auto; display:none; margin-top:14px;
+    background:linear-gradient(135deg,#FFE27A,#E0A800); color:#111; font-weight:900;
+    text-decoration:none; padding:14px 28px; border-radius:30px;
+    font-size:clamp(14px,3.5vmin,18px); box-shadow:0 6px 0 rgba(0,0,0,.25);
+    transition:transform .12s;
+  }
+  .runbtn.on { display:inline-block; }
+  .runbtn:active { transform:scale(.96); }
   .like {
     pointer-events:auto; display:inline-flex; align-items:center; gap:8px; margin-top:14px;
     background:#fff; border:3px solid #111; color:#e0245e; font-weight:900; font-family:inherit;
@@ -165,6 +174,7 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
     <button class="like" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span>いいね <b id="likeCt"></b></button>
     <button class="share-btn" id="shareBtn" type="button">🚀 シェア</button>
     <a class="buy" id="buy" href="#" target="_blank" rel="noopener">🛒 購入する</a>
+    <a class="runbtn" id="runOwner" href="#" rel="noopener">🎮 RUN で走る（★オーナー特典つき）</a>
   </div>
 </div>
 
@@ -399,5 +409,26 @@ const CM_NEXT = {"artist": "カゲチヨ", "out": "g8d69be3f1e86", "goods": "kag
   }, 2500);
 })();
 </script>
+<script>
+// NFCアクキーから来た人だけ、RUNの★オーナーモードへ行けるボタンを出す。
+// トークンは /n/<キー> のリダイレクト（api/n.js）が付ける。ここでは検証しない。
+// 検証は run-score.js が記録の登録時にやるので、偽のトークンでは順位表に入らない。
+// ⚠️ シェアのURLは location.pathname だけを使っているので、トークンは外に出ない。
+(function(){
+  var o = new URLSearchParams(location.search).get("owner");
+  var a = document.getElementById("runOwner");
+  if(!o || !a) return;
+  var key = (location.pathname.split("/").pop() || "").replace(/\.html$/, "");
+  if(!key) return;
+  a.href = "/run.html?char=" + encodeURIComponent(key)
+         + "&owner=" + encodeURIComponent(o) + "&utm_source=nfc";
+  a.classList.add("on");
+  a.addEventListener("pointerdown", function(e){ e.stopPropagation(); });
+  a.addEventListener("click", function(){
+    if(window.cmEvent) cmEvent("tap_run_owner", { character: key });
+  });
+})();
+</script>
+
 </body>
 </html>
