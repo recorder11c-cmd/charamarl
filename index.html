@@ -346,19 +346,6 @@
   #aSave.on{background:#ffeede;color:var(--orange);}
   .art-visit{display:block;text-align:center;background:#efefef;color:#111;border-radius:26px;padding:13px;font-size:14px;font-weight:800;text-decoration:none;margin:6px 0 20px;transition:.18s;}
   .art-visit:hover{background:var(--orange);color:#fff;}
-  /* 作家さんのイベント告知。作品を開いた人にだけ出す。
-     🔴 中身は EVENTS に書く。載せる前に必ず本人の許可を取ること。
-     ⚠️ 支援額やパーセントなど、動く数字は書かない。古くなって直し忘れる。 */
-  .art-event{margin-top:18px;border:1.5px solid var(--accent);border-radius:16px;padding:16px 18px;
-    background:linear-gradient(135deg,rgba(245,200,66,.10),rgba(162,89,255,.10));}
-  .art-event .ev-k{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--accent);}
-  .art-event .ev-t{font-size:17px;font-weight:900;line-height:1.4;margin:6px 0 4px;}
-  .art-event .ev-m{font-size:12.5px;color:var(--muted);line-height:1.8;}
-  .art-event .ev-b{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
-  .art-event .ev-b a{flex:1 1 150px;text-align:center;border-radius:22px;padding:11px 14px;
-    font-size:13px;font-weight:900;text-decoration:none;}
-  .art-event .ev-b a.p{background:var(--accent);color:#1a1a26;}
-  .art-event .ev-b a.s{background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.18);}
   .art-desc-h{font-size:15px;font-weight:900;margin-bottom:8px;}
 </style>
 <link rel="stylesheet" href="cart.css">
@@ -815,7 +802,6 @@
       <a class="art-visit" id="aVisit" href="#" target="_blank">サイトにアクセス →</a>
       <div class="art-desc-h">説明</div>
       <div class="modal-desc" id="aDesc"></div>
-      <div class="art-event" id="aEvent" hidden></div>
       <a class="art-follow" href="https://x.com/charamarl" target="_blank" rel="noopener"
          onclick="if(window.cmEvent)cmEvent('follow_click',{place:'artwork_modal'});">𝕏 新しい作品の入荷を受け取る</a>
     </div>
@@ -1266,51 +1252,12 @@
         : '';
     })();
     document.getElementById('aDesc').textContent=a.desc;
-    renderArtEvent(a);
     const av=document.getElementById('aVisit');av.href=outUrl(curArt,a.site)||a.site||'#';av.style.display=a.site?'':'none';
     // 分割計測用に「実際の行き先」を持たせる(href は /api/out?g= に化けるため種別が取れない)
     av.dataset.site=a.site||'';av.dataset.art=curArt;av.dataset.artistName=a.artist||'';
     document.getElementById('aLikeCt').textContent=likeTotal(curArt);
     const lb=document.getElementById('aLike'); lb.classList.toggle('on',liked); lb.querySelector('.ic').textContent=liked?'♥':'♡';
     const sb=document.getElementById('aSave'); sb.classList.toggle('on',saved); document.getElementById('aSaveLb').textContent=saved?'保存済み':'保存';
-  }
-
-  // ===== 作家さんのイベント告知 =====
-  // 作品を開いた人に、その作家さんのイベントを出す。
-  // 🔴 載せる前に必ず本人の許可を取る。許可が取れたものだけをここに足す。
-  //    やり取りの状況は 01_記録/ 側で管理する（このファイルは公開される）。
-  // ⚠️ 支援額・パーセント・残り日数のような動く数字は書かない。直し忘れて古くなる。
-  // 出す条件: ?preview=fes が付いているときだけ。許可が出たら enabled を true にする。
-  const EVENTS = {
-    'ROKU': {
-      enabled: false,
-      kicker: 'EVENT',
-      title: 'JUNKeeeeS FES 2026 IN KYOTO',
-      meta: '2026年10月24日（土）・25日（日）10:00〜18:00<br>'
-          + 'KYOTO NIJO CAFE ROOT TWO（京都市中京区西ノ京船塚町17）<br>'
-          + 'JR・地下鉄 二条駅から徒歩5分／入場 大人500円・大学生以下 無料',
-      links: [
-        { url:'https://junkeeees-fes-2026.pages.dev/', label:'🎪 FESの公式ページ', cls:'p' },
-        { url:'https://for-good.net/project/1004034',  label:'応援する（クラウドファンディング）', cls:'s' }
-      ]
-    }
-  };
-  function renderArtEvent(a){
-    const el = document.getElementById('aEvent');
-    if (!el) return;
-    const who = String(a.artistName || a.artist || '').replace(/^by\s+/, '').trim();
-    const ev = EVENTS[who];
-    const preview = new URLSearchParams(location.search).get('preview') === 'fes';
-    if (!ev || !(ev.enabled || preview)) { el.hidden = true; el.innerHTML = ''; return; }
-    el.innerHTML = '<div class="ev-k">' + ev.kicker + '</div>'
-      + '<div class="ev-t">' + ev.title + '</div>'
-      + '<div class="ev-m">' + ev.meta + '</div>'
-      + '<div class="ev-b">' + ev.links.map(function(l){
-          return '<a class="' + l.cls + '" href="' + l.url + '" target="_blank" rel="noopener"'
-               + ' onclick="if(window.cmEvent)cmEvent(\'event_click\',{artist:\'' + who + '\'});">'
-               + l.label + '</a>'; }).join('')
-      + '</div>';
-    el.hidden = false;
   }
 
   // ようこそポップアップ(初回のみ・?g=共有リンク経由時は出さない)
@@ -1365,7 +1312,13 @@
   // ?g= は元から共有URLの形なので、リンクとしても正しいまま。
   function artPageView(id){
     try{
-      var u = id ? (location.pathname + '?g=' + encodeURIComponent(id)) : location.pathname;
+      // 🔴 いま付いているパラメータを捨てないこと。
+      //    2026-09-23、?g= だけの形に書き換えていたため ?preview= や utm が消えていた。
+      //    ?g=作品ID&utm_source=x のような共有リンクを開くと、URLからutmが落ちる。
+      var q = new URLSearchParams(location.search);
+      if (id) q.set('g', id); else q.delete('g');
+      var qs = q.toString();
+      var u = location.pathname + (qs ? '?' + qs : '');
       // ?g= 付きで来た人は gtag('config') が既に1回送っている。
       // その作品をそのまま開くだけなので、ここで送ると二重に数える。
       if (location.pathname + location.search === u) return;
