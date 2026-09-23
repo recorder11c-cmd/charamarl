@@ -256,8 +256,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     <span>タップ / <kbd>SPACE</kbd> ジャンプ</span>
     <span><kbd>↓</kbd> / 下スワイプ / ボタン長押し しゃがむ</span>
     <span>100点ごとに世界の色がかわる</span>
-    <span>★を取ると15秒 空を飛べて点が2倍（押して上昇・ライバルにぶつかると飛行おわり）</span>
-    <span>ライバルをかわすと +10</span>
+    <span>★を取ると15秒 空を飛べて点が2倍（押して上昇・ハンバーガーにぶつかると飛行おわり）</span>
+    <span>ハンバーガーをかわすと +10</span>
   </div>
   <footer id="credit">© CHARAMARL</footer>
 </div>
@@ -301,11 +301,11 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
                 trait:{ label:'オールラウンダー' }, like:null, shop:'https://charamarl.com/', goods:null },
     pizzahat: { id:'JUNK_PIZZAHAT', name:'ピッツァハット', sprite:'art/pizzahat.png', facing:'right', artist:'JUNKeeeeS', enemySize:80,
                 trait:{ label:'★が近くに来る（取りやすい）', starY:30 }, like:null, shop:'https://charamarl.com/', goods:null },
-    blt:      { id:'JUNK_BLT',      name:'B.L.T',         sprite:'art/blt.png',      facing:'right', artist:'JUNKeeeeS', enemySize:80,
+    blt:      { id:'JUNK_BLT',      name:'B.L.T',         sprite:'art/blt.png',      facing:'left', artist:'JUNKeeeeS', enemySize:80,
                 trait:{ label:'最速ランナー（同じ時間で点が多く入る）', speed:1.1 }, like:null, shop:'https://charamarl.com/', goods:null },
     popcorn:  { id:'JUNK_POPCORN',  name:'ポップコーン',   sprite:'art/popcorn.png',  facing:'right', artist:'JUNKeeeeS', enemySize:80,
                 trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:null, shop:'https://charamarl.com/', goods:null },
-    bukgahop: { id:'JUNK_BUKGAHOP', name:'バクガ・ホップ', sprite:'art/bukgahop.png', facing:'right', artist:'JUNKeeeeS', enemySize:80,
+    bukgahop: { id:'JUNK_BUKGAHOP', name:'バクガ・ホップ', sprite:'art/bukgahop.png', facing:'left', artist:'JUNKeeeeS', enemySize:80,
                 trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:null, shop:'https://charamarl.com/', goods:null },
   };
 
@@ -672,6 +672,52 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       ctx.fillStyle = 'rgba(255,255,255,.55)'; rr(x + w*.34, o.y - h + 6, 5, h*.5, 3); ctx.fill();
     }
   }
+  // JUNKeeeeS版: 飛んでくるのはハンバーガー(キャラの絵は使わない)
+  function drawBurger(o){
+    const f = Math.sin(o.flap);
+    const cx = o.x + o.w/2, cy = o.y - o.h/2 + f*5;
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(f*.08); ctx.scale(1, 1 - Math.abs(f)*.06);
+    const w = o.w, h = o.h; ctx.lineWidth = 3; ctx.strokeStyle = '#1B1B1F'; ctx.lineJoin = 'round';
+    // 下のバンズ
+    ctx.fillStyle = '#F2B85B'; rr(-w*.46, h*.16, w*.92, h*.26, 10); ctx.fill(); ctx.stroke();
+    // パティ
+    ctx.fillStyle = '#7A3E1D'; rr(-w*.5, h*.02, w, h*.2, 6); ctx.fill(); ctx.stroke();
+    // チーズ(垂れ)
+    ctx.fillStyle = '#FFC400'; ctx.beginPath(); ctx.moveTo(-w*.5, -h*.04); ctx.lineTo(w*.5, -h*.04); ctx.lineTo(w*.5, h*.06); ctx.lineTo(w*.34, h*.14); ctx.lineTo(w*.22, h*.06); ctx.lineTo(-w*.1, h*.16); ctx.lineTo(-w*.2, h*.06); ctx.lineTo(-w*.5, h*.06); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // レタス
+    ctx.fillStyle = '#5BD35B'; ctx.beginPath(); ctx.moveTo(-w*.52, -h*.06);
+    for (let i = 0; i <= 6; i++){ const x = -w*.52 + i*(w*1.04/6); ctx.quadraticCurveTo(x - w*.08, -h*.2, x, -h*.08); }
+    ctx.lineTo(w*.52, -h*.04); ctx.lineTo(-w*.52, -h*.04); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // 上のバンズ(ドーム)＋ゴマ
+    ctx.fillStyle = '#F2B85B'; ctx.beginPath(); ctx.moveTo(-w*.5, -h*.1); ctx.quadraticCurveTo(-w*.5, -h*.62, 0, -h*.62); ctx.quadraticCurveTo(w*.5, -h*.62, w*.5, -h*.1); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#FFF3D6'; [[-w*.25,-h*.32],[-w*.05,-h*.44],[w*.16,-h*.3],[w*.3,-h*.4]].forEach(([x,y]) => { ctx.beginPath(); ctx.ellipse(x, y, 3.2, 2, .4, 0, 7); ctx.fill(); });
+    // 目
+    ctx.fillStyle = '#1B1B1F'; ctx.beginPath(); ctx.arc(-w*.12, -h*.26, 2.4, 0, 7); ctx.arc(w*.12, -h*.26, 2.4, 0, 7); ctx.fill();
+    ctx.restore();
+  }
+  // JUNKeeeeS版: 地面の障害物は大きなフライドポテト(赤い箱からポテトが飛び出す)
+  function drawFries(o, world){
+    for (let i=0;i<o.n;i++){
+      const x = o.x + i*(o.single+4), w = o.single, h = o.h - (i%2 ? 8 : 0);
+      ctx.lineWidth = 3; ctx.strokeStyle = '#1B1B1F'; ctx.lineJoin = 'round';
+      // ポテト(箱の上から扇形に)
+      const bh = h*.5, top = o.y - h, bx = x + w*.08, bw = w*.84;
+      const fries = [[.18,.02,-.18],[.34,-.06,-.06],[.5,-.1,0],[.66,-.06,.06],[.82,.02,.18]];
+      fries.forEach(([fx, dy, rot]) => {
+        ctx.save(); ctx.translate(bx + bw*fx, o.y - bh + 6); ctx.rotate(rot);
+        const fh = (h - bh) + h*.12 - dy*h; ctx.fillStyle = '#FFD23F'; rr(-w*.075, -fh, w*.15, fh + 8, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,.45)'; rr(-w*.05, -fh + 4, w*.04, fh*.6, 2); ctx.fill();
+        ctx.restore();
+      });
+      // 箱(赤・上が広い台形)
+      ctx.fillStyle = '#E5322D'; ctx.beginPath(); ctx.moveTo(bx - 3, o.y - bh); ctx.lineTo(bx + bw + 3, o.y - bh); ctx.lineTo(bx + bw - 4, o.y); ctx.lineTo(bx + 4, o.y); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#FFD23F'; ctx.beginPath(); ctx.moveTo(bx + bw*.3, o.y - bh*.72); ctx.quadraticCurveTo(bx + bw*.5, o.y - bh*.2, bx + bw*.7, o.y - bh*.72); ctx.lineWidth = 2.5; ctx.strokeStyle = '#FFD23F'; ctx.stroke();   // 箱のロゴ風の曲線
+      ctx.strokeStyle = '#1B1B1F';
+      // 顔
+      ctx.fillStyle = '#1B1B1F'; ctx.beginPath(); ctx.arc(bx + bw*.36, o.y - bh*.42, 2.4, 0, 7); ctx.arc(bx + bw*.64, o.y - bh*.42, 2.4, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(bx + bw*.5, o.y - bh*.3, 4, .15*Math.PI, .85*Math.PI); ctx.lineWidth = 2; ctx.stroke();
+    }
+  }
   function drawBird(o){
     // PUTTI：羽ばたき＝上下ゆれ＋わずかな傾き＋縦つぶれ
     const f = Math.sin(o.flap);
@@ -764,7 +810,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     { const off = (S.dist*33) % 60;
     for (let x = (DIR > 0 ? -off : off) - 120; x < W + 60; x += 60){ ctx.fillRect(x, GROUND + 18, 28, 6); ctx.fillRect(x + 36, GROUND + 34, 12, 5); } }
 
-    obstacles.forEach(o => o.type==='bird' ? drawBird(o) : drawCactus(o, world));
+    obstacles.forEach(o => o.type==='bird' ? drawBurger(o) : drawFries(o, world));
     if (star){
       ctx.save(); ctx.shadowColor = 'rgba(255,224,0,.9)'; ctx.shadowBlur = 18;
       drawStar(star.x, star.y, 24, star.rot); ctx.fillStyle = '#FFE000'; ctx.fill(); ctx.shadowBlur = 0; ctx.lineWidth = 3; ctx.strokeStyle = '#1B1B1F'; ctx.stroke();
