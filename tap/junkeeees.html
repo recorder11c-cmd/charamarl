@@ -368,7 +368,9 @@ const CONFIG = {
 };
 /* ========================================================= */
 
-document.title = CONFIG.character + " COLOR TAP | CHARAMARL";
+// 🔴 このページはカラーチェンジではなく36枚のカード収集。
+//    他のTAPと同じ雛形を使っているので、ここでタイトルを上書きしないこと。
+//    （<title> に書いたものが JS で消されていた）
 document.body.style.setProperty("--bg", CONFIG.bg);
 document.getElementById("char").src = CONFIG.baseImage;
 // 商品未設定なら購入ボタンを隠す
