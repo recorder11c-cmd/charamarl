@@ -556,6 +556,29 @@ updateCounter();
 prefetchNext();
 drawCard();
 
+// 🔴 すでに36枚そろえている端末への入口。
+//    openFin は「36枚目を引いた瞬間」にしか呼ばれないので、
+//    前に遊び終えた人は新しい画面に一生たどり着けなかった（検証で判明）。
+//    ・読み込み時に1回だけ自動で開く（同じ訪問では二度出さない）
+//    ・そのあとはカウンターの「COMPLETE!!」を押せばいつでも開く
+(function(){
+  if(seenSet().size < 36) return;
+  const ONCE = "junk_fin_shown";
+  try{
+    if(!sessionStorage.getItem(ONCE)){
+      sessionStorage.setItem(ONCE, "1");
+      setTimeout(openFin, 900);
+    }
+  }catch(e){}
+  const c = document.getElementById("gachaCount");
+  if(c){
+    c.style.cursor = "pointer";
+    c.title = "FESの情報を見る";
+    c.addEventListener("pointerdown", e => e.stopPropagation());
+    c.addEventListener("click", openFin);
+  }
+})();
+
 // ♥ いいね ＝ いま出ているカード1枚への「推し」
 // これまではページ全体で1つ（ROKUさんの「FUEL UP」と共通）だったが、
 // 押している人は画面に出ているカードに反応しているので、カード単位に変えた。
@@ -616,7 +639,7 @@ shareOverlay.addEventListener("click",e=>{if(e.target===shareOverlay)shareOverla
 document.querySelectorAll(".share-opt").forEach(btn=>btn.addEventListener("click",()=>{
   const url=location.origin+location.pathname;
   const text=(typeof shareTextNow==="function")?shareTextNow()
-             :(CONFIG.shareText||(CONFIG.character+" COLOR TAP | CHARAMARL"));
+             :(CONFIG.shareText||(CONFIG.character+" キャラクター図鑑 | CHARAMARL"));
   if(window.cmEvent)cmEvent("tap_share",{character:CONFIG.character,how:btn.dataset.sh});
   const kind=btn.dataset.sh;
   if(kind==="x")window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(url),"_blank");
