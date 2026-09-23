@@ -113,6 +113,27 @@
     .buy-bar #addCartBtn,.buy-bar .buy-btn{flex:1;padding:13px 8px;}
   }
 
+
+  /* ===== スマホ: 一覧をなるべく上に =====
+     ⚠️ このブロックは CSS のいちばん最後に置くこと。基本ルールより後ろでないと上書きされる。 */
+  @media(max-width:700px){
+    .hero{padding:18px 20px 10px;}
+    h1{font-size:30px;}
+    .tag-row{margin-bottom:8px;}
+    .lead{font-size:13px;line-height:1.75;margin-bottom:12px;}
+    .asr-block{grid-template-columns:1fr 1fr;gap:6px;font-size:10px;}
+    .asr-block>div{padding:7px 9px;}
+    section{padding:0 20px 28px;}
+    .section-title{margin-bottom:4px;}
+    .section-heading{margin-bottom:2px;}
+    .section-note{font-size:12px;margin-bottom:10px;}
+    .modes{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+    .mode{padding:10px 11px;}
+    .mode b{font-size:12.5px;margin-bottom:2px;}
+    .mode .p{font-size:17px;}
+    .mode .s{display:none;}
+    .mode .save{display:block;margin:3px 0 0;}
+  }
 </style>
 <link rel="stylesheet" href="../cart.css">
 <script defer src="/_vercel/insights/script.js"></script>
@@ -273,7 +294,6 @@ function render(){
 
   $('#buyBtn').disabled = !full;
   $('#addCartBtn').disabled = !full;
-  if (picked.length) $('#heroImg').src = '..' + DESIGNS.find(d => d.key === picked[0]).img;
 }
 
 document.querySelectorAll('.mode').forEach(b => b.addEventListener('click', () => {
