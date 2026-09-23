@@ -104,6 +104,7 @@
 
 <div class="char-hero">
   <div class="char-visual"><img src="../img/pins/sue.png" alt="ピンズ" id="heroImg"></div>
+  <!-- 上の src は読み込み前の保険。実際の絵柄は下の initHero() が日替わりで選び直す -->
   <div>
     <div class="tag-row"><span class="tag">丸25mm</span><span class="tag">金属フレーム</span><span class="tag">ドーム加工</span><span class="tag">バタフライピン</span></div>
     <h1>ピンズ</h1>
@@ -193,6 +194,24 @@ const DESIGNS = [
   { key:'kg_promu',     name:'プロム',   artist:'カゲチヨ', img:'/img/pins/kg_promu.png' },
   { key:'kg_muchiko',   name:'ムチコ',   artist:'カゲチヨ', img:'/img/pins/kg_muchiko.png' },
 ];
+// ヒーローの絵柄は日替わりにする。
+// 🔴 以前は sue.png で固定していたため、12種あるのに最初に目に入るのは必ず自社キャラだった。
+//    作家さんから見ると自社を前に出しているように見える。日ごとに順番に回す。
+//    ランダムではなく日付で決めているのは、同じ日に開き直しても絵が変わらないようにするため。
+// 並びは DESIGNS の順ではなく、作家が続かないように組んである。
+// DESIGNS の順のままだと自社3種が先頭に固まり、カゲチヨさん5種が後半に固まる。
+const HERO_ORDER = ['kg_kagechiyo','sue','kg_kimi','yurucrazy','kg_shigure','danna',
+                    'kg_promu','inkumo','kg_muchiko','mossun','mony','putti'];
+function initHero(){
+  const d0 = Date.UTC(2026, 8, 22, 15, 0, 0);   // 2026-09-23 00:00 JST
+  const days = Math.floor((Date.now() - d0) / 86400000);
+  const key = HERO_ORDER[((days % HERO_ORDER.length) + HERO_ORDER.length) % HERO_ORDER.length];
+  const d = DESIGNS.find(x => x.key === key);
+  const el = document.getElementById('heroImg');
+  if (el && d) { el.src = '..' + d.img; el.alt = 'ピンズ ' + d.name; }
+}
+initHero();
+
 const PRICE_SINGLE = 1800, PRICE_SET = 4400, SET_SIZE = 4;
 const CHAR_ID = 'pins';
 
