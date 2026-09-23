@@ -38,6 +38,7 @@ window.CM_PRODUCTS = [
 window.CM_TAPS = {
   'DinoRenny':['./tap/sue.html','./tap/putti.html','./tap/mossun.html','./tap/gotochi.html'],
   'MARU_GMC':['./tap/gmc.html'],
+  'PHAGY':['./tap/moja.html'],
   'ちゅい':['./tap/ufoo.html'],
   'SAYoooooh':['./tap/dogooooo.html'],
   "Ink'z Monster":['./tap/inkumo.html'],
