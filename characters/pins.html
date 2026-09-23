@@ -28,18 +28,7 @@
   .draft{background:#3a2a12;border-bottom:1px solid #6b4c16;color:#f5c842;font-size:12px;font-weight:800;text-align:center;padding:8px 16px;letter-spacing:.04em;}
   .char-hero{display:grid;grid-template-columns:1fr 1fr;gap:48px;max-width:1000px;margin:0 auto;padding:52px 32px 32px;align-items:center;}
   @media(max-width:700px){.char-hero{grid-template-columns:1fr;padding:22px 20px 14px;gap:16px;}}
-  /* スマホでは一覧を先に見せる。
-     🔴 直す前は 12種の一覧が y=1477（画面2.2個ぶん下）にあり、スクロールしないと1つも見えなかった。
-        アクキー一覧は y=745 なので、同じくらいまで上げる。
-     ・ヒーロー画像を小さくする（商品写真1枚に画面の高さを使わない）
-     ・長い説明とスペックは一覧の「あと」へ回す（order で並べ替えるだけ。HTMLは動かさない） */
-  @media(max-width:700px){
-    .char-visual img{max-height:190px;width:auto;margin:0 auto;display:block;}
-    .char-hero .char-desc{display:none;}
-    .char-hero .asr-block{grid-template-columns:1fr 1fr;gap:6px;font-size:10.5px;}
-    .hero-more{display:block;}
-  }
-  .hero-more{display:none;margin:0 0 8px;}
+
   .char-visual{border-radius:24px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.4);}
   .char-visual img{width:82%;height:82%;object-fit:contain;}
   .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
@@ -99,6 +88,30 @@
     .buy-bar>div{display:flex;gap:8px;}
     .buy-bar #addCartBtn,.buy-bar .buy-btn{flex:1;padding:13px 8px;}
   }
+
+  /* ===== スマホ: 12種の一覧を最初に見せる =====
+     🔴 直す前は一覧が y=1477（画面2.2個ぶん下）で、スクロールするまで1つも見えなかった。
+        ヒーロー画像と説明文だけで1,000px使っていた。アクキー一覧は y=745。
+     ⚠️ このブロックは **CSSのいちばん最後** に置くこと。
+        .char-visual の aspect-ratio:1 などの基本ルールより後ろでないと上書きされる（一度やった）。
+     長い説明は消すのではなく、一覧の「あと」に置き直している（.hero-more）。 */
+  .hero-more{display:none;}
+  @media(max-width:700px){
+    .char-visual{aspect-ratio:auto;max-height:200px;border-radius:18px;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+    .char-visual img{width:auto;height:200px;}
+    .char-hero .char-desc,
+    .char-hero .asr-block{display:none;}
+    .char-creator{margin-bottom:10px;}
+    .tag-row{margin-bottom:10px;}
+    .modes{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+    .mode{padding:11px 12px;}
+    .mode b{font-size:13px;}
+    .mode .p{font-size:18px;}
+    .mode .s{display:none;}
+    .mode .save{display:block;margin:3px 0 0;}
+    .section-note{margin-bottom:14px;}
+    .hero-more{display:block;}
+  }
 </style>
 <link rel="stylesheet" href="../cart.css">
 <script defer src="/_vercel/insights/script.js"></script>
@@ -156,7 +169,13 @@
   <div class="section-heading" id="pickHeading">絵柄をえらぶ</div>
   <div class="section-note" id="pickNote">ひとつ選んでください。</div>
   <div class="grid" id="grid"></div>
-  <p class="char-desc hero-more" style="margin-top:22px;">
+  <div class="asr-block hero-more" style="margin-top:22px;">
+    <div>🛒 <b>単品 ¥1,800</b> 税込・送料込<br><span>4個セットなら1個 ¥1,100</span></div>
+    <div>📦 受注生産<br><span>ご注文から約2週間でお届け</span></div>
+    <div>🎨 絵柄を選べます<br><span>4個セットは作家をまたいで混ぜられます</span></div>
+    <div>🤝 売上は作家さんと折半<br><span>実費を除いた粗利を分配</span></div>
+  </div>
+  <p class="char-desc hero-more" style="margin-top:14px;">
     直径25mmの丸いピンズ。金属のフレームに、ぷっくりしたドーム加工のガラス面。<br>
     裏は着脱しやすいバタフライピンです。<br><br>
     鞄でも、帽子でも、ジャケットの襟でも。小さいので、いくつも並べて留められます。
