@@ -256,8 +256,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     <span>タップ / <kbd>SPACE</kbd> ジャンプ</span>
     <span><kbd>↓</kbd> / 下スワイプ / ボタン長押し しゃがむ</span>
     <span>100点ごとに世界の色がかわる</span>
-    <span>★を取ると15秒 空を飛べて点が2倍（押して上昇・ハンバーガーにぶつかると飛行おわり）</span>
-    <span>ハンバーガーをかわすと +10</span>
+    <span>バーガーを取ると15秒 空を飛べて点が2倍（押して上昇・ライバルにぶつかると飛行おわり）</span>
+    <span>ライバルをかわすと +10</span>
   </div>
   <footer id="credit">© CHARAMARL</footer>
 </div>
@@ -300,7 +300,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     ageru:    { id:'JUNK_AGERU',    name:'アゲル',        sprite:'art/ageru.png',    facing:'right', artist:'JUNKeeeeS', enemySize:82,
                 trait:{ label:'オールラウンダー' }, like:null, shop:'https://charamarl.com/', goods:null },
     pizzahat: { id:'JUNK_PIZZAHAT', name:'ピッツァハット', sprite:'art/pizzahat.png', facing:'right', artist:'JUNKeeeeS', enemySize:80,
-                trait:{ label:'★が近くに来る（取りやすい）', starY:30 }, like:null, shop:'https://charamarl.com/', goods:null },
+                trait:{ label:'バーガーが近くに来る（取りやすい）', starY:30 }, like:null, shop:'https://charamarl.com/', goods:null },
     blt:      { id:'JUNK_BLT',      name:'B.L.T',         sprite:'art/blt.png',      facing:'left', artist:'JUNKeeeeS', enemySize:80,
                 trait:{ label:'最速ランナー（同じ時間で点が多く入る）', speed:1.1 }, like:null, shop:'https://charamarl.com/', goods:null },
     popcorn:  { id:'JUNK_POPCORN',  name:'ポップコーン',   sprite:'art/popcorn.png',  facing:'right', artist:'JUNKeeeeS', enemySize:80,
@@ -675,9 +675,11 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   // JUNKeeeeS版: 飛んでくるのはハンバーガー(キャラの絵は使わない)
   function drawBurger(o){
     const f = Math.sin(o.flap);
-    const cx = o.x + o.w/2, cy = o.y - o.h/2 + f*5;
-    ctx.save(); ctx.translate(cx, cy); ctx.rotate(f*.08); ctx.scale(1, 1 - Math.abs(f)*.06);
-    const w = o.w, h = o.h; ctx.lineWidth = 3; ctx.strokeStyle = '#1B1B1F'; ctx.lineJoin = 'round';
+    drawBurgerAt(o.x + o.w/2, o.y - o.h/2 + f*5, o.w, o.h, f*.08, 1 - Math.abs(f)*.06);
+  }
+  function drawBurgerAt(cx, cy, w, h, rot, sy){
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot || 0); ctx.scale(1, sy || 1);
+    ctx.lineWidth = 3; ctx.strokeStyle = '#1B1B1F'; ctx.lineJoin = 'round';
     // 下のバンズ
     ctx.fillStyle = '#F2B85B'; rr(-w*.46, h*.16, w*.92, h*.26, 10); ctx.fill(); ctx.stroke();
     // パティ
@@ -810,18 +812,18 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     { const off = (S.dist*33) % 60;
     for (let x = (DIR > 0 ? -off : off) - 120; x < W + 60; x += 60){ ctx.fillRect(x, GROUND + 18, 28, 6); ctx.fillRect(x + 36, GROUND + 34, 12, 5); } }
 
-    obstacles.forEach(o => o.type==='bird' ? drawBurger(o) : drawFries(o, world));
+    obstacles.forEach(o => o.type==='bird' ? drawBird(o) : drawFries(o, world));
     if (star){
+      // JUNKeeeeS版: 飛行アイテムは★ではなくハンバーガー(取ると飛べる)
       ctx.save(); ctx.shadowColor = 'rgba(255,224,0,.9)'; ctx.shadowBlur = 18;
-      drawStar(star.x, star.y, 24, star.rot); ctx.fillStyle = '#FFE000'; ctx.fill(); ctx.shadowBlur = 0; ctx.lineWidth = 3; ctx.strokeStyle = '#1B1B1F'; ctx.stroke();
-      drawStar(star.x - 5, star.y - 5, 8, star.rot); ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fill(); ctx.restore();
+      drawBurgerAt(star.x, star.y, 58, 46, Math.sin(star.t * .1) * .12, 1); ctx.restore();
     }
     drawDino();
     if (S.fly > 0){
       const sec = Math.ceil(S.fly / 60), blink = sec <= 3 && Math.floor(S.t / 8) % 2 === 0;
       ctx.save(); ctx.font = '900 18px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
       ctx.lineWidth = 5; ctx.strokeStyle = '#1B1B1F'; ctx.fillStyle = blink ? '#E5484D' : '#FFE000';
-      ctx.strokeText(`★ FLY ${sec}  点×${FLY_MULT}`, W*.5, 10); ctx.fillText(`★ FLY ${sec}  点×${FLY_MULT}`, W*.5, 10); ctx.restore();
+      ctx.strokeText(`FLY ${sec}  点×${FLY_MULT}`, W*.5, 10); ctx.fillText(`FLY ${sec}  点×${FLY_MULT}`, W*.5, 10); ctx.restore();
     }
 
     // パーティクル
