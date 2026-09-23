@@ -309,8 +309,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
                 trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:null, shop:'https://charamarl.com/', goods:null },
   };
 
-  const charKey = (new URLSearchParams(location.search).get('char') || 'kagechiyo').toLowerCase();
-  const CHAR  = CHARS[charKey] || CHARS.kagechiyo;
+  const charKey = (new URLSearchParams(location.search).get('char') || 'ageru').toLowerCase();
+  const CHAR  = CHARS[charKey] || CHARS.ageru;
   CHAR.credit = 'JUNKeeeeS';
   const T = Object.assign({ label:'', jump:1, grav:1, hit:1, speed:1, fly:0, starY:0, grace:90, shield:false, ramp:180 }, CHAR.trait || {});
   const RIVALS = Object.keys(CHARS).filter(k => CHARS[k] !== CHAR);   // 敵役の候補(主人公以外)
