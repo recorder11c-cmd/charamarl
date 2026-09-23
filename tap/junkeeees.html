@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COLOR TAP — CHARAMARL</title>
+<title>JUNKeeeeS キャラクター図鑑 — 36人を集めよう｜CHARAMARL</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { height:100%; }
@@ -176,6 +176,31 @@
 <script src="/js/ga.js"></script>
 
 <style>
+/* ===== 36枚そろったときの画面 =====
+   🔴 直す前は、36枚目で図鑑が勝手に全面表示され、その裏に作家パネルも残っていた。
+      イベント告知にたどり着くまでに「図鑑を閉じる→作家パネルを閉じる→もう一度タップ」
+      が必要で、いちばん見せたいものがいちばん遠かった。
+   いまは COMPLETE → イベントの中身 → 押せるボタン、の順に1画面で出す。
+   図鑑は勝手に開かず、このパネルのボタンから開く。 */
+#fin{position:fixed;inset:0;z-index:80;background:rgba(10,10,16,.94);
+  display:none;align-items:center;justify-content:center;padding:22px;overflow-y:auto;}
+#fin.open{display:flex;}
+#fin .box{width:min(460px,100%);background:#fff;border-radius:24px;padding:26px 22px 22px;
+  text-align:center;color:#1a1a1a;}
+#fin .done{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:clamp(24px,7vw,32px);font-weight:900;color:#FF8A00;letter-spacing:.02em;}
+#fin .lead{font-size:13.5px;font-weight:700;line-height:1.8;margin-top:8px;color:#444;}
+#fin .ev{margin-top:18px;padding:16px;border-radius:16px;background:#FFF4E6;text-align:left;}
+#fin .ev-n{font-size:16px;font-weight:900;line-height:1.45;}
+#fin .ev-d{font-size:13px;font-weight:800;color:#FF8A00;margin-top:5px;letter-spacing:.02em;}
+#fin .ev-m{font-size:12.5px;color:#555;line-height:1.8;margin-top:6px;}
+#fin .btns{display:flex;flex-direction:column;gap:9px;margin-top:18px;}
+#fin a.b,#fin button.b{display:block;width:100%;text-align:center;text-decoration:none;
+  font-family:inherit;font-size:14px;font-weight:800;padding:14px;border-radius:26px;
+  border:0;cursor:pointer;background:#FF8A00;color:#fff;}
+#fin a.b.g,#fin button.b.g{background:#fff;color:#1a1a1a;border:1.5px solid #1a1a1a;}
+#fin a.b.p,#fin button.b.p{background:transparent;color:#777;font-weight:700;font-size:12.5px;padding:6px;border:0;}
+
 /* ===== 遊び終わったあとの行き先（結果画面） ===== */
 #nextPanel{position:fixed;left:0;right:0;bottom:0;z-index:60;
   background:rgba(255,255,255,.96);backdrop-filter:blur(10px);
@@ -244,6 +269,28 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
 </div>
 <div class="spot-toast" id="spotToast"></div>
 <div class="zu-big" id="zuBig"><img id="zuBigImg" src="" alt=""></div>
+
+<div id="fin" aria-hidden="true">
+  <div class="box" role="dialog" aria-modal="true">
+    <div class="done">36人コンプリート！</div>
+    <div class="lead">JUNKeeeeSの仲間たちが、京都に集合します。</div>
+    <div class="ev">
+      <div class="ev-n">JUNKeeeeS FES 2026 in KYOTO</div>
+      <div class="ev-d">2026.10.24 SAT – 10.25 SUN　10:00〜18:00</div>
+      <div class="ev-m">ROOT2 SEIKA NIJO（京都市中京区西ノ京船塚町17）<br>
+        JR・地下鉄 二条駅から徒歩5分<br>
+        入場 大人500円／大学生以下 無料</div>
+    </div>
+    <div class="lead" style="margin-top:14px;">遊んで、見て、食べて、買って。<br>今度は会場でJUNKeeeeSに会おう！</div>
+    <div class="btns">
+      <a class="b" id="finEv" href="https://junkeeees-fes-2026.pages.dev/" target="_blank" rel="noopener">🎪 イベント詳細を見る</a>
+      <a class="b g" id="finMap" href="https://maps.google.com/?q=京都府京都市中京区西ノ京船塚町17" target="_blank" rel="noopener">📍 会場を地図で見る</a>
+      <a class="b g" id="finX" href="https://x.com/junkeeees_jp" target="_blank" rel="noopener">𝕏 JUNKeeeeS公式を見る</a>
+      <button class="b g" id="finZu" type="button">📖 36人の図鑑を見る</button>
+      <button class="b p" id="finClose" type="button">閉じる</button>
+    </div>
+  </div>
+</div>
 
 <div id="nextPanel" aria-hidden="true">
   <div class="nx-hd"><span class="nx-t" id="nxTitle">気に入った？</span>
@@ -361,7 +408,9 @@ function apply(p){
     img.style.setProperty("--sat", p.sat);
     img.style.setProperty("--bri", p.bri);
   }
-  nameEl.textContent = p.name;
+  // 🔴 FESのフライヤー面では名前を出さない。
+  //    画像そのものにタイトルと日付が入っていて、上に重ねると隠れる。
+  nameEl.textContent = String(p.key||"").startsWith("fes") ? "" : p.name;
   if(window.cmTapSeen)cmTapSeen(p.key);   // 全色を見たら結果画面を出す
   nameEl.classList.remove("show"); void nameEl.offsetWidth; nameEl.classList.add("show"); // ぱっと出てフェイドアウト
   if(shopReady){
@@ -399,7 +448,9 @@ function updateCounter(){
   const el = document.getElementById("gachaCount");
   if(!el) return;
   el.innerHTML = n >= 36
-    ? "🎉 <b>COMPLETE!!</b> 10/24-25 京都で会おう🍟"
+    ? (new Date() > FES_END
+        ? "🎉 <b>COMPLETE!!</b> ご来場ありがとうございました🍟"
+        : "🎉 <b>COMPLETE!!</b> 10/24-25 京都で会おう🍟")
     : "みつけた <b>" + n + "</b> / 36 ・ あと" + (36 - n) + "枚" + spotLine() + fesLine();
   const zs = document.getElementById("zuSub");
   if(zs) zs.textContent = n >= 36 ? "36 / 36" : n + " / 36 みつけた";
@@ -437,8 +488,13 @@ function drawCard(){
       cmEvent("card_new",{character:"JUNKeeeeS",card:card.key,found:s.size});
       if(s.size===36) cmEvent("collection_complete",{character:"JUNKeeeeS"});
     }
-    // 36枚目を引いた瞬間に COMPLETE の画面を出す（ここがいちばんの見せ場）
-    if(s.size===36 && typeof openZukan==="function") setTimeout(openZukan, 700);
+    // 36枚目 → 完走パネル（COMPLETE → イベントの中身 → 押せるボタン）
+    // 🔴 以前はここで図鑑を勝手に開いていた。図鑑と作家パネルを閉じて
+    //    もう一度タップしないとイベント告知に届かなかった。
+    if(s.size===36) setTimeout(openFin, 800);
+    // 途中で一度だけ、イベントがあることを知らせる。
+    // 36枚引かないと何も分からないのでは、来ない人には一生伝わらない。
+    if(s.size===6) setTimeout(fesTeaser, 900);
   }
   if(window.cmEvent)cmEvent("card_view",{character:"JUNKeeeeS",card:card.key,is_new:isNew});
   apply(card);
@@ -449,6 +505,46 @@ function drawCard(){
   updateCounter();
   prefetchNext();
 }
+// 36枚そろったときの画面。図鑑は勝手に開かず、ここのボタンから開く。
+function openFin(){
+  const el = document.getElementById("fin"); if(!el) return;
+  // 会期が終わったら文言を変える
+  if(new Date() > FES_END){
+    el.querySelector(".lead").textContent = "ご来場ありがとうございました。";
+    const b = el.querySelector(".btns .lead"); if(b) b.remove();
+  }
+  el.classList.add("open"); el.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+  if(window.cmEvent) cmEvent("fes_panel_open",{character:"JUNKeeeeS"});
+}
+function closeFin(){
+  const el = document.getElementById("fin"); if(!el) return;
+  el.classList.remove("open"); el.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+}
+(function(){
+  const el=document.getElementById("fin"); if(!el) return;
+  el.addEventListener("pointerdown",e=>e.stopPropagation());
+  document.getElementById("finClose").addEventListener("click",closeFin);
+  document.getElementById("finZu").addEventListener("click",()=>{ closeFin(); if(window.openZukan) openZukan(); });
+  ["finEv","finMap","finX"].forEach(id=>{
+    const a=document.getElementById(id); if(!a) return;
+    a.addEventListener("click",()=>{ if(window.cmEvent) cmEvent("fes_click",{character:"JUNKeeeeS",place:id}); });
+  });
+  el.addEventListener("click",e=>{ if(e.target===el) closeFin(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeFin(); });
+})();
+
+// 途中の予告。うるさくしないよう、1回だけ・自動で消える。
+function fesTeaser(){
+  if(new Date() > FES_END) return;
+  const el=document.getElementById("spotToast"); if(!el) return;
+  el.innerHTML = "🎪 10/24-25 は <b>JUNKeeeeS FES in KYOTO</b>";
+  el.classList.add("show");
+  if(window.cmEvent) cmEvent("fes_teaser",{character:"JUNKeeeeS"});
+  setTimeout(()=>el.classList.remove("show"), 4200);
+}
+
 stage.addEventListener("pointerdown", () => {
   if(!tapped){ tapped = true; hint.classList.add("hide"); tapHere.classList.add("hide"); }
   stage.classList.remove("flip"); void stage.offsetWidth; stage.classList.add("flip");
