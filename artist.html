@@ -61,6 +61,21 @@
     font-weight:900;border-radius:13px;padding:3px 11px;}
 
   /* --- 作品 --- */
+  /* インタビュー（連載「市場のひとたち」）。名義はCHARAMARLだが、
+     受けてくださった作家さんのページからも読めるようにする。 */
+  .itv{display:grid;gap:12px;}
+  .iv{display:flex;gap:14px;align-items:center;background:var(--card,#1f1f2e);
+    border-radius:16px;padding:12px;text-decoration:none;color:inherit;
+    border:1px solid transparent;transition:border-color .2s,transform .15s;}
+  .iv:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .iv img{width:96px;height:96px;object-fit:cover;border-radius:12px;flex:none;}
+  .ivb{min-width:0;}
+  .ivt{font-size:14.5px;font-weight:900;line-height:1.45;}
+  .ivd{font-size:12px;color:var(--muted);line-height:1.7;margin-top:4px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .ivl{display:inline-block;font-size:12px;font-weight:800;color:var(--accent);margin-top:7px;}
+  @media(max-width:520px){ .iv img{width:76px;height:76px;} .ivt{font-size:13.5px;} }
+
   .works{columns:3 190px;column-gap:12px;}
   .w{break-inside:avoid;margin-bottom:12px;display:block;text-decoration:none;position:relative;}
   .w img{width:100%;border-radius:14px;display:block;border:1px solid var(--line);background:#fff;}
@@ -133,6 +148,16 @@
     var list=res[0].list||[], rc=res[1]||{}, oc=res[2]||{};
     var mine=list.filter(function(a){return norm(a.artist)===norm(want);});
 
+    // 連載「市場のひとたち」で、この作家さんを取り上げた記事。
+    // 🔴 名義は CHARAMARL のまま。記事の文章・構成・見出し画像はこちらが作ったもので、
+    //    作家さんの「作品」ではない。作家名義にすると作品数が水増しになる
+    //    （掲載作品125点は CHARAMARL自身の分を除いて数えている）。
+    //    ただし、受けてくださった方のページから読めないのはおかしいので、別枠で出す。
+    // 紐づけはタイトル（「市場のひとたち #04 プラクテル」）で行う。
+    var interviews=list.filter(function(a){
+      return a.cat==='INTERVIEW' && String(a.title||'').indexOf(want)>=0;
+    });
+
     // ギャラリーAPIより前からある作品（SUE・PUTTI・MOSSUN・レコマル等）は
     // /api/gallery に入っていないので、js/works_legacy.js から足す。
     // これが無いと DinoRenny さんのページが DR POP 4点だけになり、
@@ -204,6 +229,20 @@
         html+='<a class="g" href="'+esc(p.page)+'"><img src="'+esc(p.img)+'" alt="'+esc(p.name)+'" loading="lazy">'+
           '<div class="gi"><div class="gn">'+esc(p.name)+'</div><div class="gk">'+esc(p.kind)+'</div>'+
           '<span class="gp">'+yen(p.price)+'</span></div></a>';
+      });
+      html+='</div></div>';
+    }
+
+    if(interviews.length){
+      html+='<div class="sec"><div class="sec-h"><h2>📖 インタビュー</h2>'+
+        '<span class="n">'+interviews.length+'本</span></div><div class="itv">';
+      interviews.forEach(function(a){
+        html+='<a class="iv" href="'+esc(a.link||('./index.html?g='+a.id))+'"'+
+          (a.link?' target="_blank" rel="noopener"':'')+'>'+
+          '<img src="'+esc(a.img)+'" alt="'+esc(a.title)+'" loading="lazy">'+
+          '<div class="ivb"><div class="ivt">'+esc(a.title)+'</div>'+
+          '<div class="ivd">'+esc(String(a.desc||'').slice(0,80))+'…</div>'+
+          '<span class="ivl">記事を読む →</span></div></a>';
       });
       html+='</div></div>';
     }
