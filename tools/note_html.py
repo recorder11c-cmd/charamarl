@@ -12,7 +12,9 @@ note の編集画面は「リッチテキストの貼り付け」に対応して
 ■ 原稿の書き方（Markdownの一部だけ使う）
     ## 見出し           → <h2>
     > 引用              → <blockquote>（連続行はひとつの引用にまとまる）
+    ### 小見出し        → <h3>
     [[img:パス]]        → <img>（画像はbase64で埋め込むので単体で完結する）
+    [[img:パス|説明]]   → <figure> + <figcaption>（noteのキャプション欄に手で入れる）
     それ以外の行        → <p>
     空行                → 段落の区切り
     ---                 → 無視（原稿の区切り用）
@@ -27,14 +29,24 @@ note の編集画面は「リッチテキストの貼り付け」に対応して
 """
 import sys, os, base64, html, re
 
-def img_tag(path):
+def img_tag(spec):
+    """[[img:パス]] または [[img:パス|キャプション]]
+
+    🔴 alt にファイル名を入れない。note が貼り付けのときに
+       キャプション欄へ拾うことがあり、`in1_数字.png` が本文に出る。
+       キャプションを書かないときは alt を空にする。
+    """
+    path, _, cap = spec.partition('|')
     p = os.path.expanduser(path.strip())
     if not os.path.exists(p):
         raise SystemExit(f'画像が見つかりません: {p}')
     ext = 'png' if p.lower().endswith('.png') else 'jpeg'
     b64 = base64.b64encode(open(p, 'rb').read()).decode()
-    alt = html.escape(os.path.basename(p))
-    return f'<img src="data:image/{ext};base64,{b64}" alt="{alt}">'
+    alt = html.escape(cap.strip())
+    img = f'<img src="data:image/{ext};base64,{b64}" alt="{alt}">'
+    if not cap.strip():
+        return img
+    return f'<figure>{img}<figcaption>{html.escape(cap.strip())}</figcaption></figure>'
 
 def linkify(s):
     return re.sub(r'(https?://[^\s<）」]+)', r'<a href="\1">\1</a>', s)
@@ -65,6 +77,8 @@ def convert(md):
         m = re.match(r'\[\[img:(.+?)\]\]', line.strip())
         if m:
             flush_quote(); flush_para(); out.append(img_tag(m.group(1))); continue
+        if line.startswith('### '):
+            flush_quote(); flush_para(); out.append(f'<h3>{bold(html.escape(line[4:].strip()))}</h3>'); continue
         if line.startswith('## '):
             flush_quote(); flush_para(); out.append(f'<h2>{bold(html.escape(line[3:].strip()))}</h2>'); continue
         if line.startswith('> '):
@@ -76,6 +90,9 @@ def convert(md):
 CSS = """body{font-family:"Hiragino Sans","Yu Gothic",sans-serif;max-width:660px;margin:0 auto;
  padding:28px 22px 80px;line-height:1.9;color:#1a1a1a;font-size:16px;}
 h2{font-size:22px;font-weight:800;margin:44px 0 14px;line-height:1.5;}
+h3{font-size:18px;font-weight:800;margin:32px 0 10px;line-height:1.6;}
+figure{margin:26px 0;}
+figcaption{font-size:13px;color:#666;margin-top:6px;line-height:1.7;}
 p{margin:0 0 22px;}
 blockquote{margin:0 0 22px;padding:2px 0 2px 18px;border-left:4px solid #ccc;color:#444;}
 blockquote p{margin:0 0 6px;}
