@@ -1,6 +1,16 @@
 {
   "redirects": [
     {
+      "source": "/ig",
+      "destination": "https://charamarl.com/?utm_source=ig&utm_medium=bio",
+      "permanent": false
+    },
+    {
+      "source": "/ig/join",
+      "destination": "https://charamarl.com/join.html?utm_source=ig&utm_medium=bio",
+      "permanent": false
+    },
+    {
       "source": "/:path((?!api/).*)",
       "has": [
         {
