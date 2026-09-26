@@ -188,6 +188,11 @@ module.exports = async (req, res) => {
       if (b.title) item.title = trim(b.title, 60);
       if (b.artist) item.artist = trim(b.artist, 40);       // 表示名義の修正
       if (b.artistKey) item.artistKey = trim(b.artistKey, 60); // 所有アカウントの移管（キー=小文字名）
+      // 掲載日を実際の日付に直す。
+      // 🔴 NEWバッジは ts が7日以内かどうかで出る（index.html）。
+      //    過去のもの（昔のnote記事など）をあとから登録すると、古い内容に NEW が付く。
+      //    2026-09-25、8/19と8/25のnoteを登録したら両方NEWになった。
+      if (b.ts !== undefined) { const t = Number(b.ts); if (t > 0) item.ts = t; }
       if (b.desc !== undefined) item.desc = trim(b.desc, 500);
       if (b.link !== undefined) {
         let link = trim(b.link, 300);
