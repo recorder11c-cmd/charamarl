@@ -46,9 +46,19 @@ def top1(cid, week):
 
 
 def week_label(week):
-    """見出しに出す期間。week=last は先週の月〜日。"""
+    """見出しに出す期間。week=last は先週の月〜日。
+
+    週のキー（2026-09-21 のような月曜の日付）を渡したときも、
+    同じ「9/21〜9/27」の形にする。前日に翌日ぶんを作って確かめたいことがあるため。
+    """
     if week != 'last':
-        return week
+        try:
+            y, m, d = (int(x) for x in week.split('-'))
+            s = date(y, m, d)
+            e = s + timedelta(days=6)
+            return f'{s.month}/{s.day}〜{e.month}/{e.day}'
+        except Exception:
+            return week
     today = date.today()
     mon = today - timedelta(days=today.weekday())       # 今週の月曜
     s, e = mon - timedelta(days=7), mon - timedelta(days=1)
