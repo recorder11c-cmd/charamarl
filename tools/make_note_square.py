@@ -53,6 +53,11 @@ NOTES = [
          title='「デザイナーなのに<br>何もやってない人」<br>という焦りから',
          wide='「デザイナーなのに<br>何もやってない人」<br>という焦りから',
          works=['Punch!!', 'とびっきりの∞KAWAII', 'Fairy pop', 'Comic Angel']),
+    dict(no='05', artist='ひよ', sub='ぽよっとぷりん',
+         title='肩の力が、<br>ぽよっと抜ける',
+         wide='肩の力が、<br>ぽよっと抜ける',
+         works=['ぽよっとぷりん', 'ぽよっとぷりん ハロウィンシール'],
+         skip=['ぽよっとぷりん ランダムシール']),   # 販売期間が9/14で終了
 ]
 
 TPL = '''<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
@@ -86,14 +91,18 @@ h1{{font-size:{fs}px;font-weight:900;line-height:1.34;letter-spacing:.01em;}}
 </body></html>'''
 
 
-def works_for(artist, want, cache):
+def works_for(artist, want, cache, skip=()):
     """その作家の公開作品を4点。want に題名があればそれを優先。"""
     # 🔴 EVENT と INTERVIEW は作品ではない。
     #    2026-09-25、ROKUさんの枠に JUNKeeeeS FES とクラファンの告知2点が
     #    「作品」として並んだ。告知の画像をインタビュー記事の表紙に使わない。
     SKIP = {'EVENT', 'INTERVIEW'}
+    # 🔴 出せない作品は外す。
+    #    2026-09-25、ひよさんの「ランダムシール」は販売期間が9/14で終わっている。
+    #    終わったものを記事の表紙に並べない。
     mine = [w for w in cache
-            if (w.get('artist') or '').strip() == artist and w.get('cat') not in SKIP]
+            if (w.get('artist') or '').strip() == artist and w.get('cat') not in SKIP
+            and w.get('title') not in skip]
     picked = []
     for t in (want or []):
         for w in mine:
@@ -122,7 +131,7 @@ def main():
     for n in NOTES:
         if only and n['no'] != only:
             continue
-        ws = works_for(n['artist'], n.get('works'), cache)
+        ws = works_for(n['artist'], n.get('works'), cache, n.get('skip', ()))
         if len(ws) < 4:
             print(f"  ⚠️ #{n['no']} {n['artist']}: 作品が{len(ws)}点しかない。4点そろってから作り直す")
         tmp = tempfile.mkdtemp()
