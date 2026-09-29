@@ -998,7 +998,19 @@
     const fresh=[...masonryEl.querySelectorAll('.pin:not(.cat-hide)')]
       .filter(p=>Number(p.dataset.ts||0)>WEEK);
     if(!fresh.length)return;
-    fresh.reverse().forEach(p=>masonryEl.insertBefore(p,masonryEl.firstChild));
+    // 🔴 先頭へ差し込むので、古い順に回すと新しいものが先頭に残る。
+    //    2026-09-29、reverse() だけだったため DOM の並び次第で
+    //    #04（9/23）が #05（9/29）より上に出ていた。ts で並べてから回す。
+    fresh.sort((a,b)=>Number(a.dataset.ts||0)-Number(b.dataset.ts||0))
+      .forEach(p=>masonryEl.insertBefore(p,masonryEl.firstChild));
+  }
+
+  // インタビューは読みもの。作家を散らす対象ではなく、最新が上にあるべき。
+  // 全部 artist=CHARAMARL なので interleaveVisible() は groups.size<2 で素通りする。
+  function sortVisibleByDate(){
+    [...masonryEl.querySelectorAll('.pin:not(.cat-hide)')]
+      .sort((a,b)=>Number(b.dataset.ts||0)-Number(a.dataset.ts||0))
+      .forEach(p=>masonryEl.appendChild(p));
   }
 
   function interleaveVisible(){
@@ -1042,6 +1054,7 @@
       if(hit)shown++;
     });
     interleaveVisible();
+    if(curCat==='INTERVIEW')sortVisibleByDate();
     hoistNewVisible();
     masonryEl.classList.remove('filtering');void masonryEl.offsetWidth;masonryEl.classList.add('filtering');
     masonryEl.style.display=shown?'':'none';
