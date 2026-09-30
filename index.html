@@ -36,8 +36,10 @@
   .search input{width:100%;background:#f0f0f0;border:1px solid transparent;border-radius:24px;padding:9px 16px 9px 38px;font-size:13px;outline:none;transition:.2s;}
   .search input:focus{background:#fff;border-color:var(--orange);}
   .search .ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#999;font-size:14px;}
-  nav.main{display:flex;gap:22px;margin-left:auto;}
-  nav.main a{font-size:13px;font-weight:700;color:#444;white-space:nowrap;}
+  nav.main{display:flex;align-items:center;gap:22px;margin-left:auto;}
+  /* 🔴 line-height を固定する。normal のままだと行ボックスの高さがフォント任せになり、
+     ラテンだけの「ABOUT」が日本語の項目より 2px 上にずれる（2026-09-30 実測）。 */
+  nav.main a{font-size:13px;font-weight:700;color:#444;white-space:nowrap;line-height:1.5;}
   nav.main a:hover{color:var(--orange);}
   .header-icons{display:flex;align-items:center;gap:14px;flex-shrink:0;}
   .hi{font-size:18px;color:#444;cursor:pointer;}
