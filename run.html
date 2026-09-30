@@ -152,6 +152,11 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     font-family:inherit;font-weight:900;font-size:15px;background:#fff;color:var(--ink);
   }
   .rank-msg{font-weight:900;font-size:clamp(12px,3.6vw,15px);background:#fff;border:3px solid var(--ink);border-radius:999px;padding:3px 14px;box-shadow:3px 3px 0 var(--ink);}
+  .week-gap{font-weight:900;font-size:clamp(12px,3.4vw,14px);color:var(--ink);background:linear-gradient(135deg,#FFE27A,#FFD400);border:3px solid var(--ink);border-radius:999px;padding:3px 14px;box-shadow:3px 3px 0 var(--ink);text-align:center;}
+  .week-gap[hidden]{display:none;}
+  .share-card{display:block;width:100%;max-width:360px;margin:0 auto 10px;border:3px solid var(--ink);border-radius:12px;box-shadow:3px 3px 0 var(--ink);}
+  .share-card[hidden]{display:none;}
+  .share-opt.wide{grid-column:1 / -1;background:linear-gradient(135deg,#FFE27A,#FFD400);}
   .rank-msg b{color:var(--accent-2);}
   .btn.sm{padding:8px 16px;font-size:14px;}
   /* GAME OVER の中のシェア。ハイスコアのときだけ黄色くして目を引かせる */
@@ -237,6 +242,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   <!-- ゲームオーバー後の操作パネル（キャンバスの外に出してスマホでもはみ出さない） -->
   <div class="over-panel" id="overPanel" hidden>
     <div class="rank-box" id="rankBox">
+      <div class="week-gap" id="weekGap" hidden></div>
       <div class="rank-form" id="rankForm">
         <input id="rankName" type="text" maxlength="12" placeholder="ニックネーム" autocomplete="nickname" enterkeyhint="done">
         <button class="btn sm" id="rankSubmit" type="button">🏆 登録</button>
@@ -282,7 +288,9 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 <div class="share-overlay" id="shareOverlay">
   <div class="share-menu">
     <div class="share-title">シェアする</div>
+    <img class="share-card" id="shCardPrev" alt="スコアカード" hidden>
     <div class="share-grid">
+      <button class="share-opt wide" data-sh="image"><span class="share-ic" style="background:#111;color:#fff">📷</span><span id="shImgLb">スコア画像でシェア</span></button>
       <button class="share-opt" data-sh="x"><span class="share-ic" style="background:#111;color:#fff">𝕏</span>X</button>
       <button class="share-opt" data-sh="line"><span class="share-ic" style="background:#06C755;color:#fff">LINE</span>LINE</button>
       <button class="share-opt" data-sh="copy"><span class="share-ic" style="background:#f0f0f0">🔗</span><span id="shCopyLb">リンクをコピー</span></button>
@@ -508,7 +516,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     dino.y = GROUND; dino.vy = 0; dino.duck = false; dino.onGround = true; dino.squash = 0; dino.dj = false;
     resetWorld();
     startOv.classList.add('hide'); overOv.classList.add('hide'); document.getElementById('overPanel').hidden = true; document.getElementById('charBar').hidden = true;
-    setPageColor(worldAt(0).page);
+    setPageColor(worldAt(0).page); lastBoard = null;
     beep(660, .12, 'square', .06, 300);
     drEvent('game_start', { character: CHAR.id, owner: isOwner ? 1 : 0, mode: ownerMode ? 'owner' : 'normal' }); beacon('play');
   }
@@ -910,10 +918,26 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       lastBoard = { top: d.top, total: d.total, me: d.rank ? { rank: d.rank, best: d.best } : null, week: d.week, own: d.own }; renderScope();
     }catch(e){ showMsg('登録できませんでした'); rankForm.hidden = false; }
   }
+  // 「今週の1位まで あと◯点」: 登録していない人にも、今週の壁の低さを見せる(週間ランキングは月曜リセットなので、週の前半は空席が多い)
+  const weekGapEl = document.getElementById('weekGap');
+  async function showWeekGap(score){
+    weekGapEl.hidden = true;
+    try{
+      if (!lastBoard || !lastBoard.week){ const r = await fetch(`${RANK_API}?char=${encodeURIComponent(CHAR.id)}&pid=${pid}`); lastBoard = await r.json(); }
+      const w = lastBoard.week || {}, top = w.top && w.top[0];
+      if (S.state !== 'over') return;
+      if (!top) weekGapEl.textContent = '今週の1位はまだ空席！ 登録すれば1位';
+      else if (top.me) weekGapEl.textContent = 'あなたが今週の1位！';
+      else if (score > top.score) weekGapEl.textContent = `今週の1位を超えた！ 登録して名前をのこそう`;
+      else weekGapEl.textContent = `今週の1位まで あと${top.score - score + 1}点（${top.name}さん ${top.score}）`;
+      weekGapEl.hidden = false;
+    }catch(e){}
+  }
   function onGameOverRank(score, isNew){
     if (!RANK_API || window.DR_INTERNAL){ rankBox.hidden = true; return; }   // 内部端末(?internal=1)はランキングにも登録しない
     rankBox.hidden = false; rankMsg.hidden = true; rankForm.hidden = false;
     if (score < 1){ rankBox.hidden = true; return; }
+    showWeekGap(score);
     if (savedName && isNew) submitScore(score);                       // 名前登録済みならベスト更新時に自動登録
     else if (savedName){ rankForm.hidden = true; showMsg('ベスト更新でランキングに登録されます'); }
   }
@@ -982,18 +1006,57 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     shareOverlay.classList.add('open');
   }
   // パネルのボタンと、GAME OVER の中のボタン。どちらも同じところを開く
-  document.getElementById('shareBtn').addEventListener('click', openShare);
+  const _openShare = openShare; function openShareWithCard(){ _openShare(); document.getElementById('shImgLb').textContent = 'スコア画像でシェア'; if (S.state === 'over') prepareCard(); }
+  document.getElementById('shareBtn').addEventListener('click', openShareWithCard);
   document.getElementById('shareBtnOver').addEventListener('click', e => {
     e.stopPropagation();   // 背後のキャンバスに届くとリスタートしてしまう
-    openShare();
+    openShareWithCard();
   });
   shareOverlay.addEventListener('click', e => { if (e.target === shareOverlay) shareOverlay.classList.remove('open'); });
+  // スコアカード(1200x630)を描いてPNGにする。世界の色・キャラの絵・点数・順位・URL
+  function rankText(){ const m = rankMsg.hidden ? null : rankMsg.textContent.match(/今週 (\d+)位.*?累計 (\d+)位/); return m ? `今週 ${m[1]}位 / 累計 ${m[2]}位` : ''; }
+  function makeScoreCard(){
+    const c = document.createElement('canvas'); c.width = 1200; c.height = 630; const g = c.getContext('2d');
+    const w = worldAt(S.worldIdx), INK = '#1B1B1F';
+    const grad = g.createLinearGradient(0, 0, 0, 520); grad.addColorStop(0, w.sky[0]); grad.addColorStop(1, w.sky[1]); g.fillStyle = grad; g.fillRect(0, 0, 1200, 520);
+    g.fillStyle = w.far; g.strokeStyle = INK; g.lineWidth = 5;
+    [[-60,360,150],[240,300,110],[520,380,170],[860,320,130],[1120,300,120]].forEach(([x,ww,h]) => { g.beginPath(); g.ellipse(x + ww/2, 528, ww/2, h, 0, Math.PI, 0); g.fill(); g.stroke(); });
+    g.fillStyle = w.ground; g.fillRect(0, 520, 1200, 110); g.fillStyle = INK; g.fillRect(0, 520, 1200, 7);
+    g.fillStyle = 'rgba(255,255,255,.5)'; for (let x = -40; x < 1260; x += 100){ g.fillRect(x, 552, 46, 10); }
+    const F = '"M PLUS Rounded 1c", sans-serif';
+    const outlined = (t, x, y, size, fill, align) => { g.font = `900 ${size}px ${F}`; g.textAlign = align || 'left'; g.textBaseline = 'alphabetic'; g.lineJoin = 'round'; g.lineWidth = Math.max(6, size * .16); g.strokeStyle = INK; g.strokeText(t, x + 4, y + 4); g.strokeText(t, x, y); g.fillStyle = fill; g.fillText(t, x, y); };
+    outlined('CHARAMARL', 60, 110, 64, '#fff'); outlined('RUN', 60 + g.measureText('CHARAMARL').width + 20, 110, 64, '#FFE000');
+    if (sprite.ready){ const sz = 330; g.save(); g.shadowColor = 'rgba(0,0,0,.25)'; g.shadowBlur = 20; g.drawImage(sprite.canvas, 70, 520 - sz + 8, sz, sz); g.restore(); }
+    outlined('SCORE', 470, 250, 44, '#fff'); outlined(String(S.score), 470, 380, 150, '#FFE000');
+    const rt = rankText(); if (rt) outlined(rt, 470, 445, 40, '#fff');
+    outlined(`${CHAR.name}：${T.label}`, 470, 500, 30, '#fff');
+    g.font = `900 30px ${F}`; g.textAlign = 'right'; g.lineWidth = 6; g.strokeStyle = INK; g.strokeText('charamarl.com/run.html  #CHARAMARL', 1150, 600); g.fillStyle = '#fff'; g.fillText('charamarl.com/run.html  #CHARAMARL', 1150, 600);
+    return c;
+  }
+  let cardBlob = null;
+  async function prepareCard(){
+    const prev = document.getElementById('shCardPrev'); cardBlob = null; prev.hidden = true;
+    try{ if (document.fonts && document.fonts.load) await document.fonts.load('900 40px "M PLUS Rounded 1c"'); }catch(e){}
+    try{ const c = makeScoreCard(); cardBlob = await new Promise(res => c.toBlob(res, 'image/png')); prev.src = URL.createObjectURL(cardBlob); prev.hidden = false; }catch(e){}
+  }
   document.querySelectorAll('.share-opt').forEach(btn => btn.addEventListener('click', async () => {
     const url = location.origin + location.pathname;
     const m = rankMsg.hidden ? null : rankMsg.textContent.match(/(\d+)位/);
     const text = `CHARAMARL RUN（${CHAR.name}）で ${S.score} 点${m ? `（${m[1]}位）` : ''}！ #CHARAMARL`;
     const kind = btn.dataset.sh;
     drEvent('share', { method: kind, score: S.score }); beacon('share');
+    if (kind === 'image'){   // スコアカード画像: 端末の共有(画像を添付できる)→ だめならPNGを保存してXの投稿画面を開く
+      if (!cardBlob) await prepareCard();
+      if (!cardBlob) return;
+      const file = new File([cardBlob], `charamarl_run_${CHAR.id.toLowerCase()}_${S.score}.png`, { type:'image/png' });
+      if (navigator.canShare && navigator.canShare({ files:[file] })){ try{ await navigator.share({ files:[file], text: text + ' ' + url }); }catch(e){} }
+      else {
+        const a = document.createElement('a'); a.href = URL.createObjectURL(cardBlob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+        document.getElementById('shImgLb').textContent = '画像を保存しました。Xに添付してね';
+        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+      }
+      return;
+    }
     if (kind === 'x') window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
     else if (kind === 'line') window.open('https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(url), '_blank');
     else if (kind === 'copy'){
