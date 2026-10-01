@@ -691,7 +691,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     obstacles = obstacles.filter(o => DIR > 0 ? o.x + o.w > -10 : o.x < W + 10);
     // ライバルをかわしたらボーナス(通り過ぎた瞬間に1回だけ)
     obstacles.forEach(o => {
-      if (o.type !== 'bird' || o.passed) return;
+      if (o.passed) return;   // ドパガキ版: サボテンもライバルも、かわせば全部COMBO
       const passed = DIR > 0 ? (o.x + o.w < dino.x + dino.size*.2) : (o.x > dino.x + dino.size*.8);
       if (passed){ o.passed = true; DOPA.combo++; const bonus = DODGE_BONUS * Math.min(DOPA.combo, 10); S.dist += bonus; S.dodges = (S.dodges || 0) + 1;
         flashes.push({ text:`COMBO ×${DOPA.combo}  +${bonus}`, life:50, big:true }); S.shake = Math.max(S.shake, 6);
