@@ -50,6 +50,7 @@
   .cover .pick{ font-size:16px; font-weight:900; margin-top:6px; }
   .grid{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px; max-width:420px; }
   .grid .chip{ width:64px; height:64px; }
+  .glabel{ flex-basis:100%; font-size:12px; font-weight:900; color:#888; letter-spacing:.1em; margin-top:4px; }
   .start{ margin-top:8px; background:var(--orange); color:#fff; border:none; font-family:inherit; font-weight:900; font-size:18px; padding:16px 36px; border-radius:40px; box-shadow:0 6px 0 rgba(0,0,0,.18); cursor:pointer; }
   .start:disabled{ opacity:.6; }
   .need{ display:none; color:var(--orange); font-weight:900; font-size:14px; }
@@ -136,12 +137,18 @@ AFRAME.registerComponent('stay-put', {
 
 <script>
 (function(){
-  // 販売中のアクキー(作家を問わず全員同じ扱い)。順番は毎回シャッフル
-  var ALL=(window.CM_PRODUCTS||[]).filter(function(p){ return p.kind==='アクリルキーホルダー'; });
-  for(var i=ALL.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=ALL[i]; ALL[i]=ALL[j]; ALL[j]=t; }
+  // 販売中のアクキーとピンズ(作家を問わず全員同じ扱い)。それぞれ順番は毎回シャッフル
+  function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  var PRODUCTS=window.CM_PRODUCTS||[];
+  var AKI=shuffle(PRODUCTS.filter(function(p){ return p.kind==='アクリルキーホルダー'; }));
+  var PINS=shuffle(PRODUCTS.filter(function(p){ return /^ピンズ/.test(p.kind||''); }));
+  var ALL=AKI.concat(PINS);
   var byId={}; ALL.forEach(function(p){ byId[p.id]=p; });
   var abs=function(rel){ return rel.replace(/^\.\//,'/'); };
-  var pfp=function(p){ return '/img/pfp/'+p.id+'.png'; };
+  var isPin=function(p){ return /^pin_/.test(p.id); };
+  var pfp=function(p){ return isPin(p) ? abs(p.img) : '/img/pfp/'+p.id+'.png'; };   // ピンズは丸い商品画像をそのままアイコンに
+  var dispName=function(p){ return (p.name||'').replace(/^ピンズ\s*/,''); };
+  var baseId=function(p){ return p.id.replace(/^pin_/,'').replace(/^kg_/,''); };     // pin_kg_kagechiyo → kagechiyo(COLOR TAPのID)
 
   var q=new URLSearchParams(location.search);
   var cur=byId[q.get('c')||'']||null;
@@ -171,12 +178,18 @@ AFRAME.registerComponent('stay-put', {
       chara.setAttribute('width',w); chara.setAttribute('height',h);
       chara.setAttribute('src', img.src);
     }; img.src=abs(p.img);
-    pageBtn.href=abs(p.page)+'?utm_source=ar&utm_medium=daishi';
-    if(announce){ nameEl.textContent=p.name; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); }
+    var pg=abs(p.page).replace(/[?&]utm_[a-z]+=[^&]*/g,'').replace(/&/,'?');   // 商品側のutmはARのutmで置き換える
+    pageBtn.href=pg+(pg.indexOf('?')>=0?'&':'?')+'utm_source=ar&utm_medium=daishi';
+    if(announce){ nameEl.textContent=dispName(p); nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); }
     if(window.gtag) gtag('event','ar_select',{character:p.id});
   }
 
-  ALL.forEach(function(p){ grid.appendChild(chip(p, function(x){ setChara(x,false); })); strip.appendChild(chip(p, function(x){ setChara(x,true); pop(); })); });
+  function label(txt){ var d=document.createElement('div'); d.className='glabel'; d.textContent=txt; return d; }
+  if(PINS.length){ grid.appendChild(label('アクキー')); }
+  AKI.forEach(function(p){ grid.appendChild(chip(p, function(x){ setChara(x,false); })); });
+  if(PINS.length){ grid.appendChild(label('ピンズ')); }
+  PINS.forEach(function(p){ grid.appendChild(chip(p, function(x){ setChara(x,false); })); });
+  ALL.forEach(function(p){ strip.appendChild(chip(p, function(x){ setChara(x,true); pop(); })); });
   if(cur) setChara(cur,false);
 
   // タップでぴょん
@@ -186,7 +199,7 @@ AFRAME.registerComponent('stay-put', {
     holder.setAttribute('animation__pop','property: position; from: 0 0 0.25; to: 0 0 0.6; dir: alternate; dur: 260; loop: 1; easing: easeOutCubic');
     chara.removeAttribute('animation__spin');
     chara.setAttribute('animation__spin','property: rotation; from: 0 0 0; to: 0 360 0; dur: 520; easing: easeOutCubic');
-    nameEl.textContent=cur?cur.name:''; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show');
+    nameEl.textContent=cur?dispName(cur):''; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show');
     if(window.gtag) gtag('event','ar_tap',{character:cur?cur.id:''});
   }
   document.getElementById('scene').addEventListener('click', pop);
@@ -229,7 +242,7 @@ AFRAME.registerComponent('stay-put', {
   window.addEventListener('error', function(e){ if(!cover.classList.contains('hide') && startBtn.textContent==='起動中…') fail('起動エラー: '+String(e.message||'')); });
 
   var target=document.getElementById('target'), everSeen=false;
-  target.addEventListener('targetFound', function(){ found=true; everSeen=true; hint.classList.add('hide'); if(cur){ nameEl.textContent=cur.name; nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); } if(window.gtag) gtag('event','ar_found',{character:cur?cur.id:''}); });
+  target.addEventListener('targetFound', function(){ found=true; everSeen=true; hint.classList.add('hide'); if(cur){ nameEl.textContent=dispName(cur); nameEl.classList.remove('show'); void nameEl.offsetWidth; nameEl.classList.add('show'); } if(window.gtag) gtag('event','ar_found',{character:cur?cur.id:''}); });
   var target2=document.getElementById('target2');
   target2.addEventListener('targetFound', function(){ target.dispatchEvent(new Event('targetFound')); });
   target2.addEventListener('targetLost', function(){ target.dispatchEvent(new Event('targetLost')); });
@@ -238,10 +251,11 @@ AFRAME.registerComponent('stay-put', {
   // シェア
   // シェア = いまの画面の写真(カメラ映像+キャラ)。リンクは台紙が要らないサイトのトップ
   // COLOR TAPがあるキャラは、写真の透かしと文面のリンクをそのキャラのTAPにする(短いURLはvercel.jsonの書き換えで .html なしでも開く)
-  var TAP_IDS={sue:1,putti:1,mossun:1,gmc:1,ufoo:1,dogooooo:1,inkumo:1,blockma:1,mony:1,yurucrazy:1};
+  var TAP_IDS={sue:1,putti:1,mossun:1,gmc:1,ufoo:1,dogooooo:1,inkumo:1,blockma:1,mony:1,yurucrazy:1,kagechiyo:1};
   document.getElementById('shareBtn').addEventListener('click', function(){
-    var text=(cur?cur.name+'が飛び出した！':'キャラが飛び出した！')+' #CHARAMARL';
-    var short=(cur&&TAP_IDS[cur.id])?'charamarl.com/tap/'+cur.id:'charamarl.com';
+    var text=(cur?dispName(cur)+'が飛び出した！':'キャラが飛び出した！')+' #CHARAMARL';
+    var tid=cur?baseId(cur):'';
+    var short=(cur&&TAP_IDS[tid])?'charamarl.com/tap/'+tid:'charamarl.com';
     var url='https://'+short+'?utm_source=ar&utm_medium=share';
     var copied=CM_AR_SHARE.copyText(text+'\n'+url);
     // WebGLの中身はフレームが終わると消えるので、次の描画直後(shot-hookのtock)に写す
