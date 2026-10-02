@@ -49,6 +49,15 @@ EVENTS = {
         booth='ブース No.08',
         days=['10/3(土)・4(日)', '11:00〜18:00'],
         dark=True),         # 灰色の背景。明るい地だと沈む
+    'newbookfair': dict(
+        artist='SAYoooooh', work='dogooooo',
+        name='横浜Art Center NEW ニューBOOK FAIR',
+        place='Art Center NEW（新高島駅 地下1階直結）／入場1,000円・学生無料',
+        booth='',
+        days=['10/3(土)・4(日)', '12:00〜20:00（19:30最終入場）'],
+        dark=False),
+    # 出どころ＝本人の告知 x.com/OoooohSay/status/2105453447915114728（2026-10-01）
+    # ブース番号は10/1時点で本人の投稿に無い。分からないまま出す（booth を空にすると帯ごと消える）
     # 出どころ＝本人の告知 x.com/YUO_8888（2026-09-29）＋ Nコレ公式 @Nftcolor22（9/16）
     # 出どころ＝本人の告知 x.com/pp_hiyo/status/2097482486418972896（2026-09-09）
     # 🔴 9/9の時点で公開されていたのに、9/29に「ブース番号が分からない」として
@@ -67,7 +76,7 @@ body{{width:%dpx;height:%dpx;overflow:hidden;background:{bg};
    2026-09-29、ブース番号とフッターが切れた。高さは固定で持つこと。 */
 .art{{height:866px;display:flex;align-items:center;justify-content:center;padding:40px 44px 8px;}}
 .art img{{max-width:100%%;max-height:100%%;object-fit:contain;display:block;}}
-.info{{height:626px;background:{band};color:{ink};padding:32px 52px 36px;}}
+.info{{height:626px;background:{band};color:{ink};padding:32px 52px 36px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;}}
 .who{{font-size:28px;font-weight:700;color:{sub};letter-spacing:.03em;margin-bottom:6px;}}
 .who b{{color:{ink};font-weight:900;}}
 h1{{font-size:50px;font-weight:900;line-height:1.2;letter-spacing:.01em;margin-bottom:20px;}}

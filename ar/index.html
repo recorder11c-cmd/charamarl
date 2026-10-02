@@ -40,7 +40,8 @@
   @keyframes flash{ 0%{opacity:0; transform:translateY(8px) scale(.9);} 15%{opacity:1; transform:translateY(0) scale(1.06);} 25%{transform:scale(1);} 80%{opacity:1;} 100%{opacity:0;} }
 
   /* 起動前のカバー */
-  .cover{ position:fixed; inset:0; z-index:20; background:#FFFDF9; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:28px 24px; gap:14px; }
+  .cover{ position:fixed; inset:0; z-index:20; background:#FFFDF9; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; padding:max(28px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom)); gap:12px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .cover > *{ flex-shrink:0; }
   .cover.hide{ display:none; }
   .cover .logo{ font-family:'Helvetica Neue',Arial,sans-serif; font-weight:900; font-size:64px; line-height:1; letter-spacing:-.02em; }
   .cover .logo .a{ color:var(--orange);} .cover .logo .b{ color:var(--purple);}
@@ -49,7 +50,8 @@
   .cover p{ font-size:15px; font-weight:700; color:#555; line-height:1.6; }
   .cover .pick{ font-size:16px; font-weight:900; margin-top:6px; }
   .grid{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px; max-width:420px; }
-  .grid .chip{ width:64px; height:64px; }
+  .grid .chip{ width:60px; height:60px; }
+  .start{ position:sticky; bottom:8px; }
   .glabel{ flex-basis:100%; font-size:12px; font-weight:900; color:#888; letter-spacing:.1em; margin-top:4px; }
   .start{ margin-top:8px; background:var(--orange); color:#fff; border:none; font-family:inherit; font-weight:900; font-size:18px; padding:16px 36px; border-radius:40px; box-shadow:0 6px 0 rgba(0,0,0,.18); cursor:pointer; }
   .start:disabled{ opacity:.6; }
@@ -140,8 +142,9 @@ AFRAME.registerComponent('stay-put', {
   // 販売中のアクキーとピンズ(作家を問わず全員同じ扱い)。それぞれ順番は毎回シャッフル
   function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
   var PRODUCTS=window.CM_PRODUCTS||[];
-  var AKI=shuffle(PRODUCTS.filter(function(p){ return p.kind==='アクリルキーホルダー'; }));
-  var PINS=shuffle(PRODUCTS.filter(function(p){ return /^ピンズ/.test(p.kind||''); }));
+  // 並びはサイトの商品一覧(js/products.js)と同じ順に固定(シャッフルはやめた 2026-10-02)
+  var AKI=PRODUCTS.filter(function(p){ return p.kind==='アクリルキーホルダー'; });
+  var PINS=PRODUCTS.filter(function(p){ return /^ピンズ/.test(p.kind||''); });
   var ALL=AKI.concat(PINS);
   var byId={}; ALL.forEach(function(p){ byId[p.id]=p; });
   var abs=function(rel){ return rel.replace(/^\.\//,'/'); };
@@ -162,7 +165,7 @@ AFRAME.registerComponent('stay-put', {
 
   function chip(p, onPick){
     var b=document.createElement('button'); b.type='button'; b.className='chip'; b.dataset.id=p.id; b.title=p.name;
-    var im=document.createElement('img'); im.src=pfp(p); im.alt=p.name; im.loading='lazy'; b.appendChild(im);
+    var im=document.createElement('img'); im.src=pfp(p); im.alt=p.name; im.decoding='async'; b.appendChild(im);
     b.addEventListener('click', function(){ onPick(p); });
     return b;
   }
