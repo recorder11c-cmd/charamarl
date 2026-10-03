@@ -73,13 +73,14 @@ window.cmOutKind=function(url){
   if(is(/(^|\.)(youtube\.com|youtu\.be|tiktok\.com|note\.com|pixiv\.net|nicovideo\.jp|threads\.net|bsky\.app)$/)) return 'sns';
   if(is(/(^|\.)(cluster\.mu|peatix\.com|eventbrite\.com|connpass\.com|pages\.dev)$/)) return 'event';
   if(is(/(^|\.)(for-good\.net|camp-fire\.jp|readyfor\.jp|kickstarter\.com|makuake\.com|greenfunding\.jp)$/)) return 'crowdfunding';
+  if(is(/(^|\.)(skeb\.jp|coconala\.com|lancers\.jp|crowdworks\.jp)$/)) return 'request'; // 依頼窓口(指示書 §10・2026-10-03)
   return 'other';
 };
 // 送客ボタンの文言(指示書 §5)。手直し(label)があればそれを優先
 window.cmOutLabel=function(url,label){
   if(label) return label+' ↗';
   var k=window.cmOutKind(url);
-  return ({link:'作家の活動・リンク集を見る',instagram:'Instagramで作品を見る',x:'Xで作家の投稿を見る',shop:'作家のショップを見る',sns:'作家の投稿を見る',event:'イベント詳細を見る',crowdfunding:'プロジェクトを見る'}[k]||'作家の公式サイトを見る')+' ↗';
+  return ({link:'作家の活動・リンク集を見る',instagram:'Instagramで作品を見る',x:'Xで作家の投稿を見る',shop:'作家のショップを見る',sns:'作家の投稿を見る',event:'イベント詳細を見る',crowdfunding:'プロジェクトを見る',request:'作品の依頼をする'}[k]||'作家の公式サイトを見る')+' ↗';
 };
 // 送客ボタンを押したときに呼ぶ。click_artist_{種別} と、横断集計用の click_artist を両方送る。
 //   url   … 実際の行き先(/api/out?g=... ではなく、登録されている外部URLを渡すこと)
