@@ -97,6 +97,9 @@ module.exports = async (req, res) => {
         .map(({ artistKey, ...pub }) => pub);
       // 作家のホームリンク。画面側は artists[作家名の小文字] で引く（artistKey は小文字名）
       let artists = {}; try { artists = await loadArtists(); } catch (e) {}
+      // 画面は表示名(artist)しか持たないので、表示名の小文字でも引けるように別名を足す（BeernoMocca ≠ "Beerno Mocca" 対策）
+      const all = await loadAll();
+      for (const a of all) { if (a.artistKey && artists[a.artistKey] && a.artist) { const alias = String(a.artist).trim().toLowerCase(); if (!artists[alias]) artists[alias] = artists[a.artistKey]; } }
       return res.status(200).json({ list, artists });
     }
 
