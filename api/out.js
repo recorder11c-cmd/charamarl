@@ -54,6 +54,19 @@ module.exports = async (req, res) => {
       return res.status(200).json(out);
     }
 
+    // 作家共通（ホーム）: GET /api/out?a={artistKey} → artist:{key}.home へ。カウント out:home:{key} / out:artist:{key} / out:total
+    const a = String((req.query && req.query.a) || '').toLowerCase();
+    if (a) {
+      if (!/^[a-z0-9_.\-\u3040-\u30ff\u4e00-\u9fff ]{1,60}$/i.test(a)) return res.status(400).json({ error: 'bad key' });
+      const rawA = await redis('GET', `artist:${a}`);
+      let home = '';
+      try { home = String((JSON.parse(rawA) || {}).home || ''); } catch (e) {}
+      if (!/^https?:\/\//.test(home)) return res.redirect(302, 'https://charamarl.com/');
+      try { await redis('INCR', `out:home:${a}`); await redis('INCR', `out:artist:${a}`); await redis('INCR', 'out:total'); } catch (e) {}
+      try { const u = new URL(home); if (!u.searchParams.has('utm_source')) { u.searchParams.set('utm_source', 'charamarl'); u.searchParams.set('utm_medium', 'referral'); } home = u.toString(); } catch (e) {}
+      return res.redirect(302, home);
+    }
+
     const g = String((req.query && req.query.g) || '');
     if (!/^g[a-f0-9]{12}$/.test(g)) return res.status(400).json({ error: 'bad id' });
     const raw = await redis('GET', `gal:${g}`);

@@ -354,7 +354,12 @@
   .react-btn .ic{font-size:16px;line-height:1;}
   .react-btn.on{background:#ffe1e6;color:#e0245e;}
   #aSave.on{background:#ffeede;color:var(--orange);}
-  .art-visit{display:block;text-align:center;background:#efefef;color:#111;border-radius:26px;padding:13px;font-size:14px;font-weight:800;text-decoration:none;margin:6px 0 20px;transition:.18s;}
+  /* 送客ボタン(主): 作品固有リンクがあればそれ、無ければ作家のホーム。黒で一番目立たせる(2026-10-03 指示書 §4) */
+  .art-visit{display:block;text-align:center;background:#111;color:#fff;border-radius:26px;padding:14px;font-size:14px;font-weight:900;text-decoration:none;margin:10px 0 8px;transition:.18s;}
+  .art-visit:hover{background:#333;}
+  /* 副: 主が作品固有のときだけ、作家のホームを小さく */
+  .art-home{display:block;text-align:center;color:#555;font-size:12px;font-weight:800;text-decoration:underline;text-underline-offset:3px;margin:0 0 18px;}
+  .art-react-bottom{margin:16px 0 12px;}
   .art-visit:hover{background:var(--orange);color:#fff;}
   .art-desc-h{font-size:15px;font-weight:900;margin-bottom:8px;}
 </style>
@@ -800,18 +805,18 @@
     <button class="modal-close" id="artClose">×</button>
     <div class="modal-img art"><div class="abg" id="aBg"></div><img id="aImg" src="" alt=""></div>
     <div class="modal-info">
-      <div class="art-top">
-        <div class="art-react">
-          <button class="react-btn" id="aLike"><span class="ic">♡</span><span class="ct" id="aLikeCt">0</span></button>
-          <button class="react-btn" id="aSave"><span class="ic">🔖</span><span class="lb" id="aSaveLb">保存</span></button>
-          <button class="react-btn" id="aShare"><span class="ic">🚀</span><span class="lb">シェア</span></button>
-        </div>
-      </div>
       <h2 id="aTitle"></h2>
       <div class="modal-creator" id="aArtist"></div>
-      <a class="art-visit" id="aVisit" href="#" target="_blank">サイトにアクセス →</a>
+      <a class="art-visit" id="aVisit" href="#" target="_blank" rel="noopener">サイトにアクセス →</a>
+      <a class="art-home" id="aHome" href="#" target="_blank" rel="noopener" hidden>作家の活動場所を見る ↗</a>
       <div class="art-desc-h">説明</div>
       <div class="modal-desc" id="aDesc"></div>
+      <div class="art-react art-react-bottom">
+        <button class="react-btn" id="aLike"><span class="ic">♡</span><span class="ct" id="aLikeCt">0</span></button>
+        <button class="react-btn" id="aSave"><span class="ic">🔖</span><span class="lb" id="aSaveLb">保存</span></button>
+        <button class="react-btn" id="aShare"><span class="ic">🚀</span><span class="lb">シェア</span></button>
+      </div>
+      <div class="modal-creator" id="aArtistMore"></div>
       <a class="art-follow" href="https://x.com/charamarl" target="_blank" rel="noopener"
          onclick="if(window.cmEvent)cmEvent('follow_click',{place:'artwork_modal'});">𝕏 新しい作品の入荷を受け取る</a>
     </div>
@@ -1269,15 +1274,30 @@
       // そのままリンクに入れると、作家ページが「作品が見つかりません」になる。
       var who=String(a.artistName||a.artist||'').replace(/^by\s+/,'').trim();
       var el=document.getElementById('aArtist');
-      el.innerHTML = who
-        ? '<a href="./artist.html?a='+encodeURIComponent(who)+'" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">'
-          + who.replace(/&/g,'&amp;').replace(/</g,'&lt;') + ' の作品をすべて見る →</a>'
-        : '';
+      var esc=function(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');};
+      el.innerHTML = who ? '<a href="./artist.html?a='+encodeURIComponent(who)+'" style="color:inherit;text-decoration:none;">'+esc(who)+'</a>' : '';
+      document.getElementById('aArtistMore').innerHTML = who
+        ? '<a href="./artist.html?a='+encodeURIComponent(who)+'" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">'+esc(who)+' の作品をすべて見る →</a>' : '';
     })();
     document.getElementById('aDesc').textContent=a.desc;
-    const av=document.getElementById('aVisit');av.href=outUrl(curArt,a.site)||a.site||'#';av.style.display=a.site?'':'none';
-    // 分割計測用に「実際の行き先」を持たせる(href は /api/out?g= に化けるため種別が取れない)
-    av.dataset.site=a.site||'';av.dataset.art=curArt;av.dataset.artistName=a.artist||'';
+    // 送客ボタン: 主=作品固有リンク(link)、無ければ作家のホーム(ARTISTS[作家名小文字].home)。副=主が作品固有のとき作家のホーム
+    (function(){
+      var who=String(a.artistName||a.artist||'').replace(/^by\s+/,'').trim();
+      var home=(window.ARTISTS&&window.ARTISTS[who.toLowerCase()])||null;
+      var av=document.getElementById('aVisit'), ah=document.getElementById('aHome');
+      var isG=/^g[a-f0-9]{12}$/.test(String(curArt));
+      if(a.site){
+        av.href=outUrl(curArt,a.site)||a.site; av.textContent=window.cmOutLabel?cmOutLabel(a.site,a.linkLabel):'サイトにアクセス →'; av.style.display='';
+        av.dataset.site=a.site; av.dataset.level='work';
+      }else if(home&&home.home&&isG){
+        av.href='/api/out?a='+encodeURIComponent(who.toLowerCase()); av.textContent=window.cmOutLabel?cmOutLabel(home.home,home.homeLabel):'サイトにアクセス →'; av.style.display='';
+        av.dataset.site=home.home; av.dataset.level='home';
+      }else{ av.style.display='none'; av.dataset.site=''; }
+      av.dataset.art=curArt; av.dataset.artistName=who;
+      var showHome=!!(a.site&&home&&home.home&&isG&&home.home.replace(/\/$/,'')!==String(a.site).replace(/\/$/,'').split('?')[0]);
+      ah.hidden=!showHome;
+      if(showHome){ ah.href='/api/out?a='+encodeURIComponent(who.toLowerCase()); ah.textContent=(home.homeLabel?home.homeLabel:'作家の活動場所を見る')+' ↗'; ah.dataset.site=home.home; ah.dataset.art=curArt; ah.dataset.artistName=who; }
+    })();
     document.getElementById('aLikeCt').textContent=likeTotal(curArt);
     const lb=document.getElementById('aLike'); lb.classList.toggle('on',liked); lb.querySelector('.ic').textContent=liked?'♥':'♡';
     const sb=document.getElementById('aSave'); sb.classList.toggle('on',saved); document.getElementById('aSaveLb').textContent=saved?'保存済み':'保存';
@@ -1379,9 +1399,13 @@
     openShare(`${a.title} ${a.artist||''}`.trim(),artShareUrl(curArt));
   });
   // 送客ボタン(作品モーダル)の分割計測。行き先の種別ごとに click_artist_{種別} を送る
+  document.getElementById('aHome').addEventListener('click',function(){
+    if(this.dataset.site&&window.cmOutClick)
+      cmOutClick(this.dataset.site,{place:'artwork_modal',id:this.dataset.art,artist:this.dataset.artistName,level:'home'});
+  });
   document.getElementById('aVisit').addEventListener('click',function(){
     if(this.dataset.site&&window.cmOutClick)
-      cmOutClick(this.dataset.site,{place:'artwork_modal',id:this.dataset.art,artist:this.dataset.artistName});
+      cmOutClick(this.dataset.site,{place:'artwork_modal',id:this.dataset.art,artist:this.dataset.artistName,level:this.dataset.level||'work'});
   });
 
   // 投稿ギャラリー作品の外部リンクは送客計測(/api/out)経由にする
@@ -1450,7 +1474,7 @@
   function addGalleryItem(a){
     if(ARTWORKS[a.id])return;
     const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    ARTWORKS[a.id]={img:a.img,title:a.title,artist:'by '+a.artist,site:a.link||'',desc:a.desc||'',likes:0};
+    ARTWORKS[a.id]={img:a.img,title:a.title,artist:'by '+a.artist,site:a.link||'',linkLabel:a.linkLabel||'',desc:a.desc||'',likes:0};
     const div=document.createElement('div');
     div.className='pin art';
     if(a.ts)div.dataset.ts=a.ts;
@@ -1526,6 +1550,7 @@
     if(gid&&ARTWORKS[gid])openArt(gid);
   }
   fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
+    window.ARTISTS=d.artists||{}; // 作家のホームリンク(キー=作家名の小文字)
     if(!d.list||!d.list.length){openDeepLink();return;}
     galleryList=d.list;
     renderRanking();          // 候補が揃ったので人気順を出し直す

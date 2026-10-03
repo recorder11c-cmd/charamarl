@@ -71,7 +71,15 @@ window.cmOutKind=function(url){
   if(is(/(^|\.)(base\.shop|thebase\.in|theshop\.jp|booth\.pm|stores\.jp|suzuri\.jp|shop-pro\.jp|minne\.com|creema\.jp|myshopify\.com|bigcartel\.com|etsy\.com|fanbox\.cc|opensea\.io)$/)) return 'shop';
   if(is(/(^|\.)(lit\.link|linktr\.ee|potofu\.me|profcard\.info|bio\.link|linkin\.bio)$/)) return 'link';
   if(is(/(^|\.)(youtube\.com|youtu\.be|tiktok\.com|note\.com|pixiv\.net|nicovideo\.jp|threads\.net|bsky\.app)$/)) return 'sns';
+  if(is(/(^|\.)(cluster\.mu|peatix\.com|eventbrite\.com|connpass\.com|pages\.dev)$/)) return 'event';
+  if(is(/(^|\.)(for-good\.net|camp-fire\.jp|readyfor\.jp|kickstarter\.com|makuake\.com|greenfunding\.jp)$/)) return 'crowdfunding';
   return 'other';
+};
+// 送客ボタンの文言(指示書 §5)。手直し(label)があればそれを優先
+window.cmOutLabel=function(url,label){
+  if(label) return label+' ↗';
+  var k=window.cmOutKind(url);
+  return ({link:'作家の活動・リンク集を見る',instagram:'Instagramで作品を見る',x:'Xで作家の投稿を見る',shop:'作家のショップを見る',sns:'作家の投稿を見る',event:'イベント詳細を見る',crowdfunding:'プロジェクトを見る'}[k]||'作家の公式サイトを見る')+' ↗';
 };
 // 送客ボタンを押したときに呼ぶ。click_artist_{種別} と、横断集計用の click_artist を両方送る。
 //   url   … 実際の行き先(/api/out?g=... ではなく、登録されている外部URLを渡すこと)
@@ -84,7 +92,7 @@ window.cmOutClick=function(url,opt){
   if(!u || u.origin===location.origin) return;
   var kind=window.cmOutKind(url), host='';
   try{ host=u.hostname.replace(/^www\./,''); }catch(e){}
-  var p={ destination:kind, host:host, place:opt.place||'' };
+  var p={ destination:kind, host:host, place:opt.place||'', level:opt.level||'work' }; // level: work=作品固有 / home=作家共通
   if(opt.id) p.item_id=opt.id;
   if(opt.artist) p.artist=opt.artist;
   if(window.cmEvent){ window.cmEvent('click_artist_'+kind,p); window.cmEvent('click_artist',p); }

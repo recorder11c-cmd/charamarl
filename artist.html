@@ -145,7 +145,7 @@
     fetch('/api/react').then(function(r){return r.ok?r.json():{};}).catch(function(){return {};}),
     fetch('/api/out?counts=1').then(function(r){return r.ok?r.json():{};}).catch(function(){return {};})
   ]).then(function(res){
-    var list=res[0].list||[], rc=res[1]||{}, oc=res[2]||{};
+    var gal=res[0]||{}, list=gal.list||[], rc=res[1]||{}, oc=res[2]||{};
     var mine=list.filter(function(a){return norm(a.artist)===norm(want);});
 
     // 連載「市場のひとたち」で、この作家さんを取り上げた記事。
@@ -184,6 +184,11 @@
     // 外部リンク（送客計測を通す）
     var linked=mine.filter(function(a){return a.link;})[0];
     var outHref=linked?('/api/out?g='+encodeURIComponent(linked.id)):'';
+    // 作家のホーム(活動場所)があればそれを上部の主ボタンに。無ければ従来どおり作品のリンクで代用
+    var home=(gal.artists||{})[norm(name)]||(gal.artists||{})[String(name).toLowerCase()]||null;
+    var homeHref=home&&home.home?('/api/out?a='+encodeURIComponent(String(name).toLowerCase())):'';
+    var topHref=homeHref||outHref, topUrl=homeHref?home.home:(linked?linked.link:''), topLevel=homeHref?'home':'work';
+    var topLabel=topUrl?(window.cmOutLabel?cmOutLabel(topUrl,homeHref?home.homeLabel:(linked&&linked.linkLabel)):'↗ '+name+'さんのページへ'):'';
 
     var goods=(window.CM_PRODUCTS||[]).filter(function(p){return norm(p.creator)===norm(name);});
     var taps=(window.CM_TAPS||{})[name]||[];
@@ -197,7 +202,7 @@
       '<div class="asub">CHARAMARL 参加アーティスト ・ 作品'+mine.length+'点'+
         (goods.length?' ・ グッズ'+goods.length+'点':'')+'</div>'+
       '<div class="links">'+
-        (outHref?'<a class="lbtn" id="outBtn" href="'+esc(outHref)+'" target="_blank" rel="noopener" data-out="'+esc(linked.link)+'">↗ '+esc(name)+'さんのページへ</a>':'')+
+        (topHref?'<a class="lbtn" id="outBtn" href="'+esc(topHref)+'" target="_blank" rel="noopener" data-out="'+esc(topUrl)+'" data-level="'+topLevel+'">'+esc(topLabel)+'</a>':'')+
         (taps.length?'<a class="lbtn ghost" href="'+esc(taps[0])+'">🎨 COLOR TAPで遊ぶ</a>':'')+
       '</div></div></div>';
 
@@ -279,7 +284,7 @@
     // 送客ボタンの分割計測（href は /api/out?g= に化けるので data-out の実URLで種別を判定する）
     var ob=document.getElementById('outBtn');
     if(ob) ob.addEventListener('click',function(){
-      if(window.cmOutClick)cmOutClick(ob.dataset.out,{place:'artist_page',id:linked.id,artist:name});
+      if(window.cmOutClick)cmOutClick(ob.dataset.out,{place:'artist_page',id:linked?linked.id:'',artist:name,level:ob.dataset.level||'work'});
     });
 
     var xa=document.getElementById('shX');

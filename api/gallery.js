@@ -11,6 +11,7 @@
 const crypto = require('crypto');
 const { put, del } = require('@vercel/blob');
 const { isAdminReq } = require('./_lib/admin.js');
+const { loadArtists } = require('./artist.js'); // 作家ごとのホームリンク（公開一覧に同梱）
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -94,7 +95,9 @@ module.exports = async (req, res) => {
       // 読むたびに判定するのでcronは要らない。取りこぼしも、ずれもない。
       const list = (await loadAll()).filter(a => a.status === 'approved' && !isScheduled(a))
         .map(({ artistKey, ...pub }) => pub);
-      return res.status(200).json({ list });
+      // 作家のホームリンク。画面側は artists[作家名の小文字] で引く（artistKey は小文字名）
+      let artists = {}; try { artists = await loadArtists(); } catch (e) {}
+      return res.status(200).json({ list, artists });
     }
 
     if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
@@ -106,6 +109,7 @@ module.exports = async (req, res) => {
       const title = trim(b.title, 60);
       const desc = trim(b.desc, 500);
       let link = trim(b.link, 300);
+      const linkLabel = trim(b.linkLabel, 30); // 送客ボタンの文言（空ならURLから自動）
       if (!title) return res.status(400).json({ error: '作品タイトルを入力してください' });
       if (b.noAi !== true) return res.status(400).json({ error: '生成AIを使用していないことの確認が必要です' });
       if (link && !/^https?:\/\//.test(link)) link = 'https://' + link;
@@ -120,7 +124,7 @@ module.exports = async (req, res) => {
         access: 'public', contentType: img.contentType, addRandomSuffix: false,
       });
       const item = {
-        id, title, desc, link,
+        id, title, desc, link, linkLabel,
         img: blob.url,
         cat: CATS.includes(b.cat) ? b.cat : 'ARTWORK',
         artist: u.name, artistKey: u.key,
@@ -148,6 +152,7 @@ module.exports = async (req, res) => {
       let link = trim(b.link, 300);
       if (link && !/^https?:\/\//.test(link)) link = 'https://' + link;
       item.link = link;
+      if (b.linkLabel !== undefined) item.linkLabel = trim(b.linkLabel, 30);
       if (b.image) { // 画像差し替えは再審査へ
         const img = decodeImage(b.image);
         if (!img) return res.status(400).json({ error: '画像を読み込めませんでした（jpeg/png/webp・3.5MBまで）' });
@@ -194,6 +199,7 @@ module.exports = async (req, res) => {
       //    2026-09-25、8/19と8/25のnoteを登録したら両方NEWになった。
       if (b.ts !== undefined) { const t = Number(b.ts); if (t > 0) item.ts = t; }
       if (b.desc !== undefined) item.desc = trim(b.desc, 500);
+      if (b.linkLabel !== undefined) item.linkLabel = trim(b.linkLabel, 30);
       if (b.link !== undefined) {
         let link = trim(b.link, 300);
         if (link && !/^https?:\/\//.test(link)) link = 'https://' + link;
