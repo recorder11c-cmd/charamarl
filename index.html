@@ -197,7 +197,8 @@
   .share-ic{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
 
   /* DISCOVER */
-  .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+  .tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;align-items:center;}
+  .tabs-sep{flex:0 0 auto;width:1px;height:22px;background:#ddd;margin:0 4px;} /* 作品種別 ｜ 記事・催し */
   .tabs::-webkit-scrollbar{display:none;}
   .tab{background:#fff;border:1px solid var(--line);color:#555;border-radius:22px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s;}
   .tab:hover{background:#f0f0f0;}
@@ -260,10 +261,12 @@
   .shopbar-top{display:flex;align-items:center;gap:10px;}
   .shopbar-t{display:block;font-size:clamp(14px,4vw,16px);font-weight:900;white-space:nowrap;}
   .shopbar-s{display:block;font-size:clamp(10px,2.9vw,11.5px);font-weight:700;opacity:.9;white-space:nowrap;}
-  .shopbar-row{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:12px;}
+  /* 2026-10-03 指示書 #4: バナーは縮小。スマホはタイトル1行だけ、アイコン列は720px以上で出す */
+  .shopbar{padding:11px 14px;}
+  .shopbar-row{display:none;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:12px;}
   .shopbar-row img{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;
     border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.22);background:#fff;}
-  @media(min-width:720px){ .shopbar-row{grid-template-columns:repeat(13,1fr);gap:9px;} }
+  @media(min-width:720px){ .shopbar{padding:13px 16px;} .shopbar-row{display:grid;grid-template-columns:repeat(13,1fr);gap:9px;} }
   .pin.coming .pin-img{background:linear-gradient(150deg,#fff3e6,#f3e9ff);border:1px dashed #e0c9f0;}
   .pin.coming .ct{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;}
   .pin.coming .ct .ic{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--orange));display:flex;align-items:center;justify-content:center;font-size:20px;}
@@ -363,12 +366,20 @@
   /* 副: 主が作品固有のときだけ、作家のホームを小さく */
   .art-home{display:block;text-align:center;color:#555;font-size:12px;font-weight:800;text-decoration:underline;text-underline-offset:3px;margin:0 0 18px;}
   .art-react-bottom{margin:16px 0 12px;}
+  .art-goods{margin-top:12px;}
+  .art-goods .ag-h{font-size:11px;font-weight:900;color:var(--muted);letter-spacing:.06em;margin-bottom:8px;}
+  .art-goods .ag-row{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+  .art-goods a{flex:0 0 112px;text-decoration:none;color:inherit;}
+  .art-goods img{width:112px;height:112px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:14px;display:block;}
+  .art-goods .ag-n{font-size:11px;font-weight:800;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .art-goods .ag-p{font-size:11px;color:var(--orange);font-weight:900;}
   .art-visit:hover{background:var(--orange);color:#fff;}
   .art-desc-h{font-size:15px;font-weight:900;margin-bottom:8px;}
 </style>
 <link rel="stylesheet" href="cart.css">
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/js/ga.js"></script>
+<script src="/js/products.js"></script>
 <script src="/js/protect.js"></script>
 <script src="/js/works_legacy.js"></script>
 </head>
@@ -434,7 +445,7 @@
 
 <!-- DISCOVER -->
 <section class="blk" id="discover">
-  <div class="sec-head"><div><div class="sec-eyebrow">DISCOVER</div><h2 class="sec-title">作品・記事・グッズをピックアップ</h2></div>
+  <div class="sec-head"><div><div class="sec-eyebrow">DISCOVER</div><h2 class="sec-title">好きな作品から、好きな作家へ。</h2></div>
     <div class="sortdd">
       <div class="sec-more" id="sortBtn">おすすめ順 ▾</div>
       <div class="sort-menu" id="sortMenu" hidden>
@@ -445,8 +456,8 @@
     </div>
   </div>
   <div class="tabs">
-    <div class="tab active" data-cat="all">すべて</div><div class="tab" data-cat="CHARACTER">キャラクター</div><div class="tab" data-cat="PRODUCT">グッズ</div>
-    <div class="tab" data-cat="ARTWORK">アートワーク</div><div class="tab" data-cat="INTERVIEW">インタビュー</div><div class="tab" data-cat="MAKING">制作風景</div><div class="tab" data-cat="EVENT">イベント</div>
+    <div class="tab active" data-cat="all">すべて</div><div class="tab" data-cat="CHARACTER">キャラクター</div><div class="tab" data-cat="ARTWORK">アートワーク</div><div class="tab" data-cat="MAKING">制作風景</div><div class="tab" data-cat="PRODUCT">グッズ</div>
+    <span class="tabs-sep" aria-hidden="true"></span><div class="tab" data-cat="INTERVIEW">インタビュー</div><div class="tab" data-cat="EVENT">イベント</div>
   </div>
   <div class="masonry" id="masonry">
 
@@ -684,7 +695,7 @@
   </div>
   <div class="benefits">
     <div class="benefit" role="button" tabindex="0" aria-expanded="false"><span class="bi">🖼</span><div><div class="bt">まず、並べる<span class="chev">▼</span></div><div class="bs">掲載は無料。1点から置けます</div>
-      <div class="bd">費用はかかりません。作品を1点お預かりして、トップページのDISCOVERギャラリーに並べます。作家さんごとのページもできて、SNSのプロフィールにそのまま貼れます。グッズを作る予定がなくても構いません。</div></div></div>
+      <div class="bd">作品からあなたのInstagram・X・ショップ・リンク集へ飛べる入口が増えます。掲載は無料、1点から。作家さんごとのページもできて、SNSのプロフィールにそのまま貼れます。グッズを作る予定がなくても構いません。</div></div></div>
     <div class="benefit" role="button" tabindex="0" aria-expanded="false"><span class="bi">❤️</span><div><div class="bt">反応が見える<span class="chev">▼</span></div><div class="bs">♥・保存・リンクへ移動した人数</div>
       <div class="bd">訪問者が♥いいね・🔖保存でリアクションできます。さらに「何人があなたのサイトやSNSへ移動したか」も数えていて、マイページでいつでも見られます。人気ランキングにも反映されます。</div></div></div>
     <div class="benefit" role="button" tabindex="0" aria-expanded="false"><span class="bi">🎨</span><div><div class="bt">遊べるページ<span class="chev">▼</span></div><div class="bs">COLOR TAP・AR・NFC</div>
@@ -820,6 +831,7 @@
         <button class="react-btn" id="aShare"><span class="ic">🚀</span><span class="lb">シェア</span></button>
       </div>
       <div class="modal-creator" id="aArtistMore"></div>
+      <div class="art-goods" id="aGoods" hidden></div>
       <a class="art-follow" href="https://x.com/charamarl" target="_blank" rel="noopener"
          onclick="if(window.cmEvent)cmEvent('follow_click',{place:'artwork_modal'});">𝕏 新しい作品の入荷を受け取る</a>
     </div>
@@ -1283,6 +1295,20 @@
         ? '<a href="./artist.html?a='+encodeURIComponent(who)+'" style="color:inherit;text-decoration:underline;text-underline-offset:3px;">'+esc(who)+' の作品をすべて見る →</a>' : '';
     })();
     document.getElementById('aDesc').textContent=a.desc;
+    // 関連グッズ(同じ作家の販売中の商品・js/products.js)。作品と商品の関係が分かるように作家名で結ぶ
+    (function(){
+      var g=document.getElementById('aGoods'); if(!g)return;
+      var who=String(a.artistName||a.artist||'').replace(/^by\s+/,'').trim();
+      var nm=function(t){return String(t||'').trim().toLowerCase().replace(/[\s'’.\-_+]/g,'');};
+      var goods=(window.CM_PRODUCTS||[]).filter(function(p){return who&&nm(p.creator)===nm(who);}).slice(0,8);
+      if(!goods.length){g.hidden=true;g.innerHTML='';return;}
+      var esc=function(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');};
+      g.innerHTML='<div class="ag-h">🛒 '+esc(who)+'さんのグッズ</div><div class="ag-row">'+goods.map(function(p){
+        var pg=String(p.page||'').replace(/^\.\//,'./').replace(/[?&]utm_[a-z]+=[^&]*/g,'').replace(/&/,'?');
+        return '<a href="'+esc(pg+(pg.indexOf('?')>=0?'&':'?')+'utm_source=artwork_modal')+'"><img src="'+esc(p.img)+'" alt="" loading="lazy"><div class="ag-n">'+esc(p.name)+'</div><div class="ag-p">¥'+Number(p.price).toLocaleString()+'</div></a>';
+      }).join('')+'</div>';
+      g.hidden=false;
+    })();
     // 送客ボタン: 主=作品固有リンク(link)、無ければ作家のホーム(ARTISTS[作家名小文字].home)。副=主が作品固有のとき作家のホーム
     (function(){
       var who=String(a.artistName||a.artist||'').replace(/^by\s+/,'').trim();
