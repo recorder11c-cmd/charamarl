@@ -241,12 +241,15 @@
   .ob-chip{position:absolute;top:8px;left:8px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;background:rgba(255,255,255,.92);border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.15);pointer-events:none;transition:opacity .2s;}
   .pin:hover .ob-chip{opacity:0;}
   .pin-meta{font-size:11px;color:var(--muted);margin-top:5px;}
-  /* グリッドでは作品名・作家名を伏せ、絵だけで選んでもらう（タップすると詳細が開く）。
-     「誰の絵だろう」でタップさせるのが狙い＝作家への送客を増やすため。
+  /* グリッドでは作品名は伏せて絵を主役に。作家名だけ常時出す（2026-10-03 指示書 §4: 画像→作品詳細、作家名→作家ページ）。
      販売中のものだけ価格バッジを残す（買えると分からないものは買われない）。 */
-  .pin-cat,.pin-title,.pin-sub{display:none;}
-  .pin-body{margin-top:0;}
-  .pin-price{margin-top:8px;}
+  .pin-cat,.pin-title{display:none;}
+  .pin-body{margin-top:0;padding-top:6px;}
+  .pin-sub{font-size:11.5px;font-weight:800;color:#444;cursor:pointer;min-height:22px;}
+  .pin-sub:hover{color:var(--orange);text-decoration:underline;text-underline-offset:3px;}
+  .pin-sub .av{width:14px;height:14px;flex:0 0 auto;}
+  .pin-state{display:inline-block;font-size:9.5px;font-weight:900;letter-spacing:.04em;color:#fff;background:var(--purple);border-radius:8px;padding:2px 7px;margin-left:6px;vertical-align:1px;}
+  .pin-price{margin-top:6px;}
   .pin-new{position:absolute;top:8px;left:8px;z-index:3;background:#ffd60a;color:#1a1a26;font-size:10px;
     font-weight:900;letter-spacing:.06em;border-radius:11px;padding:3px 9px;
     border:1.5px solid rgba(0,0,0,.1);box-shadow:0 2px 8px rgba(0,0,0,.22);}
@@ -1408,6 +1411,14 @@
       cmOutClick(this.dataset.site,{place:'artwork_modal',id:this.dataset.art,artist:this.dataset.artistName,level:this.dataset.level||'work'});
   });
 
+  // 作品カードの作家名→作家ページ(画像→作品詳細とは別の行き先。2026-10-03 指示書 §4)
+  document.addEventListener('click',e=>{
+    const sub=e.target.closest&&e.target.closest('.pin-sub'); if(!sub)return;
+    const name=sub.textContent.trim(); if(!name)return;
+    e.preventDefault();e.stopPropagation();
+    if(window.cmEvent)cmEvent('artist_name_click',{place:'pin',artist:name});
+    location.href='./artist.html?a='+encodeURIComponent(name);
+  },true);
   // 投稿ギャラリー作品の外部リンクは送客計測(/api/out)経由にする
   const outUrl=(id,site)=>(site&&/^g[a-f0-9]{12}$/.test(String(id)))?('/api/out?g='+id):site;
   // アート/GMCピンの配線（静的・動的共通）
@@ -1455,6 +1466,13 @@
       const catTxt=(cat.childNodes[0]&&cat.childNodes[0].textContent||'').trim().toUpperCase();
       if(!cat.querySelector('.pin-exh')&&catTxt!=='PRODUCT'&&catTxt!=='EVENT'&&catTxt!=='CHARACTER'){
         const s=document.createElement('span');s.className='pin-exh';s.textContent='展示作品';cat.appendChild(s);
+      }
+      // 必要な状態だけ作家名の横に短く(イベント／インタビュー)。販売中は価格バッジで分かる
+      const sub=p.querySelector('.pin-sub');
+      const stateTxt={EVENT:'イベント',INTERVIEW:'インタビュー'}[catTxt];
+      if(sub&&stateTxt&&!p.querySelector('.pin-state')){
+        const t=document.createElement('span');t.className='pin-state';t.textContent=stateTxt;sub.insertAdjacentElement('afterend',t);
+        sub.style.display='inline-flex';
       }
       if(!im.querySelector('.ob-chip')&&members.has(artistOf(p))){
         const s=document.createElement('span');s.className='ob-chip';s.textContent='🎪';s.title='OPENING MEMBER';im.appendChild(s);
