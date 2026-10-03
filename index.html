@@ -60,6 +60,14 @@
   .user-menu a,.user-menu button{display:block;width:100%;text-align:left;font-size:13px;font-weight:700;color:#333;padding:9px 12px;border-radius:9px;text-decoration:none;background:none;border:none;font-family:inherit;cursor:pointer;}
   .user-menu a:hover,.user-menu button:hover{background:#f5f5f5;}
   @media(max-width:900px){ nav.main{display:none;} }
+  /* スマホ: 検索欄が縮めず(min-width:auto)ヘッダーが402pxまで広がり横はみ出し(2026-10-03 計測・360/390幅)。縮められるようにし余白も詰める */
+  .search{min-width:0;} .search input{min-width:0;}
+  @media(max-width:480px){
+    .header-in{padding:10px 14px;gap:10px;}
+    .logo{font-size:19px;letter-spacing:.04em;}
+    .header-icons{gap:8px;}
+    .search input{padding:8px 12px 8px 32px;font-size:12px;} .search .ic{left:11px;}
+  }
 
   /* HERO */
   .hero{max-width:1180px;margin:20px auto 0;padding:0 24px;}

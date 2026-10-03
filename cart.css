@@ -25,6 +25,8 @@
   display:flex; flex-direction:column; font-family:'Helvetica Neue',Arial,sans-serif;
 }
 .cart-drawer.open { transform:translateX(0); }
+/* 閉じているときは影も消す。画面外に置いた引き出しの影が右端に灰色の帯として漏れていた(2026-10-03) */
+.cart-drawer:not(.open) { box-shadow:none; visibility:hidden; transition:transform .28s cubic-bezier(.4,0,.2,1), visibility 0s linear .28s; }
 .cart-head { display:flex; align-items:center; justify-content:space-between; padding:20px 22px; border-bottom:1px solid #e6e6e6; }
 .cart-head h3 { font-size:17px; font-weight:900; margin:0; }
 .cart-close { background:none; border:none; font-size:24px; cursor:pointer; color:#888; line-height:1; }
