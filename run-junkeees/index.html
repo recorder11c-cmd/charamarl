@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>JUNKeeeeS RUN</title>
-<meta name="description" content="JUNKeeeeSの5人で走るランゲーム。"><meta name="robots" content="noindex,nofollow">
+<meta name="description" content="JUNKeeeeSの4体で走るランゲーム。"><meta name="robots" content="noindex,nofollow">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://charamarl.com/run-junkeees/">
 <meta property="og:title" content="JUNKeeeeS RUN">
-<meta property="og:description" content="アゲル・ピッツァハット・B.L.T・ポップコーン・バクガ・ホップで、かけっこ">
+<meta property="og:description" content="アゲル・PATTY・ホットドッグブルドッグ・ジョーカーで、かけっこ">
 <meta property="og:image" content="https://charamarl.com/run-junkeees/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="JUNKeeeeS RUN">
-<meta name="twitter:description" content="アゲル・ピッツァハット・B.L.T・ポップコーン・バクガ・ホップで、かけっこ">
+<meta name="twitter:description" content="アゲル・PATTY・ホットドッグブルドッグ・ジョーカーで、かけっこ">
 <meta name="twitter:image" content="https://charamarl.com/run-junkeees/og.png">
 <script>
 // 計測(GA4・CHARAMARLと同じプロパティ)。?internal=1 を一度開いた端末は以後計測しない(解除=?internal=0)
@@ -196,7 +196,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 <body>
 <div class="wrap">
   <header>
-    <a class="logo" href="https://charamarl.com/" title="CHARAMARLへ">JUNKeeeeS<small>RUN</small></a>
+    <a class="logo" href="https://charamarl.com/tap/junkeeees.html?utm_source=junkeees_run" title="JUNKeeeeSのページへ">JUNKeeeeS<small>RUN</small></a>
     <div class="scores">
       <div class="chip num">SCORE <b id="scoreNow">0</b></div>
       <div class="chip num">HI <b id="scoreHi">0</b></div>
@@ -297,21 +297,20 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   //   id      : API・保存キー用(英字)。name : 表示名。artist : クレジット
   //   敵役は「主人公以外のキャラ」がランダムで飛んでくる(enemySize で大きさ調整)
   const CHARS = {
-    ageru:    { id:'JUNK_AGERU',    name:'アゲル',        sprite:'art/ageru.png',    facing:'right', artist:'JUNKeeeeS', enemySize:82,
-                trait:{ label:'オールラウンダー' }, like:null, shop:'https://charamarl.com/', goods:null },
-    pizzahat: { id:'JUNK_PIZZAHAT', name:'ピッツァハット', sprite:'art/pizzahat.png', facing:'right', artist:'JUNKeeeeS', enemySize:80,
-                trait:{ label:'バーガーが近くに来る（取りやすい）', starY:30 }, like:null, shop:'https://charamarl.com/', goods:null },
-    blt:      { id:'JUNK_BLT',      name:'B.L.T',         sprite:'art/blt.png',      facing:'left', artist:'JUNKeeeeS', enemySize:80,
-                trait:{ label:'最速ランナー（同じ時間で点が多く入る）', speed:1.1 }, like:null, shop:'https://charamarl.com/', goods:null },
-    popcorn:  { id:'JUNK_POPCORN',  name:'ポップコーン',   sprite:'art/popcorn.png',  facing:'right', artist:'JUNKeeeeS', enemySize:80,
-                trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:null, shop:'https://charamarl.com/', goods:null },
-    bukgahop: { id:'JUNK_BUKGAHOP', name:'バクガ・ホップ', sprite:'art/bukgahop.png', facing:'left', artist:'JUNKeeeeS', enemySize:80,
-                trait:{ label:'頑丈（1回だけ耐える）', shield:true }, like:null, shop:'https://charamarl.com/', goods:null },
+    ageru:  { id:'JUNK_AGERU',  name:'アゲル',               sprite:'art/ageru.png',  facing:'right', artist:'ROKU', enemySize:82,
+              trait:{ label:'オールラウンダー' }, like:null, shop:'https://charamarl.com/tap/junkeeees.html?utm_source=junkeees_run', goods:null },
+    patty:  { id:'JUNK_PATTY',  name:'PATTY',                sprite:'art/patty.png',  facing:'right', artist:'ROKU', enemySize:80,
+              trait:{ label:'最速ランナー（同じ時間で点が多く入る）', speed:1.1 }, like:null, shop:'https://charamarl.com/tap/junkeeees.html?utm_source=junkeees_run', goods:null },
+    hotdog: { id:'JUNK_HOTDOG', name:'ホットドッグブルドッグ', sprite:'art/bull.png',   facing:'right', artist:'ROKU', enemySize:84,
+              trait:{ label:'ジャンプ力が高い', jump:1.12 }, like:null, shop:'https://charamarl.com/tap/junkeeees.html?utm_source=junkeees_run', goods:null },
+    joker:  { id:'JUNK_JOKER',  name:'ジョーカー',           sprite:'art/clown.png',  facing:'right', artist:'ROKU', enemySize:82,
+              trait:{ label:'バーガーが近くに来る（取りやすい）', starY:30 }, like:null, shop:'https://charamarl.com/tap/junkeeees.html?utm_source=junkeees_run', goods:null },
   };
+
 
   const charKey = (new URLSearchParams(location.search).get('char') || 'ageru').toLowerCase();
   const CHAR  = CHARS[charKey] || CHARS.ageru;
-  CHAR.credit = 'JUNKeeeeS';
+  CHAR.credit = 'JUNKeeeeS by ROKU';
   const T = Object.assign({ label:'', jump:1, grav:1, hit:1, speed:1, fly:0, starY:0, grace:90, shield:false, ramp:180 }, CHAR.trait || {});
   const RIVALS = Object.keys(CHARS).filter(k => CHARS[k] !== CHAR);   // 敵役の候補(主人公以外)
   // 星の飛行(500点ごとに★が飛来。取ると FLY_SEC 秒間、障害物を無視して空を飛べる)
