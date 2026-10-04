@@ -7,6 +7,10 @@
     charamarl_postcard_front.png / .pdf   … 全キャラ＋THANK YOU（取っておいてもらう面）
     charamarl_postcard_back.png  / .pdf   … QR・割引コード・ひとこと
 
+    --both を付けると、アクキーとピンズを並べた共存版を作る（charamarl_postcard_both_*）。
+    アクキー専用版は9/14に27個へ同梱済みなので、上書きしない。
+    ピンズだけを買った人にも、アクキーだけの人にも同じ1枚で通じるようにする。
+
 ■ なぜ2面に分けるか
     表は「捨てられない理由」、裏は「次に来る理由」。役割を混ぜると、どちらも効かない。
 
@@ -178,19 +182,88 @@ h1{{font-size:{px(5.2)}px;font-weight:800;color:#1D1A28;line-height:1.5;letter-s
 </body></html>'''
 
 
+# --- 共存版（アクキー＋ピンズ） ---
+QR_URL_BOTH = 'https://charamarl.com/?utm_source=card&utm_medium=print&utm_campaign=goods'
+# 商品ページ characters/pins.html の12種（img/pins/<key>.png）。購入者の多いカゲチヨを先頭側に
+PINS = ['kg_kagechiyo', 'kg_kimi', 'kg_shigure', 'kg_promu', 'kg_muchiko', 'sue',
+        'mossun', 'putti', 'yurucrazy', 'danna', 'inkumo', 'mony']
+
+
+def front_both(W, H):
+    ak = ''.join(
+        f'<div class="t"><img src="data:image/png;base64,{b64_file(f"{ROOT}/img/products_t/{k}.png")}"></div>'
+        for k, _ in CHARS)
+    pn = ''.join(
+        f'<div class="p"><img src="data:image/png;base64,{b64_file(f"{ROOT}/img/pins/{k}.png")}"></div>'
+        for k in PINS)
+    return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>
+{BASE_CSS.format(W=W, H=H)}
+body{{background:#FFFDF8}}
+body::before{{content:"";position:absolute;inset:0;
+ background:radial-gradient(620px 420px at 88% -6%, #FFE3C4 0%, rgba(255,227,196,0) 62%),
+            radial-gradient(560px 420px at -8% 104%, #E7DBFB 0%, rgba(231,219,251,0) 60%)}}
+.rail{{position:absolute;top:0;left:0;right:0;height:{px(3)}px;
+ background:linear-gradient(90deg,#FF8A00 0%,#FF4D8D 52%,#8E4ED9 100%)}}
+.wrap{{position:relative;height:100%;display:flex;flex-direction:column;
+ padding:{px(9)}px {px(7)}px {px(7)}px}}
+.hd{{text-align:center;margin-bottom:{px(1.5)}px}}
+.logo{{font-size:{px(8.6)}px;margin-bottom:{px(1.4)}px}}
+.tag{{font-size:{px(2.5)}px;font-weight:700;color:#8E8AA0;letter-spacing:.16em}}
+.sec{{margin-top:{px(3.6)}px}}
+.lb{{font-size:{px(2.6)}px;font-weight:800;color:#8E8AA0;letter-spacing:.2em;text-align:center;margin-bottom:{px(1.2)}px}}
+.g1,.g2{{display:flex;flex-wrap:wrap;justify-content:center}}
+.g1{{gap:{px(1)}px {px(1.4)}px}}
+.t{{width:calc(16.66% - {px(1.4)}px);height:{px(20)}px;display:flex;align-items:center;justify-content:center}}
+.t img{{max-width:100%;max-height:100%;object-fit:contain;display:block;
+ filter:drop-shadow(0 {px(.6)}px {px(1)}px rgba(30,24,50,.18))}}
+.g2{{gap:{px(1.6)}px {px(1.6)}px}}
+.p{{width:calc(16.66% - {px(1.6)}px);aspect-ratio:1;border-radius:50%;overflow:hidden;
+ box-shadow:0 {px(.5)}px {px(1.4)}px rgba(30,24,50,.22)}}
+.p img{{width:100%;height:100%;object-fit:cover;transform:scale(1.1);display:block}}
+.ft{{text-align:center;margin-top:auto;flex:none}}
+.thanks{{font-size:{px(5)}px;white-space:nowrap;font-weight:800;color:#1D1A28;letter-spacing:.02em}}
+.sub{{font-size:{px(2.8)}px;font-weight:700;color:#6E6884;margin-top:{px(1.4)}px;line-height:1.7}}
+</style></head><body>
+<div class="rail"></div>
+<div class="wrap">
+  <div class="hd">
+    <div class="logo"><span class="a">CHARA</span><span class="b">MARL</span></div>
+    <div class="tag">キャラクターたちが集まる小さな市場</div>
+  </div>
+  <div class="sec"><div class="lb">ACRYLIC KEYCHAIN &nbsp;11</div><div class="g1">{ak}</div></div>
+  <div class="sec"><div class="lb">PINS &nbsp;12</div><div class="g2">{pn}</div></div>
+  <div class="ft">
+    <div class="thanks">おむかえ、ありがとうございます。</div>
+    <div class="sub">アクキー11種、ピンズ12種。<br>いろんな作家さんが描いています。</div>
+  </div>
+</div></body></html>'''
+
+
+def back_both(W, H):
+    h = back(W, H)
+    h = h.replace('<h1>この子には、<br>まだ10人の仲間がいます。</h1>', '<h1>この子には、<br>まだ仲間がいます。</h1>')
+    h = h.replace(b64_qr(QR_URL), b64_qr(QR_URL_BOTH))
+    assert 'まだ仲間がいます' in h
+    return h
+
+
 def main():
-    outdir = os.path.expanduser(sys.argv[1]) if len(sys.argv) > 1 else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_print')
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    both = '--both' in sys.argv
+    outdir = os.path.expanduser(args[0]) if args else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_print')
     os.makedirs(outdir, exist_ok=True)
     W, H = px(CARD_MM[0] + BLEED_MM * 2), px(CARD_MM[1] + BLEED_MM * 2)
 
-    for name, html in (('front', front(W, H)), ('back', back(W, H))):
+    pages = (('both_front', front_both(W, H)), ('both_back', back_both(W, H))) if both \
+        else (('front', front(W, H)), ('back', back(W, H)))
+    for name, html in pages:
         p = os.path.join(outdir, f'charamarl_postcard_{name}.png')
         render(html, p, W, H)
         im = Image.open(p).convert('RGB')
         im.save(p, dpi=(DPI, DPI))
         im.save(p.replace('.png', '.pdf'), 'PDF', resolution=DPI)
         print(f'{p}  ({im.size[0]}×{im.size[1]}px / {CARD_MM[0]+BLEED_MM*2}×{CARD_MM[1]+BLEED_MM*2}mm @ {DPI}dpi)')
-    print(f'\nQRの行き先: {QR_URL}')
+    print(f'\nQRの行き先: {QR_URL_BOTH if both else QR_URL}')
     print(f'割引コード: {CODE}（{OFF} OFF）')
 
 

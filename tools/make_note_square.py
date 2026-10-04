@@ -58,6 +58,11 @@ NOTES = [
          wide='肩の力が、<br>ぽよっと抜ける',
          works=['ぽよっとぷりん', 'ぽよっとぷりん ハロウィンシール'],
          skip=['ぽよっとぷりん ランダムシール']),   # 販売期間が9/14で終了
+    dict(no='06', artist='PHAGY', sub='ソフビ原型師',
+         title='「PHAGY」の看板を背負って、<br>イマ自分の作りたいものを作る',
+         wide='「PHAGY」の看板を背負って、<br>イマ自分の作りたいものを作る',
+         works=['不眠症の悪魔「ドリームレス（仮）」', '謎の未確認生命体MOJA(モジャ)ソフビ', 'PHAGY TOY指スケ'],
+         skip=['MOJA 1周年記念セール']),   # セールは9/5で終了
 ]
 
 TPL = '''<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
