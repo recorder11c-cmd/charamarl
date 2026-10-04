@@ -265,7 +265,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     <span>100点ごとに世界の色がかわる</span>
     <span>バーガーを取ると15秒 空を飛べて点が2倍（押して上昇・ライバルにぶつかると飛行おわり）</span>
     <span>ライバルをかわすと +10</span>
-    <span>バーガー1個目で ドパガキモード（かわすと全部COMBO・5コンボでFEVER 点2倍）、2個目で 二段ジャンプ 解放</span>
+    <span>バーガー1個目で JUNK MODE（かわすと全部COMBO・5コンボでFEVER 点2倍）、2個目で 二段ジャンプ 解放</span>
   </div>
   <footer id="credit">© CHARAMARL</footer>
 </div>
@@ -326,7 +326,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const FLY_MULT = 2;          // 飛行中はスコア2倍
   const FLY_HIT = 'drop';      // 飛行中にライバルにぶつかったら: 'drop'=飛行が終わる(ゲームオーバーにならない) / 'ignore'=素通り
   const DODGE_BONUS = 10;      // ライバルをかわしたときのボーナス点
-  // ドパガキ演出: バーガー1個目でON(COMBO/FEVER/紙吹雪/虹)、2個目で二段ジャンプ解放
+  // JUNK MODE: バーガー1個目でON(COMBO/FEVER/紙吹雪/虹)、2個目で二段ジャンプ解放
   const DOPA = { on:false, dj:false, burgers:0, combo:0, fever:false, flash:0, zoom:0, pop:0 };
   const RB = ['#FF3EA5','#FFE000','#00D4FF','#7FE000','#FF7A00','#fff','#B266FF'];
   const hue = (o=0) => `hsl(${(S.t*7 + o) % 360},100%,60%)`;
@@ -655,7 +655,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       if (hit(db, sb)){
         const flySec = FLY_SEC + T.fly; S.fly = flySec * 60; star = null;
         DOPA.burgers++;
-        if (DOPA.burgers === 1){ setDopa(true); DOPA.flash = 14; DOPA.zoom = 16; S.shake = Math.max(S.shake, 12); flashes.push({ text:'⚡ ドパガキモード ON!! ⚡', life:90, big:true }); burst(W*.5, H*.5, 160, RB); [0,80,160,240,320,400].forEach((d,i) => setTimeout(() => beep(500 + i*120, .1, 'square', .07), d)); }
+        if (DOPA.burgers === 1){ setDopa(true); DOPA.flash = 14; DOPA.zoom = 16; S.shake = Math.max(S.shake, 12); flashes.push({ text:'⚡ JUNK MODE ON!! 揚げてくぜ！ ⚡', life:100, big:true }); burst(W*.5, H*.5, 160, RB); [0,80,160,240,320,400].forEach((d,i) => setTimeout(() => beep(500 + i*120, .1, 'square', .07), d)); }
         else if (DOPA.burgers === 2){ DOPA.dj = true; DOPA.flash = 12; DOPA.zoom = 14; flashes.push({ text:'二段ジャンプ 解放!!', life:90, big:true }); burst(W*.5, H*.5, 120, RB); }
         else { DOPA.flash = 10; DOPA.zoom = 10; }
         flashes.push({ text:`FLY ${flySec}s!`, life:80, big:DOPA.on }); burst(dino.x + dino.size*.5, dino.y - dino.size*.5, DOPA.on ? 120 : 40, DOPA.on ? RB : ['#FFE000','#fff','#FF3EA5','#00D4FF']);
