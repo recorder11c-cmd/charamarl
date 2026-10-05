@@ -117,6 +117,12 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     animation:bob 1.6s ease-in-out infinite;
   }
   .ttl span{color:var(--accent);}
+  .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(120deg,#FF3EA5,#FFE000,#00D4FF,#7FE000,#FF7A00,#FF3EA5);background-size:400% 400%;animation:bgcycle 5s linear infinite;opacity:0;mix-blend-mode:multiply;transition:opacity .6s;}
+  body.dopaon .bgfx{opacity:.5;}
+  @keyframes bgcycle{0%{background-position:0% 0%}100%{background-position:100% 100%}}
+  .wrap{position:relative;z-index:1;}
+  body.fever .chip{animation:feverchip .4s ease-in-out infinite;background:linear-gradient(135deg,#FFE27A,#FF3EA5);}
+  @keyframes feverchip{0%,100%{transform:scale(1)}50%{transform:scale(1.08) rotate(-2deg)}}
   @keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
   .sub{font-weight:900;font-size:clamp(12px,3.6vw,16px);background:#fff;border:3px solid var(--ink);
        border-radius:999px;padding:4px 14px;box-shadow:3px 3px 0 var(--ink);}
@@ -204,6 +210,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 </style>
 </head>
 <body>
+<div class="bgfx"></div>
 <div class="wrap">
   <header>
     <a class="logo" href="https://charamarl.com/?utm_source=charamarl_run" title="グッズページへ">CHARAMARL<small>RUN</small></a>
@@ -272,6 +279,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     <span>100点ごとに世界の色がかわる</span>
     <span>★を取ると15秒 空を飛べて点が2倍（押して上昇・ライバルにぶつかると飛行おわり）</span>
     <span>ライバルをかわすと +10</span>
+    <span>★1個目で CHARA MODE（かわすと全部COMBO・5コンボでFEVER 点2倍）、2個目で 二段ジャンプ 解放</span>
   </div>
   <footer id="credit">© CHARAMARL</footer>
 </div>
@@ -357,6 +365,12 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const FLY_MULT = 2;          // 飛行中はスコア2倍
   const FLY_HIT = 'drop';      // 飛行中にライバルにぶつかったら: 'drop'=飛行が終わる(ゲームオーバーにならない) / 'ignore'=素通り
   const DODGE_BONUS = 10;      // ライバルをかわしたときのボーナス点
+  // CHARA MODE: ★1個目でON(COMBO/FEVER/紙吹雪/虹)、2個目で二段ジャンプ解放
+  const DOPA = { on:false, dj:false, burgers:0, combo:0, fever:false, flash:0, zoom:0, pop:0 };
+  const RB = ['#FF3EA5','#FFE000','#00D4FF','#7FE000','#FF7A00','#fff','#B266FF'];
+  const hue = (o=0) => `hsl(${(S.t*7 + o) % 360},100%,60%)`;
+  function setFever(on){ DOPA.fever = on; document.body.classList.toggle('fever', on); }
+  function setDopa(on){ DOPA.on = on; document.body.classList.toggle('dopaon', on); }
   const DIR = RUN_DIR === 'right' ? 1 : -1;   // 主人公の進行方向。世界は -DIR に流れる
   // NFCアクキー所有者特典: ?owner=<token> をAPIで検証 → 端末に記憶 → 金のオーラ＋GOLD WORLDから開始
   const OWNER_KEY = 'dr_run_owner_' + CHAR.id, OWNER_TOK_KEY = 'dr_run_owner_tok_' + CHAR.id;
@@ -512,6 +526,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   resetWorld();
 
   function start(){
+    DOPA.burgers = 0; DOPA.combo = 0; DOPA.dj = false; DOPA.flash = 0; DOPA.zoom = 0; setFever(false); setDopa(false); dino.dj = false;
     S.state = 'play'; S.t = 0; S.speed = 6; S.dist = 0; S.score = 0; S.worldIdx = 0; S.worldMix = 0; S.shake = 0; S.fly = 0; S.nextStar = STAR_EVERY; S.hold = false; S.grace = 0; S.shieldUsed = false; S.goldPreview = 0; S.dodges = 0; S.goldFly = false; S.goldUntil = 0; star = null;
     dino.y = GROUND; dino.vy = 0; dino.duck = false; dino.onGround = true; dino.squash = 0; dino.dj = false;
     resetWorld();
@@ -521,7 +536,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     drEvent('game_start', { character: CHAR.id, owner: isOwner ? 1 : 0, mode: ownerMode ? 'owner' : 'normal' }); beacon('play');
   }
   function gameOver(){
-    S.state = 'over'; S.shake = 14; if (!isOwner) S.goldPreview = 240;   // 4秒だけ金の世界を見せる
+    S.state = 'over'; S.shake = DOPA.on ? 30 : 14; if (DOPA.on){ DOPA.flash = 22; burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 120, RB); } setFever(false); if (!isOwner) S.goldPreview = 240;   // 4秒だけ金の世界を見せる
     beep(220, .35, 'sawtooth', .09, -160);
     burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 28, ['#E5484D','#FFD400','#fff']);
     if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
@@ -539,8 +554,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     if (dino.onGround){
       dino.vy = (dino.duck ? -15 : -16.5) * T.jump; dino.onGround = false; dino.duck = false; dino.dj = false;
       beep(520, .14, 'square', .05, 260);
-      burst(dino.x + dino.size*.6, GROUND, 8, ['#fff', '#FFD400']);
-    } else if (ownerMode && !dino.dj){   // ★オーナーモード: 空中でもう一回(二段ジャンプ)
+      if (DOPA.on){ burst(dino.x + dino.size*.6, GROUND, 26, RB); S.shake = Math.max(S.shake, 4); } else burst(dino.x + dino.size*.6, GROUND, 8, ['#fff', '#FFD400']);
+    } else if ((ownerMode || DOPA.dj) && !dino.dj){   // ★オーナーモード: 空中でもう一回(二段ジャンプ)
       dino.dj = true; dino.vy = -13.5 * T.jump;
       beep(700, .12, 'square', .05, 320);
       burst(dino.x + dino.size*.5, dino.y - dino.size*.35, 14, ['#FFD23F', '#fff', '#E0A800']);
@@ -617,7 +632,12 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     const flow = -DIR * (S.state==='play' ? S.speed : 2);
     clouds.forEach(c => { c.x += flow * .25 * dt * c.s; if (c.x > W + 80){ c.x = -140; c.y = 30 + Math.random()*90; } if (c.x < -140){ c.x = W + 80; c.y = 30 + Math.random()*90; } });
     hills.forEach(h => { h.x += flow * .4 * dt; if (h.x > W + 20) h.x = -h.w - 20; if (h.x + h.w < -20) h.x = W + 20; });
-    particles.forEach(p => { p.x += p.vx*dt; p.y += p.vy*dt; p.vy += .25*dt; p.life -= dt; });
+    if (S.state === 'play' && DOPA.on){
+      particles.push({ x:dino.x + dino.size*.25, y:dino.y - dino.size*.5 + (Math.random()-.5)*50, vx:-DIR*(3+Math.random()*3), vy:(Math.random()-.5)*1.5, life:26, c:hue(Math.random()*120), r:3+Math.random()*4 });
+      if (DOPA.fever){ for (let i=0;i<2;i++) particles.push({ x:Math.random()*W, y:-10, vx:(Math.random()-.5)*2, vy:2+Math.random()*3, life:110, c:RB[Math.floor(Math.random()*RB.length)], r:3+Math.random()*4 }); }
+    }
+    if (DOPA.flash > 0) DOPA.flash -= dt; if (DOPA.zoom > 0) DOPA.zoom -= dt; if (DOPA.pop > 0) DOPA.pop -= dt;
+    particles.forEach(p => { p.x += p.vx*dt; p.y += p.vy*dt; p.vy += (p.life > 100 ? .02 : .25)*dt; p.life -= dt; });
     particles = particles.filter(p => p.life > 0);
     flashes.forEach(f => f.life -= dt); flashes = flashes.filter(f => f.life > 0);
     if (S.shake > 0) S.shake = Math.max(0, S.shake - dt*1.2);
@@ -640,12 +660,12 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     } else {
       if (S.grace > 0) S.grace -= dt;
       dino.vy += .8 * T.grav * dt; dino.y += dino.vy * dt;
-      if (dino.y >= GROUND){ if(!dino.onGround){ dino.squash = 1; burst(dino.x + dino.size*.4, GROUND, 6, ['#fff','#1B1B1F']); } dino.y = GROUND; dino.vy = 0; dino.onGround = true; dino.dj = false; }
+      if (dino.y >= GROUND){ if(!dino.onGround){ dino.squash = 1; if (DOPA.on){ burst(dino.x + dino.size*.4, GROUND, 30, RB); S.shake = Math.max(S.shake, 7); } else burst(dino.x + dino.size*.4, GROUND, 6, ['#fff','#1B1B1F']); } dino.y = GROUND; dino.vy = 0; dino.onGround = true; dino.dj = false; }
     }
 
     // 速度・スコア
     S.speed = Math.min(14, 6 + S.dist / T.ramp) * T.speed;
-    S.dist += S.speed * dt * .03 * (S.fly > 0 ? FLY_MULT : 1);
+    S.dist += S.speed * dt * .03 * (S.fly > 0 ? FLY_MULT : 1) * (DOPA.fever ? 2 : 1);
     const prev = S.score;
     S.score = Math.floor(S.dist);
     if (S.score !== prev) scoreNowEl.textContent = S.score;
@@ -655,7 +675,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       setPageColor(worldAt(S.worldIdx).page);
       flashes.push({ text: worldAt(S.worldIdx).name, life: 70 });
       beep(880, .1, 'square', .05); setTimeout(()=>beep(1320,.16,'square',.05), 90);
-      burst(W*.5, 90, 40, ['#FF3EA5','#00D4FF','#FFE000','#7FE000','#FF7A00','#fff']);
+      if (DOPA.on){ DOPA.zoom = 10; DOPA.flash = 6; S.shake = Math.max(S.shake, 6); burst(W*.5, 90, 90, RB); } else burst(W*.5, 90, 40, ['#FF3EA5','#00D4FF','#FFE000','#7FE000','#FF7A00','#fff']);
     }
     S.worldMix += (1 - S.worldMix) * Math.min(1, .04*dt); // (予約: 補間用)
 
@@ -670,9 +690,15 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     obstacles = obstacles.filter(o => DIR > 0 ? o.x + o.w > -10 : o.x < W + 10);
     // ライバルをかわしたらボーナス(通り過ぎた瞬間に1回だけ)
     obstacles.forEach(o => {
-      if (o.type !== 'bird' || o.passed) return;
+      if (o.passed || (!DOPA.on && o.type !== 'bird')) return;
       const passed = DIR > 0 ? (o.x + o.w < dino.x + dino.size*.2) : (o.x > dino.x + dino.size*.8);
-      if (passed){ o.passed = true; S.dist += DODGE_BONUS / 1; S.dodges = (S.dodges || 0) + 1; flashes.push({ text:'かわした！ +' + DODGE_BONUS, life:35, small:true }); beep(740, .08, 'triangle', .04); }
+      if (passed && !DOPA.on){ o.passed = true; S.dist += DODGE_BONUS / 1; S.dodges = (S.dodges || 0) + 1; flashes.push({ text:'かわした！ +' + DODGE_BONUS, life:35, small:true }); beep(740, .08, 'triangle', .04); }
+      else if (passed){ o.passed = true; DOPA.combo++; const bonus = DODGE_BONUS * Math.min(DOPA.combo, 10); S.dist += bonus; S.dodges = (S.dodges || 0) + 1;
+        flashes.push({ text:`+${bonus}`, life:28, small:true }); DOPA.pop = 14; S.shake = Math.max(S.shake, 4);
+        burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 24, RB);
+        beep(440 + Math.min(DOPA.combo, 12)*70, .08, 'square', .05); setTimeout(() => beep(660 + Math.min(DOPA.combo, 12)*70, .1, 'square', .05), 70);
+        if (DOPA.combo === 5){ setFever(true); DOPA.flash = 10; DOPA.zoom = 12; flashes.push({ text:'FEVER!! 点2倍', life:60, big:true }); burst(W*.5, H*.5, 120, RB); [0,90,180,270,360].forEach((d,i) => setTimeout(() => beep(600 + i*140, .12, 'square', .07), d)); }
+      }
     });
 
     // ★スター: 500点ごとに飛来。ジャンプの頂点あたりの高さを、ゆらゆら飛ぶ
@@ -685,7 +711,11 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       if (hit(db, sb)){
         const flySec = FLY_SEC + T.fly; S.fly = flySec * 60; star = null;
         if (ownerMode){ S.goldFly = true; setPageColor(GOLD.page); }   // オーナーモードの★は金の★: 飛行中＋着地後100点は金の世界
-        flashes.push({ text: ownerMode ? `GOLD ★ FLY ${flySec}s!` : `FLY ${flySec}s!`, life:80 }); burst(dino.x + dino.size*.5, dino.y - dino.size*.5, 40, ['#FFE000','#fff','#FF3EA5','#00D4FF']);
+        DOPA.burgers++;
+        if (DOPA.burgers === 1){ setDopa(true); DOPA.flash = 14; DOPA.zoom = 16; S.shake = Math.max(S.shake, 12); flashes.push({ text:'⚡ CHARA MODE ON!! ⚡', life:100, big:true }); burst(W*.5, H*.5, 160, RB); [0,80,160,240,320,400].forEach((d,i) => setTimeout(() => beep(500 + i*120, .1, 'square', .07), d)); }
+        else if (DOPA.burgers === 2){ DOPA.dj = true; DOPA.flash = 12; DOPA.zoom = 14; flashes.push({ text:'二段ジャンプ 解放!!', life:90, big:true }); burst(W*.5, H*.5, 120, RB); }
+        else { DOPA.flash = 10; DOPA.zoom = 10; }
+        flashes.push({ text: ownerMode ? `GOLD ★ FLY ${flySec}s!` : `FLY ${flySec}s!`, life:80, big:DOPA.on }); burst(dino.x + dino.size*.5, dino.y - dino.size*.5, DOPA.on ? 120 : 40, DOPA.on ? RB : ['#FFE000','#fff','#FF3EA5','#00D4FF']);
         beep(880, .1, 'square', .06); setTimeout(()=>beep(1175,.1,'square',.06),90); setTimeout(()=>beep(1568,.2,'square',.06),180);
         drEvent('star_catch', { character: CHAR.id, score: S.score });
       } else if (DIR > 0 ? star.x < -40 : star.x > W + 40) star = null;
@@ -694,7 +724,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       for (const o of obstacles){
         if (o.type !== 'bird') continue;   // 飛行中はライバルだけが当たる(サボテンは足元なので高く飛べば無関係)
         const ob = { x:o.x+10, y:o.y-o.h+8, w:o.w-20, h:o.h-14 };
-        if (hit(db, ob)){ S.fly = 0; S.grace = T.grace; S.shake = 8; endGoldFly(); flashes.push({ text:'ぶつかった！ 飛行おわり', life:60 }); beep(260, .2, 'sawtooth', .07, -100); S.nextStar = S.score + STAR_EVERY; break; }
+        if (hit(db, ob)){ S.fly = 0; S.grace = T.grace; S.shake = DOPA.on ? 14 : 8; DOPA.combo = 0; setFever(false); endGoldFly(); flashes.push({ text:'ぶつかった！ 飛行おわり', life:60 }); beep(260, .2, 'sawtooth', .07, -100); S.nextStar = S.score + STAR_EVERY; break; }
       }
     }
     if (S.fly <= 0 && S.grace <= 0){
@@ -737,7 +767,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     // PUTTI：羽ばたき＝上下ゆれ＋わずかな傾き＋縦つぶれ
     const f = Math.sin(o.flap);
     const cx = o.x + o.w/2, cy = o.y - o.h/2 + f*5;
-    ctx.save(); ctx.translate(cx, cy); ctx.rotate(f*.08); ctx.scale(1, 1 - Math.abs(f)*.08);
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(DOPA.on ? o.flap*1.3 : f*.08); ctx.scale(1, 1 - Math.abs(f)*.08);
     const e = enemies[o.who];
     if (e && e.ready){
       const sz = e.size; ctx.drawImage(e.canvas, -sz/2, -sz/2, sz, sz);
@@ -768,10 +798,10 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     ctx.translate(dino.x + s*.5, dino.y + bob);
     ctx.rotate(rot); ctx.scale(sx, sy);
     if (S.grace > 0 && Math.floor(S.t / 4) % 2 === 0) ctx.globalAlpha = .45;   // 着地後の無敵は点滅
-    if (isOwner || S.fly > 0){ ctx.shadowColor = S.fly > 0 ? 'rgba(255,255,255,.95)' : 'rgba(255,200,0,.95)'; ctx.shadowBlur = 22; }
+    if (isOwner || S.fly > 0 || DOPA.fever){ ctx.shadowColor = DOPA.fever ? hue() : S.fly > 0 ? 'rgba(255,255,255,.95)' : 'rgba(255,200,0,.95)'; ctx.shadowBlur = DOPA.fever ? 30 : 22; }
     if (sprite.ready){
       ctx.drawImage(sprite.canvas, -s*.5, -s*.96, s, s);
-      if (isOwner || S.fly > 0){ ctx.shadowBlur = 0; ctx.drawImage(sprite.canvas, -s*.5, -s*.96, s, s); }
+      if (isOwner || S.fly > 0 || DOPA.fever){ ctx.shadowBlur = 0; ctx.drawImage(sprite.canvas, -s*.5, -s*.96, s, s); }
     } else {
       ctx.fillStyle = '#1B1B1F'; rr(-s*.3, -s*.8, s*.6, s*.8, 14); ctx.fill();
     }
@@ -781,12 +811,15 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     const world = worldAt(S.worldIdx);
     ctx.save();
     if (S.shake > 0) ctx.translate((Math.random()-.5)*S.shake, (Math.random()-.5)*S.shake);
+    if (DOPA.zoom > 0){ const z = 1 + DOPA.zoom * .003; ctx.translate(W*.5, H*.5); ctx.scale(z, z); ctx.translate(-W*.5, -H*.5); }
 
     // 空
     const sky = ctx.createLinearGradient(0,0,0,GROUND);
     sky.addColorStop(0, world.sky[0]); sky.addColorStop(1, world.sky[1]);
     ctx.fillStyle = sky; ctx.fillRect(-20, -20, W+40, H+40);
 
+    if (DOPA.fever){ ctx.save(); ctx.globalAlpha = .45; for (let i = 0; i < 7; i++){ ctx.fillStyle = hue(i*51); ctx.fillRect(-20, -20 + i*(GROUND+20)/7, W+40, (GROUND+20)/7 + 2); } ctx.restore(); }
+    if (DOPA.on && S.state === 'play' && S.speed > 7.5){ ctx.save(); ctx.globalAlpha = Math.min(.6, (S.speed-7)*.12); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; for (let i = 0; i < 14; i++){ const y = (i*53 + S.t*3) % GROUND, x = (i*131 + S.t*S.speed*5) % (W+200) - 100; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 60 + S.speed*8, y); ctx.stroke(); } ctx.restore(); }
     // 太陽
     ctx.fillStyle = '#FFE000'; ctx.strokeStyle = '#1B1B1F'; ctx.lineWidth = 3;
     const sunX = DIR > 0 ? W - 120 : 120;
@@ -839,13 +872,15 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 
     // 100点フラッシュ
     flashes.forEach(f => {
-      const a = Math.min(1, f.life/25), sc = f.small ? 1 : 1 + (1 - Math.min(1, (70 - f.life)/10))*.6;
-      ctx.save(); ctx.globalAlpha = a; ctx.translate(f.small ? dino.x + dino.size*.5 : W*.5, f.small ? dino.y - dino.size - 10 : 92); ctx.scale(sc, sc);
-      ctx.font = f.small ? '900 16px "M PLUS Rounded 1c", sans-serif' : '900 34px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const a = Math.min(1, f.life/25), sc = (f.small || f.big) ? 1 : 1 + (1 - Math.min(1, (70 - f.life)/10))*.6;
+      ctx.save(); ctx.globalAlpha = a; ctx.translate(f.small ? dino.x + dino.size*.5 : W*.5, f.small ? dino.y - dino.size - 10 : (f.big ? 34 : 92)); ctx.scale(sc, sc);
+      ctx.font = f.small ? '900 16px "M PLUS Rounded 1c", sans-serif' : (f.big ? '900 24px "M PLUS Rounded 1c", sans-serif' : '900 34px "M PLUS Rounded 1c", sans-serif'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.lineWidth = 8; ctx.strokeStyle = '#1B1B1F'; ctx.strokeText(f.text, 0, 0);
-      ctx.fillStyle = '#FFE000'; ctx.fillText(f.text, 0, 0);
+      ctx.fillStyle = f.big ? hue(f.life*9) : '#FFE000'; ctx.fillText(f.text, 0, 0);
       ctx.restore();
     });
+    if (DOPA.on && S.state === 'play' && DOPA.combo >= 2){ ctx.save(); ctx.font = '900 22px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.lineWidth = 6; ctx.strokeStyle = '#1B1B1F'; const t = `${DOPA.fever ? 'FEVER ' : ''}COMBO ×${DOPA.combo}`; const ps = 1 + Math.max(0, DOPA.pop)/14*.5; ctx.translate(14, 12); ctx.scale(ps, ps); ctx.strokeText(t, 0, 0); ctx.fillStyle = hue(); ctx.fillText(t, 0, 0); ctx.restore(); }
+    if (DOPA.flash > 0){ ctx.save(); ctx.globalAlpha = Math.min(.45, DOPA.flash/26); ctx.fillStyle = '#fff'; ctx.fillRect(-40, -40, W+80, H+80); ctx.restore(); }
 
     if (S.goldPreview > 0){
       ctx.save(); ctx.globalAlpha = Math.min(1, S.goldPreview/30); ctx.font = '900 15px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
@@ -876,7 +911,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   }
   requestAnimationFrame(loop);
   // テスト用フック
-  window.DRRUN = { S, dino, step, draw, start, jump, CHAR, get obstacles(){ return obstacles; }, get star(){ return star; }, setOwner(v){ isOwner = !!v; if (v) initOwnerMode(); }, setMode(v){ ownerMode = !!v; applyOwnerMode(); }, get ownerMode(){ return ownerMode; } };
+  window.DRRUN = { S, dino, step, draw, start, jump, CHAR, DOPA, get obstacles(){ return obstacles; }, get star(){ return star; }, setOwner(v){ isOwner = !!v; if (v) initOwnerMode(); }, setMode(v){ ownerMode = !!v; applyOwnerMode(); }, get ownerMode(){ return ownerMode; } };
 
   // ================= 🏆 ランキング =================
   const NAME_KEY = 'dr_run_name', PID_KEY = 'dr_run_pid';
