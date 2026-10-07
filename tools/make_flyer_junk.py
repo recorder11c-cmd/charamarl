@@ -128,7 +128,7 @@ body{{background:#FFFDF8}}
 .h1 span{{background:#111;color:#FFD400;padding:0 {px(1.5)}px;border-radius:{px(1.2)}px;display:inline-block;line-height:1.3}}
 .cols{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(78)}px;display:flex;gap:{px(5)}px}}
 .col{{flex:1;text-align:center;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(5)}px {px(2.5)}px {px(4)}px}}
-.ct{{font-size:{px(3.9)}px;line-height:1.3;min-height:{px(11)}px;display:flex;align-items:center;justify-content:center}}
+.ct{{font-size:{px(3.6)}px;line-height:1.3;min-height:{px(11)}px;display:flex;align-items:center;justify-content:center;white-space:nowrap}}
 .cd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700;color:#333;min-height:{px(16)}px;margin:{px(2)}px 0 {px(3)}px;white-space:nowrap}}
 .col .qrbox{{padding:{px(1.2)}px;border-width:{px(.6)}px}} .col .qrbox img{{width:{px(24)}px;height:{px(24)}px}}
 .col .url{{font-size:{px(2.4)}px;margin-top:{px(1.5)}px}}
