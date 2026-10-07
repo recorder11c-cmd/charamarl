@@ -117,28 +117,63 @@ BACK_QR = [
 def b64_qr_url(url):
     buf = io.BytesIO(); segno.make(url, error='h').save(buf, kind='png', scale=18, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()
 def pageBack():
-    cols = ''.join(f'''<div class="col"><div class="ct disp">{t}</div><div class="cd">{d}</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(u)}"></div><div class="url">{sh}</div></div>''' for t,d,u,sh in BACK_QR)
+    # 裏面: 上=ロゴ＋見出し、中=2列(ギャラリー=ピンタレスト風UIの図、キャラクター=スマホとアクキーのモック)＋QR、下=作家・企業の方へ(横配置)、SNS
+    g, k, ap = BACK_QR
+    # ピンタレスト風UI(図形だけ。作品は使わない)
+    colsT = [[(11,'#FFD9B8'),(7,'#E9DAFB'),(9,'#FFE3F0')],[(8,'#D9F3EA'),(12,'#FFF1C2'),(7,'#E3EEFF')],[(9,'#FFE3F0'),(7,'#E9DAFB'),(11,'#FFD9B8')]]
+    pin = '<div class="pin">' + ''.join('<div class="pc">' + ''.join(f'<div class="pt" style="height:{px(h)}px;background:{col}"><span class="hv">♥</span></div>' for h,col in c) + '</div>' for c in colsT) + '</div>'
+    phone = '''<div class="mock"><div class="phone"><div class="pbar"></div><div class="pimg"><div class="face"><i></i><i></i><b></b></div></div><div class="prow"><span class="pl">♥ 128</span><span class="pb"></span></div><div class="pbtn"></div><div class="pbtn s"></div></div>
+      <div class="key"><div class="ring"></div><div class="plate"><div class="face sm"><i></i><i></i><b></b></div></div><div class="nfc">))) NFC</div></div></div>'''
     return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
 body{{background:#FFFDF8}}
 .rail{{position:absolute;top:0;left:0;right:0;height:{px(5)}px;background:linear-gradient(90deg,#FF8A00 0%,#FF4D8D 52%,#8E4ED9 100%)}}
-.top{{position:absolute;left:0;right:0;top:{px(5)}px;padding:{px(12)}px {px(3+9)}px 0;text-align:center}}
-.top .logo{{font-size:{px(14)}px;display:block}}
-.tag{{font-size:{px(3.8)}px;font-weight:700;color:#6E6884;letter-spacing:.12em;margin-top:{px(2)}px}}
-.h1{{font-size:{px(6.2)}px;line-height:1.35;margin-top:{px(10)}px}}
-.h1 span{{background:#111;color:#FFD400;padding:0 {px(1.5)}px;border-radius:{px(1.2)}px;display:inline-block;line-height:1.3}}
-.cols{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(78)}px;display:flex;gap:{px(5)}px}}
-.col{{flex:1;text-align:center;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(5)}px {px(2.5)}px {px(4)}px}}
-.ct{{font-size:{px(3.6)}px;line-height:1.3;min-height:{px(11)}px;display:flex;align-items:center;justify-content:center;white-space:nowrap}}
-.cd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700;color:#333;min-height:{px(16)}px;margin:{px(2)}px 0 {px(3)}px;white-space:nowrap}}
-.col .qrbox{{padding:{px(1.2)}px;border-width:{px(.6)}px}} .col .qrbox img{{width:{px(24)}px;height:{px(24)}px}}
-.col .url{{font-size:{px(2.4)}px;margin-top:{px(1.5)}px}}
-.contact{{position:absolute;left:{px(3+9)}px;right:{px(3+9)}px;top:{px(170)}px;text-align:center;font-size:{px(3.1)}px;line-height:1.7;font-weight:700;color:#333}}
-.contact .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#111}}
+.top{{position:absolute;left:0;right:0;top:{px(5)}px;padding:{px(9)}px {px(3+9)}px 0;text-align:center}}
+.top .logo{{font-size:{px(12)}px;display:block}}
+.tag{{font-size:{px(3.4)}px;font-weight:700;color:#6E6884;letter-spacing:.12em;margin-top:{px(1.6)}px}}
+.h1{{font-size:{px(5.6)}px;line-height:1.35;margin-top:{px(5)}px}}
+.h1 span{{background:#111;color:#FFD400;padding:0 {px(1.5)}px;border-radius:{px(1.2)}px;display:inline-block;line-height:1.3;margin-bottom:{px(1)}px}}
+.cols{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(62)}px;display:flex;gap:{px(5)}px}}
+.col{{flex:1;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(3)}px {px(3)}px {px(3)}px;text-align:center}}
+.ill{{height:{px(36)}px;border-radius:{px(2.5)}px;background:#F6F2FA;border:{px(.4)}px solid #DDD6EA;overflow:hidden;position:relative;margin-bottom:{px(2.5)}px}}
+.pin{{display:flex;gap:{px(1.2)}px;padding:{px(1.6)}px}} .pc{{flex:1;display:flex;flex-direction:column;gap:{px(1.2)}px}}
+.pt{{border-radius:{px(1.4)}px;border:{px(.35)}px solid #111;position:relative}}
+.pt .hv{{position:absolute;right:{px(.8)}px;bottom:{px(.6)}px;font-size:{px(2)}px;font-weight:900;color:#FF4D8D;background:#fff;border-radius:999px;padding:0 {px(.8)}px;line-height:1.5}}
+.mock{{display:flex;align-items:center;justify-content:center;gap:{px(4)}px;height:100%}}
+.phone{{width:{px(17)}px;height:{px(31)}px;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(2.6)}px;padding:{px(1.2)}px;position:relative;box-shadow:{px(.6)}px {px(.6)}px 0 #111}}
+.pbar{{width:40%;height:{px(.7)}px;background:#111;border-radius:999px;margin:0 auto {px(1)}px}}
+.pimg{{height:{px(13)}px;border-radius:{px(1.4)}px;background:linear-gradient(135deg,#FFD9B8,#E9DAFB);border:{px(.35)}px solid #111;display:flex;align-items:center;justify-content:center}}
+.face{{width:{px(7)}px;height:{px(7)}px;background:#FFE000;border:{px(.4)}px solid #111;border-radius:50%;position:relative}}
+.face i{{position:absolute;top:38%;width:{px(.8)}px;height:{px(.8)}px;background:#111;border-radius:50%}} .face i:first-child{{left:28%}} .face i:nth-child(2){{right:28%}}
+.face b{{position:absolute;left:30%;right:30%;bottom:24%;height:{px(1.4)}px;border:{px(.4)}px solid #111;border-top:none;border-radius:0 0 {px(2)}px {px(2)}px}}
+.face.sm{{width:{px(5.2)}px;height:{px(5.2)}px}}
+.prow{{display:flex;justify-content:space-between;align-items:center;margin:{px(1)}px 0}}
+.pl{{font-size:{px(1.9)}px;font-weight:900;color:#FF4D8D}} .pb{{width:{px(5)}px;height:{px(1.2)}px;background:#DDD6EA;border-radius:999px}}
+.pbtn{{height:{px(2.6)}px;border-radius:999px;background:#F97316;margin-top:{px(1)}px}} .pbtn.s{{background:#8B5CF6}}
+.key{{position:relative;width:{px(16)}px;height:{px(26)}px}}
+.ring{{position:absolute;left:50%;top:0;width:{px(4.5)}px;height:{px(4.5)}px;border:{px(.7)}px solid #111;border-radius:50%;transform:translateX(-50%)}}
+.plate{{position:absolute;left:0;right:0;top:{px(4)}px;bottom:{px(4)}px;background:rgba(255,255,255,.85);border:{px(.6)}px solid #111;border-radius:{px(2.2)}px;display:flex;align-items:center;justify-content:center;box-shadow:{px(.5)}px {px(.5)}px 0 #111}}
+.nfc{{position:absolute;left:0;right:0;bottom:0;text-align:center;font-family:"Helvetica Neue",Arial,sans-serif;font-size:{px(1.9)}px;font-weight:800;color:#8B5CF6;letter-spacing:.05em}}
+.ct{{font-size:{px(3.8)}px;line-height:1.3;white-space:nowrap}}
+.cd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700;color:#333;margin:{px(1.2)}px 0 {px(2.2)}px;white-space:nowrap}}
+.col .qrbox{{padding:{px(1.2)}px;border-width:{px(.6)}px}} .col .qrbox img{{width:{px(22)}px;height:{px(22)}px}}
+.col .url{{font-size:{px(2.4)}px;margin-top:{px(1.2)}px}}
+.biz{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(160)}px;background:#111;color:#fff;border-radius:{px(4)}px;padding:{px(3)}px {px(4)}px;display:flex;align-items:center;gap:{px(4)}px}}
+.biz .bt{{font-size:{px(3.8)}px;color:#FFD400;margin-bottom:{px(1)}px}}
+.biz .bd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700}} .biz .bd .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#fff}}
+.biz .l{{flex:1}} .biz .r{{flex:none;text-align:center}}
+.biz .qrbox{{padding:{px(1)}px;border-color:#fff;border-width:{px(.5)}px}} .biz .qrbox img{{width:{px(20)}px;height:{px(20)}px}}
+.biz .url{{font-size:{px(2.2)}px;margin-top:{px(.8)}px;color:#fff}}
+.sns{{position:absolute;left:0;right:0;top:{px(191.5)}px;text-align:center;font-size:{px(2.8)}px;font-weight:700;color:#333}}
+.sns .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#111}}
 </style></head><body><div class="rail"></div>
 <div class="top"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><div class="tag">キャラクターたちが集まる、小さな市場</div>
 <div class="h1 disp"><span>JUNKeeeeSのほかにも、</span><br><span>キャラクターが集まっています。</span></div></div>
-<div class="cols">{cols}</div>
-<div class="contact">CHARAMARLは、いろいろな作家さんのキャラクターが集まる場所です。<br>お問い合わせ <span class="em">charamarlinfo@gmail.com</span>　／　X <span class="em">@charamarl</span></div>
+<div class="cols">
+  <div class="col"><div class="ill">{pin}</div><div class="ct disp">{g[0]}</div><div class="cd">{g[1]}</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(g[2])}"></div><div class="url">{g[3]}</div></div>
+  <div class="col"><div class="ill">{phone}</div><div class="ct disp">{k[0].replace('<br>','')}</div><div class="cd">{k[1]}</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(k[2])}"></div><div class="url">{k[3]}</div></div>
+</div>
+<div class="biz"><div class="l"><div class="bt disp">{ap[0]}</div><div class="bd">{ap[1].replace('<br>','')}<br>メール <span class="em">charamarlinfo@gmail.com</span></div></div><div class="r"><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(ap[2])}"></div><div class="url">{ap[3]}</div></div></div>
+<div class="sns">X <span class="em">@charamarl</span>　／　Instagram <span class="em">@charamarlinfo</span></div>
 {FOOT}</body></html>'''
 def render(html, name):
     htmlp = os.path.join(OUT, name + '.html'); png = os.path.join(OUT, name + '.png'); pdf = os.path.join(OUT, name + '.pdf')
@@ -152,8 +187,8 @@ def render(html, name):
     det = cv2.QRCodeDetector()
     if name.endswith('_back'):
         Wd, Hd = im.size; found = []
-        for i in range(3):
-            crop = im.crop((int(Wd*(0.04+i*0.31)), int(Hd*0.45), int(Wd*(0.04+(i+1)*0.31)), int(Hd*0.85)))
+        for (x0,y0,x1,y1) in [(0.12,0.56,0.42,0.73),(0.55,0.56,0.9,0.73),(0.68,0.74,0.95,0.88)]:
+            crop = im.crop((int(Wd*x0), int(Hd*y0), int(Wd*x1), int(Hd*y1)))
             d, _, _ = det.detectAndDecode(cv2.cvtColor(np.array(crop), cv2.COLOR_RGB2BGR)); found.append(d)
         print(name, im.size, 'QR:', 'OK' if found == [u for _,_,u,_ in BACK_QR] else f'NG found={found}')
     else:
