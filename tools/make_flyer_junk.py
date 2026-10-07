@@ -120,10 +120,18 @@ def pageBack():
     # 裏面: 上=ロゴ＋見出し、中=2列(ギャラリー=ピンタレスト風UIの図、キャラクター=スマホとアクキーのモック)＋QR、下=作家・企業の方へ(横配置)、SNS
     g, k, ap = BACK_QR
     # ピンタレスト風UI(図形だけ。作品は使わない)
-    colsT = [[(11,'#FFD9B8'),(7,'#E9DAFB'),(9,'#FFE3F0')],[(8,'#D9F3EA'),(12,'#FFF1C2'),(7,'#E3EEFF')],[(9,'#FFE3F0'),(7,'#E9DAFB'),(11,'#FFD9B8')]]
-    pin = '<div class="pin">' + ''.join('<div class="pc">' + ''.join(f'<div class="pt" style="height:{px(h)}px;background:{col}"><span class="hv">♥</span></div>' for h,col in c) + '</div>' for c in colsT) + '</div>'
-    phone = '''<div class="mock"><div class="phone"><div class="pbar"></div><div class="pimg"><div class="face"><i></i><i></i><b></b></div></div><div class="prow"><span class="pl">♥ 128</span><span class="pb"></span></div><div class="pbtn"></div><div class="pbtn s"></div></div>
-      <div class="key"><div class="ring"></div><div class="plate"><div class="face sm"><i></i><i></i><b></b></div></div><div class="nfc">))) NFC</div></div></div>'''
+    # 🔴 他作家の絵は使わない。自社キャラ(SUE/PUTTI/MOSSUN)の絵・アクキー・ピンズだけ
+    def tile(path, h, col, fit='contain'):
+        im = Image.open(os.path.join(ROOT, path)).convert('RGBA'); im.thumbnail((360, 360)); bg = Image.new('RGBA', im.size, (0,0,0,0)); bg.alpha_composite(im)
+        return f'<div class="pt" style="height:{px(h)}px;background:{col}"><img src="data:image/png;base64,{b64_img(bg, "PNG")}" style="object-fit:{fit}"><span class="hv">♥</span></div>'
+    colsT = [[('img/putti.png',10,'#FFE3F0'),('img/products_t/sue_cyan.png',12,'#E3F6FF'),('img/pins/mossun.png',7,'#FFF1C2')],
+             [('run-art/sue_pixel.png',8,'#FFD9B8'),('img/pins/putti.png',7,'#E9DAFB'),('img/products_t/mossun_yellow.png',13,'#FFF6D5')],
+             [('img/mossun.png',9,'#D9F3EA'),('img/products_t/putti_pink.png',12,'#FFE3F0'),('img/pins/sue.png',7,'#FFD9B8')]]
+    pin = '<div class="pin">' + ''.join('<div class="pc">' + ''.join(tile(pth,h,col) for pth,h,col in c) + '</div>' for c in colsT) + '</div>'
+    shot = Image.open(os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_print/_assets/sue_phone.png')).convert('RGB'); shot = shot.crop((0, 0, shot.width, int(shot.width*1.95))); shot.thumbnail((420, 900))
+    key = Image.open(os.path.join(ROOT, 'img/products_t/sue_red.png')).convert('RGBA'); key.thumbnail((360, 660))
+    phone = f'''<div class="mock"><div class="phone"><img class="scr" src="data:image/jpeg;base64,{b64_img(shot, q=90)}"></div>
+      <div class="key"><img src="data:image/png;base64,{b64_img(key, "PNG")}"><div class="nfc">))) NFC</div></div></div>'''
     return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
 body{{background:#FFFDF8}}
 .rail{{position:absolute;top:0;left:0;right:0;height:{px(5)}px;background:linear-gradient(90deg,#FF8A00 0%,#FF4D8D 52%,#8E4ED9 100%)}}
@@ -136,10 +144,10 @@ body{{background:#FFFDF8}}
 .col{{flex:1;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(3)}px {px(3)}px {px(3)}px;text-align:center}}
 .ill{{height:{px(36)}px;border-radius:{px(2.5)}px;background:#F6F2FA;border:{px(.4)}px solid #DDD6EA;overflow:hidden;position:relative;margin-bottom:{px(2.5)}px}}
 .pin{{display:flex;gap:{px(1.2)}px;padding:{px(1.6)}px}} .pc{{flex:1;display:flex;flex-direction:column;gap:{px(1.2)}px}}
-.pt{{border-radius:{px(1.4)}px;border:{px(.35)}px solid #111;position:relative}}
+.pt{{border-radius:{px(1.4)}px;border:{px(.35)}px solid #111;position:relative;overflow:hidden}} .pt img{{width:100%;height:100%;display:block;padding:{px(.6)}px}}
 .pt .hv{{position:absolute;right:{px(.8)}px;bottom:{px(.6)}px;font-size:{px(2)}px;font-weight:900;color:#FF4D8D;background:#fff;border-radius:999px;padding:0 {px(.8)}px;line-height:1.5}}
 .mock{{display:flex;align-items:center;justify-content:center;gap:{px(4)}px;height:100%}}
-.phone{{width:{px(17)}px;height:{px(31)}px;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(2.6)}px;padding:{px(1.2)}px;position:relative;box-shadow:{px(.6)}px {px(.6)}px 0 #111}}
+.phone{{width:{px(16)}px;height:{px(31)}px;background:#111;border:{px(.6)}px solid #111;border-radius:{px(2.6)}px;padding:{px(.7)}px;position:relative;box-shadow:{px(.6)}px {px(.6)}px 0 #111;overflow:hidden}} .phone .scr{{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:{px(2)}px;display:block}}
 .pbar{{width:40%;height:{px(.7)}px;background:#111;border-radius:999px;margin:0 auto {px(1)}px}}
 .pimg{{height:{px(13)}px;border-radius:{px(1.4)}px;background:linear-gradient(135deg,#FFD9B8,#E9DAFB);border:{px(.35)}px solid #111;display:flex;align-items:center;justify-content:center}}
 .face{{width:{px(7)}px;height:{px(7)}px;background:#FFE000;border:{px(.4)}px solid #111;border-radius:50%;position:relative}}
@@ -149,7 +157,7 @@ body{{background:#FFFDF8}}
 .prow{{display:flex;justify-content:space-between;align-items:center;margin:{px(1)}px 0}}
 .pl{{font-size:{px(1.9)}px;font-weight:900;color:#FF4D8D}} .pb{{width:{px(5)}px;height:{px(1.2)}px;background:#DDD6EA;border-radius:999px}}
 .pbtn{{height:{px(2.6)}px;border-radius:999px;background:#F97316;margin-top:{px(1)}px}} .pbtn.s{{background:#8B5CF6}}
-.key{{position:relative;width:{px(16)}px;height:{px(26)}px}}
+.key{{position:relative;width:{px(16)}px;height:{px(31)}px;display:flex;align-items:flex-start;justify-content:center}} .key > img{{max-height:{px(27)}px;max-width:100%;filter:drop-shadow({px(.5)}px {px(.5)}px 0 rgba(0,0,0,.25))}}
 .ring{{position:absolute;left:50%;top:0;width:{px(4.5)}px;height:{px(4.5)}px;border:{px(.7)}px solid #111;border-radius:50%;transform:translateX(-50%)}}
 .plate{{position:absolute;left:0;right:0;top:{px(4)}px;bottom:{px(4)}px;background:rgba(255,255,255,.85);border:{px(.6)}px solid #111;border-radius:{px(2.2)}px;display:flex;align-items:center;justify-content:center;box-shadow:{px(.5)}px {px(.5)}px 0 #111}}
 .nfc{{position:absolute;left:0;right:0;bottom:0;text-align:center;font-family:"Helvetica Neue",Arial,sans-serif;font-size:{px(1.9)}px;font-weight:800;color:#8B5CF6;letter-spacing:.05em}}
