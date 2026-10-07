@@ -83,6 +83,32 @@ def pageB():
 <div class="bottom"><div class="qrcol"><div class="qrlabel disp">▼ QRを読んで、図鑑をひらく</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr()}"></div><div class="url">{SHORT}</div></div>
 <div class="info"><div class="note">ログイン・アプリ不要。ブラウザでそのまま遊べます。</div>{fes_html()}</div></div>
 {FOOT}</body></html>'''
+def pageC():
+    # C案(依頼者の方針): CHARAMARLのPRが主。その中に「いま来ているJUNKeeeeSの36人」。会場配布なのでFES情報は載せない
+    return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
+body{{background:#FFFDF8}}
+.rail{{position:absolute;top:0;left:0;right:0;height:{px(5)}px;background:linear-gradient(90deg,#FF8A00 0%,#FF4D8D 52%,#8E4ED9 100%)}}
+.top{{position:absolute;left:0;right:0;top:{px(5)}px;padding:{px(9)}px {px(3+9)}px 0;text-align:center}}
+.top .logo{{font-size:{px(13)}px;display:block}}
+.tag{{font-size:{px(3.6)}px;font-weight:700;color:#6E6884;letter-spacing:.12em;margin-top:{px(1.8)}px}}
+.h1{{font-size:{px(7.4)}px;line-height:1.3;margin-top:{px(6)}px;text-align:left}}
+.h1 span{{background:#111;color:#FFD400;padding:0 {px(1.5)}px;border-radius:{px(1.2)}px;display:inline-block;line-height:1.25;margin-bottom:{px(1.2)}px}}
+.lead{{font-size:{px(3.2)}px;line-height:1.65;font-weight:700;margin-top:{px(2)}px;text-align:left}}
+.grid{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(84)}px;display:grid;grid-template-columns:repeat(9,1fr);gap:{px(1.2)}px}}
+.grid img{{width:100%;aspect-ratio:640/809;object-fit:cover;border-radius:{px(1.2)}px;border:{px(.5)}px solid #111;display:block}}
+.bottom{{position:absolute;left:{px(3+9)}px;right:{px(3+9)}px;top:{px(164)}px;display:flex;gap:{px(6)}px;align-items:flex-start}}
+.qrcol{{text-align:center;flex:none}} .qrlabel{{font-size:{px(3.4)}px;font-weight:900;margin-bottom:{px(1.2)}px}}
+.qrbox img{{width:{px(26)}px;height:{px(26)}px}}
+.info{{flex:1;padding-top:{px(1)}px;font-size:{px(3.0)}px;line-height:1.7;font-weight:700}}
+.info b{{display:block;font-size:{px(3.6)}px;margin-bottom:{px(1)}px}}
+''' + f'''</style></head><body><div class="rail"></div>
+<div class="top"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><div class="tag">キャラクターたちが集まる、小さな市場</div>
+<div class="h1 disp"><span>いま、JUNKeeeeSの36人が</span><br><span>来ています。</span></div>
+<div class="lead">CHARAMARLは、いろいろな作家さんのキャラクターが集まる場所です。<br>スマホで図鑑をひらくと、タップするたびに1人ずつ現れます。36人ぜんぶ集めると図鑑が完成。</div></div>
+<div class="grid">{cards36()}</div>
+<div class="bottom"><div class="qrcol"><div class="qrlabel disp">▼ JUNKeeeeSの図鑑をひらく</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr()}"></div><div class="url">{SHORT}</div></div>
+<div class="info"><b>CHARAMARLでできること</b>気に入ったキャラクターに♥を送る／作家さんの活動場所（X・ショップ・イベント）へすぐ行ける／お気に入りを集めて自分の図鑑にする<br><span style="font-family:Helvetica Neue,Arial,sans-serif">charamarl.com</span></div></div>
+{FOOT}</body></html>'''
 def render(html, name):
     htmlp = os.path.join(OUT, name + '.html'); png = os.path.join(OUT, name + '.png'); pdf = os.path.join(OUT, name + '.pdf')
     open(htmlp, 'w', encoding='utf-8').write(html)
@@ -96,3 +122,4 @@ def render(html, name):
 which = sys.argv[1] if len(sys.argv) > 1 else 'both'
 if which in ('A', 'both'): render(pageA(), 'charamarl_flyer_junk_A5_A')
 if which in ('B', 'both'): render(pageB(), 'charamarl_flyer_junk_A5_B')
+if which in ('C', 'both'): render(pageC(), 'charamarl_flyer_junk_A5_C')
