@@ -104,10 +104,10 @@ body{{background:#FFFDF8}}
 ''' + f'''</style></head><body><div class="rail"></div>
 <div class="top"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><div class="tag">キャラクターたちが集まる、小さな市場</div>
 <div class="h1 disp"><span>いま、JUNKeeeeSの36人が</span><br><span>来ています。</span></div>
-<div class="lead">CHARAMARLは、いろいろな作家さんのキャラクターが集まる場所です。<br>スマホで図鑑をひらくと、タップするたびに1人ずつ現れます。36人ぜんぶ集めると図鑑が完成。</div></div>
+<div class="lead">CHARAMARLは、いろいろな作家さんのキャラクターが集まる場所です。<br>スマホで図鑑をひらくと、タップするたびに1人ずつ現れます。<br>36人ぜんぶ集めると、図鑑が完成します。</div></div>
 <div class="grid">{cards36()}</div>
 <div class="bottom"><div class="qrcol"><div class="qrlabel disp">▼ JUNKeeeeSの図鑑をひらく</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr()}"></div><div class="url">{SHORT}</div></div>
-<div class="info"><b>CHARAMARLでできること</b>気に入ったキャラクターに♥を送る／作家さんの活動場所（X・ショップ・イベント）へすぐ行ける／お気に入りを集めて自分の図鑑にする<br><span style="font-family:Helvetica Neue,Arial,sans-serif">charamarl.com</span></div></div>
+<div class="info"><b>CHARAMARLでできること</b>・気に入ったキャラクターに♥を送る<br>・作家さんの活動場所（X・ショップ・イベント）へすぐ行ける<br>・お気に入りを集めて、自分の図鑑にする<br><span style="font-family:Helvetica Neue,Arial,sans-serif">charamarl.com</span></div></div>
 {FOOT}</body></html>'''
 def render(html, name):
     htmlp = os.path.join(OUT, name + '.html'); png = os.path.join(OUT, name + '.png'); pdf = os.path.join(OUT, name + '.pdf')
