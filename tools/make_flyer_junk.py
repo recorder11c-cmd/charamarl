@@ -11,7 +11,7 @@ px = lambda mm: round(mm / 25.4 * DPI)
 URL = 'https://charamarl.com/tap/junkeeees.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag'
 SHORT = 'charamarl.com/tap/junkeeees.html'
 # 🔴 FES情報は tap/junkeeees.html と一字一句同じ
-FES = ['JUNKeeeeS FES 2026 in KYOTO', '2026.10.24 SAT – 10.25 SUN　10:00〜18:00', 'ROOT2 SEIKA NIJO（京都市中京区西ノ京船塚町17）', 'JR・地下鉄 二条駅から徒歩5分', '入場 大人500円／大学生以下 無料']
+FES = ['JUNKeeeeS FES 2026 in KYOTO', '2026.10.24 SAT 10:00〜22:00 ／ 10.25 SUN 10:00〜17:30', 'ROOT2 青果 二条（京都市中京区西ノ京船塚町17）', 'JR・地下鉄 二条駅から徒歩7分', '入場 大人500円／大学生以下 無料']
 def b64_file(p): return base64.b64encode(open(p,'rb').read()).decode()
 def b64_qr():
     buf = io.BytesIO(); segno.make(URL, error='h').save(buf, kind='png', scale=24, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()

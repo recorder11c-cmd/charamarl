@@ -3,6 +3,8 @@
 
     python3 tools/make_pin_card.py <キー> [出力先ディレクトリ]      キー＝dino3 / kagechiyo / both
     （both＝アクキー11種とピンズ12種を並べた「ともに販売中」カード。写真は使わず商品画像のみ）
+    python3 tools/make_pin_card.py akey <id|all> [出力先]   … アクキー1体の「販売中」カード（作家さんに渡す用）。id＝gmc／sue など
+    python3 tools/make_pin_card.py pin  <key|all> [出力先]  … ピンズ1絵柄の「販売中」カード。key＝sue／kg_kimi など
 
     例)  python3 tools/make_pin_card.py dino3
          python3 tools/make_pin_card.py kagechiyo
@@ -176,10 +178,129 @@ def render_both(out_dir):
     print(f'{op}  ({W}×{H})')
 
 
+# --- アクキー1体の「販売中」カード（作家さんに渡して、ご自身の投稿に使ってもらう） ---
+# (id, 表示名, 作家, 商品画像 img/products_t/<file>.png, 商品ページ)
+AKEY = {
+    'sue':       ('SUE',           'DinoRenny',      'sue_red',       'characters/sue.html'),
+    'putti':     ('PUTTI',         'DinoRenny',      'putti_yellow',  'characters/putti.html'),
+    'mossun':    ('MOSSUN',        'DinoRenny',      'mossun_blue',   'characters/mossun.html'),
+    'gmc':       ('レコマル',       'MARU_GMC',       'gmc_red',       'characters/gmc.html'),
+    'ufoo':      ('う〜ほ〜',       'ちゅい',          'ufoo_white',    'characters/ufoo.html'),
+    'dogooooo':  ('dogooooo',      'SAYoooooh',      'dogooooo_pink', 'characters/dogooooo.html'),
+    'inkumo':    ('インクモ',       "Ink'z Monster",  'inkumo_mono',   'characters/inkumo.html'),
+    'danna':     ('だんな',         '赤猫かるま',      'danna_blue',    'characters/danna.html'),
+    'blockma':   ('ぶろっくま',     'チンチロ',        'blockma',       'characters/blockma.html'),
+    'mony':      ('モニィ',         'morry',          'mony',          'characters/mony.html'),
+    'yurucrazy': ('ユルクレイジー', 'CRAZY',          'yurucrazy',     'characters/yurucrazy.html'),
+}
+
+TPL_AKEY = '''<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
+@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&display=swap');
+*{{margin:0;padding:0;box-sizing:border-box}}
+body{{width:%dpx;height:%dpx;overflow:hidden;background:#FFFDF8;color:#17161F;
+  font-family:"Zen Kaku Gothic New","Hiragino Sans",sans-serif;position:relative;}}
+body::before{{content:"";position:absolute;inset:0;
+  background:radial-gradient(800px 420px at 92%% 0%%,#FFE9D2 0%%,rgba(255,233,210,0) 62%%),
+             radial-gradient(700px 420px at 0%% 100%%,#ECE4FB 0%%,rgba(236,228,251,0) 60%%);}}
+.wrap{{position:relative;height:100%%;}}
+.rail{{height:8px;background:linear-gradient(90deg,#FF8A00,#FF4D8D 52%%,#8E4ED9);}}
+.hd{{height:170px;padding:40px 52px 0;}}
+.kick{{font-size:24px;font-weight:700;color:#8E8CA3;letter-spacing:.08em;}}
+h1{{margin-top:6px;font-size:64px;font-weight:900;line-height:1.15;letter-spacing:.01em;}}
+.ph{{height:700px;margin:0 52px;border-radius:28px;background:#EAE7F2;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(20,18,32,.12);}}
+.ph img{{height:92%%;max-width:90%%;object-fit:contain;filter:drop-shadow(0 18px 24px rgba(30,24,50,.28));}}
+.by{{height:96px;padding:26px 52px 0;font-size:30px;font-weight:700;color:#3B3949;}}
+.by b{{font-weight:900;}}
+.info{{height:420px;margin:0 52px;border-top:2px solid #E4E2EC;padding-top:26px;}}
+.pr{{display:flex;align-items:baseline;gap:20px;}}
+.pr b{{font-size:54px;font-weight:900;}}
+.pr span{{font-size:25px;font-weight:700;color:#3B3949;}}
+.spec{{margin-top:16px;font-size:26px;font-weight:700;line-height:1.5;color:#3B3949;}}
+.lead{{display:inline-block;margin-top:18px;background:#D2610E;color:#fff;font-size:30px;font-weight:900;
+  letter-spacing:.03em;padding:10px 26px;border-radius:999px;}}
+.ft{{position:absolute;left:52px;right:52px;bottom:40px;display:flex;align-items:flex-end;}}
+.logo{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;font-size:44px;letter-spacing:.10em;}}
+.logo .a{{color:#F97316}}.logo .b{{color:#8B5CF6}}
+.url{{margin-left:auto;font-size:25px;font-weight:700;color:#8E8CA3;padding-bottom:6px;}}
+</style></head><body><div class="wrap">
+<div class="rail"></div>
+<div class="hd"><div class="kick">アクリルキーホルダー ／ 販売中</div><h1>{name}</h1></div>
+<div class="ph"><img src="file://{img}"></div>
+<div class="by">作家：<b>{artist}</b></div>
+<div class="info">
+  <div class="pr"><b>¥1,500</b><span>税込・送料込</span></div>
+  <div class="spec">50mm・NFCタグ付き<br>売上の一部は、絵を描いた作家さんにお渡ししています</div>
+  <div class="lead">受注生産｜毎月末締め・翌月中旬ごろの発送</div>
+</div>
+<div class="ft"><div class="logo"><span class="a">CHARA</span><span class="b">MARL</span></div><div class="url">{url}</div></div>
+</div></body></html>''' % (W, H)
+
+
+def render_akey(cid, out_dir):
+    name, artist, imgf, page = AKEY[cid]
+    htm = TPL_AKEY.format(name=html.escape(name), artist=html.escape(artist),
+                          img=f'{REPO}/img/products_t/{imgf}.png', url='charamarl.com/' + page)
+    safe = artist.replace('/', '_')
+    hp = os.path.join(out_dir, f'akey_{cid}.html'); op = os.path.join(out_dir, f'akey_{cid}.png')
+    open(hp, 'w', encoding='utf-8').write(htm)
+    subprocess.run([CHROME, '--headless', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files',
+                    f'--screenshot={op}', f'--window-size={W},{H}', '--default-background-color=00000000',
+                    f'file://{hp}'], check=True, capture_output=True)
+    os.remove(hp)
+    print(f'{op}  ({W}×{H})  {name} / {artist}')
+
+
+# --- ピンズ1絵柄の「販売中」カード ---
+# key: (表示名, 作家)   画像は img/pins/<key>.png（丸い商品画像）
+PINCARD = {
+    'sue': ('スー', 'DinoRenny'), 'mossun': ('モッスン', 'DinoRenny'), 'putti': ('プッチィ', 'DinoRenny'),
+    'yurucrazy': ('ユルクレイジー', 'CRAZY'), 'danna': ('だんな', '赤猫かるま'),
+    'inkumo': ('インクモ', "Ink'z Monster"), 'mony': ('モニィ', 'morry'),
+    'kg_kagechiyo': ('カゲチヨ', 'カゲチヨ'), 'kg_kimi': ('キミ', 'カゲチヨ'), 'kg_shigure': ('シグレ', 'カゲチヨ'),
+    'kg_promu': ('プロム', 'カゲチヨ'), 'kg_muchiko': ('ムチコ', 'カゲチヨ'),
+}
+
+
+def render_pin(key, out_dir):
+    name, artist = PINCARD[key]
+    t = TPL_AKEY
+    t = t.replace('アクリルキーホルダー ／ 販売中', 'ピンズ ／ 販売中')
+    t = t.replace('<div class="pr"><b>¥1,500</b><span>税込・送料込</span></div>',
+                  '<div class="pr"><b>¥1,800</b><span>税込・送料込｜4個セットなら1個 ¥1,100</span></div>')
+    t = t.replace('50mm・NFCタグ付き<br>', '直径25mm・金属フレーム＋ドーム加工<br>')
+    t = t.replace('毎月末締め・翌月中旬ごろの発送', '毎月末締め・翌月中旬ごろのお届け')
+    t = t.replace('.ph img{{height:92%;max-width:90%;object-fit:contain;filter:drop-shadow(0 18px 24px rgba(30,24,50,.28));}}',
+                  '.ph img{{height:80%;max-width:86%;object-fit:contain;border-radius:50%;filter:drop-shadow(0 18px 24px rgba(30,24,50,.28));}}')
+    htm = t.format(name=html.escape(name), artist=html.escape(artist),
+                   img=f'{REPO}/img/pins/{key}.png', url='charamarl.com/characters/pins.html')
+    hp = os.path.join(out_dir, f'pin_{key}.html'); op = os.path.join(out_dir, f'pin_{key}.png')
+    open(hp, 'w', encoding='utf-8').write(htm)
+    subprocess.run([CHROME, '--headless', '--disable-gpu', '--hide-scrollbars', '--allow-file-access-from-files',
+                    f'--screenshot={op}', f'--window-size={W},{H}', '--default-background-color=00000000',
+                    f'file://{hp}'], check=True, capture_output=True)
+    os.remove(hp)
+    print(f'{op}  ({W}×{H})  {name} / {artist}')
+
+
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in (*CARDS, 'both'):
-        raise SystemExit(f'使い方: make_pin_card.py <{"|".join([*CARDS, "both"])}> [出力先]')
+    if len(sys.argv) < 2 or sys.argv[1] not in (*CARDS, 'both', 'akey', 'pin'):
+        raise SystemExit(f'使い方: make_pin_card.py <{"|".join([*CARDS, "both", "akey", "pin"])}> [出力先]')
     key = sys.argv[1]
+    if key == 'akey':
+        cid = sys.argv[2] if len(sys.argv) > 2 else 'all'
+        out = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_akey_cards')
+        os.makedirs(out, exist_ok=True)
+        for k in (AKEY if cid == 'all' else [cid]):
+            render_akey(k, out)
+        return
+    if key == 'pin':
+        k = sys.argv[2] if len(sys.argv) > 2 else 'all'
+        out = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_pin_cards')
+        os.makedirs(out, exist_ok=True)
+        for kk in (PINCARD if k == 'all' else [k]):
+            render_pin(kk, out)
+        return
     if key == 'both':
         out = sys.argv[2] if len(sys.argv) > 2 else OUT_DEFAULT
         os.makedirs(out, exist_ok=True)
