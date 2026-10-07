@@ -123,7 +123,7 @@ def pageBack():
     # 🔴 他作家の絵は使わない。自社キャラ(SUE/PUTTI/MOSSUN)の絵・アクキー・ピンズだけ
     CARDS = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/作家別_販売中カード/DinoRenny(自社)')
     def card_photo(name):   # 販売中カード(1200x1500)から商品写真の枠だけ切り出す(価格などの文字は🔴載せないため)
-        im = Image.open(os.path.join(CARDS, name)).convert('RGB'); return im.crop((200, 150, 760, 704))   # 商品を中心に正方形に近く
+        im = Image.open(os.path.join(CARDS, name)).convert('RGB'); return im.crop((49, 178, 1150, 975))   # カードの写真枠(実測)だけ
     def tile(src, h, col, fit='cover'):
         if isinstance(src, str): im = Image.open(os.path.join(ROOT, src)).convert('RGBA'); im.thumbnail((360, 360)); bg = Image.new('RGBA', im.size, (0,0,0,0)); bg.alpha_composite(im); data = b64_img(bg, 'PNG'); mime = 'png'; fit = 'contain'
         else: im = src.copy(); im.thumbnail((440, 440)); data = b64_img(im, 'JPEG', 90); mime = 'jpeg'; fit = 'contain'
