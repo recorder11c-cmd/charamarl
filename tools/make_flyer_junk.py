@@ -109,6 +109,37 @@ body{{background:#FFFDF8}}
 <div class="bottom"><div class="qrcol"><div class="qrlabel disp">▼ JUNKeeeeSの図鑑をひらく</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr()}"></div><div class="url">{SHORT}</div></div>
 <div class="info"><b>CHARAMARLでできること</b>・気に入ったキャラクターに♥を送る<br>・作家さんの活動場所（X・ショップ・イベント）へすぐ行ける<br>・お気に入りを集めて、自分の図鑑にする<br><span style="font-family:Helvetica Neue,Arial,sans-serif">charamarl.com</span></div></div>
 {FOOT}</body></html>'''
+BACK_QR = [
+  ('ギャラリー', '参加作家のキャラクターと<br>作品を1枚ずつ見られます。<br>気に入ったら♥を。', 'https://charamarl.com/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=gallery#discover', 'charamarl.com'),
+  ('キャラクター<br>（アクキー・ピンズ）', 'キャラクターのアクキーとピンズ。<br>アクキーはかざすと<br>作家さんのページがひらきます。', 'https://charamarl.com/characters/keyrings.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=keyrings', 'charamarl.com/characters/<wbr>keyrings.html'),
+  ('作家・企業の方へ', 'キャラクターの掲載・<br>グッズ化・イベントの<br>ご相談は、こちらから。', 'https://charamarl.com/apply.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=apply', 'charamarl.com/apply.html'),
+]
+def b64_qr_url(url):
+    buf = io.BytesIO(); segno.make(url, error='h').save(buf, kind='png', scale=18, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()
+def pageBack():
+    cols = ''.join(f'''<div class="col"><div class="ct disp">{t}</div><div class="cd">{d}</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(u)}"></div><div class="url">{sh}</div></div>''' for t,d,u,sh in BACK_QR)
+    return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
+body{{background:#FFFDF8}}
+.rail{{position:absolute;top:0;left:0;right:0;height:{px(5)}px;background:linear-gradient(90deg,#FF8A00 0%,#FF4D8D 52%,#8E4ED9 100%)}}
+.top{{position:absolute;left:0;right:0;top:{px(5)}px;padding:{px(12)}px {px(3+9)}px 0;text-align:center}}
+.top .logo{{font-size:{px(14)}px;display:block}}
+.tag{{font-size:{px(3.8)}px;font-weight:700;color:#6E6884;letter-spacing:.12em;margin-top:{px(2)}px}}
+.h1{{font-size:{px(6.2)}px;line-height:1.35;margin-top:{px(10)}px}}
+.h1 span{{background:#111;color:#FFD400;padding:0 {px(1.5)}px;border-radius:{px(1.2)}px;display:inline-block;line-height:1.3}}
+.cols{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(78)}px;display:flex;gap:{px(5)}px}}
+.col{{flex:1;text-align:center;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(5)}px {px(2.5)}px {px(4)}px}}
+.ct{{font-size:{px(3.9)}px;line-height:1.3;min-height:{px(11)}px;display:flex;align-items:center;justify-content:center}}
+.cd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700;color:#333;min-height:{px(16)}px;margin:{px(2)}px 0 {px(3)}px;white-space:nowrap}}
+.col .qrbox{{padding:{px(1.2)}px;border-width:{px(.6)}px}} .col .qrbox img{{width:{px(24)}px;height:{px(24)}px}}
+.col .url{{font-size:{px(2.4)}px;margin-top:{px(1.5)}px}}
+.contact{{position:absolute;left:{px(3+9)}px;right:{px(3+9)}px;top:{px(170)}px;text-align:center;font-size:{px(3.1)}px;line-height:1.7;font-weight:700;color:#333}}
+.contact .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#111}}
+</style></head><body><div class="rail"></div>
+<div class="top"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><div class="tag">キャラクターたちが集まる、小さな市場</div>
+<div class="h1 disp"><span>JUNKeeeeSのほかにも、</span><br><span>キャラクターが集まっています。</span></div></div>
+<div class="cols">{cols}</div>
+<div class="contact">CHARAMARLは、いろいろな作家さんのキャラクターが集まる場所です。<br>お問い合わせ <span class="em">charamarlinfo@gmail.com</span>　／　X <span class="em">@charamarl</span></div>
+{FOOT}</body></html>'''
 def render(html, name):
     htmlp = os.path.join(OUT, name + '.html'); png = os.path.join(OUT, name + '.png'); pdf = os.path.join(OUT, name + '.pdf')
     open(htmlp, 'w', encoding='utf-8').write(html)
@@ -117,9 +148,18 @@ def render(html, name):
     im.resize((W//3, H//3), Image.LANCZOS).save(os.path.join(OUT, name + '_preview.png'))
     # QR読み取り確認
     import cv2, numpy as np
-    arr = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGR); data, pts, _ = cv2.QRCodeDetector().detectAndDecode(arr)
-    print(name, im.size, 'QR:', 'OK' if data == URL else f'NG ({data[:60]!r})')
+    arr = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGR)
+    det = cv2.QRCodeDetector()
+    if name.endswith('_back'):
+        Wd, Hd = im.size; found = []
+        for i in range(3):
+            crop = im.crop((int(Wd*(0.04+i*0.31)), int(Hd*0.45), int(Wd*(0.04+(i+1)*0.31)), int(Hd*0.85)))
+            d, _, _ = det.detectAndDecode(cv2.cvtColor(np.array(crop), cv2.COLOR_RGB2BGR)); found.append(d)
+        print(name, im.size, 'QR:', 'OK' if found == [u for _,_,u,_ in BACK_QR] else f'NG found={found}')
+    else:
+        data, pts, _ = det.detectAndDecode(arr); print(name, im.size, 'QR:', 'OK' if data == URL else f'NG ({data[:60]!r})')
 which = sys.argv[1] if len(sys.argv) > 1 else 'both'
 if which in ('A', 'both'): render(pageA(), 'charamarl_flyer_junk_A5_A')
 if which in ('B', 'both'): render(pageB(), 'charamarl_flyer_junk_A5_B')
 if which in ('C', 'both'): render(pageC(), 'charamarl_flyer_junk_A5_C')
+if which in ('back', 'both'): render(pageBack(), 'charamarl_flyer_junk_A5_back')
