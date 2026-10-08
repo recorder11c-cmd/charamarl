@@ -131,7 +131,7 @@ def pageBack():
     meishi = photo('charamarl_meishi_2026-09/05_実寸イメージ.png', (900, 400))
     pin = '<div class="tool"><img src="data:image/jpeg;base64,' + meishi + '"></div>'
     # グッズ: ピンズ3種の実物写真 ＋ 発送したアクキーの写真
-    pins_ph = photo('charamarl_pins_実物/PR_3種_真上_card用.jpg', (900, 400), crop=(40, 200, 1310, 620)); ship_ph = photo('charamarl_share/初回発送物.png', (900, 400), crop=(0, 380, 860, 760))
+    pins_ph = photo('charamarl_pins_実物/PR_3種_真上_card用.jpg', (900, 400), crop=(40, 200, 1310, 620)); ship_ph = photo('charamarl_share/charamarl_hassou_20260914.jpg', (900, 400), crop=(300, 330, 1900, 1030))
     phone = '<div class="goods"><img src="data:image/jpeg;base64,' + pins_ph + '"><img src="data:image/jpeg;base64,' + ship_ph + '"></div>'
     return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
 body{{background:#FFFDF8}}
