@@ -97,9 +97,9 @@ body{{background:#FFFDF8}}
 .lead{{font-size:{px(3.2)}px;line-height:1.65;font-weight:700;margin-top:{px(2)}px;text-align:left}}
 .grid{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(84)}px;display:grid;grid-template-columns:repeat(9,1fr);gap:{px(1.2)}px}}
 .grid img{{width:100%;aspect-ratio:640/809;object-fit:cover;border-radius:{px(1.2)}px;border:{px(.5)}px solid #111;display:block}}
-.bottom{{position:absolute;left:{px(3+9)}px;right:{px(3+9)}px;top:{px(164)}px;display:flex;gap:{px(6)}px;align-items:flex-start}}
+.bottom{{position:absolute;left:{px(3+9)}px;right:{px(3+9)}px;top:{px(160)}px;display:flex;gap:{px(6)}px;align-items:flex-start}}
 .qrcol{{text-align:center;flex:none}} .qrlabel{{font-size:{px(3.4)}px;font-weight:900;margin-bottom:{px(1.2)}px}}
-.qrbox img{{width:{px(26)}px;height:{px(26)}px}}
+.qrbox img{{width:{px(31)}px;height:{px(31)}px}}
 .info{{flex:1;padding-top:{px(1)}px;font-size:{px(3.0)}px;line-height:1.7;font-weight:700}}
 .info b{{display:block;font-size:{px(3.6)}px;margin-bottom:{px(1)}px}}
 ''' + f'''</style></head><body><div class="rail"></div>
