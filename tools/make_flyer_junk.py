@@ -31,6 +31,7 @@ body{{width:{W}px;height:{H}px;overflow:hidden;position:relative;background:#FFD
 .foot .logo{{font-size:{px(5.2)}px}} .foot .url2{{font-family:"Helvetica Neue",Arial,sans-serif;opacity:.9}}
 '''
 FOOT = f'<div class="foot"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><span>キャラクターたちが集まる、小さな市場</span><span class="url2">charamarl.com</span></div>'
+FOOT_SHORT = f'<div class="foot"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><span class="url2">charamarl.com</span></div>'   # 上の帯に同じ一文がある面(C案・裏面)用
 def fes_html():
     d = FES[1].replace('　', '　<span class="nw">') + '</span>'   # 全角スペースで折り返せる(時刻は途中で切らない)
     v = FES[2].replace('（', '<span class="nw">（') + '</span>'
@@ -107,8 +108,8 @@ body{{background:#FFFDF8}}
 <div class="lead">CHARAMARLは、いろいろな作家さんのキャラクターが集まる場所です。<br>スマホで図鑑をひらくと、タップするたびに1人ずつ現れます。<br>36人ぜんぶ集めると、図鑑が完成します。</div></div>
 <div class="grid">{cards36()}</div>
 <div class="bottom"><div class="qrcol"><div class="qrlabel disp">▼ JUNKeeeeSの図鑑をひらく</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr()}"></div><div class="url">{SHORT}</div></div>
-<div class="info"><b>CHARAMARLでできること</b>・気に入ったキャラクターに♥を送る<br>・作家さんの活動場所（X・ショップ・イベント）へすぐ行ける<br>・お気に入りを集めて、自分の図鑑にする<br><span style="font-family:Helvetica Neue,Arial,sans-serif">charamarl.com</span></div></div>
-{FOOT}</body></html>'''
+<div class="info"><b>CHARAMARLでできること</b>・気に入ったキャラクターに♥を送る<br>・作家さんの活動場所（X・ショップ・イベント）へすぐ行ける<br>・気に入った作品を保存して、あとで見返す<br><span style="font-family:Helvetica Neue,Arial,sans-serif">charamarl.com</span></div></div>
+{FOOT_SHORT}</body></html>'''
 BACK_QR = [
   ('ギャラリー', '参加作家のキャラクターと<br>作品を1枚ずつ見られます。<br>気に入ったら♥を。', 'https://charamarl.com/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=gallery#discover', 'charamarl.com'),
   ('キャラクター<br>（アクキー・ピンズ）', 'キャラクターのアクキーとピンズ。<br>アクキーはかざすと<br>作家さんのページがひらきます。', 'https://charamarl.com/characters/keyrings.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=keyrings', 'charamarl.com/characters/<wbr>keyrings.html'),
@@ -186,7 +187,7 @@ body{{background:#FFFDF8}}
 </div>
 <div class="biz"><div class="l"><div class="bt disp">{ap[0]}</div><div class="bd">{ap[1].replace('<br>','')}<br>メール <span class="em">charamarlinfo@gmail.com</span></div></div><div class="r"><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(ap[2])}"></div><div class="url">{ap[3]}</div></div></div>
 <div class="sns">X <span class="em">@charamarl</span>　／　Instagram <span class="em">@charamarlinfo</span></div>
-{FOOT}</body></html>'''
+{FOOT_SHORT}</body></html>'''
 def render(html, name):
     htmlp = os.path.join(OUT, name + '.html'); png = os.path.join(OUT, name + '.png'); pdf = os.path.join(OUT, name + '.pdf')
     open(htmlp, 'w', encoding='utf-8').write(html)
