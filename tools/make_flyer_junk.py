@@ -131,7 +131,7 @@ def pageBack():
     meishi = photo('charamarl_meishi_2026-09/05_実寸イメージ.png', (900, 400))
     pin = '<div class="tool"><img src="data:image/jpeg;base64,' + meishi + '"></div>'
     # グッズ: ピンズ3種の実物写真 ＋ 発送したアクキーの写真
-    pins_ph = photo('charamarl_pins_実物/PR_3種_真上_card用.jpg', (700, 500)); ship_ph = photo('charamarl_share/初回発送物.png', (500, 700), crop=(0, 160, 860, 1100))
+    pins_ph = photo('charamarl_pins_実物/PR_3種_真上_card用.jpg', (800, 500), crop=(60, 60, 1290, 760)); ship_ph = photo('charamarl_share/初回発送物.png', (500, 700), crop=(0, 160, 860, 1100))
     phone = '<div class="goods"><img src="data:image/jpeg;base64,' + pins_ph + '"><img src="data:image/jpeg;base64,' + ship_ph + '"></div>'
     return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
 body{{background:#FFFDF8}}
@@ -145,7 +145,7 @@ body{{background:#FFFDF8}}
 .col{{flex:1 1 0;min-width:0;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(3)}px {px(3)}px {px(3)}px;text-align:center}}
 .ill{{height:{px(36)}px;border-radius:{px(2.5)}px;background:#F6F2FA;border:{px(.4)}px solid #DDD6EA;overflow:hidden;position:relative;margin-bottom:{px(2.5)}px}}
 .tool{{height:100%;display:flex;align-items:center;justify-content:center;padding:{px(1.5)}px}} .tool img{{width:100%;height:auto;object-fit:contain;border-radius:{px(1)}px;box-shadow:{px(.4)}px {px(.6)}px {px(1.2)}px rgba(0,0,0,.18)}}
-.goods{{height:100%;display:flex;gap:{px(1.5)}px;padding:{px(1.5)}px}} .goods img{{flex:1;min-width:0;height:100%;object-fit:cover;border-radius:{px(1.6)}px;border:{px(.35)}px solid #111}}
+.goods{{height:100%;display:flex;gap:{px(1.5)}px;padding:{px(1.5)}px}} .goods img{{min-width:0;height:100%;object-fit:cover;border-radius:{px(1.6)}px;border:{px(.35)}px solid #111}} .goods img:first-child{{flex:1.7}} .goods img:last-child{{flex:1}}
 .pin{{display:flex;gap:{px(1.2)}px;padding:{px(1.6)}px}} .pc{{flex:1;display:flex;flex-direction:column;gap:{px(1.2)}px}}
 .pt{{border-radius:{px(1.4)}px;border:{px(.35)}px solid #111;position:relative;overflow:hidden}} .pt img{{width:100%;height:100%;display:block;padding:{px(.5)}px}}
 .pt .hv{{position:absolute;right:{px(.8)}px;bottom:{px(.6)}px;font-size:{px(2)}px;font-weight:900;color:#FF4D8D;background:#fff;border-radius:999px;padding:0 {px(.8)}px;line-height:1.5}}
