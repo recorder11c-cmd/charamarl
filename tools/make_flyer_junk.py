@@ -131,7 +131,12 @@ def pageBack():
     meishi = photo('charamarl_meishi_2026-09/05_実寸イメージ.png', (900, 400))
     pin = '<div class="tool"><img src="data:image/jpeg;base64,' + meishi + '"></div>'
     # グッズ: ピンズ3種の実物写真 ＋ 発送したアクキーの写真
-    pins_ph = photo('charamarl_pins_実物/PR_3種_真上_card用.jpg', (900, 400), crop=(40, 200, 1310, 620)); ship_ph = photo('charamarl_share/charamarl_hassou_20260914.jpg', (900, 400), crop=(300, 330, 1900, 1030))
+    pins_ph = photo('charamarl_pins_実物/PR_3種_真上_card用.jpg', (900, 400), crop=(40, 200, 1310, 620)); # 🔴 発送写真には他作家のアクキーが写るので使わない。自社3体のアクキー商品写真(販売中カードの写真枠)を横に並べた帯にする
+    CARDS = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/作家別_販売中カード/DinoRenny(自社)')
+    strip = Image.new('RGB', (3*520, 400), (233, 229, 246))
+    for n, name in enumerate(['アクキー_sue.png', 'アクキー_putti.png', 'アクキー_mossun.png']):
+        im = Image.open(os.path.join(CARDS, name)).convert('RGB').crop((49, 178, 1150, 905)); im.thumbnail((520, 400)); strip.paste(im, (n*520 + (520-im.width)//2, (400-im.height)//2))
+    ship_ph = b64_img(strip, 'JPEG', 90)
     phone = '<div class="goods"><img src="data:image/jpeg;base64,' + pins_ph + '"><img src="data:image/jpeg;base64,' + ship_ph + '"></div>'
     return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
 body{{background:#FFFDF8}}
