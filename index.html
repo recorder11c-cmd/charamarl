@@ -998,6 +998,11 @@
     document.getElementById('heroDesc').textContent=f.desc;
     document.getElementById('heroImg').src=`./img/t/colors/${f.id}_${f.color}.webp`;
     document.getElementById('heroShop').href=f.page;
+    // 🔴 VIEW ARTIST は、いま表示しているキャラの作家ページへ（2026-10-08。以前は #artist 固定で、
+    //    ヒーローの作家とは別の「今週の注目アーティスト」へ飛ぶだけだった）。
+    //    ヒーローの creator と掲載名が違う作家だけ読み替える。
+    const HERO_ARTIST_NAME={ 'MARU':'MARU_GMC' };
+    document.getElementById('heroArtist').href='./artist.html?a='+encodeURIComponent(HERO_ARTIST_NAME[f.creator]||f.creator);
     document.getElementById('dropName').textContent=f.drop;
     document.getElementById('dropArtist').textContent=f.creator;
     document.getElementById('dropPrice').innerHTML='¥'+((f.price||PRICE).toLocaleString())+' <small>(税込)</small>';
