@@ -122,21 +122,17 @@ def pageBack():
     g, k, ap = BACK_QR
     # ピンタレスト風UI(図形だけ。作品は使わない)
     # 🔴 他作家の絵は使わない。自社キャラ(SUE/PUTTI/MOSSUN)の絵・アクキー・ピンズだけ
-    CARDS = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/作家別_販売中カード/DinoRenny(自社)')
-    def card_photo(name):   # 販売中カード(1200x1500)から商品写真の枠だけ切り出す(価格などの文字は🔴載せないため)
-        im = Image.open(os.path.join(CARDS, name)).convert('RGB'); return im.crop((49, 178, 1150, 905))   # カードの写真枠(実測)。下の作家名の行は含めない
-    def tile(src, h, col, fit='cover'):
-        if isinstance(src, str): im = Image.open(os.path.join(ROOT, src)).convert('RGBA'); im.thumbnail((360, 360)); bg = Image.new('RGBA', im.size, (0,0,0,0)); bg.alpha_composite(im); data = b64_img(bg, 'PNG'); mime = 'png'; fit = 'contain'
-        else: im = src.copy(); im.thumbnail((440, 440)); data = b64_img(im, 'JPEG', 90); mime = 'jpeg'; fit = 'contain'
-        return f'<div class="pt" style="height:{px(h)}px;background:{col}"><img src="data:image/{mime};base64,{data}" style="object-fit:{fit}"><span class="hv">♥</span></div>'
-    colsT = [[(card_photo('アクキー_sue.png'),10,'#E9DAFB'),('img/putti.png',8,'#FFE3F0'),(card_photo('ピンズ_mossun.png'),11,'#E9DAFB')],
-             [('img/sue.png',8,'#FFD9B8'),(card_photo('ピンズ_putti.png'),11,'#E9DAFB'),(card_photo('アクキー_mossun.png'),10,'#E9DAFB')],
-             [(card_photo('ピンズ_sue.png'),11,'#E9DAFB'),(card_photo('アクキー_putti.png'),10,'#E9DAFB'),('img/mossun.png',8,'#D9F3EA')]]
-    pin = '<div class="pin">' + ''.join('<div class="pc">' + ''.join(tile(pth,h,col) for pth,h,col in c) + '</div>' for c in colsT) + '</div>'
-    shot = Image.open(os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_print/_assets/sue_phone.png')).convert('RGB'); shot = shot.crop((0, 0, shot.width, int(shot.width*1.95))); shot.thumbnail((420, 900))
-    key = card_photo('アクキー_sue.png'); key.thumbnail((520, 520))
-    phone = f'''<div class="mock"><div class="phone"><img class="scr" src="data:image/jpeg;base64,{b64_img(shot, q=90)}"></div>
-      <div class="key"><img src="data:image/png;base64,{b64_img(key, "PNG")}"><div class="nfc">))) NFC</div></div></div>'''
+    IMG = os.path.expanduser('~/Downloads/CHARAMARL/03_画像')
+    def photo(path, box, crop=None, q=90):
+        im = Image.open(os.path.join(IMG, path)).convert('RGB')
+        if crop: im = im.crop(crop)
+        im.thumbnail(box); return b64_img(im, 'JPEG', q)
+    # 営業ツール: 名刺(表裏の実寸イメージ)
+    meishi = photo('charamarl_meishi_2026-09/05_実寸イメージ.png', (900, 400))
+    pin = '<div class="tool"><img src="data:image/jpeg;base64,' + meishi + '"></div>'
+    # グッズ: ピンズ3種の実物写真 ＋ 発送したアクキーの写真
+    pins_ph = photo('charamarl_pins_実物/PR_3種_真上_card用.jpg', (700, 500)); ship_ph = photo('charamarl_share/初回発送物.png', (500, 700), crop=(0, 160, 860, 1100))
+    phone = '<div class="goods"><img src="data:image/jpeg;base64,' + pins_ph + '"><img src="data:image/jpeg;base64,' + ship_ph + '"></div>'
     return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
 body{{background:#FFFDF8}}
 .rail{{position:absolute;top:0;left:0;right:0;height:{px(5)}px;background:linear-gradient(90deg,#FF8A00 0%,#FF4D8D 52%,#8E4ED9 100%)}}
@@ -146,8 +142,10 @@ body{{background:#FFFDF8}}
 .h1{{font-size:{px(5.6)}px;line-height:1.35;margin-top:{px(5)}px}}
 .h1 span{{background:#111;color:#FFD400;padding:0 {px(1.5)}px;border-radius:{px(1.2)}px;display:inline-block;line-height:1.3;margin-bottom:{px(1)}px}}
 .cols{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(60)}px;display:flex;gap:{px(5)}px}}
-.col{{flex:1;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(3)}px {px(3)}px {px(3)}px;text-align:center}}
+.col{{flex:1 1 0;min-width:0;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(3)}px {px(3)}px {px(3)}px;text-align:center}}
 .ill{{height:{px(36)}px;border-radius:{px(2.5)}px;background:#F6F2FA;border:{px(.4)}px solid #DDD6EA;overflow:hidden;position:relative;margin-bottom:{px(2.5)}px}}
+.tool{{height:100%;display:flex;align-items:center;justify-content:center;padding:{px(1.5)}px}} .tool img{{width:100%;height:auto;object-fit:contain;border-radius:{px(1)}px;box-shadow:{px(.4)}px {px(.6)}px {px(1.2)}px rgba(0,0,0,.18)}}
+.goods{{height:100%;display:flex;gap:{px(1.5)}px;padding:{px(1.5)}px}} .goods img{{flex:1;min-width:0;height:100%;object-fit:cover;border-radius:{px(1.6)}px;border:{px(.35)}px solid #111}}
 .pin{{display:flex;gap:{px(1.2)}px;padding:{px(1.6)}px}} .pc{{flex:1;display:flex;flex-direction:column;gap:{px(1.2)}px}}
 .pt{{border-radius:{px(1.4)}px;border:{px(.35)}px solid #111;position:relative;overflow:hidden}} .pt img{{width:100%;height:100%;display:block;padding:{px(.5)}px}}
 .pt .hv{{position:absolute;right:{px(.8)}px;bottom:{px(.6)}px;font-size:{px(2)}px;font-weight:900;color:#FF4D8D;background:#fff;border-radius:999px;padding:0 {px(.8)}px;line-height:1.5}}
