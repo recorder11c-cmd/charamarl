@@ -188,13 +188,13 @@ body{{background:#FFFDF8}}
 .cd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700;color:#333;margin:{px(1.2)}px 0 {px(2.2)}px;white-space:nowrap}}
 .col .qrbox{{padding:{px(1.2)}px;border-width:{px(.6)}px}} .col .qrbox img{{width:{px(22)}px;height:{px(22)}px}}
 .col .url{{font-size:{px(2.4)}px;margin-top:{px(1.2)}px}}
-.biz{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(157)}px;background:#111;color:#fff;border-radius:{px(4)}px;padding:{px(2.4)}px {px(4)}px;display:flex;align-items:center;gap:{px(4)}px}}
+.biz{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(150)}px;background:#111;color:#fff;border-radius:{px(4)}px;padding:{px(2.4)}px {px(4)}px;display:flex;align-items:center;gap:{px(4)}px}}
 .biz .bt{{font-size:{px(3.8)}px;color:#FFD400;margin-bottom:{px(1)}px}}
 .biz .bd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700}} .biz .bd .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#fff}}
 .biz .l{{flex:1}} .biz .r{{flex:none;text-align:center}}
 .biz .qrbox{{padding:{px(1)}px;border-color:#fff;border-width:{px(.5)}px}} .biz .qrbox img{{width:{px(20)}px;height:{px(20)}px}}
 .biz .url{{font-size:{px(2.2)}px;margin-top:{px(.8)}px;color:#fff}}
-.sns{{position:absolute;left:0;right:0;top:{px(192.5)}px;text-align:center;font-size:{px(2.8)}px;font-weight:700;color:#333}}
+.sns{{position:absolute;left:0;right:0;top:{px(188)}px;text-align:center;font-size:{px(2.8)}px;font-weight:700;color:#333}}
 .sns .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#111}}
 </style></head><body><div class="rail"></div>
 <div class="top"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><div class="tag">キャラクターたちが集まる、小さな市場</div>
@@ -218,7 +218,7 @@ def render(html, name):
     det = cv2.QRCodeDetector()
     if name.endswith('_back'):
         Wd, Hd = im.size; found = []
-        for (x0,y0,x1,y1) in [(0.08,0.48,0.47,0.72),(0.52,0.48,0.92,0.72),(0.68,0.72,0.95,0.88)]:
+        for (x0,y0,x1,y1) in [(0.08,0.48,0.47,0.72),(0.52,0.48,0.92,0.72),(0.68,0.69,0.95,0.86)]:
             crop = im.crop((int(Wd*x0), int(Hd*y0), int(Wd*x1), int(Hd*y1)))
             d, _, _ = det.detectAndDecode(cv2.cvtColor(np.array(crop), cv2.COLOR_RGB2BGR)); found.append(d)
         print(name, im.size, 'QR:', 'OK' if found == [u for _,_,u,_ in BACK_QR] else f'NG found={found}')
