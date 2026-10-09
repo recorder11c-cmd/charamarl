@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>チラシをかざすと、アゲルが出てくる — JUNKeeeeS FES × CHARAMARL</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="JUNKeeeeS FESのチラシにスマホをかざすと、アゲルが飛び出してあいさつします。">
+<meta property="og:title" content="チラシをかざすと、アゲルが出てくる">
+<meta property="og:image" content="https://charamarl.com/run-junkeees/og.png">
+<link rel="icon" href="/img/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;900&display=swap">
+<style>
+  :root{ --orange:#FF8A00; --purple:#A855F7; --yellow:#FFD400; --red:#FF0F2E; --black:#111; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ height:100%; background:#111; overflow:hidden; }
+  body{ height:100%; background:transparent; overflow:hidden; font-family:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN','Hiragino Kaku Gothic ProN',sans-serif; color:#111; -webkit-tap-highlight-color:transparent; }
+  a-scene{ position:fixed; inset:0; }
+  .ui{ position:fixed; inset:0; pointer-events:none; z-index:10; }
+  .top{ position:absolute; top:max(14px, env(safe-area-inset-top)); left:0; right:0; text-align:center; }
+  .brand{ display:inline-block; background:#111; color:#fff; border-radius:30px; padding:8px 16px; font-weight:900; letter-spacing:.06em; font-size:14px; box-shadow:0 4px 0 rgba(0,0,0,.2); }
+  .brand b{ color:var(--yellow); }
+  .hint{ display:inline-block; margin-top:12px; background:#fff; border-radius:30px; padding:12px 22px; font-weight:900; font-size:clamp(14px,3.8vmin,18px); box-shadow:0 6px 0 rgba(0,0,0,.18); animation:bob 1.4s ease-in-out infinite; transition:opacity .3s; }
+  .hint.hide{ opacity:0; }
+  @keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+  /* 吹き出し: 画面の上1/3に固定(3Dの文字は日本語が崩れるのでHTMLで出す) */
+  .bubble{ position:absolute; left:50%; top:22%; transform:translate(-50%,0) scale(.9); width:min(86vw,420px); background:#fff; border:4px solid #111; border-radius:22px; padding:16px 18px; font-weight:900; font-size:clamp(17px,4.8vmin,24px); line-height:1.4; text-align:center; box-shadow:5px 5px 0 #111; opacity:0; transition:opacity .25s, transform .25s; }
+  .bubble::after{ content:""; position:absolute; left:50%; bottom:-18px; width:0; height:0; border:12px solid transparent; border-top:14px solid #111; border-bottom:0; transform:translateX(-50%); }
+  .bubble.show{ opacity:1; transform:translate(-50%,0) scale(1); }
+  .bubble small{ display:block; font-size:12px; font-weight:700; color:#888; margin-top:6px; }
+  .bottom{ position:absolute; left:0; right:0; bottom:max(12px, env(safe-area-inset-bottom)); display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .row{ display:flex; gap:8px; pointer-events:auto; }
+  .btn{ display:inline-flex; align-items:center; gap:6px; background:#111; color:#fff; font-weight:900; font-family:inherit; text-decoration:none; border:3px solid #111; padding:12px 20px; border-radius:30px; font-size:15px; box-shadow:0 5px 0 rgba(0,0,0,.25); cursor:pointer; }
+  .btn.y{ background:var(--yellow); color:#111; }
+  .btn.w{ background:#fff; color:#111; }
+  .btn:active{ transform:scale(.96); }
+  .cover{ position:fixed; inset:0; z-index:20; background:var(--yellow); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:max(28px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom)); gap:14px; overflow:auto; }
+  .cover.hide{ display:none; }
+  .cover img.hero{ width:min(46vw,200px); height:auto; }
+  .cover .t1{ font-size:14px; font-weight:900; letter-spacing:.08em; background:#111; color:var(--yellow); padding:4px 12px; border-radius:999px; }
+  .cover h1{ font-size:clamp(22px,6.6vmin,32px); font-weight:900; line-height:1.3; }
+  .cover p{ font-size:15px; font-weight:700; color:#333; line-height:1.6; }
+  .start{ margin-top:6px; background:#111; color:#fff; border:none; font-family:inherit; font-weight:900; font-size:18px; padding:16px 36px; border-radius:40px; box-shadow:0 6px 0 rgba(0,0,0,.25); cursor:pointer; }
+  .start:disabled{ opacity:.6; }
+  .small{ font-size:12px; color:#444; font-weight:700; }
+  .err{ display:none; } .err.show{ display:block; } .err a{ color:#111; font-weight:900; }
+  .cm{ font-family:'Helvetica Neue',Arial,sans-serif; font-weight:900; letter-spacing:.08em; font-size:12px; color:#111; }
+</style>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/ga.js"></script>
+<script src="/ar/share.js?v=2"></script>
+<script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe-master.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+<body>
+
+<div class="cover" id="cover">
+  <div class="t1">JUNKeeeeS FES 2026 in KYOTO</div>
+  <img class="hero" src="/run-junkeees/art/ageru.png" alt="アゲル">
+  <h1>チラシをかざすと、<br>アゲルが出てくる。</h1>
+  <p>JUNKeeeeSのチラシ（表）に<br>カメラをむけてね。</p>
+  <button class="start" id="start" type="button">カメラをはじめる</button>
+  <div class="small">カメラの映像は端末の中だけで使い、送信・保存はしません</div>
+  <div class="small err" id="err">カメラを起動できませんでした。<br>XやLINEの中で開いている場合は、<a href="#" id="openSafari">SafariやChromeで開く</a>とうまくいきます。<br><span id="errDetail"></span></div>
+  <div class="cm">presented by CHARAMARL</div>
+</div>
+
+<script>
+AFRAME.registerComponent('shot-hook', { tock: function(){ if(window._cmWantShot){ var f=window._cmWantShot; window._cmWantShot=null; f(); } } });
+// チラシ(target)の位置を毎フレーム写し、見失っても最後の位置に残す
+AFRAME.registerComponent('stay-put', {
+  init: function(){ this.target=document.getElementById('target'); this.el.object3D.matrixAutoUpdate=false; },
+  tick: function(){ var o=this.target&&this.target.object3D; if(!o||!o.visible) return; this.el.object3D.matrix.copy(o.matrix); this.el.object3D.matrixWorldNeedsUpdate=true; this.el.object3D.visible=true; }
+});
+</script>
+<a-scene id="scene" shot-hook
+  mindar-image="imageTargetSrc: /ar/fes/targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001;"
+  color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true, preserveDrawingBuffer: true"
+  vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" loading-screen="enabled: false" embedded>
+  <a-assets><img id="ageruImg" src="/run-junkeees/art/ageru.png" crossorigin="anonymous"></a-assets>
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <a-entity id="target" mindar-image-target="targetIndex: 0"></a-entity>
+  <a-entity id="stay" stay-put visible="false">
+    <a-circle id="shadow" position="0 -0.45 0.01" radius="0.3" scale="1 0.35 1" color="#000" opacity="0.22" transparent="true"></a-circle>
+    <a-entity id="holder" position="0 0 0.3">
+      <!-- チラシ(幅1)の上に、アゲルが走ってきて止まる → ゆれる -->
+      <a-image id="chara" src="#ageruImg" width="0.9" height="0.9" position="0 0.05 0" transparent="true"
+        animation__bob="property: position; from: 0 0.02 0; to: 0 0.12 0; dir: alternate; dur: 700; loop: true; easing: easeInOutSine"
+        animation__sway="property: rotation; from: 0 0 -5; to: 0 0 5; dir: alternate; dur: 1100; loop: true; easing: easeInOutSine"></a-image>
+    </a-entity>
+  </a-entity>
+</a-scene>
+
+<div class="ui" id="ui" hidden>
+  <div class="top">
+    <div class="brand">JUNKeeeeS <b>FES</b> × CHARAMARL</div><br>
+    <div class="hint" id="hint">チラシの おもて にカメラをむけてね</div>
+  </div>
+  <div class="bubble" id="bubble"></div>
+  <div class="bottom">
+    <div class="row">
+      <a class="btn y" id="pageBtn" href="https://charamarl.com/tap/junkeeees.html?utm_source=ar_fes&utm_medium=flyer" target="_blank" rel="noopener">36人の図鑑をひらく</a>
+      <button class="btn w" id="shareBtn" type="button">シェア</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // 日時で変わるメッセージ(JST)。文言はROKUさん確認前の仮
+  var FES_1=new Date('2026-10-24T00:00:00+09:00'), STAGE=new Date('2026-10-24T17:30:00+09:00'), DAY2=new Date('2026-10-25T00:00:00+09:00'), END=new Date('2026-10-26T00:00:00+09:00');
+  function phase(){ var n=new Date(); if(n<FES_1) return 'before'; if(n<STAGE) return 'day1'; if(n<DAY2) return 'stage'; if(n<END) return 'day2'; return 'after'; }
+  var MSG={
+    before:['10/24・25、JUNKeeeeS FESで待ってるで！','36人の図鑑、先に集めとく？'],
+    day1:['JUNKeeeeS FESに来てくれて、ありがとう！','今日は一日、楽しんでいってな！','会場の3か所にNFCがあるで。かざしてみて'],
+    stage:['来てくれて、ありがとう！','17:30からSPECIAL STAGE。見ていってな！','会場の3か所にNFCがあるで。かざしてみて'],
+    day2:['2日目も来てくれて、ありがとう！','最終日、最後まで楽しんでな！','会場の3か所にNFCがあるで。かざしてみて'],
+    after:['JUNKeeeeS FES、ありがとう！','また会おうな！','36人の図鑑は、いつでもひらけるで']
+  };
+  var list=MSG[phase()], idx=0;
+  var bubble=document.getElementById('bubble'), hint=document.getElementById('hint'), ui=document.getElementById('ui'), cover=document.getElementById('cover');
+  var holder=document.getElementById('holder'), chara=document.getElementById('chara'), startBtn=document.getElementById('start'), scene=document.getElementById('scene');
+  var found=false, everSeen=false, shownOnce=false;
+  function say(i){ idx=i%list.length; bubble.innerHTML=list[idx]+(list.length>1?'<small>タップで次へ</small>':''); bubble.classList.remove('show'); void bubble.offsetWidth; bubble.classList.add('show'); }
+  function pop(){
+    if(!found&&!everSeen) return;
+    holder.removeAttribute('animation__pop');
+    holder.setAttribute('animation__pop','property: position; from: 0 0 0.3; to: 0 0 0.7; dir: alternate; dur: 260; loop: 1; easing: easeOutCubic');
+    chara.removeAttribute('animation__spin');
+    chara.setAttribute('animation__spin','property: rotation; from: 0 0 0; to: 0 360 0; dur: 520; easing: easeOutCubic');
+    say(idx+1);
+    if(window.gtag) gtag('event','ar_fes_tap',{msg:idx});
+  }
+  scene.addEventListener('click', pop);
+
+  var startTimer=null;
+  startBtn.addEventListener('click', function(){
+    startBtn.disabled=true; startBtn.textContent='起動中…';
+    var sys=scene.systems&&scene.systems['mindar-image-system'];
+    if(!sys){ fail('ARの準備ができていません。ページを読み込み直してください'); return; }
+    try{ sys.start(); }catch(e){ fail(String(e&&e.message||e)); return; }
+    clearTimeout(startTimer); startTimer=setTimeout(function(){ if(cover.classList.contains('hide')) return; fail('カメラの許可待ちで止まっています'); },20000);
+    if(window.gtag) gtag('event','ar_fes_start',{phase:phase()});
+  });
+  scene.addEventListener('arReady', function(){ clearTimeout(startTimer); cover.classList.add('hide'); ui.hidden=false; });
+  scene.addEventListener('arError', function(e){ fail(e&&e.detail&&e.detail.error?String(e.detail.error):''); });
+  function fail(msg){ clearTimeout(startTimer); startBtn.disabled=false; startBtn.textContent='もう一度ためす'; document.getElementById('err').classList.add('show'); var d=document.getElementById('errDetail'); if(d) d.textContent=msg||''; if(window.gtag) gtag('event','ar_error',{reason:('fes:'+(msg||'')).slice(0,80)}); }
+  document.getElementById('openSafari').addEventListener('click', function(e){ e.preventDefault(); var u=location.href; if(navigator.clipboard) navigator.clipboard.writeText(u).catch(function(){}); alert('リンクをコピーしました。SafariやChromeのアドレス欄に貼りつけて開いてください。\n'+u); });
+  window.addEventListener('unhandledrejection', function(e){ if(!cover.classList.contains('hide')) fail('起動エラー: '+String(e.reason&&e.reason.message||e.reason||'')); });
+  window.addEventListener('error', function(e){ if(!cover.classList.contains('hide')&&startBtn.textContent==='起動中…') fail('起動エラー: '+String(e.message||'')); });
+
+  var target=document.getElementById('target');
+  target.addEventListener('targetFound', function(){
+    found=true; everSeen=true; hint.classList.add('hide');
+    if(!shownOnce){ shownOnce=true; say(0); holder.removeAttribute('animation__in'); holder.setAttribute('animation__in','property: position; from: -1.2 0 0.3; to: 0 0 0.3; dur: 700; easing: easeOutCubic'); if(window.gtag) gtag('event','ar_fes_found',{phase:phase()}); }
+  });
+  target.addEventListener('targetLost', function(){ found=false; if(everSeen){ hint.textContent='チラシを外しても、そのまま写真が撮れます'; hint.classList.remove('hide'); setTimeout(function(){ hint.classList.add('hide'); },2500); } });
+
+  document.getElementById('shareBtn').addEventListener('click', function(){
+    var text='JUNKeeeeS FESのチラシをかざしたら、アゲルが出てきた！ #JUNKeeeeS #CHARAMARL';
+    var url='https://charamarl.com/tap/junkeeees?utm_source=ar_fes&utm_medium=share';
+    var copied=CM_AR_SHARE.copyText(text+'\n'+url);
+    window._cmWantShot=function(){
+      var canvas=CM_AR_SHARE.snapshot({ video:document.querySelector('video'), gl:scene.canvas||scene.renderer.domElement, label:'charamarl.com/tap/junkeeees' });
+      CM_AR_SHARE.share({ canvas:canvas, text:text, url:url, copied:copied }).then(function(m){ if(window.gtag) gtag('event','share',{method:m, content_type:'ar_fes_photo'}); });
+    };
+  });
+  // 開発確認用: ?demo=1 でカメラなしに吹き出しを出す
+  if(new URLSearchParams(location.search).get('demo')==='1'){ cover.classList.add('hide'); ui.hidden=false; everSeen=true; found=true; hint.classList.add('hide'); say(0); }
+})();
+</script>
+</body>
+</html>
