@@ -79,7 +79,10 @@ AFRAME.registerComponent('stay-put', {
     var o3=this.el.object3D;
     if(this.grab){
       var cam=this.el.sceneEl.camera; if(!cam||!this.pt) return;
+      // MindARはカメラの投影行列を直接書き換えるので、逆行列を毎回作り直してから unproject する(これが古いとアゲルが画面外に飛ぶ)
+      cam.updateMatrixWorld(true); cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert();
       this.v.set(this.pt.x, this.pt.y, 0.5).unproject(cam); this.v.sub(cam.position).normalize();
+      if(this.v.z>0) this.v.negate();   // 念のため: カメラの後ろに出たら前に
       o3.matrix.identity(); o3.matrix.makeRotationFromQuaternion(cam.quaternion); o3.matrix.setPosition(cam.position.clone().add(this.v.multiplyScalar(this.dist)));
       o3.matrixWorldNeedsUpdate=true; o3.visible=true; return;
     }
