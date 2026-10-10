@@ -106,7 +106,7 @@ AFRAME.registerComponent('stay-put', {
   <div class="bottom">
     <div class="row">
       <a class="btn y" id="pageBtn" href="https://charamarl.com/tap/junkeeees.html?utm_source=ar_fes&utm_medium=flyer" target="_blank" rel="noopener">36人の図鑑をひらく</a>
-      <button class="btn w" id="shareBtn" type="button">シェア</button>
+      <button class="btn w" id="shareBtn" type="button">📷 写真をXでシェア</button>
     </div>
   </div>
 </div>
@@ -117,11 +117,11 @@ AFRAME.registerComponent('stay-put', {
   var FES_1=new Date('2026-10-24T00:00:00+09:00'), STAGE=new Date('2026-10-24T17:30:00+09:00'), DAY2=new Date('2026-10-25T00:00:00+09:00'), END=new Date('2026-10-26T00:00:00+09:00');
   function phase(){ var n=new Date(); if(n<FES_1) return 'before'; if(n<STAGE) return 'day1'; if(n<DAY2) return 'stage'; if(n<END) return 'day2'; return 'after'; }
   var MSG={
-    before:['10/24・25、JUNKeeeeS FESで待ってるよ！','36人の図鑑、先に集めておく？'],
-    day1:['JUNKeeeeS FESに来てくれて、ありがとう！','今日は一日、楽しんでいってね！','会場の3か所にNFCがあるよ。かざしてみて'],
-    stage:['来てくれて、ありがとう！','17:30からSPECIAL STAGE。見ていってね！','会場の3か所にNFCがあるよ。かざしてみて'],
-    day2:['2日目も来てくれて、ありがとう！','最終日、最後まで楽しんでね！','会場の3か所にNFCがあるよ。かざしてみて'],
-    after:['JUNKeeeeS FES、ありがとう！','また会おうね！','36人の図鑑は、いつでもひらけるよ']
+    before:['10/24・25、JUNKeeeeS FESで待ってるよ！','36人の図鑑、先に集めておく？','写真を撮って、Xでシェアしてね！'],
+    day1:['JUNKeeeeS FESに来てくれて、ありがとう！','今日は一日、楽しんでいってね！','会場の3か所にNFCがあるよ。かざしてみて','写真を撮って、Xでシェアしてね！'],
+    stage:['来てくれて、ありがとう！','17:30からSPECIAL STAGE。見ていってね！','会場の3か所にNFCがあるよ。かざしてみて','写真を撮って、Xでシェアしてね！'],
+    day2:['2日目も来てくれて、ありがとう！','最終日、最後まで楽しんでね！','会場の3か所にNFCがあるよ。かざしてみて','写真を撮って、Xでシェアしてね！'],
+    after:['JUNKeeeeS FES、ありがとう！','また会おうね！','36人の図鑑は、いつでもひらけるよ','写真を撮って、Xでシェアしてね！']
   };
   var list=MSG[phase()], idx=0;
   var bubble=document.getElementById('bubble'), hint=document.getElementById('hint'), ui=document.getElementById('ui'), cover=document.getElementById('cover');
