@@ -191,7 +191,7 @@ body{{background:#FFFDF8}}
   <div class="col"><div class="ill">{pin}</div><div class="ct disp">{g[0]}</div><div class="cd">{g[1]}</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(g[2])}"></div><div class="url">{g[3]}</div></div>
   <div class="col"><div class="ill">{phone}</div><div class="ct disp">{k[0].replace('<br>','')}</div><div class="cd">{k[1]}</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(k[2])}"></div><div class="url">{k[3]}</div></div>
 </div>
-<div class="biz"><div class="l"><div class="bt disp">{ap[0]}</div><div class="bd">{ap[1].replace('<br>','')}<br>メール <span class="em">charamarlinfo@gmail.com</span></div></div><div class="r"><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(ap[2])}"></div><div class="url">{ap[3]}</div></div></div>
+<div class="biz"><div class="l"><div class="bt disp">{ap[0]}</div><div class="bd">{ap[1]}<br>メール <span class="em">charamarlinfo@gmail.com</span></div></div><div class="r"><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(ap[2])}"></div><div class="url">{ap[3]}</div></div></div>
 <div class="sns">X <span class="em">@charamarl</span>　／　Instagram <span class="em">@charamarlinfo</span></div>
 {FOOT_SHORT}</body></html>'''
 def render(html, name):
