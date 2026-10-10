@@ -97,7 +97,7 @@ body{{background:#FFFDF8}}
 .h1 span{{background:#111;color:#FFD400;padding:0 {px(1.5)}px;border-radius:{px(1.2)}px;display:inline-block;line-height:1.25;margin-bottom:{px(1.2)}px}}
 .lead{{font-size:{px(3.2)}px;line-height:1.65;font-weight:700;margin-top:{px(2)}px;text-align:left}}
 .grid{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(84)}px;display:grid;grid-template-columns:repeat(9,1fr);gap:{px(1.2)}px}}
-.grid img{{width:100%;aspect-ratio:640/809;object-fit:cover;border-radius:{px(1.2)}px;border:{px(.5)}px solid #111;display:block}}
+.grid img{{width:100%;aspect-ratio:640/809;object-fit:cover;border-radius:{px(1.2)}px;display:block}}   /* 黒ふちなし(ROKUさん要望 10/11) */
 .bottom{{position:absolute;left:{px(3+9)}px;right:{px(3+9)}px;top:{px(160)}px;display:flex;gap:{px(6)}px;align-items:flex-start}}
 .qrcol{{text-align:center;flex:none}} .qrlabel{{font-size:{px(3.4)}px;font-weight:900;margin-bottom:{px(1.2)}px}}
 .qrbox img{{width:{px(31)}px;height:{px(31)}px}}
@@ -131,10 +131,17 @@ def pageBack():
         if crop: im = im.crop(crop)
         im.thumbnail(box); return b64_img(im, 'JPEG', q)
     # 営業ツール: 名刺(表裏の実寸イメージ)
-    # ギャラリー: 依頼者指定のギャラリー画像(6×3の作品グリッド、_assets/gallery_grid_36.jpg)。下の文字帯は外してグリッドだけ使う
-    # 10/10 依頼者「グッズ採用の作家さんにも営業ツールへの許可を得ている」→ 全作家の作品を入れる
-    gsrc = Image.open(os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_print/_assets/gallery_grid_36.jpg')).convert('RGB')
-    grid = gsrc.crop((0, 0, gsrc.width, GRID_H))
+    # ギャラリー: 6×3のグリッド。絵は ROKUさん(JUNKeeeeS 4体)・ahoyoung(SUE/PUTTI/MOSSUN)・CRAZY(ユルクレイジー)・MARU(レコマル) だけ(10/11 依頼者指示。他の作家の作品は入れない)
+    def tile_img(path, bg, flip=False):
+        im = Image.open(os.path.join(ROOT, path)).convert('RGBA')
+        if flip: im = im.transpose(Image.FLIP_LEFT_RIGHT)
+        t = Image.new('RGB', (300, 300), bg); im.thumbnail((250, 250)); t.paste(im, ((300-im.width)//2, (300-im.height)//2), im); return t
+    J = 'run-junkeees/art/'; C = 'img/colors_nobg/'
+    GRID = [(J+'ageru.png','#FFE3E8'),(C+'sue_red.png','#FFF6D5'),('run-art/run_yurucrazy.png','#E9DAFB',True),(C+'gmc_red.png','#DFF9FF'),(J+'clown.png','#FFE000'),(C+'putti_yellow.png','#FFE3F0'),
+            (C+'mossun_cyan.png','#FFE7CC'),(J+'bull.png','#EAFFC9'),(C+'gmc_blue.png','#FFE3E8'),(J+'patty.png','#E3EEFF'),('run-art/run_yurucrazy.png','#FFF1C2',True),(C+'sue_cyan.png','#FFE3F0'),
+            (J+'clown.png','#DFF9FF'),(C+'putti_pink.png','#EAFFC9'),(J+'ageru.png','#FFF6D5'),(C+'mossun_pink.png','#E9DAFB'),(C+'gmc_green.png','#FFE3E8'),(J+'bull.png','#FFE7CC')]
+    grid = Image.new('RGB', (6*300, 3*300), '#fff')
+    for n, gt in enumerate(GRID): grid.paste(tile_img(gt[0], gt[1], len(gt) > 2 and gt[2]), ((n%6)*300, (n//6)*300))
     pin = '<div class="tool grid"><img src="data:image/jpeg;base64,' + b64_img(grid, 'JPEG', 92) + '"></div>'
 
     # グッズ: 依頼者指定の営業OK素材(ポストカード表 charamarl_postcard_front.png = アクキー11種・ピンズ12種)から、上段=アクキー、下段=ピンズを切り出す
