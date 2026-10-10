@@ -58,11 +58,11 @@ NOTES = [
          wide='肩の力が、<br>ぽよっと抜ける',
          works=['ぽよっとぷりん', 'ぽよっとぷりん ハロウィンシール'],
          skip=['ぽよっとぷりん ランダムシール']),   # 販売期間が9/14で終了
-    dict(no='06', artist='PHAGY', sub='ソフビ原型師',
+    dict(no='06', artist='PHAGY', sub='マルチクリエイター',
          title='クリエイター「PHAGY」',
          wide='クリエイター「PHAGY」',
-         works=['不眠症の悪魔「ドリームレス（仮）」', '謎の未確認生命体MOJA(モジャ)ソフビ', 'PHAGY TOY指スケ'],   # 記事本文からドリームレスは外したが、サムネは作品の並び
-         skip=['MOJA 1周年記念セール']),   # セールは9/5で終了
+         works=['謎の未確認生命体MOJA(モジャ)ソフビ', 'PHAGY TOY指スケ', 'MOJA 1周年記念セール', '不眠症の悪魔「ドリームレス（仮）」'],
+         portrait=True),   # 2026-10-08 作品は4点とも 4:5 の縦長。正方形のセルに入れると上下が切れるので、縦長のまま全部見せる
 ]
 
 TPL = '''<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
@@ -101,7 +101,7 @@ def works_for(artist, want, cache, skip=()):
     # 🔴 EVENT と INTERVIEW は作品ではない。
     #    2026-09-25、ROKUさんの枠に JUNKeeeeS FES とクラファンの告知2点が
     #    「作品」として並んだ。告知の画像をインタビュー記事の表紙に使わない。
-    SKIP = {'EVENT', 'INTERVIEW'}
+    SKIP = {'EVENT', 'INTERVIEW'}  # 作品として数えない種類
     # 🔴 出せない作品は外す。
     #    2026-09-25、ひよさんの「ランダムシール」は販売期間が9/14で終わっている。
     #    終わったものを記事の表紙に並べない。
@@ -163,13 +163,21 @@ def main():
             else:
                 cols = 'repeat(%d,1fr)' % max(n_w, 1)
             ar = '16/9' if n_w == 1 else '1'
+            gw = S['gw']
+            if n.get('portrait'):
+                ar = '4/5'
+                cols = 'repeat(4,1fr)' if S['tag'] == 'square' else 'repeat(2,1fr)'
+                # note用(横長)は 2x2 が高さに収まる幅に固定する（高さ542pxから逆算）
+                if S['tag'] == 'note':
+                    ch = (S['h'] - S['pad'] * 2 - S['gg']) / 2.0
+                    gw = 'flex:none;width:%dpx;' % int(ch * 4 / 5 * 2 + S['gg'])
             k = S['w'] / 1080.0
             htm = TPL.format(no=n['no'], title=title, artist=html.escape(artist),
                              cells=cells, fs=fs, cols=cols, ar=ar,
-                             w=S['w'], h=S['h'], flex=S['flex'], txtw=S['txtw'], gw=S['gw'],
+                             w=S['w'], h=S['h'], flex=S['flex'], txtw=S['txtw'], gw=gw,
                              pad=S['pad'], rail=S['rail'], gg=S['gg'], r=int(16 * k),
                              bs=int(23 * k), bp=int(9 * k), bp2=int(24 * k),
-                             bm=int(34 * k), bym=int(26 * k), bys=int(25 * k), gap=int(16 * k))
+                             bm=int(34 * k), bym=int(26 * k), bys=int((21 if n.get('portrait') else 25) * k), gap=int(16 * k))
             src = os.path.join(tmp, f"card_{S['tag']}.html")
             open(src, 'w', encoding='utf-8').write(htm)
             out = os.path.join(OUT, f"note{n['no']}_{n['artist']}_{S['tag']}.png")
