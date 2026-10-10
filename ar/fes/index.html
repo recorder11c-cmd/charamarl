@@ -28,6 +28,9 @@
   .bubble::after{ content:""; position:absolute; left:50%; bottom:-18px; width:0; height:0; border:12px solid transparent; border-top:14px solid #111; border-bottom:0; transform:translateX(-50%); }
   .bubble.show{ opacity:1; transform:translate(-50%,0) scale(1); }
   .bubble small{ display:block; font-size:12px; font-weight:700; color:#888; margin-top:6px; }
+  .grabchip{ position:absolute; left:50%; top:calc(22% + 150px); transform:translateX(-50%); background:var(--yellow); border:3px solid #111; border-radius:999px; padding:8px 10px 8px 14px; font-weight:900; font-size:13px; white-space:nowrap; box-shadow:3px 3px 0 #111; pointer-events:auto; display:flex; gap:8px; align-items:center; }
+  .grabchip[hidden]{ display:none; }
+  .grabchip button{ font-family:inherit; font-weight:900; font-size:12px; background:#111; color:#fff; border:0; border-radius:999px; padding:6px 10px; }
   .bottom{ position:absolute; left:0; right:0; bottom:max(12px, env(safe-area-inset-bottom)); display:flex; flex-direction:column; align-items:center; gap:10px; }
   .row{ display:flex; gap:8px; pointer-events:auto; }
   .btn{ display:inline-flex; align-items:center; gap:6px; background:#111; color:#fff; font-weight:900; font-family:inherit; text-decoration:none; border:3px solid #111; padding:12px 20px; border-radius:30px; font-size:15px; box-shadow:0 5px 0 rgba(0,0,0,.25); cursor:pointer; }
@@ -68,9 +71,21 @@
 <script>
 AFRAME.registerComponent('shot-hook', { tock: function(){ if(window._cmWantShot){ var f=window._cmWantShot; window._cmWantShot=null; f(); } } });
 // チラシ(target)の位置を毎フレーム写し、見失っても最後の位置に残す
+// grab=true の間はチラシを無視して、指の位置(画面)にアゲルを固定する。チラシから外れても、好きな場所で写真が撮れる
 AFRAME.registerComponent('stay-put', {
-  init: function(){ this.target=document.getElementById('target'); this.el.object3D.matrixAutoUpdate=false; },
-  tick: function(){ var o=this.target&&this.target.object3D; if(!o||!o.visible) return; this.el.object3D.matrix.copy(o.matrix); this.el.object3D.matrixWorldNeedsUpdate=true; this.el.object3D.visible=true; }
+  init: function(){ this.target=document.getElementById('target'); this.el.object3D.matrixAutoUpdate=false; this.grab=false; this.dist=1.6; this.pt=null; this.v=new THREE.Vector3(); },
+  tick: function(){
+    var o3=this.el.object3D;
+    if(this.grab){
+      var cam=this.el.sceneEl.camera; if(!cam||!this.pt) return;
+      this.v.set(this.pt.x, this.pt.y, 0.5).unproject(cam); this.v.sub(cam.position).normalize();
+      o3.matrix.identity(); o3.matrix.makeRotationFromQuaternion(cam.quaternion); o3.matrix.setPosition(cam.position.clone().add(this.v.multiplyScalar(this.dist)));
+      o3.matrixWorldNeedsUpdate=true; o3.visible=true; return;
+    }
+    var o=this.target&&this.target.object3D; if(!o||!o.visible) return;
+    o3.matrix.copy(o.matrix); o3.matrixWorldNeedsUpdate=true; o3.visible=true;
+    var p=new THREE.Vector3().setFromMatrixPosition(o.matrix); this.dist=Math.max(0.8, Math.min(3, p.length()));   // チラシまでの距離を覚えておく(つれていくときの大きさ)
+  }
 });
 </script>
 <a-scene id="scene" shot-hook
@@ -97,6 +112,7 @@ AFRAME.registerComponent('stay-put', {
     <div class="hint" id="hint">チラシの おもて にカメラをむけてね</div>
   </div>
   <div class="bubble" id="bubble"></div>
+  <div class="grabchip" id="grabchip" hidden>📌 アゲルをつれて歩いてる <button type="button" id="grabOff">チラシにもどす</button></div>
   <div class="bottom">
     <div class="row">
       <a class="btn y" id="pageBtn" href="https://charamarl.com/tap/junkeeees.html?utm_source=ar_fes&utm_medium=flyer" target="_blank" rel="noopener">36人の図鑑をひらく</a>
@@ -131,7 +147,18 @@ AFRAME.registerComponent('stay-put', {
     say(idx+1);
     if(window.gtag) gtag('event','ar_fes_tap',{msg:idx});
   }
-  scene.addEventListener('click', pop);
+  // 指の操作: 短くタップ=ぴょん＋次のメッセージ／長押し(0.35秒)=アゲルを指でつかんで「つれていく」(指を離した場所に固定・チラシは不要になる)
+  var stay=document.getElementById('stay'), grabchip=document.getElementById('grabchip');
+  var pressT=0, pressTimer=null, moved=false, sp=null;
+  function ndc(e){ return { x:(e.clientX/window.innerWidth)*2-1, y:-(e.clientY/window.innerHeight)*2+1 }; }
+  function setGrab(on){ var c=stay.components['stay-put']; if(!c) return; c.grab=on; grabchip.hidden=!on; if(on){ hint.textContent='好きな場所で写真が撮れるで'; hint.classList.remove('hide'); setTimeout(function(){ hint.classList.add('hide'); },2200); if(window.gtag) gtag('event','ar_fes_grab'); } }
+  function onDown(e){ if(e.target.closest&&e.target.closest('.btn, .grabchip')) return; if(!everSeen) return; pressT=Date.now(); moved=false; sp=ndc(e); var c=stay.components['stay-put']; if(c) c.pt=sp;
+    clearTimeout(pressTimer); pressTimer=setTimeout(function(){ setGrab(true); },350); }
+  function onMove(e){ if(!pressT) return; var c=stay.components['stay-put']; var p=ndc(e); if(Math.abs(p.x-sp.x)>0.03||Math.abs(p.y-sp.y)>0.03) moved=true; if(c&&c.grab){ c.pt=p; e.preventDefault(); } }
+  function onUp(e){ clearTimeout(pressTimer); var c=stay.components['stay-put']; var held=Date.now()-pressT; pressT=0; if(c&&c.grab) return;   // つかんでいた→離した場所に固定(そのまま)
+    if(held<350&&!moved) pop(); }
+  document.addEventListener('pointerdown', onDown, {passive:true}); document.addEventListener('pointermove', onMove, {passive:false}); document.addEventListener('pointerup', onUp); document.addEventListener('pointercancel', onUp);
+  document.getElementById('grabOff').addEventListener('click', function(e){ e.stopPropagation(); setGrab(false); hint.textContent='チラシの おもて にカメラをむけてね'; hint.classList.remove('hide'); });
 
   var startTimer=null;
   startBtn.addEventListener('click', function(){
@@ -154,7 +181,7 @@ AFRAME.registerComponent('stay-put', {
     found=true; everSeen=true; hint.classList.add('hide');
     if(!shownOnce){ shownOnce=true; say(0); holder.removeAttribute('animation__in'); holder.setAttribute('animation__in','property: position; from: -1.2 0 0.3; to: 0 0 0.3; dur: 700; easing: easeOutCubic'); if(window.gtag) gtag('event','ar_fes_found',{phase:phase()}); }
   });
-  target.addEventListener('targetLost', function(){ found=false; if(everSeen){ hint.textContent='チラシを外しても、そのまま写真が撮れます'; hint.classList.remove('hide'); setTimeout(function(){ hint.classList.add('hide'); },2500); } });
+  target.addEventListener('targetLost', function(){ found=false; var c=stay.components['stay-put']; if(c&&c.grab) return; if(everSeen){ hint.textContent='そのままでも撮れる。長押しでアゲルをつれていける'; hint.classList.remove('hide'); setTimeout(function(){ hint.classList.add('hide'); },2800); } });
 
   document.getElementById('shareBtn').addEventListener('click', function(){
     var text='JUNKeeeeS FESのチラシをかざしたら、アゲルが出てきた！ #JUNKeeeeS #CHARAMARL';
