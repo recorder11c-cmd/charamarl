@@ -135,13 +135,10 @@ def pageBack():
     grid = gsrc.crop((0, 0, gsrc.width, GRID_H))
     pin = '<div class="tool grid"><img src="data:image/jpeg;base64,' + b64_img(grid, 'JPEG', 92) + '"></div>'
 
-    # グッズ: ピンズ3種の実物写真 ＋ 発送したアクキーの写真
-    pins_ph = photo('charamarl_pins_実物/PR_3種_真上_card用.jpg', (900, 400), crop=(40, 200, 1310, 620)); # 🔴 発送写真には他作家のアクキーが写るので使わない。自社3体のアクキー商品写真(販売中カードの写真枠)を横に並べた帯にする
-    CARDS = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/作家別_販売中カード/DinoRenny(自社)')
-    strip = Image.new('RGB', (3*520, 400), (233, 229, 246))
-    for n, name in enumerate(['アクキー_sue.png', 'アクキー_putti.png', 'アクキー_mossun.png']):
-        im = Image.open(os.path.join(CARDS, name)).convert('RGB').crop((49, 178, 1150, 905)); im.thumbnail((520, 400)); strip.paste(im, (n*520 + (520-im.width)//2, (400-im.height)//2))
-    ship_ph = b64_img(strip, 'JPEG', 90)
+    # グッズ: 依頼者指定の営業OK素材(ポストカード表 charamarl_postcard_front.png = アクキー11種・ピンズ12種)から、上段=アクキー、下段=ピンズを切り出す
+    pc = Image.open(os.path.join(OUT, 'charamarl_postcard_front.png')).convert('RGB')
+    kc = pc.crop((0, 395, pc.width, 1010)); kc.thumbnail((1000, 600)); pins_ph = b64_img(kc, 'JPEG', 92)
+    pn = pc.crop((0, 1035, pc.width, 1305)); pn.thumbnail((1000, 300)); ship_ph = b64_img(pn, 'JPEG', 92)
     phone = '<div class="goods"><img src="data:image/jpeg;base64,' + pins_ph + '"><img src="data:image/jpeg;base64,' + ship_ph + '"></div>'
     return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
 body{{background:#FFFDF8}}
@@ -156,7 +153,7 @@ body{{background:#FFFDF8}}
 .ill{{height:{px(36)}px;border-radius:{px(2.5)}px;background:#F6F2FA;border:{px(.4)}px solid #DDD6EA;overflow:hidden;position:relative;margin-bottom:{px(2.5)}px}}
 .tool{{height:100%;display:flex;align-items:center;justify-content:center;padding:{px(1.5)}px}} .tool img{{width:100%;height:auto;object-fit:contain;border-radius:{px(1)}px;box-shadow:{px(.4)}px {px(.6)}px {px(1.2)}px rgba(0,0,0,.18)}} .tool.grid{{padding:0}} .tool.grid img{{width:100%;height:100%;object-fit:cover;border-radius:0;box-shadow:none}}
 .col .ill{{height:auto;aspect-ratio:1200/556}}
-.goods{{height:100%;display:flex;flex-direction:column;gap:{px(1.2)}px;padding:{px(1.5)}px}} .goods img{{min-height:0;width:100%;object-fit:cover;border-radius:{px(1.6)}px;border:{px(.35)}px solid #111}} .goods img:first-child{{flex:1.15}} .goods img:last-child{{flex:1}}
+.goods{{height:100%;display:flex;flex-direction:column;gap:{px(1.2)}px;padding:{px(1.5)}px}} .goods img{{min-height:0;width:100%;object-fit:contain;background:#FFFDF8;border-radius:{px(1.6)}px;border:{px(.35)}px solid #111}} .goods img:first-child{{flex:1.6}} .goods img:last-child{{flex:1}}
 .pin{{display:flex;gap:{px(1.2)}px;padding:{px(1.6)}px}} .pc{{flex:1;display:flex;flex-direction:column;gap:{px(1.2)}px}}
 .pt{{border-radius:{px(1.4)}px;border:{px(.35)}px solid #111;position:relative;overflow:hidden}} .pt img{{width:100%;height:100%;display:block;padding:{px(.5)}px}}
 .pt .hv{{position:absolute;right:{px(.8)}px;bottom:{px(.6)}px;font-size:{px(2)}px;font-weight:900;color:#FF4D8D;background:#fff;border-radius:999px;padding:0 {px(.8)}px;line-height:1.5}}
