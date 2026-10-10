@@ -31,6 +31,16 @@ function cleanUrl(v) {
   return u;
 }
 
+// 自分（アカウントキー k）の作品の表示名。一覧は gal:ids（新しい順200件）から読む。
+async function ownedBrands(k) {
+  const ids = (await redis('LRANGE', 'gal:ids', '0', '199')) || [];
+  if (!ids.length) return { works: 0, brands: [] };
+  const raw = await redis('MGET', ...ids.map(id => `gal:${id}`));
+  const brands = new Set(); let works = 0;
+  raw.forEach(x => { try { const w = JSON.parse(x); if (w && w.artistKey === k) { works++; if (w.artist) brands.add(String(w.artist).trim()); } } catch (e) {} });
+  return { works, brands: [...brands] };
+}
+
 async function loadAll() {
   let cursor = '0'; const keys = [];
   do {
@@ -53,7 +63,13 @@ module.exports = async (req, res) => {
         const k = await currentUserKey(req);
         if (!k) return res.status(401).json({ error: 'ログインしてください' });
         let rec = null; try { rec = JSON.parse(await redis('GET', `artist:${k}`)); } catch (e) {}
-        return res.status(200).json({ artistKey: k, home: (rec && rec.home) || '', homeLabel: (rec && rec.homeLabel) || '', confirmed: (rec && rec.confirmed) || 0 });
+        const ob = await ownedBrands(k);
+        let home = (rec && rec.home) || '', homeLabel = (rec && rec.homeLabel) || '', via = home ? 'self' : '';
+        // 自分のキーに登録が無いとき、運営が「表示名」で登録した分を、本人の画面にも出す（公開側で実際に使われているリンク）
+        if (!home && ob.brands.length === 1) {
+          try { const r2 = JSON.parse(await redis('GET', `artist:${ob.brands[0].toLowerCase()}`)); if (r2 && r2.home) { home = r2.home; homeLabel = r2.homeLabel || ''; via = 'brand'; } } catch (e) {}
+        }
+        return res.status(200).json({ artistKey: k, home, homeLabel, via, works: ob.works, brands: ob.brands, confirmed: (rec && rec.confirmed) || 0 });
       }
       if (req.query && req.query.confirmed) { // 運営のみ：誰が「確認した」を押したか
         if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });

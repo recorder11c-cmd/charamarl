@@ -475,8 +475,8 @@
   async function loadHome(){
     try{
       const r=await fetch('/api/artist?mine=1'); if(!r.ok) return; const d=await r.json(); $('homeLink').value=d.home||'';
-      // 確認済みでなければ、帯を出す（運営アカウントには出さない）
-      if(!d.confirmed && !(window.cmMe&&window.cmMe.admin)){
+      // 作品を持っていて、まだ確認していなければ帯を出す（運営アカウントにも出す。作品の無いアカウントには出さない）
+      if(!d.confirmed && d.works>0){
         $('homeNoteMsg').textContent = d.home
           ? 'いま登録されている活動場所は「'+d.home+'」です。作品のボタンや、作家ページの上のボタンの行き先になります。これで合っていれば「いまのままで大丈夫」を押してください。いちばん来てほしい場所が別にあれば、直してください。'
           : '活動場所のリンクが、まだ登録されていません。作品にリンクが無いときの行き先になります。リンク集・Instagram・X・ショップなど、いちばん来てほしい場所を登録してください。';

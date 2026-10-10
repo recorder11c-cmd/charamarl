@@ -1729,10 +1729,10 @@
     const merge=(k,arr)=>{const s=getSet(k);(arr||[]).forEach(x=>s.add(x));putSet(k,s);};
     merge(LK,d.likes);merge(SV,d.saves);
     if(curArt)renderArt();
-    // 活動場所のリンクの確認が未了の作家には、アイコンに赤い点と、メニューの1行を出す（運営アカウントには出さない）
-    if(!cmUser.admin){
+    // 作品を持つアカウントで、活動場所のリンクの確認が未了なら、アイコンに赤い点と、メニューの1行を出す（運営アカウントにも出す）
+    {
       fetch('/api/artist?mine=1').then(r=>r.ok?r.json():null).then(m=>{
-        if(!m||m.confirmed)return;
+        if(!m||m.confirmed||!(m.works>0))return;
         userBtn.classList.add('has-note');
         const a=document.createElement('a');a.href='./mypage.html#homeSec';a.className='um-note';a.textContent='↗ 活動場所のリンクを確認してください';
         userMenu.insertBefore(a,userMenu.children[1]||null);

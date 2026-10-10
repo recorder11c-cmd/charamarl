@@ -324,10 +324,14 @@
   // ===== アカウント一覧（作品数つき・代行用の仮アカウントを片づけるため） =====
   async function loadUsers(){
     try{
-      const [ur,gr]=await Promise.all([
+      const [ur,gr,cr,hr]=await Promise.all([
         fetch(`/api/auth?users=1&key=${encodeURIComponent(key)}`),
-        fetch(`/api/gallery?status=all&key=${encodeURIComponent(key)}`)
+        fetch(`/api/gallery?status=all&key=${encodeURIComponent(key)}`),
+        fetch(`/api/artist?confirmed=1&key=${encodeURIComponent(key)}`),   // 活動場所のリンクを確認した時刻（運営のみ）
+        fetch('/api/artist')                                              // 登録されている活動場所
       ]);
+      const conf=cr.ok?(await cr.json().catch(()=>({}))):{};
+      const homes=hr.ok?((await hr.json().catch(()=>({}))).artists||{}):{};
       if(!ur.ok)throw new Error('アカウント一覧を取得できませんでした（'+ur.status+'）');
       const {users=[]}=await ur.json();
       const gal=gr.ok?((await gr.json()).list||[]):[];
@@ -341,13 +345,24 @@
       const zeroN=users.filter(x=>!(cnt[String(x.name||'').trim().toLowerCase()]||0)).length;
       const tu=document.getElementById('tUser');
       tu.textContent=zeroN; tu.className='n'+(zeroN?' alert':'');
+      const withWorks=users.filter(x=>(cnt[String(x.name||'').trim().toLowerCase()]||0)>0);
+      const okN=withWorks.filter(x=>conf[String(x.name||'').trim().toLowerCase()]).length;
+      let sm=document.getElementById('linkSum');
+      if(!sm){sm=document.createElement('p');sm.id='linkSum';sm.className='sub';sm.style.cssText='font-weight:800;margin:0 0 10px;';document.getElementById('userList').before(sm);}
+      sm.textContent=`活動場所リンクの確認：作品のある ${withWorks.length} アカウントのうち ${okN} 件が確認済み／${withWorks.length-okN} 件が未確認`;
       document.getElementById('userList').innerHTML=users.map(u=>{
         const n=cnt[String(u.name||'').trim().toLowerCase()]||0;
+        const uk=String(u.name||'').trim().toLowerCase();
+        const cAt=conf[uk]||0;
+        const lk=!n?'':(cAt?`<span style="margin-left:10px;color:#0a0;font-weight:800;">リンク ✓確認済 ${fmt(cAt)}</span>`:`<span style="margin-left:10px;color:#c00;font-weight:800;">リンク 未確認</span>`);
+        const hm=homes[uk]&&homes[uk].home?`<div class="sub" style="margin:2px 0 0;word-break:break-all;">活動場所: ${esc(homes[uk].home)}</div>`:(n?'<div class="sub" style="margin:2px 0 0;color:#c00;">活動場所: 未登録</div>':'');
         return `<div class="card" data-works="${n}" style="display:flex;align-items:center;gap:12px;">
           <div style="flex:1;min-width:0;">
             <b>${esc(u.name)}</b>
             <span class="num" style="margin-left:10px;color:${n?'#0a0':'#c00'};font-weight:800;">作品 ${n}</span>
+            ${lk}
             ${(disp[String(u.name||'').trim().toLowerCase()]&&disp[String(u.name||'').trim().toLowerCase()]!==u.name)?`<span class="sub" style="margin-left:8px;">掲載名: ${esc(disp[String(u.name||'').trim().toLowerCase()])}</span>`:''}
+            ${hm}
             <div class="sub" style="margin:2px 0 0;">${u.created?fmt(u.created):'登録日不明'}</div>
           </div>
           <button class="del" data-user="${esc(u.name)}" title="このアカウントを削除">✕</button>

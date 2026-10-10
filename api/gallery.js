@@ -99,7 +99,19 @@ module.exports = async (req, res) => {
       let artists = {}; try { artists = await loadArtists(); } catch (e) {}
       // 画面は表示名(artist)しか持たないので、表示名の小文字でも引けるように別名を足す（BeernoMocca ≠ "Beerno Mocca" 対策）
       const all = await loadAll();
-      for (const a of all) { if (a.artistKey && artists[a.artistKey] && a.artist) { const alias = String(a.artist).trim().toLowerCase(); if (!artists[alias]) artists[alias] = artists[a.artistKey]; } }
+      // 🔴 2026-10-10: 本人（アカウントのキー）の登録を、表示名側の登録より優先する。
+      //    以前は「表示名側に既にあれば、そちらが勝つ」で、本人がマイページで保存しても公開側に反映されなかった
+      //    （Beerno Mocca／Ink'z Monster／Selfie Bears／YUO.+／あめいメア）。
+      //    ただし、1つのアカウントが複数の表示名の作品を持つとき（ahoyoung＝DinoRenny と ahoyoung）は、
+      //    別々のブランドなので上書きしない。
+      const brandsOf = {};
+      for (const a of all) { if (a.artistKey && a.artist) (brandsOf[a.artistKey] = brandsOf[a.artistKey] || new Set()).add(String(a.artist).trim().toLowerCase()); }
+      for (const a of all) {
+        if (!(a.artistKey && artists[a.artistKey] && a.artist)) continue;
+        const alias = String(a.artist).trim().toLowerCase();
+        const single = brandsOf[a.artistKey] && brandsOf[a.artistKey].size === 1;
+        if (!artists[alias] || (single && alias !== a.artistKey)) artists[alias] = artists[a.artistKey];
+      }
       return res.status(200).json({ list, artists });
     }
 
