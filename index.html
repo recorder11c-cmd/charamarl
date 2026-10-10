@@ -57,6 +57,9 @@
   .userdd{position:relative;display:flex;align-items:center;}
   .user-menu{position:absolute;right:0;top:calc(100% + 12px);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:6px;min-width:160px;z-index:60;}
   .user-menu .um-name{font-size:11px;font-weight:800;color:var(--muted);padding:8px 12px 4px;}
+  .avatar.has-note{position:relative;overflow:visible;}
+  .avatar.has-note::after{content:"";position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#e3306e;border:2px solid #fff;}
+  .user-menu a.um-note{color:#c4155a;font-weight:900;}
   .user-menu a,.user-menu button{display:block;width:100%;text-align:left;font-size:13px;font-weight:700;color:#333;padding:9px 12px;border-radius:9px;text-decoration:none;background:none;border:none;font-family:inherit;cursor:pointer;}
   .user-menu a:hover,.user-menu button:hover{background:#f5f5f5;}
   @media(max-width:900px){ nav.main{display:none;} }
@@ -1726,6 +1729,15 @@
     const merge=(k,arr)=>{const s=getSet(k);(arr||[]).forEach(x=>s.add(x));putSet(k,s);};
     merge(LK,d.likes);merge(SV,d.saves);
     if(curArt)renderArt();
+    // 活動場所のリンクの確認が未了の作家には、アイコンに赤い点と、メニューの1行を出す（運営アカウントには出さない）
+    if(!cmUser.admin){
+      fetch('/api/artist?mine=1').then(r=>r.ok?r.json():null).then(m=>{
+        if(!m||m.confirmed)return;
+        userBtn.classList.add('has-note');
+        const a=document.createElement('a');a.href='./mypage.html#homeSec';a.className='um-note';a.textContent='↗ 活動場所のリンクを確認してください';
+        userMenu.insertBefore(a,userMenu.children[1]||null);
+      }).catch(()=>{});
+    }
   }).catch(()=>{});
   userBtn.addEventListener('click',e=>{
     if(!cmUser){location.href='./login.html';return;}

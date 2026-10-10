@@ -2,6 +2,8 @@
 //   GET  /api/artist                  → { artists: { [artistKey]: { home, homeLabel } } }（公開・内部キーはそのまま小文字名）
 //   POST {action:'set', home, homeLabel}                         本人（ログイン中のアカウント）
 //   POST {action:'adminset', key|session, artistKey, home, homeLabel}  運営
+//   POST {action:'ack'}                                          本人が「活動場所のリンクを確認した」と押した記録（confirmed=時刻）
+//   GET  /api/artist?confirmed=1  （運営のみ）→ { artistKey: 確認した時刻 }  誰が確認済みか
 // 作品側の link（作品固有リンク）とは別物。作品に link が無いとき、作家ページの上部ボタンのときに使う。
 const { isAdminReq } = require('./_lib/admin.js');
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -51,13 +53,29 @@ module.exports = async (req, res) => {
         const k = await currentUserKey(req);
         if (!k) return res.status(401).json({ error: 'ログインしてください' });
         let rec = null; try { rec = JSON.parse(await redis('GET', `artist:${k}`)); } catch (e) {}
-        return res.status(200).json({ artistKey: k, home: (rec && rec.home) || '', homeLabel: (rec && rec.homeLabel) || '' });
+        return res.status(200).json({ artistKey: k, home: (rec && rec.home) || '', homeLabel: (rec && rec.homeLabel) || '', confirmed: (rec && rec.confirmed) || 0 });
+      }
+      if (req.query && req.query.confirmed) { // 運営のみ：誰が「確認した」を押したか
+        if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
+        let cursor = '0'; const keys = [];
+        do { const r = await redis('SCAN', cursor, 'MATCH', 'artist:*', 'COUNT', '200'); cursor = String(r[0]); keys.push(...r[1]); } while (cursor !== '0');
+        const out = {};
+        if (keys.length) { const vals = await redis('MGET', ...keys); keys.forEach((k, i) => { try { const v = JSON.parse(vals[i]); if (v && v.confirmed) out[k.slice(7)] = v.confirmed; } catch (e) {} }); }
+        return res.status(200).json(out);
       }
       res.setHeader('Cache-Control', 'public, max-age=60');
       return res.status(200).json({ artists: await loadAll() });
     }
     if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
     const b = req.body || {};
+    if (b.action === 'ack') { // 本人が「活動場所のリンクを確認した」を押した
+      const k = await currentUserKey(req);
+      if (!k) return res.status(401).json({ error: 'ログインしてください' });
+      let rec = {}; try { rec = JSON.parse(await redis('GET', `artist:${k}`)) || {}; } catch (e) {}
+      rec.confirmed = Date.now(); if (rec.home === undefined) rec.home = '';
+      await redis('SET', `artist:${k}`, JSON.stringify(rec));
+      return res.status(200).json({ ok: true, confirmed: rec.confirmed });
+    }
     let key = null;
     if (b.action === 'set') {
       key = await currentUserKey(req);
@@ -72,7 +90,9 @@ module.exports = async (req, res) => {
     const home = cleanUrl(b.home);
     if (home === null) return res.status(400).json({ error: 'URLの形式が正しくありません' });
     const rec = { home, homeLabel: trim(b.homeLabel, 30), edited: Date.now() };
-    if (!home) await redis('DEL', `artist:${key}`);
+    if (b.action === 'set') rec.confirmed = Date.now(); // 自分で保存した＝確認した
+    else { try { const old = JSON.parse(await redis('GET', `artist:${key}`)); if (old && old.confirmed) rec.confirmed = old.confirmed; } catch (e) {} } // 運営の差し替えでは確認済みを消さない
+    if (!home && !rec.confirmed) await redis('DEL', `artist:${key}`);
     else await redis('SET', `artist:${key}`, JSON.stringify(rec));
     return res.status(200).json({ ok: true, artistKey: key, home, homeLabel: rec.homeLabel });
   } catch (e) {

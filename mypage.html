@@ -82,6 +82,13 @@
   .ebtn:focus-visible{outline:3px solid var(--purple);outline-offset:1px;}
   .post-cancel{display:none;align-items:center;justify-content:center;width:100%;min-height:var(--tap-min);margin-top:8px;background:none;border:none;font-family:inherit;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer;}
   .post-card.editing{border-color:var(--purple);box-shadow:0 0 0 3px #f3e9ff;}
+  .home-note{display:none;background:#fff1f0;border:2px solid #e3306e;border-radius:16px;padding:14px 16px;margin:0 0 16px;}
+  .home-note b{display:block;font-size:14px;font-weight:900;color:#c4155a;margin-bottom:4px;}
+  .home-note p{font-size:12px;color:#444;line-height:1.8;margin:0 0 10px;}
+  .home-note .hn-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .home-note a,.home-note button{min-height:40px;padding:0 16px;border-radius:22px;font-family:inherit;font-size:12px;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;text-decoration:none;}
+  .home-note a{background:#e3306e;color:#fff;border:none;}
+  .home-note button{background:#fff;color:#444;border:1px solid #d9d9e2;}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -95,6 +102,15 @@
 
 <div class="wrap">
   <div class="err" id="err"></div>
+  <!-- 活動場所のリンクの確認のお願い（10/10〜）。作家がマイページを開いたときにだけ出す。「確認した」を押すとサーバーに記録され、帯は消える -->
+  <div class="home-note" id="homeNote" role="status">
+    <b>お願い：活動場所のリンクを、確認してください</b>
+    <p id="homeNoteMsg"></p>
+    <div class="hn-btns">
+      <a href="#homeSec" id="homeNoteGo">リンクを見る・直す</a>
+      <button type="button" id="homeNoteOk">いまのままで大丈夫</button>
+    </div>
+  </div>
   <div class="profile">
     <div class="pfp" id="pfp">🎪</div>
     <div>
@@ -175,7 +191,7 @@
   </div>
   </div>
 
-  <div class="sec-h">↗ 活動場所のリンク</div>
+  <div class="sec-h" id="homeSec">↗ 活動場所のリンク</div>
   <div class="post-card" style="padding:14px 16px;margin-bottom:18px;">
     <div class="fld" style="margin-bottom:8px;"><label for="homeLink">あなたの活動場所（リンク集・Instagram・X・ショップなど）<span class="opt">任意・公開されます</span></label>
       <input type="url" id="homeLink" maxlength="300" placeholder="https://lit.link/… や https://www.instagram.com/…">
@@ -275,6 +291,7 @@
     try{
       const d=await fetch('/api/auth').then(r=>r.json());
       if(!d.user){location.href='./login.html';return;}
+      window.cmMe=d.user;
       $('pname').textContent=d.user.name;
       // 公開されているアーティストページへの導線（作品が1点でもあれば表示）
       (function(){
@@ -456,13 +473,27 @@
 
   // 活動場所のリンク（作家共通）
   async function loadHome(){
-    try{ const r=await fetch('/api/artist?mine=1'); if(!r.ok) return; const d=await r.json(); $('homeLink').value=d.home||''; }catch(e){}
+    try{
+      const r=await fetch('/api/artist?mine=1'); if(!r.ok) return; const d=await r.json(); $('homeLink').value=d.home||'';
+      // 確認済みでなければ、帯を出す（運営アカウントには出さない）
+      if(!d.confirmed && !(window.cmMe&&window.cmMe.admin)){
+        $('homeNoteMsg').textContent = d.home
+          ? 'いま登録されている活動場所は「'+d.home+'」です。作品のボタンや、作家ページの上のボタンの行き先になります。これで合っていれば「いまのままで大丈夫」を押してください。いちばん来てほしい場所が別にあれば、直してください。'
+          : '活動場所のリンクが、まだ登録されていません。作品にリンクが無いときの行き先になります。リンク集・Instagram・X・ショップなど、いちばん来てほしい場所を登録してください。';
+        $('homeNote').style.display='block';
+      }
+    }catch(e){}
   }
+  $('homeNoteOk').addEventListener('click',async()=>{
+    $('homeNoteOk').disabled=true;
+    try{ const r=await fetch('/api/artist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'ack'})}); if(r.ok){ $('homeNote').style.display='none'; } }catch(e){}
+    $('homeNoteOk').disabled=false;
+  });
   $('homeSave').addEventListener('click',async()=>{
     const home=$('homeLink').value.trim(); $('homeMsg').textContent='保存中…';
     try{
       const r=await fetch('/api/artist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'set',home})});
-      const d=await r.json(); $('homeMsg').textContent=r.ok?(home?'保存しました':'削除しました'):(d.error||'保存できませんでした');
+      const d=await r.json(); $('homeMsg').textContent=r.ok?(home?'保存しました':'削除しました'):(d.error||'保存できませんでした'); if(r.ok) $('homeNote').style.display='none';
     }catch(e){ $('homeMsg').textContent='保存できませんでした'; }
   });
   async function loadMine(){
