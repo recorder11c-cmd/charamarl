@@ -113,7 +113,7 @@ body{{background:#FFFDF8}}
 BACK_QR = [
   ('ギャラリー', '参加作家のキャラクターと<br>作品を1枚ずつ見られます。<br>気に入ったら♥を。', 'https://charamarl.com/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=gallery#discover', 'charamarl.com'),
   ('キャラクター<br>（アクキー・ピンズ）', 'キャラクターのアクキーとピンズ。<br>アクキーはかざすと<br>作家さんのページがひらきます。', 'https://charamarl.com/characters/keyrings.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=keyrings', 'charamarl.com/characters/<wbr>keyrings.html'),
-  ('作家・企業の方へ', 'キャラクターの掲載・<br>グッズ化・イベントの<br>ご相談は、こちらから。', 'https://charamarl.com/apply.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=apply', 'charamarl.com/apply.html'),
+  ('作家・企業の方へ', 'タップで30秒、CHARAMARLがわかります。<br>そのあと、掲載・グッズ化・イベントのご相談へ。', 'https://charamarl.com/join.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=join', 'charamarl.com/join.html'),
 ]
 def b64_qr_url(url):
     buf = io.BytesIO(); segno.make(url, error='h').save(buf, kind='png', scale=18, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()
