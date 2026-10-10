@@ -31,6 +31,7 @@ body{{width:{W}px;height:{H}px;overflow:hidden;position:relative;background:#FFD
 .foot .logo{{font-size:{px(5.2)}px}} .foot .url2{{font-family:"Helvetica Neue",Arial,sans-serif;opacity:.9}}
 '''
 FOOT = f'<div class="foot"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><span>キャラクターたちが集まる、小さな市場</span><span class="url2">charamarl.com</span></div>'
+FOOT_SNS = f'<div class="foot"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><span class="url2">charamarl.com</span><span class="url2">X @charamarl</span><span class="url2">Instagram @charamarlinfo</span></div>'
 FOOT_SHORT = f'<div class="foot"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><span class="url2">charamarl.com</span></div>'   # 上の帯に同じ一文がある面(C案・裏面)用
 def fes_html():
     d = FES[1].replace('　', '　<span class="nw">') + '</span>'   # 全角スペースで折り返せる(時刻は途中で切らない)
@@ -110,6 +111,7 @@ body{{background:#FFFDF8}}
 <div class="bottom"><div class="qrcol"><div class="qrlabel disp">▼ JUNKeeeeSの図鑑をひらく</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr()}"></div><div class="url">{SHORT}</div></div>
 <div class="info"><b>CHARAMARLでできること</b>・気に入ったキャラクターに♥を送る<br>・作家さんの活動場所（X・ショップ・イベント）へすぐ行ける<br>・気に入った作品を保存して、あとで見返す<br><span style="font-family:Helvetica Neue,Arial,sans-serif">charamarl.com</span></div></div>
 {FOOT_SHORT}</body></html>'''
+AR_URL = 'https://charamarl.com/ar/fes/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=ar'
 BACK_QR = [
   ('ギャラリー', '参加作家のキャラクターと<br>作品を1枚ずつ見られます。<br>気に入ったら♥を。', 'https://charamarl.com/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=gallery#discover', 'charamarl.com'),
   ('キャラクター<br>（アクキー・ピンズ）', 'キャラクターのアクキーとピンズ。<br>アクキーはかざすと<br>作家さんのページがひらきます。', 'https://charamarl.com/characters/keyrings.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=keyrings', 'charamarl.com/characters/<wbr>keyrings.html'),
@@ -152,7 +154,7 @@ body{{background:#FFFDF8}}
 .col{{flex:1 1 0;min-width:0;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(3)}px {px(3)}px {px(3)}px;text-align:center}}
 .ill{{height:{px(36)}px;border-radius:{px(2.5)}px;background:#F6F2FA;border:{px(.4)}px solid #DDD6EA;overflow:hidden;position:relative;margin-bottom:{px(2.5)}px}}
 .tool{{height:100%;display:flex;align-items:center;justify-content:center;padding:{px(1.5)}px}} .tool img{{width:100%;height:auto;object-fit:contain;border-radius:{px(1)}px;box-shadow:{px(.4)}px {px(.6)}px {px(1.2)}px rgba(0,0,0,.18)}} .tool.grid{{padding:0}} .tool.grid img{{width:100%;height:100%;object-fit:cover;object-position:center;border-radius:0;box-shadow:none}}
-.col .ill{{height:auto;aspect-ratio:1.55/1}}
+.col .ill{{height:auto;aspect-ratio:2/1}}
 .goods{{height:100%;display:flex;flex-direction:column;gap:{px(1)}px;padding:{px(1)}px}} .goods img{{min-height:0;width:100%;object-fit:contain;background:#FFFDF8;border-radius:{px(1.6)}px;border:{px(.35)}px solid #111}} .goods img:first-child{{flex:1.4}} .goods img:last-child{{flex:1}}
 .pin{{display:flex;gap:{px(1.2)}px;padding:{px(1.6)}px}} .pc{{flex:1;display:flex;flex-direction:column;gap:{px(1.2)}px}}
 .pt{{border-radius:{px(1.4)}px;border:{px(.35)}px solid #111;position:relative;overflow:hidden}} .pt img{{width:100%;height:100%;display:block;padding:{px(.5)}px}}
@@ -173,16 +175,23 @@ body{{background:#FFFDF8}}
 .plate{{position:absolute;left:0;right:0;top:{px(4)}px;bottom:{px(4)}px;background:rgba(255,255,255,.85);border:{px(.6)}px solid #111;border-radius:{px(2.2)}px;display:flex;align-items:center;justify-content:center;box-shadow:{px(.5)}px {px(.5)}px 0 #111}}
 .nfc{{position:absolute;left:0;right:0;bottom:0;text-align:center;font-family:"Helvetica Neue",Arial,sans-serif;font-size:{px(1.9)}px;font-weight:800;color:#8B5CF6;letter-spacing:.05em}}
 .ct{{font-size:{px(3.8)}px;line-height:1.3;white-space:nowrap}}
-.cd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700;color:#333;margin:{px(1.2)}px 0 {px(2.2)}px;white-space:nowrap}}
+.cd{{font-size:{px(2.5)}px;line-height:1.55;font-weight:700;color:#333;margin:{px(1)}px 0 {px(1.8)}px;white-space:nowrap}}
 .col .qrbox{{padding:{px(1.2)}px;border-width:{px(.6)}px}} .col .qrbox img{{width:{px(22)}px;height:{px(22)}px}}
 .col .url{{font-size:{px(2.4)}px;margin-top:{px(1.2)}px}}
-.biz{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(158)}px;background:#111;color:#fff;border-radius:{px(4)}px;padding:{px(2.4)}px {px(4)}px;display:flex;align-items:center;gap:{px(4)}px}}
-.biz .bt{{font-size:{px(3.8)}px;color:#FFD400;margin-bottom:{px(1)}px}}
-.biz .bd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700;white-space:nowrap}} .biz .bd .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#fff}}
+.ar{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(146)}px;height:{px(27)}px;background:var(--yellow,#FFD400);background:#FFD400;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(2)}px {px(3.5)}px;display:flex;align-items:center;gap:{px(3.5)}px}}
+.ar .hero{{flex:none;width:{px(19)}px;height:{px(19)}px;object-fit:contain}}
+.ar .at{{font-size:{px(3.4)}px;line-height:1.3;margin-bottom:{px(.8)}px}}
+.ar .ad{{font-size:{px(2.5)}px;line-height:1.55;font-weight:700;color:#111;white-space:nowrap}}
+.ar .l{{flex:1}} .ar .r{{flex:none;text-align:center}}
+.ar .qrbox{{padding:{px(.8)}px;border-width:{px(.5)}px}} .ar .qrbox img{{width:{px(18)}px;height:{px(18)}px}}
+.ar .url{{font-size:{px(2)}px;margin-top:{px(.6)}px}}
+.biz{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(175)}px;height:{px(27)}px;background:#111;color:#fff;border-radius:{px(4)}px;padding:{px(2)}px {px(4)}px;display:flex;align-items:center;gap:{px(4)}px}}
+.biz .bt{{font-size:{px(3.4)}px;color:#FFD400;margin-bottom:{px(.6)}px}}
+.biz .bd{{font-size:{px(2.4)}px;line-height:1.55;font-weight:700;white-space:nowrap}} .biz .bd .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#fff}}
 .biz .l{{flex:1}} .biz .r{{flex:none;text-align:center}}
-.biz .qrbox{{padding:{px(1)}px;border-color:#fff;border-width:{px(.5)}px}} .biz .qrbox img{{width:{px(20)}px;height:{px(20)}px}}
+.biz .qrbox{{padding:{px(.8)}px;border-color:#fff;border-width:{px(.5)}px}} .biz .qrbox img{{width:{px(18)}px;height:{px(18)}px}}
 .biz .url{{font-size:{px(2.2)}px;margin-top:{px(.8)}px;color:#fff}}
-.sns{{position:absolute;left:0;right:0;top:{px(192)}px;text-align:center;font-size:{px(2.8)}px;font-weight:700;color:#333}}
+.sns{{position:absolute;left:0;right:0;top:{px(194)}px;text-align:center;font-size:{px(2.8)}px;font-weight:700;color:#333}}
 .sns .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#111}}
 </style></head><body><div class="rail"></div>
 <div class="top"><span class="logo"><span class="a">CHARA</span><span class="b">MARL</span></span><div class="tag">キャラクターたちが集まる、小さな市場</div>
@@ -191,9 +200,9 @@ body{{background:#FFFDF8}}
   <div class="col"><div class="ill">{pin}</div><div class="ct disp">{g[0]}</div><div class="cd">{g[1]}</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(g[2])}"></div><div class="url">{g[3]}</div></div>
   <div class="col"><div class="ill">{phone}</div><div class="ct disp">{k[0].replace('<br>','')}</div><div class="cd">{k[1]}</div><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(k[2])}"></div><div class="url">{k[3]}</div></div>
 </div>
+<div class="ar"><img class="hero" src="data:image/png;base64,{b64_file(os.path.join(ROOT, 'run-junkeees/art/ageru.png'))}"><div class="l"><div class="at disp">このチラシの表に、アゲルがかくれてる。</div><div class="ad">QRを開いて、チラシの表にカメラをむけてね。<br>アゲルが飛び出して、あいさつします。写真も撮れます。</div></div><div class="r"><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(AR_URL)}"></div><div class="url">charamarl.com/ar/fes/</div></div></div>
 <div class="biz"><div class="l"><div class="bt disp">{ap[0]}</div><div class="bd">{ap[1]}<br>メール <span class="em">charamarlinfo@gmail.com</span></div></div><div class="r"><div class="qrbox"><img src="data:image/png;base64,{b64_qr_url(ap[2])}"></div><div class="url">{ap[3]}</div></div></div>
-<div class="sns">X <span class="em">@charamarl</span>　／　Instagram <span class="em">@charamarlinfo</span></div>
-{FOOT_SHORT}</body></html>'''
+{FOOT_SNS}</body></html>'''
 def render(html, name):
     htmlp = os.path.join(OUT, name + '.html'); png = os.path.join(OUT, name + '.png'); pdf = os.path.join(OUT, name + '.pdf')
     open(htmlp, 'w', encoding='utf-8').write(html)
@@ -205,15 +214,17 @@ def render(html, name):
     arr = cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGR)
     det = cv2.QRCodeDetector()
     if name.endswith('_back'):
-        Wd, Hd = im.size; found = []
-        for (x0,y0,x1,y1) in [(0.08,0.52,0.47,0.76),(0.52,0.52,0.92,0.76),(0.70,0.72,0.96,0.86)]:
-            crop = im.crop((int(Wd*x0), int(Hd*y0), int(Wd*x1), int(Hd*y1)))
-            # 暗い背景のQRは、白い箱の範囲だけにして周りを白で囲む
-            arr0 = np.array(crop); white = (arr0.min(axis=2) > 200); ys, xs = np.where(white)
-            if len(ys): crop = crop.crop((xs.min(), ys.min(), xs.max()+1, ys.max()+1))
-            padded = Image.new('RGB', (crop.width + 200, crop.height + 200), 'white'); padded.paste(crop, (100, 100))
-            d, _, _ = det.detectAndDecode(cv2.cvtColor(np.array(padded), cv2.COLOR_RGB2BGR)); found.append(d)
-        print(name, im.size, 'QR:', 'OK' if found == [u for _,_,u,_ in BACK_QR] else f'NG found={found}')
+        # 白いQRの箱を全部見つけて個別に読む(位置に依存しない)。周りを白で囲むと暗い背景でも読める
+        Wd, Hd = im.size; arr0 = np.array(im); white = (arr0.min(axis=2) > 200).astype(np.uint8)
+        n, lab, stats, _ = cv2.connectedComponentsWithStats(white); found = []
+        for k in range(1, n):
+            x, y, w, h, a = stats[k]
+            if w < 150 or h < 150 or w > 500 or abs(w - h) > 20: continue
+            box = im.crop((x, y, x+w, y+h)); pad = Image.new('RGB', (w+200, h+200), 'white'); pad.paste(box, (100, 100))
+            d, _, _ = det.detectAndDecode(cv2.cvtColor(np.array(pad), cv2.COLOR_RGB2BGR))
+            if d: found.append(d)
+        expect = sorted([u for _,_,u,_ in BACK_QR] + [AR_URL])
+        print(name, im.size, 'QR:', 'OK (%d)' % len(found) if sorted(found) == expect else f'NG found={found}')
     else:
         data, pts, _ = det.detectAndDecode(arr); print(name, im.size, 'QR:', 'OK' if data == URL else f'NG ({data[:60]!r})')
 which = sys.argv[1] if len(sys.argv) > 1 else 'both'
