@@ -117,6 +117,7 @@ BACK_QR = [
 ]
 def b64_qr_url(url):
     buf = io.BytesIO(); segno.make(url, error='h').save(buf, kind='png', scale=18, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()
+GRID_H = 556   # gallery_grid_36.jpg のグリッド部分の高さ(下の文字帯の手前)
 def pageBack():
     # 裏面: 上=ロゴ＋見出し、中=2列(ギャラリー=ピンタレスト風UIの図、キャラクター=スマホとアクキーのモック)＋QR、下=作家・企業の方へ(横配置)、SNS
     g, k, ap = BACK_QR
@@ -128,21 +129,11 @@ def pageBack():
         if crop: im = im.crop(crop)
         im.thumbnail(box); return b64_img(im, 'JPEG', q)
     # 営業ツール: 名刺(表裏の実寸イメージ)
-    # ギャラリー: OG画像と同じ6×3のグリッド。絵は自社(SUE/PUTTI/MOSSUN/レコマル・色違い)とJUNKeeeeS(印刷OK済み)だけ
-    def tile_img(path, bg):
-        im = Image.open(os.path.join(ROOT, path)).convert('RGBA'); t = Image.new('RGB', (300, 300), bg)
-        if path.endswith('.jpg'):
-            src = im.convert('RGB').crop((40, 150, 600, 710)); src = src.resize((300, 300), Image.LANCZOS); t.paste(src, (0, 0))   # 図鑑カードの名前・文字を避けてキャラの部分だけ
-        else:
-            im.thumbnail((240, 240)); t.paste(im, ((300-im.width)//2, (300-im.height)//2), im)
-        return t
-    J = 'run-junkeees/art/'
-    GRID = [(J+'ageru.png','#FFE3E8'),('img/colors_nobg/sue_red.png','#FFF6D5'),(J+'clown.png','#E9DAFB'),('img/colors_nobg/putti_yellow.png','#DFF9FF'),(J+'bull.png','#FFE3F0'),('img/colors_nobg/mossun_cyan.png','#EAFFC9'),
-            ('img/colors_nobg/gmc_red.png','#FFE7CC'),(J+'patty.png','#FFE3F0'),('img/colors_nobg/putti_pink.png','#E3EEFF'),(J+'ageru.png','#FFF6D5'),('img/colors_nobg/sue_cyan.png','#FFE3E8'),(J+'clown.png','#FFE000'),
-            (J+'bull.png','#DFF9FF'),('img/colors_nobg/mossun_pink.png','#FFF1C2'),(J+'patty.png','#EAFFC9'),('img/colors_nobg/gmc_blue.png','#FFE3F0'),(J+'ageru.png','#E9DAFB'),('img/colors_nobg/sue_green.png','#FFE7CC')]
-    grid = Image.new('RGB', (6*300, 3*300), '#fff')
-    for n, (pth, bg) in enumerate(GRID): grid.paste(tile_img(pth, bg), ((n%6)*300, (n//6)*300))
-    pin = '<div class="tool grid"><img src="data:image/jpeg;base64,' + b64_img(grid, 'JPEG', 90) + '"></div>'
+    # ギャラリー: 依頼者指定のギャラリー画像(6×3の作品グリッド、_assets/gallery_grid_36.jpg)。下の文字帯は外してグリッドだけ使う
+    # 10/10 依頼者「グッズ採用の作家さんにも営業ツールへの許可を得ている」→ 全作家の作品を入れる
+    gsrc = Image.open(os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_print/_assets/gallery_grid_36.jpg')).convert('RGB')
+    grid = gsrc.crop((0, 0, gsrc.width, GRID_H))
+    pin = '<div class="tool grid"><img src="data:image/jpeg;base64,' + b64_img(grid, 'JPEG', 92) + '"></div>'
 
     # グッズ: ピンズ3種の実物写真 ＋ 発送したアクキーの写真
     pins_ph = photo('charamarl_pins_実物/PR_3種_真上_card用.jpg', (900, 400), crop=(40, 200, 1310, 620)); # 🔴 発送写真には他作家のアクキーが写るので使わない。自社3体のアクキー商品写真(販売中カードの写真枠)を横に並べた帯にする
@@ -164,7 +155,7 @@ body{{background:#FFFDF8}}
 .col{{flex:1 1 0;min-width:0;background:#fff;border:{px(.6)}px solid #111;border-radius:{px(4)}px;padding:{px(3)}px {px(3)}px {px(3)}px;text-align:center}}
 .ill{{height:{px(36)}px;border-radius:{px(2.5)}px;background:#F6F2FA;border:{px(.4)}px solid #DDD6EA;overflow:hidden;position:relative;margin-bottom:{px(2.5)}px}}
 .tool{{height:100%;display:flex;align-items:center;justify-content:center;padding:{px(1.5)}px}} .tool img{{width:100%;height:auto;object-fit:contain;border-radius:{px(1)}px;box-shadow:{px(.4)}px {px(.6)}px {px(1.2)}px rgba(0,0,0,.18)}} .tool.grid{{padding:0}} .tool.grid img{{width:100%;height:100%;object-fit:cover;border-radius:0;box-shadow:none}}
-.col .ill{{height:auto;aspect-ratio:2/1}}
+.col .ill{{height:auto;aspect-ratio:1200/556}}
 .goods{{height:100%;display:flex;flex-direction:column;gap:{px(1.2)}px;padding:{px(1.5)}px}} .goods img{{min-height:0;width:100%;object-fit:cover;border-radius:{px(1.6)}px;border:{px(.35)}px solid #111}} .goods img:first-child{{flex:1.15}} .goods img:last-child{{flex:1}}
 .pin{{display:flex;gap:{px(1.2)}px;padding:{px(1.6)}px}} .pc{{flex:1;display:flex;flex-direction:column;gap:{px(1.2)}px}}
 .pt{{border-radius:{px(1.4)}px;border:{px(.35)}px solid #111;position:relative;overflow:hidden}} .pt img{{width:100%;height:100%;display:block;padding:{px(.5)}px}}
