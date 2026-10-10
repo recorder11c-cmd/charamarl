@@ -136,9 +136,9 @@ def pageBack():
     pin = '<div class="tool grid"><img src="data:image/jpeg;base64,' + b64_img(grid, 'JPEG', 92) + '"></div>'
 
     # グッズ: 依頼者指定の営業OK素材(ポストカード表 charamarl_postcard_front.png = アクキー11種・ピンズ12種)から、上段=アクキー、下段=ピンズを切り出す
-    pc = Image.open(os.path.join(OUT, 'charamarl_postcard_front.png')).convert('RGB')
-    kc = pc.crop((0, 395, pc.width, 1010)); kc.thumbnail((1000, 600)); pins_ph = b64_img(kc, 'JPEG', 92)
-    pn = pc.crop((0, 1035, pc.width, 1305)); pn.thumbnail((1000, 300)); ship_ph = b64_img(pn, 'JPEG', 92)
+    pc = Image.open(os.path.join(OUT, '_assets', 'goods_postcard_front.png')).convert('RGB')   # 10/10 依頼者添付(アクキー11・ピンズ12の新版)
+    kc = pc.crop((0, 385, pc.width, 880)); kc.thumbnail((1000, 600)); pins_ph = b64_img(kc, 'JPEG', 92)
+    pn = pc.crop((0, 970, pc.width, 1320)); pn.thumbnail((1000, 400)); ship_ph = b64_img(pn, 'JPEG', 92)
     phone = '<div class="goods"><img src="data:image/jpeg;base64,' + pins_ph + '"><img src="data:image/jpeg;base64,' + ship_ph + '"></div>'
     return f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>{BASE}
 body{{background:#FFFDF8}}
@@ -153,7 +153,7 @@ body{{background:#FFFDF8}}
 .ill{{height:{px(36)}px;border-radius:{px(2.5)}px;background:#F6F2FA;border:{px(.4)}px solid #DDD6EA;overflow:hidden;position:relative;margin-bottom:{px(2.5)}px}}
 .tool{{height:100%;display:flex;align-items:center;justify-content:center;padding:{px(1.5)}px}} .tool img{{width:100%;height:auto;object-fit:contain;border-radius:{px(1)}px;box-shadow:{px(.4)}px {px(.6)}px {px(1.2)}px rgba(0,0,0,.18)}} .tool.grid{{padding:0}} .tool.grid img{{width:100%;height:100%;object-fit:cover;border-radius:0;box-shadow:none}}
 .col .ill{{height:auto;aspect-ratio:1200/556}}
-.goods{{height:100%;display:flex;flex-direction:column;gap:{px(1.2)}px;padding:{px(1.5)}px}} .goods img{{min-height:0;width:100%;object-fit:contain;background:#FFFDF8;border-radius:{px(1.6)}px;border:{px(.35)}px solid #111}} .goods img:first-child{{flex:1.6}} .goods img:last-child{{flex:1}}
+.goods{{height:100%;display:flex;flex-direction:column;gap:{px(1.2)}px;padding:{px(1.5)}px}} .goods img{{min-height:0;width:100%;object-fit:contain;background:#FFFDF8;border-radius:{px(1.6)}px;border:{px(.35)}px solid #111}} .goods img:first-child{{flex:1.25}} .goods img:last-child{{flex:1}}
 .pin{{display:flex;gap:{px(1.2)}px;padding:{px(1.6)}px}} .pc{{flex:1;display:flex;flex-direction:column;gap:{px(1.2)}px}}
 .pt{{border-radius:{px(1.4)}px;border:{px(.35)}px solid #111;position:relative;overflow:hidden}} .pt img{{width:100%;height:100%;display:block;padding:{px(.5)}px}}
 .pt .hv{{position:absolute;right:{px(.8)}px;bottom:{px(.6)}px;font-size:{px(2)}px;font-weight:900;color:#FF4D8D;background:#fff;border-radius:999px;padding:0 {px(.8)}px;line-height:1.5}}
