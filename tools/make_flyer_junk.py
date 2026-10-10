@@ -113,7 +113,7 @@ body{{background:#FFFDF8}}
 BACK_QR = [
   ('ギャラリー', '参加作家のキャラクターと<br>作品を1枚ずつ見られます。<br>気に入ったら♥を。', 'https://charamarl.com/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=gallery#discover', 'charamarl.com'),
   ('キャラクター<br>（アクキー・ピンズ）', 'キャラクターのアクキーとピンズ。<br>アクキーはかざすと<br>作家さんのページがひらきます。', 'https://charamarl.com/characters/keyrings.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=keyrings', 'charamarl.com/characters/<wbr>keyrings.html'),
-  ('作家・企業の方へ', 'タップで30秒、CHARAMARLがわかります。<br>そのあと、掲載・グッズ化・イベントのご相談へ。', 'https://charamarl.com/join.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=join', 'charamarl.com/join.html'),
+  ('作家・企業の方へ', 'タップで30秒、CHARAMARLがわかります。<br>そのあと、掲載・グッズ化・イベントの相談へ。', 'https://charamarl.com/join.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=join', 'charamarl.com/join.html'),
 ]
 def b64_qr_url(url):
     buf = io.BytesIO(); segno.make(url, error='h').save(buf, kind='png', scale=18, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()
@@ -178,7 +178,7 @@ body{{background:#FFFDF8}}
 .col .url{{font-size:{px(2.4)}px;margin-top:{px(1.2)}px}}
 .biz{{position:absolute;left:{px(3+8)}px;right:{px(3+8)}px;top:{px(158)}px;background:#111;color:#fff;border-radius:{px(4)}px;padding:{px(2.4)}px {px(4)}px;display:flex;align-items:center;gap:{px(4)}px}}
 .biz .bt{{font-size:{px(3.8)}px;color:#FFD400;margin-bottom:{px(1)}px}}
-.biz .bd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700}} .biz .bd .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#fff}}
+.biz .bd{{font-size:{px(2.6)}px;line-height:1.65;font-weight:700;white-space:nowrap}} .biz .bd .em{{font-family:"Helvetica Neue",Arial,sans-serif;font-weight:800;color:#fff}}
 .biz .l{{flex:1}} .biz .r{{flex:none;text-align:center}}
 .biz .qrbox{{padding:{px(1)}px;border-color:#fff;border-width:{px(.5)}px}} .biz .qrbox img{{width:{px(20)}px;height:{px(20)}px}}
 .biz .url{{font-size:{px(2.2)}px;margin-top:{px(.8)}px;color:#fff}}
@@ -206,9 +206,13 @@ def render(html, name):
     det = cv2.QRCodeDetector()
     if name.endswith('_back'):
         Wd, Hd = im.size; found = []
-        for (x0,y0,x1,y1) in [(0.08,0.52,0.47,0.76),(0.52,0.52,0.92,0.76),(0.68,0.72,0.95,0.89)]:
+        for (x0,y0,x1,y1) in [(0.08,0.52,0.47,0.76),(0.52,0.52,0.92,0.76),(0.70,0.72,0.96,0.86)]:
             crop = im.crop((int(Wd*x0), int(Hd*y0), int(Wd*x1), int(Hd*y1)))
-            d, _, _ = det.detectAndDecode(cv2.cvtColor(np.array(crop), cv2.COLOR_RGB2BGR)); found.append(d)
+            # 暗い背景のQRは、白い箱の範囲だけにして周りを白で囲む
+            arr0 = np.array(crop); white = (arr0.min(axis=2) > 200); ys, xs = np.where(white)
+            if len(ys): crop = crop.crop((xs.min(), ys.min(), xs.max()+1, ys.max()+1))
+            padded = Image.new('RGB', (crop.width + 200, crop.height + 200), 'white'); padded.paste(crop, (100, 100))
+            d, _, _ = det.detectAndDecode(cv2.cvtColor(np.array(padded), cv2.COLOR_RGB2BGR)); found.append(d)
         print(name, im.size, 'QR:', 'OK' if found == [u for _,_,u,_ in BACK_QR] else f'NG found={found}')
     else:
         data, pts, _ = det.detectAndDecode(arr); print(name, im.size, 'QR:', 'OK' if data == URL else f'NG ({data[:60]!r})')
