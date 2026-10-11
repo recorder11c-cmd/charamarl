@@ -57,7 +57,7 @@
 
 <div class="cover" id="cover">
   <div class="t1">JUNKeeeeS FES 2026 in KYOTO</div>
-  <img class="hero" src="/run-junkeees/art/ageru.png" alt="アゲル">
+  <img class="hero" src="/ar/fes/ageru_point.png?v=2" alt="アゲル">
   <h1>チラシをかざすと、<br>アゲルが出てくる。</h1>
   <p>JUNKeeeeSのチラシ（表）に<br>カメラをむけてね。</p>
   <button class="start" id="start" type="button">カメラをはじめる</button>
@@ -83,7 +83,7 @@ AFRAME.registerComponent('stay-put', {
   mindar-image="imageTargetSrc: /ar/fes/targets.mind; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001;"
   color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true, preserveDrawingBuffer: true"
   vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" loading-screen="enabled: false" embedded>
-  <a-assets><img id="ageruImg" src="/run-junkeees/art/ageru.png" crossorigin="anonymous"></a-assets>
+  <a-assets><img id="ageruImg" src="/ar/fes/ageru_point.png?v=2" crossorigin="anonymous"></a-assets>
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
   <a-entity id="target" mindar-image-target="targetIndex: 0"></a-entity>
   <a-entity id="stay" stay-put visible="false">
@@ -117,11 +117,11 @@ AFRAME.registerComponent('stay-put', {
   var FES_1=new Date('2026-10-24T00:00:00+09:00'), STAGE=new Date('2026-10-24T17:30:00+09:00'), DAY2=new Date('2026-10-25T00:00:00+09:00'), END=new Date('2026-10-26T00:00:00+09:00');
   function phase(){ var n=new Date(); if(n<FES_1) return 'before'; if(n<STAGE) return 'day1'; if(n<DAY2) return 'stage'; if(n<END) return 'day2'; return 'after'; }
   var MSG={
-    before:['10/24・25、JUNKeeeeS FESで待ってるよ！','36人の図鑑、先に集めておく？','写真を撮って、Xでシェアしてね！'],
-    day1:['JUNKeeeeS FESに来てくれて、ありがとう！','今日は一日、楽しんでいってね！','会場の3か所にNFCがあるよ。かざしてみて','写真を撮って、Xでシェアしてね！'],
-    stage:['来てくれて、ありがとう！','17:30からSPECIAL STAGE。見ていってね！','会場の3か所にNFCがあるよ。かざしてみて','写真を撮って、Xでシェアしてね！'],
-    day2:['2日目も来てくれて、ありがとう！','最終日、最後まで楽しんでね！','会場の3か所にNFCがあるよ。かざしてみて','写真を撮って、Xでシェアしてね！'],
-    after:['JUNKeeeeS FES、ありがとう！','また会おうね！','36人の図鑑は、いつでもひらけるよ','写真を撮って、Xでシェアしてね！']
+    before:['アゲてくぜ！ 10/24・25、JUNKeeeeS FESで待ってるよ！','36人の図鑑、先に集めておく？','写真を撮って、Xでシェアしてね！','アゲてくぜ！'],
+    day1:['アゲてくぜ！ JUNKeeeeS FESに来てくれて、ありがとう！','今日は一日、楽しんでいってね！','会場の3か所にNFCがあるよ。かざしてみて','写真を撮って、Xでシェアしてね！','アゲてくぜ！'],
+    stage:['アゲてくぜ！ 来てくれて、ありがとう！','17:30からSPECIAL STAGE。見ていってね！','会場の3か所にNFCがあるよ。かざしてみて','写真を撮って、Xでシェアしてね！','アゲてくぜ！'],
+    day2:['アゲてくぜ！ 2日目も来てくれて、ありがとう！','最終日、最後まで楽しんでね！','会場の3か所にNFCがあるよ。かざしてみて','写真を撮って、Xでシェアしてね！','アゲてくぜ！'],
+    after:['JUNKeeeeS FES、ありがとう！','また会おうね！','36人の図鑑は、いつでもひらけるよ','写真を撮って、Xでシェアしてね！','アゲてくぜ！']
   };
   var list=MSG[phase()], idx=0;
   var bubble=document.getElementById('bubble'), hint=document.getElementById('hint'), ui=document.getElementById('ui'), cover=document.getElementById('cover');
