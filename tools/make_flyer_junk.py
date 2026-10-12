@@ -118,8 +118,8 @@ AR_URL = 'https://charamarl.com/ar/fes/?utm_source=flyer&utm_medium=print&utm_ca
 QR_SHORT[AR_URL] = 'https://charamarl.com/q/a'
 BACK_QR = [
   ('ギャラリー', '参加作家のキャラクターと<br>作品を1枚ずつ見られます。<br>気に入ったら♥を。', 'https://charamarl.com/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=gallery#discover', 'charamarl.com'),
-  ('キャラクター<br>（アクキー・ピンズ）', 'キャラクターのアクキーとピンズ。<br>アクキーはかざすと<br>作家さんのページがひらきます。', 'https://charamarl.com/characters/keyrings.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=keyrings', 'charamarl.com/characters/<wbr>keyrings.html'),
-  ('作家・企業の方へ', 'タップで30秒、CHARAMARLがわかります。<br>そのあと、掲載・グッズ化・イベントの相談へ。', 'https://charamarl.com/join.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=join', 'charamarl.com/join.html'),
+  ('キャラクター<br>（アクキー・ピンズ）', 'キャラクターのアクキーとピンズ。<br>アクキーをかざすと<br>作家さんのページがひらきます。', 'https://charamarl.com/characters/keyrings.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=keyrings', 'charamarl.com/characters/<wbr>keyrings.html'),
+  ('作家・企業の方へ', 'タップして30秒で、CHARAMARLがわかります。<br>そのあと、掲載・グッズ化・イベントの相談へ。', 'https://charamarl.com/join.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=join', 'charamarl.com/join.html'),
 ]
 QR_SHORT[BACK_QR[0][2]] = 'https://charamarl.com/q/g'; QR_SHORT[BACK_QR[1][2]] = 'https://charamarl.com/q/k'; QR_SHORT[BACK_QR[2][2]] = 'https://charamarl.com/q/b'
 def b64_qr_url(url):
