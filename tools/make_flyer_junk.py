@@ -9,12 +9,15 @@ DPI = 300; TRIM = (148, 210); BLEED = 3
 W = round((TRIM[0] + BLEED*2) / 25.4 * DPI); H = round((TRIM[1] + BLEED*2) / 25.4 * DPI)   # 1819x2551
 px = lambda mm: round(mm / 25.4 * DPI)
 URL = 'https://charamarl.com/tap/junkeeees.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag'
+# 🔴 QRに入れるのは短い転送URL(vercel.json の /q/*)。utm付きの長いURLを入れると57マス以上になり、裏の18mmのQRで1マス0.3mmしかなく印刷で読めない(10/12に発覚)
+#    /q/j=図鑑(表) /q/a=AR /q/g=ギャラリー /q/k=キャラ(アクキー) /q/b=作家・企業。転送先は vercel.json と同じutm付きURL
+QR_SHORT = { URL: 'https://charamarl.com/q/j' }
 SHORT = 'charamarl.com/tap/junkeeees.html'
 # 🔴 FES情報は tap/junkeeees.html と一字一句同じ
 FES = ['JUNKeeeeS FES 2026 in KYOTO', '2026.10.24 SAT 10:00〜22:00 ／ 10.25 SUN 10:00〜17:30', 'ROOT2 青果 二条（京都市中京区西ノ京船塚町17）', 'JR・地下鉄 二条駅から徒歩7分', '入場 大人500円／大学生以下 無料']
 def b64_file(p): return base64.b64encode(open(p,'rb').read()).decode()
 def b64_qr():
-    buf = io.BytesIO(); segno.make(URL, error='h').save(buf, kind='png', scale=24, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()
+    buf = io.BytesIO(); segno.make(QR_SHORT[URL], error='m').save(buf, kind='png', scale=24, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()
 def b64_img(im, fmt='JPEG', q=92):
     buf = io.BytesIO(); im.save(buf, fmt, quality=q); return base64.b64encode(buf.getvalue()).decode()
 FONT = b64_file(os.path.join(ROOT, 'tools', 'mplus900.ttf'))
@@ -112,13 +115,15 @@ body{{background:#FFFDF8}}
 <div class="info"><b>CHARAMARLでできること</b>・気に入ったキャラクターに♥を送る<br>・作家さんの活動場所（X・ショップ・イベント）へすぐ行ける<br>・気に入った作品を保存して、あとで見返す<br><span style="font-family:Helvetica Neue,Arial,sans-serif">charamarl.com</span></div></div>
 {FOOT_SHORT}</body></html>'''
 AR_URL = 'https://charamarl.com/ar/fes/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=ar'
+QR_SHORT[AR_URL] = 'https://charamarl.com/q/a'
 BACK_QR = [
   ('ギャラリー', '参加作家のキャラクターと<br>作品を1枚ずつ見られます。<br>気に入ったら♥を。', 'https://charamarl.com/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=gallery#discover', 'charamarl.com'),
   ('キャラクター<br>（アクキー・ピンズ）', 'キャラクターのアクキーとピンズ。<br>アクキーはかざすと<br>作家さんのページがひらきます。', 'https://charamarl.com/characters/keyrings.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=keyrings', 'charamarl.com/characters/<wbr>keyrings.html'),
   ('作家・企業の方へ', 'タップで30秒、CHARAMARLがわかります。<br>そのあと、掲載・グッズ化・イベントの相談へ。', 'https://charamarl.com/join.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=join', 'charamarl.com/join.html'),
 ]
+QR_SHORT[BACK_QR[0][2]] = 'https://charamarl.com/q/g'; QR_SHORT[BACK_QR[1][2]] = 'https://charamarl.com/q/k'; QR_SHORT[BACK_QR[2][2]] = 'https://charamarl.com/q/b'
 def b64_qr_url(url):
-    buf = io.BytesIO(); segno.make(url, error='h').save(buf, kind='png', scale=18, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()
+    buf = io.BytesIO(); segno.make(QR_SHORT[url], error='m').save(buf, kind='png', scale=18, border=4, dark='#111111', light='#FFFFFF'); return base64.b64encode(buf.getvalue()).decode()
 GRID_H = 556   # gallery_grid_36.jpg のグリッド部分の高さ(下の文字帯の手前)
 def pageBack():
     # 裏面: 上=ロゴ＋見出し、中=2列(ギャラリー=ピンタレスト風UIの図、キャラクター=スマホとアクキーのモック)＋QR、下=作家・企業の方へ(横配置)、SNS
@@ -230,10 +235,10 @@ def render(html, name):
             box = im.crop((x, y, x+w, y+h)); pad = Image.new('RGB', (w+200, h+200), 'white'); pad.paste(box, (100, 100))
             d, _, _ = det.detectAndDecode(cv2.cvtColor(np.array(pad), cv2.COLOR_RGB2BGR))
             if d: found.append(d)
-        expect = sorted([u for _,_,u,_ in BACK_QR] + [AR_URL])
+        expect = sorted([QR_SHORT[u] for _,_,u,_ in BACK_QR] + [QR_SHORT[AR_URL]])
         print(name, im.size, 'QR:', 'OK (%d)' % len(found) if sorted(found) == expect else f'NG found={found}')
     else:
-        data, pts, _ = det.detectAndDecode(arr); print(name, im.size, 'QR:', 'OK' if data == URL else f'NG ({data[:60]!r})')
+        data, pts, _ = det.detectAndDecode(arr); print(name, im.size, 'QR:', 'OK' if data == QR_SHORT[URL] else f'NG ({data[:60]!r})')
 which = sys.argv[1] if len(sys.argv) > 1 else 'both'
 if which in ('A', 'both'): render(pageA(), 'charamarl_flyer_junk_A5_A')
 if which in ('B', 'both'): render(pageB(), 'charamarl_flyer_junk_A5_B')

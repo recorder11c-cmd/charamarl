@@ -1,4 +1,6 @@
-// JUNKeeeeS FES チラシAR の認識データ ar/fes/targets.mind を作る(チラシの表面が変わったら必ず実行)。実行は /tmp/mindar の中で(tools/ar_compile.mjs と同じ手順)
+// JUNKeeeeS FES チラシAR の認識データ ar/fes/targets.mind を作る(チラシの表面が変わったら必ず実行)。
+// 使い方: mkdir -p /tmp/mindar && cd /tmp/mindar && npm init -y && npm i mind-ar@1.2.5 @tensorflow/tfjs
+//        cp tools/ar_compile_fes.mjs /tmp/mindar/ && cd /tmp/mindar && node ar_compile_fes.mjs   ← 🔴 コピーして /tmp/mindar の中から実行(import が相対パスのため)。約30秒
 
 import { OfflineCompiler } from './node_modules/mind-ar/src/image-target/offline-compiler.js';
 import { loadImage } from './node_modules/canvas/index.js';
