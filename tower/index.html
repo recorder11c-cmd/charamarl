@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>CHARAMARL アクキータワー</title>
+<meta name="description" content="CHARAMARLのアクキーを積んで塔をつくるゲーム。タップで落とすだけ。何cm積める？">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://charamarl.com/tower/">
+<meta property="og:title" content="CHARAMARL アクキータワー">
+<meta property="og:description" content="アクキーを積んで塔をつくる。タップで落とすだけ。何cm積める？">
+<meta property="og:image" content="https://charamarl.com/tower/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CHARAMARL アクキータワー">
+<meta name="twitter:description" content="アクキーを積んで塔をつくる。タップで落とすだけ。何cm積める？">
+<meta name="twitter:image" content="https://charamarl.com/tower/og.png">
+<script>
+// 計測(GA4・CHARAMARLと同じプロパティ)。?internal=1 を一度開いた端末は以後計測しない(解除=?internal=0)
+(function(){
+  try{ var q=new URLSearchParams(location.search);
+    if(q.get('internal')==='1') localStorage.setItem('cm_internal','1');
+    if(q.get('internal')==='0') localStorage.removeItem('cm_internal');
+    if(localStorage.getItem('cm_internal')==='1'){ window.DR_INTERNAL=true; return; } }catch(e){}
+  var id='G-PMSD6TMSJW', s=document.createElement('script'); s.async=true; s.src='https://www.googletagmanager.com/gtag/js?id='+id; document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[]; window.gtag=function(){dataLayer.push(arguments);}; gtag('js',new Date()); gtag('config',id);
+})();
+window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',name,params||{}); }catch(e){} };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
+<style>
+  :root{ --ink:#1B1B1F; --pink:#FF3EA5; --yellow:#FFE000; --cyan:#00D4FF; --lime:#7FE000; --bg:#FFF6E5; --tap-min:44px; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;}
+  body{ font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif; color:var(--ink); background:var(--pink);
+    -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; overflow:hidden; touch-action:none; font-feature-settings:"palt"; }
+  body::before{ content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.18) 6px, transparent 6px), radial-gradient(circle, rgba(0,212,255,.15) 4px, transparent 4px);
+    background-size:80px 80px, 40px 40px; background-position:0 0, 20px 20px; }
+  #stage{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:1; }
+  #wrap{ position:relative; width:100%; height:100%; max-width:480px; max-height:100%; background:var(--bg); overflow:hidden; }
+  @media (min-width:481px){ #wrap{ border-left:4px solid var(--ink); border-right:4px solid var(--ink); } }
+  canvas#cv{ display:block; width:100%; height:100%; }
+  .hud{ position:absolute; left:0; right:0; top:0; padding:max(10px, env(safe-area-inset-top)) 14px 0; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none; }
+  .hud .h{ font-weight:900; font-size:15px; letter-spacing:.02em; }
+  .hud .h b{ font-size:34px; line-height:1; font-variant-numeric:tabular-nums; display:inline-block; min-width:2.2em; text-align:right; }
+  .hud .r{ text-align:right; font-weight:800; font-size:13px; color:#6B6660; line-height:1.4; }
+  .hud .r b{ color:var(--ink); font-size:15px; }
+  .hint{ position:absolute; left:0; right:0; bottom:max(18px, env(safe-area-inset-bottom)); text-align:center; font-weight:900; font-size:15px; pointer-events:none; }
+  .hint small{ display:block; font-size:12px; font-weight:800; color:#6B6660; }
+  .brand{ position:absolute; left:14px; bottom:max(18px, env(safe-area-inset-bottom)); font-weight:900; font-size:12px; pointer-events:auto; color:var(--ink); text-decoration:none; }
+  /* ---- オーバーレイ ---- */
+  .ov{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(27,27,31,.35); z-index:5; }
+  .ov.open{ display:flex; }
+  .panel{ width:100%; max-width:400px; background:#fff; border:4px solid var(--ink); border-radius:22px; box-shadow:8px 8px 0 var(--ink); padding:20px 18px 16px; text-align:center; max-height:92%; overflow:auto; }
+  .panel h1{ font-size:26px; font-weight:900; line-height:1.2; margin-bottom:6px; }
+  .panel h1 span{ color:var(--pink); }
+  .panel p{ font-weight:800; font-size:14px; color:#6B6660; line-height:1.6; }
+  .panel .big{ font-size:58px; font-weight:900; line-height:1; margin:10px 0 2px; font-variant-numeric:tabular-nums; }
+  .panel .big small{ font-size:22px; }
+  .panel .name{ font-weight:900; font-size:14px; line-height:1.5; margin:8px 0 2px; word-break:break-all; color:var(--ink); background:#FFF6E5; border-radius:12px; padding:8px 10px; }
+  .panel .name em{ font-style:normal; font-size:11px; color:#6B6660; display:block; }
+  .btns{ display:grid; gap:10px; margin-top:14px; }
+  .btn{ display:flex; align-items:center; justify-content:center; gap:8px; min-height:var(--tap-min); border:3px solid var(--ink); border-radius:14px; background:#fff; font-family:inherit; font-weight:900; font-size:16px; color:var(--ink); cursor:pointer; text-decoration:none; box-shadow:4px 4px 0 var(--ink); padding:10px 14px; }
+  .btn:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink); }
+  .btn.y{ background:var(--yellow); } .btn.p{ background:var(--pink); color:#fff; } .btn.c{ background:var(--cyan); }
+  .btn.s{ font-size:13px; min-height:38px; box-shadow:none; border-width:2px; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .best{ font-size:12px; font-weight:800; color:#6B6660; margin-top:10px; }
+  .pv{ height:150px; width:auto; border:3px solid var(--ink); border-radius:10px; margin:8px auto 0; display:none; }
+  .note{ font-size:11px; color:#6B6660; font-weight:700; margin-top:10px; line-height:1.5; }
+  .note a{ color:var(--ink); }
+  /* タイトル */
+  .title h1{ font-size:30px; }
+  .title .sub{ font-size:13px; margin:4px 0 10px; }
+  .how{ text-align:left; background:#FFF6E5; border-radius:14px; padding:12px 14px; font-size:13px; font-weight:800; line-height:1.6; margin:6px 0 4px; }
+  .how b{ color:var(--pink); }
+  .shake{ animation:shk .5s; }
+  @keyframes shk{ 0%,100%{transform:translate(0,0)} 20%{transform:translate(-5px,2px)} 40%{transform:translate(5px,-2px)} 60%{transform:translate(-4px,1px)} 80%{transform:translate(4px,0)} }
+</style>
+</head>
+<body>
+<div id="stage"><div id="wrap">
+  <canvas id="cv"></canvas>
+  <div class="hud">
+    <div class="h">高さ <b id="hH" class="num">0.0</b> cm</div>
+    <div class="r"><b id="hN">0</b> 個<br>ベスト <span id="hB">0.0</span> cm</div>
+  </div>
+  <div class="hint" id="hint">タップで落とす<small>アクキーを積んで塔をつくろう</small></div>
+
+  <div class="ov open" id="ovTitle"><div class="panel title">
+    <h1>🎪 CHARAMARL<br><span>アクキータワー</span></h1>
+    <p class="sub">アクキーを積んで、塔をつくる</p>
+    <div class="how">
+      <div>👆 <b>タップで落とす</b>。左右に動く手から、アクキーがポトッ</div>
+      <div>📏 高さは cm で出ます。<b>崩れて落ちたら終わり</b></div>
+      <div>🏷 積んだ順で、塔の名前が決まります</div>
+    </div>
+    <div class="btns"><button class="btn y" id="btnStart">はじめる</button></div>
+    <div class="note">アクキーは全部 <a href="https://charamarl.com/?utm_source=tower&utm_medium=title" target="_blank" rel="noopener">CHARAMARL</a> で買える本物の絵です</div>
+  </div></div>
+
+  <div class="ov" id="ovOver"><div class="panel">
+    <h1 id="ovTtl">崩れた！</h1>
+    <div class="big"><span id="ovH">0.0</span><small> cm</small></div>
+    <p><span id="ovN">0</span> 個 積めました <span id="ovNew" style="color:var(--pink)"></span></p>
+    <div class="name"><em>この塔の名前</em><span id="ovName"></span></div>
+    <img class="pv" id="cardPrev" alt="結果カード">
+    <div class="btns">
+      <button class="btn p" id="btnShare">📷 画像でシェア</button>
+      <button class="btn y" id="btnRetry">もう一回</button>
+      <div class="row2">
+        <a class="btn s" href="https://charamarl.com/?utm_source=tower&utm_medium=over" target="_blank" rel="noopener" id="btnShop">🛍 アクキーを見る</a>
+        <a class="btn s" href="https://charamarl.com/run.html?utm_source=tower" target="_blank" rel="noopener">🏃 RUNで走る</a>
+      </div>
+    </div>
+    <div class="best">ベスト <span id="ovBest">0.0</span> cm　<span id="shareMsg"></span></div>
+  </div></div>
+</div></div>
+
+<script>
+(() => {
+  const { Engine, Bodies, Body, Composite, Vertices, Events } = Matter;
+  const Q = new URLSearchParams(location.search);
+  const RANK_API = 'https://charamarl.com/api/run-score';
+  function beacon(event){
+    if (window.DR_INTERNAL) return;
+    try{ const body = JSON.stringify({ char:'TOWER', event });
+      if (!(navigator.sendBeacon && navigator.sendBeacon(RANK_API, body)))
+        fetch(RANK_API, { method:'POST', headers:{ 'Content-Type':'text/plain' }, body, keepalive:true }).catch(()=>{}); }catch(e){}
+  }
+
+  // ---- キャラ(積むアクキー) ----
+  const CHARS = {
+    sue:       { name:'SUE',           artist:'DinoRenny' },
+    gmc:       { name:'レコマル',       artist:'MARU' },
+    ufoo:      { name:'う〜ほ〜',       artist:'ちゅい' },
+    kagechiyo: { name:'カゲチヨ',       artist:'カゲチヨ' },
+    yurucrazy: { name:'ユルクレイジー', artist:'CRAZY' },
+    dogooooo:  { name:'ドグー',         artist:'SAYoooooh' },
+    inkumo:    { name:'インクモ',       artist:"Ink'z Monster" },
+    danna:     { name:'だんな',         artist:'赤猫かるま' },
+    blockma:   { name:'ぶろっくま',     artist:'チンチロ' },
+    mony:      { name:'モニィ',         artist:'morry' },
+  };
+  const KEYS = Object.keys(CHARS);
+  const ART_H = 68;               // 画面上のアクキー本体(絵の部分)の高さ(px)。リングと鎖はその上に付く
+  const CM_PER_PX = 5 / ART_H;    // アクキー本体は約5cm
+  const scOf = key => ART_H / shapes[key].ah;   // 画像→画面の倍率(本体の高さを揃える)
+  // 絵の部分(リングと鎖を除く)の長方形。画像左上を原点にした画面px
+  function artRect(key){ const sh = shapes[key], sc = scOf(key); const xs = sh.v.map(v => v[0] * sc), ys = sh.v.map(v => v[1] * sc); const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys); return { x0, y0, w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 }; }
+  let shapes = null; const imgs = {};
+
+  // ---- 画面 ----
+  const wrap = document.getElementById('wrap'), cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  let W = 400, H = 700, DPR = 1;
+  function resize(){
+    const r = wrap.getBoundingClientRect(); DPR = Math.min(2, window.devicePixelRatio || 1);
+    W = Math.round(r.width); H = Math.round(r.height); cv.width = W * DPR; cv.height = H * DPR;
+    plate.w = Math.min(280, W * .7);
+  }
+  const plate = { w:250, h:26, cx:0, top:0 };
+
+  // ---- 物理 ----
+  const engine = Engine.create({ enableSleeping:false, positionIterations:10, velocityIterations:8 });
+  engine.gravity.y = 1.0;
+  const world = engine.world;
+  let plateBody = null;
+  const S = { state:'title', pieces:[], count:0, height:0, best:0, cam:0, camT:0, hand:{ x:0, dir:1, speed:2.2 }, next:null, falling:null, settle:0, snapshot:null, nameList:[], over:false, t:0, shakeT:0 };
+  try{ S.best = +localStorage.getItem('cm_tower_best') || 0; }catch(e){}
+  document.getElementById('hB').textContent = S.best.toFixed(1);
+
+  function pick(){ let k; do { k = KEYS[Math.floor(Math.random() * KEYS.length)]; } while (S.pieces.length && k === S.pieces[S.pieces.length - 1].key && Math.random() < .8); return k; }
+
+  function makeBody(key, x, y){
+    const sh = shapes[key], sc = scOf(key);
+    // 当たり判定は絵の部分の長方形(多角形だとMatter.jsの積み上げが安定しない。角を落とすだけでも崩れる)
+    const r = artRect(key);
+    const body = Bodies.rectangle(x, y, r.w, r.h, { friction:.95, frictionStatic:1.2, restitution:0, density:.0025, frictionAir:.012 });
+    body.plugin = { key, ox:-r.cx, oy:-r.cy, w: sh.w * sc, h: sh.h * sc };
+    return body;
+  }
+  function setupWorld(){
+    Composite.clear(world, false);
+    plate.cx = W / 2; plate.top = H - 110;
+    plateBody = Bodies.rectangle(plate.cx, plate.top + plate.h / 2, plate.w, plate.h, { isStatic:true, friction:1, restitution:0 });
+    Composite.add(world, plateBody);
+  }
+
+  function start(){
+    S.state = 'play'; S.pieces = []; S.count = 0; S.height = 0; S.cam = 0; S.camT = 0; S.falling = null; S.snapshot = null; S.nameList = []; S.over = false; S.t = 0;
+    S.hand.x = W / 2; S.hand.dir = 1; S.hand.speed = 2.2; S.next = pick();
+    setupWorld(); updateHud();
+    document.getElementById('ovTitle').classList.remove('open'); document.getElementById('ovOver').classList.remove('open');
+    document.getElementById('hint').style.opacity = 1;
+    drEvent('tower_start'); beacon('play');
+  }
+
+  // 手の位置(画面座標) → 落とす
+  const HAND_Y = 96;
+  function drop(){
+    if (S.state !== 'play' || S.falling || !S.next) return;
+    const key = S.next; const r = artRect(key);
+    const wx = S.hand.x, wy = S.cam + HAND_Y + r.cy;   // 画像の上端を手の位置に合わせた時の中心
+    const b = makeBody(key, wx, wy);
+    Composite.add(world, b); S.pieces.push(b); S.falling = b; S.settle = 0; S.next = null;
+    document.getElementById('hint').style.opacity = 0;
+  }
+
+  function towerTop(){ let top = plate.top; for (const b of S.pieces){ if (b === S.falling) continue; if (b.bounds.min.y < top) top = b.bounds.min.y; } return top; }
+  function measure(){ return Math.max(0, (plate.top - towerTop()) * CM_PER_PX); }
+
+  function landed(){
+    const b = S.falling; S.falling = null; S.count = S.pieces.length;
+    S.nameList.push(b.plugin.key);
+    S.height = measure();
+    S.snapshot = S.pieces.map(p => ({ key:p.plugin.key, x:p.position.x, y:p.position.y, a:p.angle }));
+    S.next = pick(); S.hand.speed = Math.min(4.4, 2.0 + S.count * .14);
+    updateHud();
+  }
+
+  function gameOver(){
+    if (S.over) return; S.over = true; S.state = 'over'; S.shakeT = 30;
+    const h = S.height; const isNew = h > S.best + 1e-6;
+    if (isNew){ S.best = h; try{ localStorage.setItem('cm_tower_best', String(h)); }catch(e){} }
+    document.getElementById('ovH').textContent = h.toFixed(1); document.getElementById('ovN').textContent = S.count;
+    document.getElementById('ovNew').textContent = isNew && S.count > 0 ? '🎉 自己ベスト！' : '';
+    document.getElementById('ovName').textContent = towerName() || '（まだ名前がない）';
+    document.getElementById('ovBest').textContent = S.best.toFixed(1); document.getElementById('hB').textContent = S.best.toFixed(1);
+    document.getElementById('shareMsg').textContent = ''; document.getElementById('cardPrev').style.display = 'none'; cardBlob = null;
+    document.getElementById('ovTtl').textContent = S.count === 0 ? '落ちた…' : (S.count >= 15 ? 'すごい塔！' : S.count >= 8 ? 'なかなかの塔！' : '崩れた！');
+    drEvent('tower_over', { height: Math.round(h * 10) / 10, count: S.count, new_record: isNew ? 1 : 0 }); beacon('over');
+    setTimeout(() => { document.getElementById('ovOver').classList.add('open'); prepareCard(); }, 650);
+  }
+  function towerName(){ return S.nameList.map(k => CHARS[k].name).join(''); }
+
+  function updateHud(){
+    document.getElementById('hH').textContent = S.height.toFixed(1);
+    document.getElementById('hN').textContent = S.count;
+  }
+
+  // ---- 更新 ----
+  let last = 0;
+  function frame(ts){
+    requestAnimationFrame(frame);
+    if (document.hidden) return;
+    tick();
+  }
+  function tick(){
+    S.t++;
+    if (S.state === 'play' || S.state === 'over'){
+      Engine.update(engine, 1000 / 60);
+      // 手の往復
+      if (S.state === 'play' && !S.falling){
+        const lim = Math.min(W / 2 - 40, plate.w / 2 + 24);   // 台の端から少しだけはみ出せる
+        S.hand.x += S.hand.dir * S.hand.speed; if (S.hand.x > plate.cx + lim){ S.hand.x = plate.cx + lim; S.hand.dir = -1; } if (S.hand.x < plate.cx - lim){ S.hand.x = plate.cx - lim; S.hand.dir = 1; }
+      }
+      // 着地判定
+      if (S.falling){
+        const b = S.falling; const sp = Math.hypot(b.velocity.x, b.velocity.y);
+        if (sp < .25 && Math.abs(b.angularVelocity) < .01) S.settle++; else S.settle = 0;
+        if (S.settle > 22 && b.bounds.min.y < plate.top + 2) landed();
+      }
+      // 落下判定(塔から落ちた)
+      for (const b of S.pieces){ if (b.position.y > plate.top + 160){ if (S.state === 'play') gameOver(); } if (b.position.y > plate.top + 1500 && !b.plugin.gone){ b.plugin.gone = true; Composite.remove(world, b); } }
+      // 全体がじわっと崩れている時も、止まった高さで更新
+      // カメラ: 塔の上端(or 落下中の絵)を画面の 45% あたりに
+      const top = Math.min(towerTop(), S.falling ? S.falling.bounds.min.y : 1e9);
+      S.camT = Math.min(0, top - H * .36 - 40);   // 塔の上端が画面の36%あたり(落とす距離を一定に)
+      S.cam += (S.camT - S.cam) * .12;
+    }
+    draw();
+  }
+
+  // ---- 描画 ----
+  function draw(){
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    let shx = 0, shy = 0; if (S.shakeT > 0){ S.shakeT--; shx = (Math.random() - .5) * 8; shy = (Math.random() - .5) * 8; }
+    ctx.save(); ctx.translate(shx, -S.cam + shy);
+    // 定規(10cmごと)
+    ctx.font = '800 11px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    const topCm = Math.ceil((plate.top - S.cam) * CM_PER_PX / 10) * 10 + 10;
+    for (let cm = 10; cm <= topCm; cm += 10){
+      const y = plate.top - cm / CM_PER_PX; ctx.strokeStyle = 'rgba(27,27,31,.18)'; ctx.lineWidth = 1; ctx.setLineDash([6, 6]);
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(27,27,31,.45)'; ctx.fillText(cm + 'cm', 8, y - 8);
+    }
+    // 台
+    ctx.fillStyle = '#1B1B1F'; rr(plate.cx - plate.w / 2, plate.top, plate.w, plate.h, 8); ctx.fill();
+    ctx.fillStyle = '#FFE000'; rr(plate.cx - plate.w / 2 + 4, plate.top + 4, plate.w - 8, plate.h - 8, 6); ctx.fill();
+    ctx.fillStyle = '#1B1B1F'; ctx.font = '900 12px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🎪 CHARAMARL', plate.cx, plate.top + plate.h / 2 + 1);
+    // 台の脚
+    ctx.fillStyle = '#1B1B1F'; ctx.fillRect(plate.cx - plate.w / 2 + 18, plate.top + plate.h, 14, 400); ctx.fillRect(plate.cx + plate.w / 2 - 32, plate.top + plate.h, 14, 400);
+    // 積んだアクキー
+    for (const b of S.pieces) drawPiece(ctx, b.plugin.key, b.position.x, b.position.y, b.angle, b.plugin);
+    // 手と、次のアクキー
+    if (S.state === 'play' && !S.falling && S.next){
+      const hy = S.cam + HAND_Y; const sh = shapes[S.next], sc = scOf(S.next), pw = sh.w * sc, ph = sh.h * sc;
+      // 絵(上端=hy)
+      ctx.drawImage(imgs[S.next], S.hand.x - pw / 2, hy, pw, ph);
+      // 指(リングをつまむ)
+      ctx.fillStyle = '#FFD9B3'; ctx.strokeStyle = '#1B1B1F'; ctx.lineWidth = 3;
+      rr(S.hand.x - 9, hy - 56, 18, 64, 9); ctx.fill(); ctx.stroke();
+      rr(S.hand.x + 6, hy - 40, 16, 48, 8); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#1B1B1F'; ctx.fillRect(S.hand.x - 2, S.cam - 10, 4, HAND_Y - 46);
+    }
+    ctx.restore();
+    // 落下中の点線(目安)
+    if (S.state === 'play' && !S.falling && S.next){
+      ctx.strokeStyle = 'rgba(27,27,31,.25)'; ctx.lineWidth = 2; ctx.setLineDash([4, 8]);
+      ctx.beginPath(); ctx.moveTo(S.hand.x, HAND_Y + shapes[S.next].h * scOf(S.next) + 6); ctx.lineTo(S.hand.x, H); ctx.stroke(); ctx.setLineDash([]);
+    }
+  }
+  function drawPiece(g, key, x, y, a, p){
+    const im = imgs[key]; if (!im) return;
+    g.save(); g.translate(x, y); g.rotate(a); g.drawImage(im, p.ox, p.oy, p.w, p.h); g.restore();
+  }
+  function rr(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+  // ---- 結果カード(1080x1350) ----
+  let cardBlob = null;
+  function makeCard(){
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1350; const g = c.getContext('2d');
+    const INK = '#1B1B1F', F = '"M PLUS Rounded 1c", sans-serif';
+    g.fillStyle = '#FF3EA5'; g.fillRect(0, 0, 1080, 1350);
+    for (let y = 0; y < 1350; y += 80) for (let x = 0; x < 1080; x += 80){ g.fillStyle = 'rgba(255,255,255,.18)'; g.beginPath(); g.arc(x, y, 12, 0, 7); g.fill(); g.fillStyle = 'rgba(0,212,255,.15)'; g.beginPath(); g.arc(x + 40, y + 40, 8, 0, 7); g.fill(); }
+    // 白い板
+    g.fillStyle = INK; rrg(g, 56, 56, 968, 1238, 36); g.fill(); g.fillStyle = '#FFF6E5'; rrg(g, 40, 40, 968, 1238, 36); g.fill(); g.lineWidth = 8; g.strokeStyle = INK; g.stroke();
+    const outlined = (t, x, y, size, fill, align) => { g.font = `900 ${size}px ${F}`; g.textAlign = align || 'left'; g.textBaseline = 'alphabetic'; g.lineJoin = 'round'; g.lineWidth = Math.max(6, size * .16); g.strokeStyle = INK; g.strokeText(t, x, y); g.fillStyle = fill; g.fillText(t, x, y); };
+    outlined('CHARAMARL', 80, 140, 56, '#fff'); outlined('アクキータワー', 80, 215, 64, '#FFE000');
+    // 塔の絵(スナップショット)を右側に
+    const snap = S.snapshot || [];
+    if (snap.length){
+      let minY = plate.top, minX = 1e9, maxX = -1e9;
+      for (const s of snap){ const p = shapes[s.key], sc = scOf(s.key); minY = Math.min(minY, s.y - p.h * sc); minX = Math.min(minX, s.x - p.w * sc); maxX = Math.max(maxX, s.x + p.w * sc); }
+      minX = Math.min(minX, plate.cx - plate.w / 2 - 10); maxX = Math.max(maxX, plate.cx + plate.w / 2 + 10);
+      const th = plate.top + 30 - minY + 40, tw = maxX - minX;
+      const boxX = 520, boxY = 250, boxW = 460, boxH = 900;
+      const sc = Math.min(boxW / tw, boxH / th, 3.2);
+      g.save(); g.translate(boxX + boxW / 2, boxY + boxH); g.scale(sc, sc); g.translate(-plate.cx, -(plate.top + 30));
+      g.fillStyle = INK; rrg(g, plate.cx - plate.w / 2, plate.top, plate.w, plate.h, 8); g.fill(); g.fillStyle = '#FFE000'; rrg(g, plate.cx - plate.w / 2 + 4, plate.top + 4, plate.w - 8, plate.h - 8, 6); g.fill();
+      for (const s of snap){ const p = shapes[s.key], ssc = scOf(s.key), r = artRect(s.key); g.save(); g.translate(s.x, s.y); g.rotate(s.a); g.drawImage(imgs[s.key], -r.cx, -r.cy, p.w * ssc, p.h * ssc); g.restore(); }
+      g.restore();
+    }
+    outlined('高さ', 80, 420, 44, '#fff');
+    outlined(S.height.toFixed(1), 80, 560, 150, '#FFE000'); g.font = `900 56px ${F}`; const nw = g.measureText(S.height.toFixed(1)).width;
+    outlined('cm', 80 + measure150(g, S.height.toFixed(1)) + 16, 560, 56, '#fff');
+    outlined(`${S.count} 個 積めた`, 80, 640, 40, '#fff');
+    // 塔の名前(折り返し)
+    g.font = `900 30px ${F}`; g.fillStyle = INK; g.textAlign = 'left'; g.lineWidth = 0;
+    g.fillStyle = '#6B6660'; g.font = `800 26px ${F}`; g.fillText('この塔の名前', 80, 730);
+    const name = towerName() || '—'; const lines = wrapText(g, name, 400, `900 34px ${F}`);
+    g.font = `900 34px ${F}`; g.fillStyle = INK; lines.slice(0, 9).forEach((ln, i) => g.fillText(ln, 80, 780 + i * 44));
+    g.font = `900 30px ${F}`; g.textAlign = 'right'; g.lineWidth = 6; g.strokeStyle = INK; g.lineJoin = 'round'; g.strokeText('charamarl.com/tower/  #CHARAMARL', 990, 1235); g.fillStyle = '#fff'; g.fillText('charamarl.com/tower/  #CHARAMARL', 990, 1235);
+    return c;
+  }
+  function measure150(g, t){ g.font = '900 150px "M PLUS Rounded 1c", sans-serif'; return g.measureText(t).width; }
+  function rrg(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function wrapText(g, text, maxW, font){ g.font = font; const out = []; let cur = ''; for (const ch of text){ if (g.measureText(cur + ch).width > maxW && cur){ out.push(cur); cur = ch; } else cur += ch; } if (cur) out.push(cur); return out; }
+  async function prepareCard(){
+    const prev = document.getElementById('cardPrev'); cardBlob = null; prev.style.display = 'none';
+    try{ if (document.fonts && document.fonts.load) await document.fonts.load('900 40px "M PLUS Rounded 1c"'); }catch(e){}
+    try{ const c = makeCard(); cardBlob = await new Promise(res => c.toBlob(res, 'image/png')); prev.src = URL.createObjectURL(cardBlob); prev.style.display = 'inline-block'; }catch(e){}
+  }
+  document.getElementById('btnShare').addEventListener('click', async () => {
+    const url = 'https://charamarl.com/tower/';
+    const text = `アクキータワー 高さ ${S.height.toFixed(1)}cm（${S.count}個）「${towerName().slice(0, 40)}」 #CHARAMARL`;
+    drEvent('tower_share', { height: Math.round(S.height * 10) / 10 }); beacon('share');
+    if (!cardBlob) await prepareCard();
+    if (!cardBlob){ window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank'); return; }
+    const file = new File([cardBlob], `charamarl_tower_${S.height.toFixed(1)}cm.png`, { type:'image/png' });
+    if (navigator.canShare && navigator.canShare({ files:[file] })){ try{ await navigator.share({ files:[file], text: text + ' ' + url }); }catch(e){} }
+    else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(cardBlob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+      document.getElementById('shareMsg').textContent = '画像を保存しました。Xに添付してね';
+      window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+    }
+  });
+  document.getElementById('btnShop').addEventListener('click', () => { drEvent('tower_shop'); beacon('shop'); });
+
+  // ---- 入力 ----
+  document.getElementById('btnStart').addEventListener('click', start);
+  document.getElementById('btnRetry').addEventListener('click', start);
+  cv.addEventListener('pointerdown', e => { e.preventDefault(); if (S.state === 'play') drop(); });
+  window.addEventListener('keydown', e => { if (e.code === 'Space' || e.code === 'ArrowDown'){ e.preventDefault(); if (S.state === 'play') drop(); else if (S.state === 'title' || S.state === 'over') start(); } });
+  window.addEventListener('resize', () => { const oldTop = plate.top, oldCx = plate.cx; resize(); if (S.state === 'play'){ /* プレイ中は台を動かさない */ plate.top = oldTop; plate.cx = oldCx; } });
+
+  // ---- 読み込み ----
+  async function load(){
+    shapes = await (await fetch('art/shapes.json')).json();
+    await Promise.all(KEYS.map(k => new Promise(res => { const im = new Image(); im.onload = () => { imgs[k] = im; res(); }; im.onerror = res; im.src = `art/${k}.png`; })));
+    resize(); setupWorld(); requestAnimationFrame(frame);
+  }
+  load();
+  window.CMTOWER = { S, drop, start, tick, get plate(){ return plate; }, engine, imgs, get shapes(){ return shapes; }, scOf, towerName };
+})();
+</script>
+</body>
+</html>
