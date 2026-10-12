@@ -10,10 +10,12 @@
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-const ADMIN_KEY = process.env.APPLY_KEY;
+const { isAdminReq } = require('./_lib/admin.js');
+// NFC所有者トークンの鍵。OWNER_SECRET を設定すれば APPLY_KEY を入れ替えても配布済みトークンは壊れない
+const OWNER_SECRET = process.env.OWNER_SECRET || process.env.APPLY_KEY;
 const crypto = require('crypto');
 // NFCアクキー所有者トークン: HMAC(APPLY_KEY, 'run-owner:'+char) の先頭20桁。go.js が発行し、ここで検証する
-function ownerToken(char) { return ADMIN_KEY ? crypto.createHmac('sha256', ADMIN_KEY).update('run-owner:' + char).digest('hex').slice(0, 20) : null; }
+function ownerToken(char) { return OWNER_SECRET ? crypto.createHmac('sha256', OWNER_SECRET).update('run-owner:' + char).digest('hex').slice(0, 20) : null; }
 
 async function redis(...cmd) {
   const res = await fetch(KV_URL, { method: 'POST', headers: { Authorization: `Bearer ${KV_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(cmd) });
@@ -82,7 +84,7 @@ module.exports = async (req, res) => {
         return res.status(200).json({ owner: ok });
       }
       if (q.stats !== undefined) {           // 管理用: 日別のプレイ数・ゲームオーバー数(直近14日)
-        if (!ADMIN_KEY || q.key !== ADMIN_KEY) return res.status(403).json({ error: 'forbidden' });
+        if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
         const days = []; const d = new Date();
         for (let i = 0; i < 14; i++) { days.push(new Date(d.getTime() - i * 864e5).toISOString().slice(0, 10)); }
         const vals = await redis('MGET', ...days.flatMap(day => [`run:stat:${char}:play:${day}`, `run:stat:${char}:over:${day}`, `run:stat:${char}:share:${day}`, `run:stat:${char}:shop:${day}`]));
@@ -91,7 +93,7 @@ module.exports = async (req, res) => {
         return res.status(200).json({ char, registered: Number(total) || 0, daily });
       }
       if (q.week !== undefined) {            // 指定週の順位表(管理用)。week=YYYY-MM-DD(その週の月曜) / week=last で先週
-        if (!ADMIN_KEY || q.key !== ADMIN_KEY) return res.status(403).json({ error: 'forbidden' });
+        if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
         let wk = String(q.week);
         if (wk === 'last') wk = weekKey(new Date(Date.now() - 7 * 864e5));
         if (!/^\d{4}-\d{2}-\d{2}$/.test(wk)) return res.status(400).json({ error: 'bad week' });
@@ -102,7 +104,7 @@ module.exports = async (req, res) => {
       }
       const pid = PID_RE.test(String(q.pid || '')) ? String(q.pid) : null;
       const out = await board(char, pid);
-      if (ADMIN_KEY && q.key === ADMIN_KEY) {           // 管理用: 削除に使うpidを付けて返す
+      if ((q.key !== undefined || (req.headers || {})['x-admin-key']) && await isAdminReq(req)) {           // 管理用: 削除に使うpidを付けて返す
         const raw = await redis('ZREVRANGE', `run:rank:${char}`, 0, TOP_N - 1);
         out.top.forEach((t, i) => { t.pid = raw[i]; });
       }
@@ -164,7 +166,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.method === 'DELETE') {
-      if (!ADMIN_KEY || q.key !== ADMIN_KEY) return res.status(403).json({ error: 'forbidden' });
+      if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
       const char = String(q.char || ''), pid = String(q.pid || '');
       if (!charOk(char) || !PID_RE.test(pid)) return res.status(400).json({ error: 'bad id' });
       await pipeline([['ZREM', `run:rank:${char}`, pid], ['ZREM', `run:rank:${char}:w:${weekKey()}`, pid], ['ZREM', `run:rank:${char}:own`, pid], ['ZREM', `run:rank:${char}:own:w:${weekKey()}`, pid], ['DEL', `run:player:${char}:${pid}`]]);
@@ -173,6 +175,6 @@ module.exports = async (req, res) => {
 
     return res.status(405).json({ error: 'method' });
   } catch (e) {
-    return res.status(500).json({ error: String(e.message || e) });
+    return require('./_lib/admin.js').serverError(res, e, 'run-score.js');
   }
 };

@@ -29,6 +29,34 @@ async function currentUser(req) {
 
 const trim = (v, n) => String(v || '').trim().slice(0, n);
 
+// 🔴 振込口座は暗号化して保存する（2026-10-13〜）。IPA注意喚起「保有データの点検」への対応。
+//    鍵は Vercel 環境変数 SELLER_ENC_KEY（長いランダム文字列）。Redis が丸ごと漏れても口座は読めない。
+//    鍵が未設定のときは従来どおり平文で保存する（サイトを止めないため）。設定後は読み出し時に順次暗号化し直す。
+//    ⚠️ SELLER_ENC_KEY を失うと口座情報は復号できない。値はパスワード管理ツールにも控えておくこと。
+const crypto = require('crypto');
+const ENC_PREFIX = 'enc:v1:';
+const encKey = () => process.env.SELLER_ENC_KEY
+  ? crypto.createHash('sha256').update(process.env.SELLER_ENC_KEY).digest() : null;
+function seal(obj) {
+  const k = encKey();
+  const json = JSON.stringify(obj);
+  if (!k) return json;
+  const iv = crypto.randomBytes(12);
+  const c = crypto.createCipheriv('aes-256-gcm', k, iv);
+  const ct = Buffer.concat([c.update(json, 'utf8'), c.final()]);
+  return ENC_PREFIX + [iv, c.getAuthTag(), ct].map(b => b.toString('base64')).join(':');
+}
+function unseal(raw) {
+  if (!raw) return null;
+  if (!String(raw).startsWith(ENC_PREFIX)) return JSON.parse(raw);   // 旧データ（平文）
+  const k = encKey();
+  if (!k) throw new Error('SELLER_ENC_KEY 未設定のため口座情報を復号できません');
+  const [iv, tag, ct] = String(raw).slice(ENC_PREFIX.length).split(':').map(s => Buffer.from(s, 'base64'));
+  const d = crypto.createDecipheriv('aes-256-gcm', k, iv);
+  d.setAuthTag(tag);
+  return JSON.parse(Buffer.concat([d.update(ct), d.final()]).toString('utf8'));
+}
+
 module.exports = async (req, res) => {
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'KV未設定' });
 
@@ -42,7 +70,11 @@ module.exports = async (req, res) => {
         const list = [];
         for (const k of keys) {
           const raw = await redis('GET', `seller:${k}`);
-          if (raw) { const d = JSON.parse(raw); d.userKey = k; list.push(d); }
+          if (!raw) continue;
+          const d = unseal(raw);
+          // 平文のまま残っている旧データは、ここで暗号化し直す
+          if (encKey() && !String(raw).startsWith(ENC_PREFIX)) await redis('SET', `seller:${k}`, seal(d));
+          d.userKey = k; list.push(d);
         }
         list.sort((a, b) => (b.ts || 0) - (a.ts || 0));
         return res.status(200).json({ count: list.length, list });
@@ -51,7 +83,7 @@ module.exports = async (req, res) => {
       const u = await currentUser(req);
       if (!u) return res.status(401).json({ error: 'ログインしてください' });
       const raw = await redis('GET', `seller:${u.key}`);
-      return res.status(200).json({ data: raw ? JSON.parse(raw) : null });
+      return res.status(200).json({ data: unseal(raw) });
     }
 
     if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
@@ -77,13 +109,13 @@ module.exports = async (req, res) => {
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) return res.status(400).json({ error: 'メールアドレスの形式をご確認ください' });
       if (!d.bank || !d.branch || !d.acctNum || !d.acctName) return res.status(400).json({ error: '振込先（銀行名・支店名・口座番号・口座名義）をすべて入力してください' });
       if (!d.agree) return res.status(400).json({ error: '販売条件への同意にチェックしてください' });
-      await redis('SET', `seller:${u.key}`, JSON.stringify(d));
+      await redis('SET', `seller:${u.key}`, seal(d));
       await redis('SADD', 'seller:index', u.key);
       return res.status(200).json({ ok: true });
     }
 
     return res.status(400).json({ error: 'bad action' });
   } catch (e) {
-    return res.status(500).json({ error: String((e && e.message) || e) });
+    return require('./_lib/admin.js').serverError(res, e, 'seller.js');
   }
 };

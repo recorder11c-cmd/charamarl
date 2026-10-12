@@ -17,6 +17,8 @@
 //                 to を空文字にすると既定値に戻る
 
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+// NFC所有者トークンの鍵。APPLY_KEY と分けておくと、APPLY_KEY を入れ替えても配布済みトークンが壊れない
+const OWNER_SECRET = process.env.OWNER_SECRET || process.env.APPLY_KEY;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
 // 既定の行き先。?nfc=1 を付けてあるのは、GA4で「NFC経由の来訪」を分けて読むため。
@@ -57,9 +59,9 @@ const RUN_KEYS = new Set(['sue', 'gmc', 'ufoo', 'kagechiyo', 'yurucrazy',
                           'dogooooo', 'inkumo', 'danna', 'blockma', 'mony']);
 
 function withOwner(dest, key) {
-  if (!RUN_KEYS.has(key) || !process.env.APPLY_KEY) return dest;
+  if (!RUN_KEYS.has(key) || !OWNER_SECRET) return dest;
   const tok = require('crypto')
-    .createHmac('sha256', process.env.APPLY_KEY)
+    .createHmac('sha256', OWNER_SECRET)
     .update('run-owner:' + key.toUpperCase())
     .digest('hex').slice(0, 20);
   return dest + (dest.includes('?') ? '&' : '?') + 'owner=' + tok;
@@ -82,12 +84,12 @@ const norm = (c) => String(c || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g,
 module.exports = async (req, res) => {
   if (!KV_URL || !KV_TOKEN) return res.status(503).json({ error: 'KV未設定' });
   const q = req.query || {};
-  const admin = () => process.env.APPLY_KEY && q.key === process.env.APPLY_KEY;
+  const { isAdminReq } = require('./_lib/admin.js');
 
   try {
     if (req.method === 'POST') {
       const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-      if (!(process.env.APPLY_KEY && b.key === process.env.APPLY_KEY)) {
+      if (!(await isAdminReq(Object.assign(req, { body: b })))) {
         return res.status(403).json({ error: 'forbidden' });
       }
       const c = norm(b.c);
@@ -103,7 +105,7 @@ module.exports = async (req, res) => {
     }
 
     if (q.stats) {
-      if (!admin()) return res.status(403).json({ error: 'forbidden' });
+      if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
       const keys = Object.keys(DEST);
       const [counts, dests, total] = await Promise.all([
         redis('MGET', ...keys.map(k => `nfc:count:${k}`)),

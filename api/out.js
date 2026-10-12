@@ -93,6 +93,6 @@ module.exports = async (req, res) => {
     } catch (e) {}
     return res.redirect(302, link);
   } catch (e) {
-    return res.status(500).json({ error: String((e && e.message) || e) });
+    return require('./_lib/admin.js').serverError(res, e, 'out.js');
   }
 };

@@ -88,6 +88,6 @@ module.exports = async (req, res) => {
 
     return res.status(405).json({ error: 'method not allowed' });
   } catch (e) {
-    return res.status(500).json({ error: String((e && e.message) || e) });
+    return require('./_lib/admin.js').serverError(res, e, 'react.js');
   }
 };

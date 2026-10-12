@@ -41,7 +41,6 @@ async function currentUser(req) {
 }
 
 const trim = (v, max) => String(v || '').trim().slice(0, max);
-const isAdmin = (q) => process.env.APPLY_KEY && q && q.key === process.env.APPLY_KEY;
 
 // 予約公開。publishAt(epoch ms) が未来のあいだは、承認済みでも公開一覧に出さない。
 const isScheduled = (a) => Number(a && a.publishAt) > Date.now();
@@ -271,6 +270,6 @@ module.exports = async (req, res) => {
 
     return res.status(400).json({ error: 'bad action' });
   } catch (e) {
-    return res.status(500).json({ error: String((e && e.message) || e) });
+    return require('./_lib/admin.js').serverError(res, e, 'gallery.js');
   }
 };

@@ -91,6 +91,7 @@
   .editbox .gbtn{margin-top:8px;width:100%;}
   .err{background:#FFC7CE;color:#9C0006;border-radius:14px;padding:12px 14px;font-size:12px;font-weight:700;margin-bottom:14px;display:none;}
   .refresh{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:var(--tap-min);margin:20px 0 6px;background:var(--orange);color:#fff;border:none;border-radius:26px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;transition:transform .12s;}
+  .acct{font:inherit;background:none;border:1px dashed currentColor;border-radius:6px;padding:0 6px;cursor:pointer;color:inherit;}
   .refresh:active{transform:scale(.95);}
   .refresh:focus-visible{outline:3px solid var(--purple);outline-offset:2px;}
   @media(prefers-reduced-motion:reduce){*{transition:none!important;}}
@@ -108,6 +109,7 @@
   <button class="tb" data-pane="p-apply" type="button">応募 <span class="n" id="tApply">-</span></button>
   <button class="tb" data-pane="p-user" type="button">アカウント <span class="n" id="tUser">-</span></button>
   <button class="tb" data-pane="p-seller" type="button">販売者情報 <span class="n" id="tSeller">-</span></button>
+  <button class="tb" data-pane="p-audit" type="button">操作ログ</button>
 </div>
 
 <div class="wrap">
@@ -150,11 +152,35 @@
     <div id="sellerList"></div>
   </section>
 
+  <section class="pane" id="p-audit" hidden>
+    <div class="eyebrow">Audit</div>
+    <h1>管理操作ログ</h1>
+    <p class="sub">管理APIへのアクセスと管理者ログインの記録（新しい200件）。身に覚えのない IP・時間帯・「denied / blocked」が続いていないかを確認してください。</p>
+    <div id="auditList"></div>
+  </section>
+
   <button class="refresh" id="refresh">↻ 一覧を更新する</button>
 </div>
 
 <script>
-  const key=new URLSearchParams(location.search).get('key')||'';
+  // 管理キーは URL に残さない（アクセスログ・閲覧履歴・画面共有で漏れるため。2026-10-13 IPA注意喚起への対応）
+  //   ?key=… で開いたら sessionStorage に移して URL から消す。API には X-Admin-Key ヘッダーで送る。
+  //   運営アカウントでログインしていれば、キーは不要。
+  const key=(()=>{
+    const p=new URLSearchParams(location.search); let k=p.get('key')||'';
+    try{ if(k) sessionStorage.setItem('cm_admin_key',k); else k=sessionStorage.getItem('cm_admin_key')||''; }catch(_){}
+    if(p.has('key')){ p.delete('key'); const qs=p.toString(); history.replaceState(null,'',location.pathname+(qs?'?'+qs:'')+location.hash); }
+    return k;
+  })();
+  const _fetch=window.fetch.bind(window);
+  const fetch=(u,o={})=>{
+    if(typeof u==='string'&&u.startsWith('/api/')){
+      u=u.replace(/([?&]key=)[^&]*/,'$1');   // key= は「管理用の呼び出し」の目印として空で残す
+      o=Object.assign({},o,{headers:Object.assign({},o.headers||{},key?{'X-Admin-Key':key}:{})});
+      if(typeof o.body==='string'){ try{const b=JSON.parse(o.body); if(b&&'key' in b){delete b.key; o.body=JSON.stringify(b);}}catch(_){} }
+    }
+    return _fetch(u,o);
+  };
   const list=document.getElementById('list'), err=document.getElementById('err');
   const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const fmt=ts=>new Date(ts).toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
@@ -314,11 +340,32 @@
         <div class="ts">${fmt(s.ts)} 登録</div>
         <div class="msg">名義: ${esc(s.sellerName)}
 ✉️ ${esc(s.email)}
-🏦 ${esc(s.bank)} ${esc(s.branch)} ${esc(s.acctType)} ${esc(s.acctNum)}
+🏦 ${esc(s.bank)} ${esc(s.branch)} ${esc(s.acctType)} <button type="button" class="acct" data-full="${esc(s.acctNum)}" title="クリックで表示">••••${esc(String(s.acctNum||'').slice(-3))}</button>
 カナ: ${esc(s.acctName)}${s.note?`
 備考: ${esc(s.note)}`:''}</div>
       </div>`).join('');
     }catch(ex){err.textContent=ex.message;err.style.display='block';}
+  }
+
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('.acct'); if(!b)return;
+    if(b.dataset.shown){b.textContent='••••'+b.dataset.full.slice(-3);delete b.dataset.shown;}
+    else{b.textContent=b.dataset.full;b.dataset.shown='1';}
+  });
+
+  // ===== 操作ログ =====
+  async function loadAudit(){
+    const el=document.getElementById('auditList');
+    try{
+      const r=await fetch('/api/auth?audit=1&key=');
+      if(!r.ok)throw new Error('操作ログの取得に失敗 ('+r.status+')');
+      const d=await r.json();
+      if(!d.list.length){el.innerHTML='<div class="empty" style="padding:24px;">記録はまだありません</div>';return;}
+      el.innerHTML='<div class="card"><div class="msg" style="font-family:ui-monospace,monospace;font-size:12px;">'+d.list.map(a=>{
+        const bad=/^(denied|blocked)/.test(a.via);
+        return `<div${bad?' style="color:#c0392b;font-weight:700;"':''}>${fmt(a.ts)}  ${esc(a.via)}  ${esc(a.ip)}  ${esc(a.method)} ${esc(a.path)}${a.action?' ['+esc(a.action)+']':''}${a.note?' — '+esc(a.note):''}</div>`;
+      }).join('')+'</div></div>';
+    }catch(ex){el.innerHTML='<div class="empty" style="padding:24px;">'+esc(ex.message)+'</div>';}
   }
 
   // ===== アカウント一覧（作品数つき・代行用の仮アカウントを片づけるため） =====
@@ -418,11 +465,12 @@
   document.getElementById('userQ').addEventListener('input',filterUsers);
   document.getElementById('userZero').addEventListener('change',filterUsers);
 
-  document.getElementById('refresh').addEventListener('click',()=>{load();loadGallery();loadSellers();loadUsers();});
+  document.getElementById('refresh').addEventListener('click',()=>{load();loadGallery();loadSellers();loadUsers();loadAudit();});
   load();
   loadGallery();
   loadSellers();
   loadUsers();
+  loadAudit();
 </script>
 </body>
 </html>

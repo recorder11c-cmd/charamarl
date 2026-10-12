@@ -59,8 +59,9 @@ module.exports = async (req, res) => {
   } catch (_) {} // 計測失敗でも誘導は止めない
   // DINORENNY RUN の所有者特典トークン(SUEのみ)。characters/sue.html が RUN へのリンクに引き継ぐ
   let extra = '';
-  if (c !== 'top' && process.env.APPLY_KEY) {   // キャラ別トークン(run-score.js の ownerToken と同じ式・大文字ID)
-    const tok = require('crypto').createHmac('sha256', process.env.APPLY_KEY).update('run-owner:' + c.toUpperCase()).digest('hex').slice(0, 20);
+  const OWNER_SECRET = process.env.OWNER_SECRET || process.env.APPLY_KEY;
+  if (c !== 'top' && OWNER_SECRET) {   // キャラ別トークン(run-score.js の ownerToken と同じ式・大文字ID)
+    const tok = require('crypto').createHmac('sha256', OWNER_SECRET).update('run-owner:' + c.toUpperCase()).digest('hex').slice(0, 20);
     extra = '&owner=' + tok;
   }
   res.statusCode = 302;

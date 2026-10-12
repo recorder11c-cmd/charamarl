@@ -112,7 +112,7 @@ module.exports = async (req, res) => {
     else await redis('SET', `artist:${key}`, JSON.stringify(rec));
     return res.status(200).json({ ok: true, artistKey: key, home, homeLabel: rec.homeLabel });
   } catch (e) {
-    return res.status(500).json({ error: String((e && e.message) || e) });
+    return require('./_lib/admin.js').serverError(res, e, 'artist.js');
   }
 };
 module.exports.loadArtists = loadAll;
