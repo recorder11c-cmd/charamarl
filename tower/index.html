@@ -201,7 +201,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   }
 
   // 手の位置(画面座標) → 落とす
-  const HAND_Y = 96;
+  const HAND_Y = 124;   // 上のHUD(高さ・ベスト)に指が重ならない位置
   function drop(){
     if (S.state !== 'play' || S.falling || !S.next) return;
     const key = S.next; const r = artRect(key);
