@@ -22,7 +22,16 @@ import sys, os, json, html, subprocess, urllib.request
 from datetime import date, timedelta
 from PIL import Image
 
-KEY = os.environ.get('CHARAMARL_KEY', 'f51472ede46274ebf97b56d0')
+# 管理キーは ~/.charamarl_admin_key（1行）だけにある。コードにも記録にも書かない（2026-10-13 入れ替え）
+def _admin_key():
+    k = os.environ.get('CHARAMARL_KEY')
+    if k:
+        return k
+    try:
+        return open(os.path.expanduser('~/.charamarl_admin_key'), encoding='utf-8').readline().strip()
+    except OSError:
+        raise SystemExit('管理キーが見つからない（~/.charamarl_admin_key）')
+KEY = _admin_key()
 API = 'https://charamarl.com/api/run-score'
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 W, H = 1200, 1200
@@ -36,9 +45,9 @@ CHARS = [('SUE', 'SUE'), ('GMC', 'レコマル'), ('UFOO', 'う〜ほ〜'), ('KA
 
 def top1(cid, week):
     """そのキャラの、その週の1位を返す。登録が無ければ None。"""
-    url = f'{API}?week={week}&key={KEY}&char={cid}'
+    url = f'{API}?week={week}&char={cid}'
     try:
-        d = json.load(urllib.request.urlopen(url))
+        d = json.load(urllib.request.urlopen(urllib.request.Request(url, headers={'X-Admin-Key': KEY})))
     except Exception:
         return None
     rows = d.get('top') or d.get('list') or []
