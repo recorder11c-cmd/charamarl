@@ -63,6 +63,11 @@ NOTES = [
          wide='クリエイター「PHAGY」',
          works=['謎の未確認生命体MOJA(モジャ)ソフビ', 'PHAGY TOY指スケ', 'MOJA 1周年記念セール', '不眠症の悪魔「ドリームレス（仮）」'],
          portrait=True),   # 2026-10-08 作品は4点とも 4:5 の縦長。正方形のセルに入れると上下が切れるので、縦長のまま全部見せる
+    dict(no='07', artist='チンチロ', sub='ぶろっくま',
+         title='自分の不得意な<br>分野では戦わない',
+         wide='自分の不得意な<br>分野では戦わない',
+         works=['ぶろっくま'],
+         contain=True),   # 作品は1点（ドット絵の正方形）。本人の言葉をそのままタイトルに
 ]
 
 TPL = '''<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
@@ -145,7 +150,8 @@ def main():
             f = os.path.join(tmp, f'w{i}.jpg')
             urllib.request.urlretrieve(w['img'], f)
             b64 = base64.b64encode(open(f, 'rb').read()).decode()
-            cells += f'<div class="cell"><img src="data:image/jpeg;base64,{b64}"></div>'
+            fit = ' style="object-fit:contain;background:#fff"' if n.get('contain') else ''
+            cells += f'<div class="cell"><img src="data:image/jpeg;base64,{b64}"{fit}></div>'
         n_w = len(ws)
         artist = n['artist'] + (f"（{n['sub']}）" if n.get('sub') else '')
 
@@ -163,6 +169,9 @@ def main():
             else:
                 cols = 'repeat(%d,1fr)' % max(n_w, 1)
             ar = '16/9' if n_w == 1 else '1'
+            # contain＝ドット絵など、切れてはいけない絵。note用(横長)は正方形のセル、サイト用は横長のセルに全体を収める
+            if n.get('contain') and S['tag'] == 'note':
+                ar = '1'
             gw = S['gw']
             if n.get('portrait'):
                 ar = '4/5'
