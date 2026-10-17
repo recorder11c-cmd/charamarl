@@ -170,7 +170,7 @@ def main():
         for ln in held:
             c = [x.strip() for x in ln.strip('|\n').split('|')]
             print('   {} / {} … {}'.format(c[0], c[1][:26], c[2][:40]))
-        d = text.split('## D.')[1] if '## D.' in text else ''
+        d = text.split('## D.')[1].split('\n## ')[0] if '## D.' in text else ''
         dl = [ln for ln in d.split('\n') if ln.startswith('- ') and '（なし）' not in ln]
         print(f'■ ⑤ 計画だけで未登録: {len(dl)} 件（0件が正常）')
         for ln in dl:
