@@ -57,13 +57,15 @@ module.exports = async (req, res) => {
     // 作家共通（ホーム）: GET /api/out?a={artistKey} → artist:{key}.home へ。カウント out:home:{key} / out:artist:{key} / out:total
     const a = String((req.query && req.query.a) || '').toLowerCase();
     if (a) {
-      if (!/^[a-z0-9_.\-\u3040-\u30ff\u4e00-\u9fff ]{1,60}$/i.test(a)) return res.status(400).json({ error: 'bad key' });
+      // 作家キーは表示名そのまま(小文字)。' © + を含む名前(ink'z monster / dreamer© / yuo.+)が 400 になっていたので、長さと制御文字だけ見る(2026-10-17)
+      if (a.length > 60 || /[\x00-\x1f<>"]/.test(a)) return res.status(400).json({ error: 'bad key' });
       const rawA = await redis('GET', `artist:${a}`);
       let home = '';
       try { home = String((JSON.parse(rawA) || {}).home || ''); } catch (e) {}
       if (!/^https?:\/\//.test(home)) return res.redirect(302, 'https://charamarl.com/');
       try { await redis('INCR', `out:home:${a}`); await redis('INCR', `out:artist:${a}`); await redis('INCR', 'out:total'); } catch (e) {}
-      try { const u = new URL(home); if (!u.searchParams.has('utm_source')) { u.searchParams.set('utm_source', 'charamarl'); u.searchParams.set('utm_medium', 'referral'); } home = u.toString(); } catch (e) {}
+      // Instagram / X はutmを読まないうえ、アプリのディープリンクが余計なクエリで崩れることがあるので付けない(2026-10-17)
+      try { const u = new URL(home); if (!/(^|\.)(instagram\.com|x\.com|twitter\.com|threads\.net)$/.test(u.hostname) && !u.searchParams.has('utm_source')) { u.searchParams.set('utm_source', 'charamarl'); u.searchParams.set('utm_medium', 'referral'); } home = u.toString(); } catch (e) {}
       return res.redirect(302, home);
     }
 
@@ -85,7 +87,8 @@ module.exports = async (req, res) => {
     // utm付与(既にクエリがあるURLにも対応)
     try {
       const u = new URL(link);
-      if (!u.searchParams.has('utm_source')) {
+      // Instagram / X はutmを付けない(ホームと同じ理由・2026-10-17)
+      if (!/(^|\.)(instagram\.com|x\.com|twitter\.com|threads\.net)$/.test(u.hostname) && !u.searchParams.has('utm_source')) {
         u.searchParams.set('utm_source', 'charamarl');
         u.searchParams.set('utm_medium', 'referral');
       }
