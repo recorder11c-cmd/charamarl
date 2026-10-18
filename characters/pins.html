@@ -161,6 +161,7 @@
     鞄でも、帽子でも、ジャケットの襟でも。小さいので、いくつも並べて留められます。
   </p>
   <div class="asr-block">
+    <div>🎱 <b><a href="../smartball/?utm_source=pins&utm_medium=page" style="color:inherit">スマートボールで遊ぶ →</a></b><br><span>玉を打って、落ちた穴のピンズを集める。4つそろえばそのままセットで</span></div>
     <div>🛒 <b>単品 ¥1,800</b> 税込・送料込<br><span>4個セットなら1個 ¥1,100</span></div>
     <div>📦 受注生産<br><span>毎月末で締めて、翌月にまとめて作ります</span></div>
     <div>🎨 絵柄を選べます<br><span>4個セットは作家をまたいで混ぜられます</span></div>
@@ -421,6 +422,12 @@ $('#buyBtn').addEventListener('click', async function(){
 // キャラページから ?k=<key> で来たら、その絵柄を最初から選んでおく。
 // 「ユルクレイジーのピンズを見に来た人」に、また探させない。
 (function(){
+  // スマートボール(/smartball/)から ?set=a,b,c,d で来たら、4個セットをその絵柄で最初から選んでおく
+  var setq = new URLSearchParams(location.search).get('set');
+  if (setq){
+    var keys = setq.split(',').filter(function(x, i, arr){ return DESIGNS.some(function(d){ return d.key === x; }) && arr.indexOf(x) === i; }).slice(0, SET_SIZE);
+    if (keys.length === SET_SIZE){ mode = 'set'; picked = keys; render(); var first = document.querySelector('.pick[data-key="' + CSS.escape(keys[0]) + '"]'); if (first) first.scrollIntoView({ block:'center' }); return; }
+  }
   var k = new URLSearchParams(location.search).get('k');
   if (!k) return;
   var d = DESIGNS.find(function(x){ return x.key === k; });

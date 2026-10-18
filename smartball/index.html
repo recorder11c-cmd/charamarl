@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>CHARAMARL ピンズスマートボール</title>
+<meta name="description" content="玉を打って、落ちた穴のピンズをあつめるスマートボール。4つそろえばセットで買える。CHARAMARLのピンズ12種。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://charamarl.com/smartball/">
+<meta property="og:title" content="CHARAMARL ピンズスマートボール">
+<meta property="og:description" content="玉を打って、落ちた穴のピンズをあつめる。4つそろえばセットで買える。">
+<meta property="og:image" content="https://charamarl.com/smartball/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CHARAMARL ピンズスマートボール">
+<meta name="twitter:description" content="玉を打って、落ちた穴のピンズをあつめる。4つそろえばセットで買える。">
+<meta name="twitter:image" content="https://charamarl.com/smartball/og.png">
+<script>
+// 計測(GA4・CHARAMARLと同じプロパティ)。?internal=1 を一度開いた端末は以後計測しない(解除=?internal=0)
+(function(){
+  try{ var q=new URLSearchParams(location.search);
+    if(q.get('internal')==='1') localStorage.setItem('cm_internal','1');
+    if(q.get('internal')==='0') localStorage.removeItem('cm_internal');
+    if(localStorage.getItem('cm_internal')==='1'){ window.DR_INTERNAL=true; return; } }catch(e){}
+  var id='G-PMSD6TMSJW', s=document.createElement('script'); s.async=true; s.src='https://www.googletagmanager.com/gtag/js?id='+id; document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[]; window.gtag=function(){dataLayer.push(arguments);}; gtag('js',new Date()); gtag('config',id);
+})();
+window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',name,params||{}); }catch(e){} };
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.20.0/matter.min.js"></script>
+<style>
+  :root{ --ink:#1B1B1F; --pink:#FF3EA5; --yellow:#FFE000; --cyan:#00D4FF; --lime:#7FE000; --orange:#FF7A00; --bg:#FFF6E5; --tap-min:44px; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;}
+  body{ font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif; color:var(--ink); background:#1B1B1F;
+    -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; overflow:hidden; touch-action:none; font-feature-settings:"palt"; }
+  #stage{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+  #wrap{ position:relative; width:100%; height:100%; max-width:480px; background:var(--bg); overflow:hidden; }
+  @media (min-width:481px){ #wrap{ border-left:4px solid #000; border-right:4px solid #000; } }
+  canvas#cv{ display:block; width:100%; height:100%; }
+  .top{ position:absolute; left:0; right:0; top:0; padding:max(8px, env(safe-area-inset-top)) 10px 0; display:flex; justify-content:space-between; align-items:flex-start; pointer-events:none; }
+  .top a{ pointer-events:auto; }
+  .pill{ background:#fff; border:3px solid var(--ink); border-radius:999px; padding:4px 12px; font-weight:900; font-size:13px; box-shadow:3px 3px 0 var(--ink); color:var(--ink); text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+  .pill b{ font-size:16px; }
+  .tray{ position:absolute; left:10px; right:10px; top:max(52px, calc(env(safe-area-inset-top) + 44px)); display:flex; gap:8px; justify-content:center; pointer-events:none; }
+  .slot{ width:56px; height:56px; border-radius:50%; border:3px dashed rgba(27,27,31,.35); background:rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .slot.on{ border:3px solid var(--ink); background:#fff; box-shadow:3px 3px 0 var(--ink); animation:pop .4s; }
+  .slot img{ width:50px; height:50px; }
+  @keyframes pop{ 0%{transform:scale(.3)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  .plunger{ position:absolute; right:10px; bottom:max(14px, env(safe-area-inset-bottom)); width:96px; height:96px; border-radius:50%; border:4px solid var(--ink); background:var(--yellow); box-shadow:5px 5px 0 var(--ink); font-family:inherit; font-weight:900; font-size:18px; color:var(--ink); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; z-index:3; }
+  .plunger:active{ transform:translate(3px,3px); box-shadow:2px 2px 0 var(--ink); }
+  .plunger small{ font-size:11px; font-weight:800; }
+  .power{ position:absolute; right:116px; bottom:max(22px, env(safe-area-inset-bottom)); width:16px; height:80px; border:3px solid var(--ink); border-radius:8px; background:#fff; overflow:hidden; z-index:3; }
+  .power i{ position:absolute; left:0; right:0; bottom:0; height:0; background:linear-gradient(to top, var(--lime), var(--yellow), var(--pink)); }
+  .hint{ position:absolute; left:12px; bottom:max(24px, env(safe-area-inset-bottom)); font-weight:900; font-size:14px; pointer-events:none; }
+  .hint small{ display:block; font-size:11px; font-weight:800; color:#6B6660; }
+  .toast{ position:absolute; left:50%; top:38%; transform:translate(-50%,-50%) scale(0); font-weight:900; font-size:30px; color:#fff; -webkit-text-stroke:2px var(--ink); paint-order:stroke fill; text-shadow:4px 4px 0 var(--ink); pointer-events:none; white-space:nowrap; z-index:4; }
+  .toast.show{ animation:toast 1.1s ease-out forwards; }
+  @keyframes toast{ 0%{transform:translate(-50%,-50%) scale(.2);opacity:0} 25%{transform:translate(-50%,-50%) scale(1.15);opacity:1} 75%{transform:translate(-50%,-60%) scale(1);opacity:1} 100%{transform:translate(-50%,-80%) scale(.9);opacity:0} }
+  /* ---- オーバーレイ ---- */
+  .ov{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(27,27,31,.45); z-index:5; }
+  .ov.open{ display:flex; }
+  .panel{ width:100%; max-width:420px; background:#fff; border:4px solid var(--ink); border-radius:22px; box-shadow:8px 8px 0 var(--ink); padding:18px 16px 14px; text-align:center; max-height:94%; overflow:auto; }
+  .panel h1{ font-size:24px; font-weight:900; line-height:1.2; margin-bottom:4px; }
+  .panel h1 span{ color:var(--pink); }
+  .panel p{ font-weight:800; font-size:13px; color:#6B6660; line-height:1.6; }
+  .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:10px 0 6px; }
+  .pk{ border:3px solid var(--ink); border-radius:14px; background:#fff; padding:6px 2px 4px; font-family:inherit; cursor:pointer; box-shadow:3px 3px 0 var(--ink); }
+  .pk:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink); }
+  .pk img{ width:58px; height:58px; display:block; margin:0 auto; }
+  .pk b{ display:block; font-size:12px; margin-top:2px; }
+  .pk small{ display:block; font-size:10px; color:#6B6660; font-weight:800; line-height:1.2; }
+  .btns{ display:grid; gap:10px; margin-top:12px; }
+  .btn{ display:flex; align-items:center; justify-content:center; gap:8px; min-height:var(--tap-min); border:3px solid var(--ink); border-radius:14px; background:#fff; font-family:inherit; font-weight:900; font-size:16px; color:var(--ink); cursor:pointer; text-decoration:none; box-shadow:4px 4px 0 var(--ink); padding:10px 14px; }
+  .btn:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink); }
+  .btn.y{ background:var(--yellow); } .btn.p{ background:var(--pink); color:#fff; } .btn.c{ background:var(--cyan); } .btn.s{ font-size:13px; min-height:40px; box-shadow:none; border-width:2px; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .got{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:8px 0; }
+  .got .g{ width:78px; text-align:center; }
+  .got .g img{ width:64px; height:64px; display:block; margin:0 auto; }
+  .got .g b{ display:block; font-size:11px; }
+  .got .g a{ display:block; font-size:11px; font-weight:900; color:var(--pink); text-decoration:underline; text-underline-offset:2px; }
+  .got .g.dup{ opacity:.45; }
+  .pv{ height:140px; width:auto; border:3px solid var(--ink); border-radius:10px; margin:6px auto 0; display:none; }
+  .note{ font-size:11px; color:#6B6660; font-weight:700; margin-top:10px; line-height:1.5; }
+  .note a{ color:var(--ink); }
+  .card{ background:#FFF6E5; border:3px solid var(--ink); border-radius:16px; padding:10px; margin-top:8px; display:flex; gap:10px; align-items:center; text-align:left; }
+  .card img{ width:72px; height:72px; flex:none; }
+  .card b{ font-size:16px; display:block; }
+  .card small{ font-size:12px; color:#6B6660; font-weight:800; display:block; }
+  .card .pr{ font-size:14px; font-weight:900; margin-top:2px; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="wrap">
+  <canvas id="cv"></canvas>
+  <div class="top">
+    <a class="pill" href="https://charamarl.com/characters/pins.html?utm_source=smartball&utm_medium=game" target="_blank" rel="noopener" id="lnkPins">🛒 ピンズのページ</a>
+    <span class="pill">🎱 <b id="hBalls">5</b> 発</span>
+  </div>
+  <div class="tray" id="tray"><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div>
+  <div class="hint" id="hint">ボタンを長押しして、はなすと発射<small>穴に入ったピンズが上の台紙にたまる</small></div>
+  <div class="power"><i id="powerBar"></i></div>
+  <button class="plunger" id="plunger" type="button">ひく<small>長押し</small></button>
+  <div class="toast" id="toast"></div>
+
+  <div class="ov open" id="ovTitle"><div class="panel">
+    <h1>🎪 ピンズ<span>スマートボール</span></h1>
+    <p>玉になるキャラをえらぶ。キャラごとに玉のクセがちがう</p>
+    <div class="grid" id="pickGrid"></div>
+    <div class="note">穴に入ったピンズは台紙にたまる。<b>4つそろえばセットで買える</b>（¥4,400・作家をまたいでOK）。ピンズは <a href="https://charamarl.com/characters/pins.html?utm_source=smartball&utm_medium=title" target="_blank" rel="noopener">ピンズのページ</a> で販売中</div>
+  </div></div>
+
+  <div class="ov" id="ovHit"><div class="panel">
+    <h1 id="hitTtl">🎯 入った！</h1>
+    <div class="card"><img id="hitImg" alt=""><div><b id="hitName"></b><small id="hitBy"></small><div class="pr">単品 ¥1,800（税込・送料込）</div></div></div>
+    <div class="btns">
+      <button class="btn y" id="btnNext">つぎの玉 →</button>
+      <a class="btn s" id="hitBuy" href="#" target="_blank" rel="noopener">🛒 このピンズを単品で買う</a>
+    </div>
+  </div></div>
+
+  <div class="ov" id="ovOver"><div class="panel">
+    <h1 id="ovTtl">おしまい</h1>
+    <p id="ovSub"></p>
+    <div class="got" id="gotList"></div>
+    <img class="pv" id="cardPrev" alt="結果カード">
+    <div class="btns" id="ovBtns"></div>
+    <div class="note">ピンズは丸25mm・金属フレーム＋ドーム加工・受注生産。<a href="https://charamarl.com/characters/pins.html?utm_source=smartball&utm_medium=over" target="_blank" rel="noopener">くわしくはピンズのページ</a></div>
+  </div></div>
+</div></div>
+
+<script>
+(() => {
+  const { Engine, Bodies, Body, Composite, Events, Vector } = Matter;
+  const RANK_API = 'https://charamarl.com/api/run-score';
+  function beacon(event){ if (window.DR_INTERNAL) return; try{ const body = JSON.stringify({ char:'SMARTBALL', event }); if (!(navigator.sendBeacon && navigator.sendBeacon(RANK_API, body))) fetch(RANK_API, { method:'POST', headers:{ 'Content-Type':'text/plain' }, body, keepalive:true }).catch(()=>{}); }catch(e){} }
+  const PINS_URL = 'https://charamarl.com/characters/pins.html';
+
+  // ---- ピンズ12種(characters/pins.html の DESIGNS と同じ順・同じ名前) と、玉になったときのクセ ----
+  const PINS = [
+    { key:'sue',          name:'スー',         artist:'DinoRenny',      trait:'重い玉',     p:{ density:.012, restitution:.15, frictionAir:.004 } },
+    { key:'mossun',       name:'モッスン',      artist:'DinoRenny',      trait:'つるつる',   p:{ density:.006, restitution:.45, friction:0, frictionAir:.002 } },
+    { key:'putti',        name:'プッチィ',      artist:'DinoRenny',      trait:'ふわっと',   p:{ density:.004, restitution:.4, frictionAir:.02, lift:.45 } },
+    { key:'yurucrazy',    name:'ユルクレイジー', artist:'CRAZY',          trait:'よく跳ねる', p:{ density:.006, restitution:.95 } },
+    { key:'danna',        name:'だんな',        artist:'赤猫かるま',       trait:'まっすぐ',   p:{ density:.008, restitution:.25, frictionAir:.012 } },
+    { key:'inkumo',       name:'インクモ',      artist:"Ink'z Monster",  trait:'大きい',     p:{ density:.006, restitution:.4, r:15 } },
+    { key:'mony',         name:'モニィ',        artist:'morry',          trait:'気まぐれ',   p:{ density:.006, restitution:.4, wobble:1 } },
+    { key:'kg_kagechiyo', name:'カゲチヨ',      artist:'カゲチヨ',        trait:'速い',       p:{ density:.006, restitution:.5, power:1.3 } },
+    { key:'kg_kimi',      name:'キミ',          artist:'カゲチヨ',        trait:'小さい',     p:{ density:.006, restitution:.4, r:9 } },
+    { key:'kg_shigure',   name:'シグレ',        artist:'カゲチヨ',        trait:'しっとり',   p:{ density:.008, restitution:.03 } },
+    { key:'kg_promu',     name:'プロム',        artist:'カゲチヨ',        trait:'くるくる',   p:{ density:.006, restitution:.4, friction:.6, spin:1 } },
+    { key:'kg_muchiko',   name:'ムチコ',        artist:'カゲチヨ',        trait:'ねばる',     p:{ density:.006, restitution:.2, friction:1, frictionAir:.012, power:1.1 } },
+  ];
+  const byKey = k => PINS.find(p => p.key === k);
+  const PRICE_SINGLE = 1800, PRICE_SET = 4400, BALLS = 5;
+  const imgs = {};
+
+  // ---- 画面(論理座標 420×740 を実画面に拡縮) ----
+  const wrap = document.getElementById('wrap'), cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  const LW = 420, LH = 740; let SC = 1, OX = 0, OY = 0, DPR = 1;
+  function resize(){
+    const r = wrap.getBoundingClientRect(); DPR = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(r.width * DPR); cv.height = Math.round(r.height * DPR);
+    SC = Math.min(r.width / LW, r.height / LH); OX = (r.width - LW * SC) / 2; OY = (r.height - LH * SC) / 2;
+  }
+
+  // ---- 盤面 ----
+  const engine = Engine.create({ positionIterations:8, velocityIterations:6 }); engine.gravity.y = 1.0;
+  const world = engine.world;
+  const S = { state:'title', char:null, balls:BALLS, ball:null, tray:[], got:[], combo:0, power:0, charging:false, t:0, flash:0, shake:0, lastHit:null, fx:[], captureCool:0 };
+  const LANE_X = 394, DIV_X = 372, FIELD_R = 369;   // 発射レーンの玉の中心 / レーンと盤面の仕切りの中心 / 盤面の右端。レーンは 375〜412 の37px(玉の直径は最大30)
+  const TOP_C = { x:(8 + 412) / 2, y:215 }, TOP_R = 202;   // 上のアーチ
+  const pockets = [];
+  function wall(x, y, w, h, a){ const b = Bodies.rectangle(x, y, w, h, { isStatic:true, angle:a || 0, friction:.1, restitution:.3 }); b.plugin = { kind:'wall' }; return b; }
+  function buildBoard(){
+    const st = [];
+    st.push(wall(4, LH/2, 8, LH*2)); st.push(wall(416, LH/2, 8, LH*2));                    // 外壁
+    st.push(wall(DIV_X, (LH + 200) / 2, 6, LH - 200));                                  // レーンと盤面の仕切り(y>200)
+    // 上のアーチ(多角形の静的セグメント)。右のレーンから上を回って左へ
+    const n = 26; for (let i = 0; i < n; i++){ const a0 = Math.PI * (i / n), a1 = Math.PI * ((i + 1) / n); const p0 = { x:TOP_C.x + TOP_R * Math.cos(a0), y:TOP_C.y - TOP_R * Math.sin(a0) }, p1 = { x:TOP_C.x + TOP_R * Math.cos(a1), y:TOP_C.y - TOP_R * Math.sin(a1) };
+      const mx = (p0.x + p1.x) / 2, my = (p0.y + p1.y) / 2, len = Math.hypot(p1.x - p0.x, p1.y - p0.y) + 2, ang = Math.atan2(p1.y - p0.y, p1.x - p0.x); st.push(wall(mx, my, len, 8, ang)); }
+    // 釘(段違いの格子)
+    const addPeg = (x, y) => { const peg = Bodies.circle(x, y, 5, { isStatic:true, restitution:.6, friction:.05 }); peg.plugin = { kind:'peg' }; st.push(peg); };
+    for (let row = 0; row < 5; row++){ const y = 250 + row * 44; const off = row % 2 ? 24 : 0; for (let x = 22 + off; x < FIELD_R - 12; x += 48) addPeg(x, y); }
+    // 左右の壁ぎわを玉が素通りしないように、壁のすぐ内側にも釘(アーチから降りてきた玉を盤面の中へ散らす)
+    [235, 330, 425].forEach(y => { addPeg(22, y); addPeg(FIELD_R - 14, y); });
+    // 穴(カップ)。上段6・下段6を互い違いに。カップ=底と両脇の短い壁＋中央のセンサー
+    // 4個×3段。段の間隔を玉より広く空けて、上段をすり抜けた玉が下の段にも落ちるように(2段×6個だと隙間が玉より狭く、上段しか入らなかった)
+    const rows = [{ y:500, xs:[45, 131, 217, 303] }, { y:582, xs:[88, 174, 260, 346] }, { y:664, xs:[45, 131, 217, 303] }];
+    let i = 0;
+    rows.forEach(r => r.xs.forEach(x => { const pin = PINS[i++]; const cw = 32, ch = 40;   // カップは玉(直径24)より少し広いだけ。広いと5発で4つそろいすぎる(40pxで8割そろった)
+      st.push(wall(x - cw/2, r.y, 5, ch)); st.push(wall(x + cw/2, r.y, 5, ch)); st.push(wall(x, r.y + ch/2, cw, 5));
+      const sens = Bodies.circle(x, r.y + 4, 10, { isStatic:true, isSensor:true }); sens.plugin = { kind:'pocket', key:pin.key }; st.push(sens);
+      pockets.push({ x, y:r.y, w:cw, h:ch, key:pin.key }); }));
+    // 下段の穴の間の仕切り(玉が下段カップの外へ落ちたら流れて drain)
+    st.push(wall(LW/2, LH + 30, LW*2, 60));   // 床(実際は drain として処理)
+    Composite.add(world, st);
+  }
+  function makeBall(){
+    const c = byKey(S.char); const p = c.p; const r = p.r || 12;
+    const b = Bodies.circle(LANE_X, LH - 70, r, { restitution: p.restitution ?? .4, friction: p.friction ?? .05, frictionAir: p.frictionAir ?? .006, density: p.density || .006 });
+    b.plugin = { kind:'ball', key:S.char, r }; return b;
+  }
+
+  function start(charKey){
+    S.char = charKey; S.state = 'play'; S.balls = BALLS; S.tray = []; S.got = []; S.combo = 0; S.power = 0; S.charging = false; S.fx = []; S.t = 0;
+    if (S.ball){ Composite.remove(world, S.ball); S.ball = null; }
+    newBall(); renderTray(); document.getElementById('hBalls').textContent = S.balls;
+    document.getElementById('ovTitle').classList.remove('open'); document.getElementById('ovOver').classList.remove('open'); document.getElementById('ovHit').classList.remove('open');
+    drEvent('smb_start', { ball: charKey }); beacon('play');
+  }
+  function newBall(){ if (S.ball) Composite.remove(world, S.ball); S.ball = makeBall(); Composite.add(world, S.ball); S.launched = false; S.ballT = 0; }
+  function launch(){
+    if (S.state !== 'play' || !S.ball || S.launched) return;
+    const c = byKey(S.char); const pw = (16 + 11 * S.power) * (c.p.power || 1);   // 弱いと上まで届かず戻ってくる(戻ったら打ち直せる)
+    Body.setVelocity(S.ball, { x:0, y:-pw }); if (c.p.spin) Body.setAngularVelocity(S.ball, .6);
+    S.launched = true; S.balls--; document.getElementById('hBalls').textContent = S.balls; S.power = 0; powerBar.style.height = '0%';
+    document.getElementById('hint').style.opacity = 0;
+  }
+  function capture(key){
+    const pin = byKey(key); const dup = S.tray.includes(key);
+    S.fx.push({ type:'burst', x:S.ball.position.x, y:S.ball.position.y, t:0 }); S.flash = 10; S.shake = 10;
+    Composite.remove(world, S.ball); S.ball = null;
+    if (!dup && S.tray.length < 4){ S.tray.push(key); S.combo++; renderTray(); toast(S.combo >= 2 ? `COMBO ×${S.combo}!!` : '入った！'); }
+    else { S.balls++; document.getElementById('hBalls').textContent = S.balls; toast('もう持ってる！ +1玉'); }
+    S.got.push({ key, dup });
+    drEvent('smb_hit', { pin:key, dup: dup ? 1 : 0 });
+    document.getElementById('hitTtl').textContent = dup ? '🎯 もう持ってる！ 玉を1つおまけ' : (S.tray.length === 4 ? '🎉 4つそろった！' : '🎯 入った！');
+    document.getElementById('hitImg').src = `/img/pins/${key}.png`; document.getElementById('hitName').textContent = pin.name; document.getElementById('hitBy').textContent = pin.artist + ' ／ ' + pin.trait;
+    document.getElementById('hitBuy').href = `${PINS_URL}?k=${key}&utm_source=smartball&utm_medium=hit`;
+    setTimeout(() => { document.getElementById('ovHit').classList.add('open'); }, 500);
+  }
+  function miss(){ S.combo = 0; Composite.remove(world, S.ball); S.ball = null; toast('はずれ…'); setTimeout(nextBall, 500); }
+  function nextBall(){ document.getElementById('ovHit').classList.remove('open'); if (S.tray.length >= 4 || S.balls <= 0) return gameOver(); newBall(); }
+  function toast(t){ const el = document.getElementById('toast'); el.textContent = t; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
+  function renderTray(){ document.querySelectorAll('#tray .slot').forEach((s, i) => { const k = S.tray[i]; s.className = 'slot' + (k ? ' on' : ''); s.innerHTML = k ? `<img src="/img/pins/${k}.png" alt="">` : ''; }); }
+
+  function gameOver(){
+    S.state = 'over'; const n = S.tray.length; const full = n === 4;
+    document.getElementById('ovTtl').textContent = full ? '🎉 4つそろった！' : (n ? `ピンズ ${n}つ あつめた` : '1つも入らなかった…');
+    document.getElementById('ovSub').textContent = full ? '作家をまたいでOK。このままセットで買える' : (n ? `あと${4 - n}つでセット（1個 ¥1,100）` : 'もう一回どうぞ');
+    const gl = document.getElementById('gotList'); gl.innerHTML = S.tray.map(k => { const p = byKey(k); return `<div class="g"><img src="/img/pins/${k}.png" alt=""><b>${p.name}</b><a href="${PINS_URL}?k=${k}&utm_source=smartball&utm_medium=over" target="_blank" rel="noopener">単品 ¥1,800</a></div>`; }).join('');
+    const bt = document.getElementById('ovBtns'); let h = '';
+    if (full) h += `<a class="btn p" href="${PINS_URL}?set=${S.tray.join(',')}&utm_source=smartball&utm_medium=set" target="_blank" rel="noopener" data-ev="set">🛒 この4個セットを買う ¥4,400</a>`;
+    h += `<button class="btn y" id="btnRetry">もう一回（玉5発）</button>`;
+    h += `<div class="row2"><button class="btn s" id="btnShare">📷 画像でシェア</button><a class="btn s" href="${PINS_URL}?utm_source=smartball&utm_medium=over2" target="_blank" rel="noopener">🛒 ピンズのページ</a></div>`;
+    bt.innerHTML = h;
+    document.getElementById('btnRetry').addEventListener('click', () => { document.getElementById('ovOver').classList.remove('open'); document.getElementById('ovTitle').classList.add('open'); });
+    document.getElementById('btnShare').addEventListener('click', share);
+    bt.querySelectorAll('a[data-ev="set"]').forEach(a => a.addEventListener('click', () => { drEvent('smb_set_click', { pins:S.tray.join(',') }); beacon('shop'); }));
+    document.getElementById('cardPrev').style.display = 'none'; cardBlob = null;
+    drEvent('smb_over', { pins:n, full: full ? 1 : 0, ball:S.char }); beacon('over');
+    setTimeout(() => { document.getElementById('ovOver').classList.add('open'); prepareCard(); }, 600);
+  }
+
+  // ---- 更新 ----
+  const powerBar = document.getElementById('powerBar');
+  function tick(){
+    S.t++;
+    if (S.state !== 'play') return;
+    if (S.charging && !S.launched){ S.power = Math.min(1, S.power + .018); powerBar.style.height = (S.power * 100) + '%'; }
+    const b = S.ball; const c = byKey(S.char);
+    if (b && S.launched){
+      S.ballT++;
+      if (c.p.lift) Body.applyForce(b, b.position, { x:0, y:-b.mass * engine.gravity.y * engine.gravity.scale * c.p.lift });
+      if (c.p.wobble && S.ballT % 18 === 0) Body.applyForce(b, b.position, { x:(Math.random() - .5) * b.mass * .02, y:0 });
+      if (c.p.spin && S.ballT % 30 === 0) Body.setAngularVelocity(b, .5);
+    }
+    Engine.update(engine, 1000/60);
+    if (b && S.launched){
+      // 穴判定: センサーに重なったら捕獲(1フレームの猶予)
+      if (S.captureCool > 0) S.captureCool--;
+      for (const pk of pockets){ if (Math.abs(b.position.x - pk.x) < 11 && b.position.y > pk.y - 6 && b.position.y < pk.y + pk.h/2 - 2 && Math.hypot(b.velocity.x, b.velocity.y) < 9){ capture(pk.key); return; } }
+      if (b.position.y > LH + 10 || (b.position.y > LH - 30 && b.position.x < DIV_X)) return miss();
+      // 上まで届かずレーンに戻ってきたら、玉を返して打ち直し
+      if (b.position.x > DIV_X && b.position.y > LH - 90 && S.ballT > 40 && Math.hypot(b.velocity.x, b.velocity.y) < .6){ S.launched = false; S.balls++; document.getElementById('hBalls').textContent = S.balls; toast('届かない… もう一回'); return; }
+      if (S.ballT > 60 * 20) return miss();   // 20秒詰まったら流す
+    }
+    S.fx.forEach(f => f.t++); S.fx = S.fx.filter(f => f.t < 40);
+    if (S.flash > 0) S.flash--; if (S.shake > 0) S.shake--;
+  }
+
+  // ---- 描画 ----
+  function draw(){
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = '#FFF6E5'; ctx.fillRect(0, 0, cv.width, cv.height);
+    let sx = 0, sy = 0; if (S.shake > 0){ sx = (Math.random() - .5) * 6; sy = (Math.random() - .5) * 6; }
+    ctx.setTransform(DPR * SC, 0, 0, DPR * SC, DPR * (OX + sx), DPR * (OY + sy));
+    // 盤面の木枠と地
+    ctx.fillStyle = '#FFD400'; ctx.fillRect(0, 0, LW, LH);
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; for (let y = 40; y < LH; y += 36) for (let x = 20; x < LW; x += 36){ ctx.beginPath(); ctx.arc(x, y, 3, 0, 7); ctx.fill(); }
+    // アーチの内側(盤面)を少し明るく
+    ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(TOP_C.x, TOP_C.y, TOP_R - 4, Math.PI, 0); ctx.lineTo(FIELD_R, LH); ctx.lineTo(8, LH); ctx.closePath(); ctx.fill();
+    // 静的な壁・釘
+    ctx.fillStyle = '#1B1B1F';
+    for (const b of Composite.allBodies(world)){
+      const k = b.plugin && b.plugin.kind;
+      if (k === 'wall'){ ctx.save(); ctx.translate(b.position.x, b.position.y); ctx.rotate(b.angle); const w = b.bounds.max.x - b.bounds.min.x, h = b.bounds.max.y - b.bounds.min.y; const vw = Math.hypot(b.vertices[1].x - b.vertices[0].x, b.vertices[1].y - b.vertices[0].y), vh = Math.hypot(b.vertices[2].x - b.vertices[1].x, b.vertices[2].y - b.vertices[1].y); ctx.fillRect(-vw/2, -vh/2, vw, vh); ctx.restore(); }
+      else if (k === 'peg'){ ctx.beginPath(); ctx.arc(b.position.x, b.position.y, 5, 0, 7); ctx.fillStyle = '#1B1B1F'; ctx.fill(); ctx.beginPath(); ctx.arc(b.position.x - 1.5, b.position.y - 1.5, 2, 0, 7); ctx.fillStyle = '#fff'; ctx.fill(); ctx.fillStyle = '#1B1B1F'; }
+    }
+    // 穴の中のピンズ
+    for (const pk of pockets){ const im = imgs[pk.key]; ctx.fillStyle = '#fff'; ctx.fillRect(pk.x - pk.w/2 + 3, pk.y - pk.h/2, pk.w - 6, pk.h); if (im) ctx.drawImage(im, pk.x - 17, pk.y - 15, 34, 34); if (S.tray.includes(pk.key)){ ctx.fillStyle = 'rgba(255,224,0,.55)'; ctx.fillRect(pk.x - pk.w/2 + 3, pk.y - pk.h/2, pk.w - 6, pk.h); } }
+    // 玉
+    const b = S.ball;
+    if (b){ const im = imgs[b.plugin.key], r = b.plugin.r; ctx.save(); ctx.translate(b.position.x, b.position.y); ctx.rotate(b.angle); ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3; ctx.beginPath(); ctx.arc(0, 0, r + 2, 0, 7); ctx.fillStyle = '#1B1B1F'; ctx.fill(); ctx.shadowColor = 'transparent'; if (im) ctx.drawImage(im, -r, -r, r*2, r*2); ctx.restore(); }
+    // 演出(紙吹雪)
+    const RB = ['#FF3EA5', '#00D4FF', '#FFE000', '#7FE000', '#FF7A00', '#fff'];
+    for (const f of S.fx){ for (let i = 0; i < 26; i++){ const a = i / 26 * Math.PI * 2, d = f.t * 6; ctx.fillStyle = RB[i % RB.length]; ctx.save(); ctx.translate(f.x + Math.cos(a) * d, f.y + Math.sin(a) * d + f.t * f.t * .12); ctx.rotate(f.t * .3 + i); ctx.fillRect(-5, -3, 10, 6); ctx.restore(); } }
+    if (S.flash > 0){ ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = `rgba(255,255,255,${S.flash / 14})`; ctx.fillRect(0, 0, cv.width, cv.height); }
+  }
+  function frame(){ requestAnimationFrame(frame); if (document.hidden) return; tick(); draw(); }
+
+  // ---- 入力 ----
+  const plunger = document.getElementById('plunger');
+  const down = e => { e.preventDefault(); if (S.state === 'play' && !S.launched){ S.charging = true; S.power = 0; } };
+  const up = e => { e.preventDefault(); if (S.charging){ S.charging = false; launch(); } };
+  plunger.addEventListener('pointerdown', down); plunger.addEventListener('pointerup', up); plunger.addEventListener('pointercancel', up); plunger.addEventListener('pointerleave', up);
+  window.addEventListener('keydown', e => { if (e.code === 'Space' && !e.repeat) down(e); });
+  window.addEventListener('keyup', e => { if (e.code === 'Space') up(e); });
+  document.getElementById('btnNext').addEventListener('click', nextBall);
+  document.getElementById('hitBuy').addEventListener('click', () => { drEvent('smb_single_click', { pin:S.got.length ? S.got[S.got.length - 1].key : '' }); beacon('shop'); });
+  document.getElementById('lnkPins').addEventListener('click', () => { drEvent('smb_pins_link'); beacon('shop'); });
+  window.addEventListener('resize', resize);
+
+  // ---- 結果カード(1080×1350) ----
+  let cardBlob = null;
+  function makeCard(){
+    const c = document.createElement('canvas'); c.width = 1080; c.height = 1350; const g = c.getContext('2d');
+    const INK = '#1B1B1F', F = '"M PLUS Rounded 1c", sans-serif';
+    g.fillStyle = '#FFD400'; g.fillRect(0, 0, 1080, 1350);
+    for (let y = 0; y < 1350; y += 80) for (let x = 0; x < 1080; x += 80){ g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.arc(x, y, 10, 0, 7); g.fill(); }
+    const rr = (x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
+    g.fillStyle = INK; rr(56, 56, 968, 1238, 36); g.fill(); g.fillStyle = '#FFF6E5'; rr(40, 40, 968, 1238, 36); g.fill(); g.lineWidth = 8; g.strokeStyle = INK; g.stroke();
+    const outlined = (t, x, y, size, fill, align) => { g.font = `900 ${size}px ${F}`; g.textAlign = align || 'center'; g.textBaseline = 'alphabetic'; g.lineJoin = 'round'; g.lineWidth = Math.max(6, size * .16); g.strokeStyle = INK; g.strokeText(t, x, y); g.fillStyle = fill; g.fillText(t, x, y); };
+    outlined('CHARAMARL', 540, 150, 56, '#fff'); outlined('ピンズスマートボール', 540, 230, 64, '#FFE000');
+    const n = S.tray.length; outlined(n === 4 ? '4つ そろった！' : `ピンズ ${n}つ あつめた`, 540, 330, 52, '#fff');
+    // 台紙(2×2)
+    g.fillStyle = '#fff'; rr(190, 380, 700, 700, 40); g.fill(); g.lineWidth = 8; g.strokeStyle = INK; g.stroke();
+    for (let i = 0; i < 4; i++){ const x = 190 + 75 + (i % 2) * 350 + 100, y = 380 + 75 + Math.floor(i / 2) * 350 + 100; const k = S.tray[i];
+      g.beginPath(); g.arc(x, y, 130, 0, 7); g.fillStyle = k ? '#fff' : '#f0ece4'; g.fill(); g.lineWidth = 6; g.strokeStyle = k ? INK : '#ccc'; g.setLineDash(k ? [] : [14, 12]); g.stroke(); g.setLineDash([]);
+      if (k && imgs[k]) g.drawImage(imgs[k], x - 120, y - 120, 240, 240);
+      if (k){ g.font = `900 30px ${F}`; g.textAlign = 'center'; g.fillStyle = INK; g.fillText(byKey(k).name, x, y + 165); } }
+    outlined(n === 4 ? '4個セット ¥4,400（1個 ¥1,100）' : '4つそろえばセットで買える', 540, 1160, 40, '#fff');
+    g.font = `900 30px ${F}`; g.textAlign = 'right'; g.lineWidth = 6; g.strokeStyle = INK; g.strokeText('charamarl.com/smartball/  #CHARAMARL', 990, 1240); g.fillStyle = '#fff'; g.fillText('charamarl.com/smartball/  #CHARAMARL', 990, 1240);
+    return c;
+  }
+  async function prepareCard(){ const prev = document.getElementById('cardPrev'); cardBlob = null; prev.style.display = 'none'; try{ if (document.fonts && document.fonts.load) await document.fonts.load('900 40px "M PLUS Rounded 1c"'); }catch(e){} try{ const c = makeCard(); cardBlob = await new Promise(res => c.toBlob(res, 'image/png')); prev.src = URL.createObjectURL(cardBlob); prev.style.display = 'inline-block'; }catch(e){} }
+  async function share(){
+    const url = 'https://charamarl.com/smartball/'; const names = S.tray.map(k => byKey(k).name).join('・');
+    const text = `ピンズスマートボールで ${S.tray.length}つ あつめた（${names}） #CHARAMARL`;
+    drEvent('smb_share', { pins:S.tray.length }); beacon('share');
+    if (!cardBlob) await prepareCard();
+    if (!cardBlob){ window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank'); return; }
+    const file = new File([cardBlob], `charamarl_smartball_${S.tray.length}.png`, { type:'image/png' });
+    if (navigator.canShare && navigator.canShare({ files:[file] })){ try{ await navigator.share({ files:[file], text: text + ' ' + url }); }catch(e){} }
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(cardBlob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank'); }
+  }
+
+  // ---- キャラ選択 ----
+  document.getElementById('pickGrid').innerHTML = PINS.map(p => `<button class="pk" type="button" data-key="${p.key}"><img src="/img/pins/${p.key}.png" alt=""><b>${p.name}</b><small>${p.trait}</small></button>`).join('');
+  document.querySelectorAll('#pickGrid .pk').forEach(b => b.addEventListener('click', () => start(b.dataset.key)));
+
+  // ---- 読み込み ----
+  async function load(){
+    await Promise.all(PINS.map(p => new Promise(res => { const im = new Image(); im.onload = () => { imgs[p.key] = im; res(); }; im.onerror = res; im.src = `/img/pins/${p.key}.png`; })));
+    resize(); buildBoard(); requestAnimationFrame(frame);
+  }
+  load();
+  window.SMB = { S, start, launch, tick, draw, pockets, get engine(){ return engine; }, setPower(v){ S.power = v; } };
+})();
+</script>
+</body>
+</html>
