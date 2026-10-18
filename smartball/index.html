@@ -196,7 +196,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     [220, 310, 400].forEach(y => { addPeg(22, y); addPeg(FIELD_R - 14, y); });
     // 穴(カップ)。上段6・下段6を互い違いに。カップ=底と両脇の短い壁＋中央のセンサー
     // 4個×3段。段の間隔を玉より広く空けて、上段をすり抜けた玉が下の段にも落ちるように(2段×6個だと隙間が玉より狭く、上段しか入らなかった)
-    const rows = [{ y:470, xs:[45, 131, 217, 303], val:5 }, { y:542, xs:[88, 174, 260, 346], val:5 }, { y:614, xs:[45, 131, 217, 303], val:15 }];
+    const rows = [{ y:462, xs:[45, 131, 217, 303], val:5 }, { y:540, xs:[88, 174, 260, 346], val:5 }, { y:618, xs:[45, 131, 217, 303], val:15 }];
     let i = 0;
     rows.forEach(r => r.xs.forEach(x => { const pin = PINS[i++]; const cw = 32, ch = 40;   // カップは玉(直径24)より少し広いだけ。広いと5発で4つそろいすぎる(40pxで8割そろった)
       st.push(wall(x - cw/2, r.y, 5, ch, 0, F_FIELD)); st.push(wall(x + cw/2, r.y, 5, ch, 0, F_FIELD)); st.push(wall(x, r.y + ch/2, cw, 5, 0, F_FIELD));
@@ -328,9 +328,14 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       else if (k === 'peg'){ ctx.beginPath(); ctx.arc(b.position.x, b.position.y, 5, 0, 7); ctx.fillStyle = '#1B1B1F'; ctx.fill(); ctx.beginPath(); ctx.arc(b.position.x - 1.5, b.position.y - 1.5, 2, 0, 7); ctx.fillStyle = '#fff'; ctx.fill(); ctx.fillStyle = '#1B1B1F'; }
     }
     // 穴の中のピンズ
-    for (const pk of pockets){ const im = imgs[pk.key]; ctx.fillStyle = '#fff'; ctx.fillRect(pk.x - pk.w/2 + 3, pk.y - pk.h/2, pk.w - 6, pk.h); if (im) ctx.drawImage(im, pk.x - 15, pk.y - 13, 30, 30); if (S.tray.includes(pk.key)){ ctx.fillStyle = 'rgba(255,224,0,.55)'; ctx.fillRect(pk.x - pk.w/2 + 3, pk.y - pk.h/2, pk.w - 6, pk.h); }
-      // 値札(上段5・下段15。実機の赤/緑のタブ)
-      ctx.fillStyle = pk.val >= 15 ? '#E5484D' : '#2E9E5B'; ctx.fillRect(pk.x - 13, pk.y - pk.h/2 - 16, 26, 14); ctx.fillStyle = '#fff'; ctx.font = '900 11px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(pk.val), pk.x, pk.y - pk.h/2 - 9); }
+    // 穴のピンズは絵が見えるように大きく(当たり判定のカップ幅32pxとは別。絵は直径60で、カップの口は上に開いている)
+    for (const pk of pockets){ const im = imgs[pk.key]; const got = S.tray.includes(pk.key);
+      ctx.fillStyle = '#fff'; ctx.fillRect(pk.x - pk.w/2 + 3, pk.y - pk.h/2, pk.w - 6, pk.h);
+      ctx.save(); ctx.beginPath(); ctx.arc(pk.x, pk.y + 8, 31, 0, 7); ctx.fillStyle = got ? '#FFE000' : '#1B1B1F'; ctx.fill(); ctx.restore();
+      if (im){ ctx.save(); if (got) ctx.globalAlpha = .55; ctx.drawImage(im, pk.x - 29, pk.y - 21, 58, 58); ctx.restore(); }
+      // 値札(右下の丸バッジ。上段・中段5／下段15)
+      ctx.beginPath(); ctx.arc(pk.x + 22, pk.y + 28, 11, 0, 7); ctx.fillStyle = pk.val >= 15 ? '#E5484D' : '#2E9E5B'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.font = '900 11px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(pk.val), pk.x + 22, pk.y + 28); }
     // 受け皿の玉(ピンズの絵)
     for (const tb of S.trayBalls){ const im = imgs[tb.plugin.key]; const r = tb.circleRadius; ctx.save(); ctx.translate(tb.position.x, tb.position.y); ctx.rotate(tb.angle); ctx.beginPath(); ctx.arc(0, 0, r + 1.5, 0, 7); ctx.fillStyle = '#1B1B1F'; ctx.fill(); if (im) ctx.drawImage(im, -r, -r, r*2, r*2); ctx.restore(); }
     // 受け皿のガラスの反射
