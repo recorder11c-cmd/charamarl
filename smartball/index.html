@@ -174,7 +174,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   // ---- 盤面 ----
   const engine = Engine.create({ positionIterations:8, velocityIterations:6 }); engine.gravity.y = 1.0;
   const world = engine.world;
-  const S = { state:'title', char:null, balls:BALLS, ball:null, tray:[], got:[], combo:0, power:0, charging:false, t:0, flash:0, shake:0, lastHit:null, fx:[], captureCool:0, trayBalls:[], payQueue:[], pop:null, score:0, stuckT:0, fever:0, stars:[false,false,false], bumpers:[], mill:null, starBodies:[], drops:[], spinner:null, extra:[] };
+  const S = { state:'title', char:null, balls:BALLS, ball:null, tray:[], got:[], combo:0, power:0, charging:false, t:0, flash:0, shake:0, lastHit:null, fx:[], captureCool:0, trayBalls:[], payQueue:[], pop:null, score:0, stuckT:0, fever:0, stars:[false,false,false], bumpers:[], mill:null, topMill:null, starBodies:[], drops:[], spinner:null, extra:[] };
   const LANE_X = 394, DIV_X = 372, FIELD_R = 369;   // 発射レーンの玉の中心 / レーンと盤面の仕切りの中心 / 盤面の右端。レーンは 375〜412 の37px(玉の直径は最大30)
   const TOP_C = { x:(8 + 412) / 2, y:200 }, TOP_R = 202;   // 上のアーチ
   const TRAY_Y = 662;                                        // 受け皿の上端(ここから下は玉がたまる)
@@ -192,7 +192,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       const q0 = { x:TOP_C.x + (TOP_R + 18) * Math.cos(a0), y:TOP_C.y - (TOP_R + 18) * Math.sin(a0) }, q1 = { x:TOP_C.x + (TOP_R + 18) * Math.cos(a1), y:TOP_C.y - (TOP_R + 18) * Math.sin(a1) }; st.push(wall((q0.x + q1.x) / 2, (q0.y + q1.y) / 2, Math.hypot(q1.x - q0.x, q1.y - q0.y) + 3, 12, Math.atan2(q1.y - q0.y, q1.x - q0.x))); }
     // 釘(段違いの格子)
     const addPeg = (x, y) => { const peg = Bodies.circle(x, y, 5, { isStatic:true, restitution:.6, friction:.05, collisionFilter:F_FIELD }); peg.plugin = { kind:'peg' }; st.push(peg); };
-    const near = (x, y) => [[118, 318], [250, 318], [184, 260], [24, 226], [318, 214]].some(([bx, by]) => Math.hypot(x - bx, y - by) < 44);
+    const near = (x, y) => [[118, 318], [250, 318], [184, 260], [FIELD_R - 8, 226], [318, 214], [184, 178], [92, 232], [276, 232], [40, 232]].some(([bx, by]) => Math.hypot(x - bx, y - by) < 44);
     for (let row = 0; row < 5; row++){ const y = 236 + row * 42; const off = row % 2 ? 24 : 0; for (let x = 22 + off; x < FIELD_R - 12; x += 48) if (!near(x, y)) addPeg(x, y); }
     // 左右の壁ぎわを玉が素通りしないように、壁のすぐ内側にも釘(アーチから降りてきた玉を盤面の中へ散らす)
     [310, 400].forEach(y => { addPeg(22, y); });   // 右の壁ぎわには釘を置かない(仕切りとの間に玉が乗って止まる)
@@ -212,9 +212,13 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     // ギミック: バンパー(当たると弾いて+1玉)・風車(回っている)・星(3つ点けるとFEVER=払い出し2倍)
     [[118, 318], [250, 318]].forEach(([x, y]) => { const bp = Bodies.circle(x, y, 17, { isStatic:true, restitution:1.1, collisionFilter:F_FIELD }); bp.plugin = { kind:'bumper', hitT:0 }; S.bumpers.push(bp); st.push(bp); });
     // ドロップターゲット×3(左上の壁ぎわ)。当てると倒れて+3玉、3枚全部で BANK +20玉。3秒で復活
-    [[24, 196], [24, 226], [24, 256]].forEach(([x, y], i) => { const dt = Bodies.rectangle(x, y, 10, 24, { isStatic:true, collisionFilter:F_FIELD, restitution:.6 }); dt.plugin = { kind:'drop', i, down:false }; S.drops.push(dt); st.push(dt); });
+    [[FIELD_R - 8, 196], [FIELD_R - 8, 226], [FIELD_R - 8, 256]].forEach(([x, y], i) => { const dt = Bodies.rectangle(x, y, 10, 24, { isStatic:true, collisionFilter:F_FIELD, restitution:.6 }); dt.plugin = { kind:'drop', i, down:false }; S.drops.push(dt); st.push(dt); });
     // スピナー(右上)。通ると回って+1玉×3
     S.spinner = Bodies.rectangle(318, 214, 40, 5, { isStatic:true, collisionFilter:F_FIELD, restitution:.2 }); S.spinner.plugin = { kind:'spinner', spin:0 }; st.push(S.spinner);
+    // 上部の振り分け: アーチを降りた玉は左の壁ぎわを通るので、斜めの板で中央へ飛ばし、回転する羽根と上段バンパーで左右に散らす
+    st.push(wall(36, 232, 62, 7, Math.atan2(36, 50)));
+    S.topMill = Bodies.rectangle(184, 178, 96, 7, { isStatic:true, collisionFilter:F_FIELD, restitution:.8 }); S.topMill.plugin = { kind:'mill' }; st.push(S.topMill);
+    [[92, 232], [276, 232]].forEach(([x, y]) => { const bp = Bodies.circle(x, y, 14, { isStatic:true, restitution:1.1, collisionFilter:F_FIELD }); bp.plugin = { kind:'bumper', hitT:0, small:true }; S.bumpers.push(bp); st.push(bp); });
     S.mill = Bodies.rectangle(184, 260, 76, 7, { isStatic:true, collisionFilter:F_FIELD, restitution:.7 }); S.mill.plugin = { kind:'mill' }; st.push(S.mill);
     [[90, 140], [184, 112], [278, 140]].forEach(([x, y], i) => { const sb = Bodies.circle(x, y, 12, { isStatic:true, isSensor:true, collisionFilter:F_FIELD }); sb.plugin = { kind:'star', i }; S.starBodies.push(sb); st.push(sb); });
     // ボーナスホール(右下。ここに流れた玉は+15玉と玉1つおまけ)
@@ -248,10 +252,10 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     document.getElementById('hint').style.opacity = 0;
   }
   // 払い出し: 入ったピンズの玉が払い出し口から受け皿へドバッと流れ込む(実機の「玉があふれる」)
-  const TRAY_MAX = 320;
+  const TRAY_MAX = 150;   // 皿(361×78)に収まる数。多いと盤面まで積み上がった
   function payout(key, n, x, y){ S.score += n; for (let i = 0; i < n; i++) S.payQueue.push({ key, x: x ?? PAYOUT.x, y: y ?? PAYOUT.y, up: x !== undefined }); }
   function spawnTrayBall(key, x, y, vx, vy){
-    const b = Bodies.circle(x, y, 9, { restitution:.35, friction:.08, frictionAir:.004, density:.004, collisionFilter:F_TRAY }); b.plugin = { kind:'tray', key };
+    const b = Bodies.circle(x, y, 7, { restitution:.35, friction:.08, frictionAir:.004, density:.004, collisionFilter:F_TRAY }); b.plugin = { kind:'tray', key: PINS[Math.floor(Math.random() * PINS.length)].key };   // 色は12種ランダム(同じ絵ばかりだと単調)
     Body.setVelocity(b, { x:vx, y:vy }); S.trayBalls.push(b); Composite.add(world, b);
     if (S.trayBalls.length > TRAY_MAX){ const old = S.trayBalls.shift(); Composite.remove(world, old); }
   }
@@ -311,6 +315,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       if (c.p.spin && S.ballT % 30 === 0) Body.setAngularVelocity(b, .5);
     }
     if (S.mill) Body.setAngle(S.mill, S.t * (S.fever > 0 ? .09 : .045));
+    if (S.topMill) Body.setAngle(S.topMill, -S.t * (S.fever > 0 ? .07 : .032));
     if (S.spinner){ const sp = S.spinner.plugin; if (sp.spin > 0){ sp.spin--; Body.setAngle(S.spinner, S.spinner.angle + .35); if (sp.spin % 20 === 0) payout(S.char, 1, S.spinner.position.x, S.spinner.position.y); } }
     if (S.lamps > 0) S.lamps--;
     pockets.forEach(pk => { if (pk.hitT > 0) pk.hitT--; });
@@ -379,7 +384,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     for (const dt of S.drops){ if (dt.plugin.down) continue; glowCircle(dt.position.x, dt.position.y, 7, NEON.orange, 10); ctx.fillStyle = '#fff'; ctx.fillRect(dt.position.x - 4, dt.position.y - 11, 8, 22); }
     if (S.spinner){ const sp = S.spinner; ctx.save(); ctx.translate(sp.position.x, sp.position.y); ctx.rotate(sp.angle); ctx.shadowColor = NEON.cyan; ctx.shadowBlur = sp.plugin.spin ? 18 : 6; ctx.fillStyle = sp.plugin.spin ? '#fff' : NEON.cyan; ctx.fillRect(-20, -2.5, 40, 5); ctx.restore(); }
     // ギミック
-    for (const bp of S.bumpers){ const h = bp.plugin.hitT; const pulse = 1 + .08 * Math.sin(S.t * .2); glowCircle(bp.position.x, bp.position.y, (17 + (h ? 5 : 0)) * pulse, h ? NEON.yellow : NEON.pink, h ? 30 : 16); ctx.beginPath(); ctx.arc(bp.position.x, bp.position.y, 11, 0, 7); ctx.fillStyle = '#fff'; ctx.fill(); ctx.fillStyle = '#0d0b1e'; ctx.font = '900 12px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('+1', bp.position.x, bp.position.y); }
+    for (const bp of S.bumpers){ const h = bp.plugin.hitT; const R0 = bp.plugin.small ? 14 : 17; const pulse = 1 + .08 * Math.sin(S.t * .2); glowCircle(bp.position.x, bp.position.y, (R0 + (h ? 5 : 0)) * pulse, h ? NEON.yellow : (bp.plugin.small ? NEON.cyan : NEON.pink), h ? 30 : 16); ctx.beginPath(); ctx.arc(bp.position.x, bp.position.y, R0 - 6, 0, 7); ctx.fillStyle = '#fff'; ctx.fill(); ctx.fillStyle = '#0d0b1e'; ctx.font = '900 12px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('+1', bp.position.x, bp.position.y); }
+    if (S.topMill){ ctx.save(); ctx.translate(S.topMill.position.x, S.topMill.position.y); ctx.rotate(S.topMill.angle); ctx.shadowColor = NEON.purple; ctx.shadowBlur = 14; ctx.fillStyle = NEON.purple; ctx.fillRect(-48, -3.5, 96, 7); ctx.restore(); glowCircle(S.topMill.position.x, S.topMill.position.y, 7, '#fff', 8); }
     if (S.mill){ ctx.save(); ctx.translate(S.mill.position.x, S.mill.position.y); ctx.rotate(S.mill.angle); ctx.shadowColor = NEON.lime; ctx.shadowBlur = 14; ctx.fillStyle = NEON.lime; ctx.fillRect(-38, -3.5, 76, 7); ctx.fillRect(-3.5, -38, 7, 76); ctx.restore(); glowCircle(S.mill.position.x, S.mill.position.y, 7, '#fff', 8); }
     S.starBodies.forEach((sb, i) => { ctx.save(); if (S.stars[i]){ ctx.shadowColor = NEON.yellow; ctx.shadowBlur = 18; ctx.fillStyle = NEON.yellow; } else { ctx.fillStyle = 'rgba(255,255,255,.22)'; } star(sb.position.x, sb.position.y, 13); ctx.restore(); });
     for (const f of S.fx){ if (f.type !== 'ring') continue; ctx.beginPath(); ctx.arc(f.x, f.y, 12 + f.t * 4, 0, 7); ctx.lineWidth = 5; ctx.strokeStyle = `rgba(255,255,255,${1 - f.t / 40})`; ctx.stroke(); }
