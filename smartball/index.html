@@ -86,7 +86,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   .got .g a{ display:block; font-size:11px; font-weight:900; color:var(--yellow); text-decoration:underline; text-underline-offset:2px; }
   .pv{ height:140px; width:auto; border:2px solid var(--cyan); border-radius:10px; margin:6px auto 0; display:none; }
   .note{ font-size:11px; color:#b9b6d6; font-weight:700; margin-top:10px; line-height:1.5; }
-  .note a, .note b{ color:#fff; }
+  .note a, .note b{ color:#fff; white-space:nowrap; }
   .card{ background:#0b0a1a; border:2px solid var(--yellow); border-radius:16px; padding:10px; margin-top:8px; display:flex; gap:10px; align-items:center; text-align:left; box-shadow:0 0 14px rgba(255,228,77,.4); }
   .card img{ width:72px; height:72px; flex:none; }
   .card b{ font-size:16px; display:block; }
@@ -132,7 +132,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     <div class="got" id="gotList"></div>
     <img class="pv" id="cardPrev" alt="結果カード">
     <div class="btns" id="ovBtns"></div>
-    <div class="note">ピンズは丸25mm・金属フレーム＋ドーム加工・受注生産。<a href="https://charamarl.com/characters/pins.html?utm_source=smartball&utm_medium=over" target="_blank" rel="noopener">くわしくはピンズのページ</a></div>
+    <div class="note">ピンズは丸25mm・金属フレーム＋ドーム加工・受注生産<br><a href="https://charamarl.com/characters/pins.html?utm_source=smartball&utm_medium=over" target="_blank" rel="noopener">くわしくはピンズのページ →</a></div>
   </div></div>
 </div></div>
 
@@ -279,9 +279,11 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     // ゾロ目: 同じピンズに3回入ったら 4個セット¥500引きのクーポン(1端末1日1枚)
     if (S.got.filter(g => g.key === key).length === 3 && !S.coupon && !S.couponBusy) zorome(key, pk);
     if (quiet) return;   // 追加の玉(マルチボール)は画面を止めない
+    S.char = key;   // 入った穴のピンズが、次の玉になる(キャラのクセも変わる)
     drEvent('smb_hit', { pin:key, dup: dup ? 1 : 0 });
     document.getElementById('hitTtl').textContent = dup ? '🎯 もう持ってる！ 玉を1つおまけ' : (S.tray.length === 4 ? '🎉 4つそろった！' : '🎯 入った！');
-    document.getElementById('hitImg').src = `/img/pins/${key}.png`; document.getElementById('hitName').textContent = pin.name; document.getElementById('hitBy').textContent = pin.artist + ' ／ ' + pin.trait;
+    document.getElementById('btnNext').textContent = `つぎの玉（${pin.name}）→`;
+    document.getElementById('hitImg').src = `/img/pins/${key}.png`; document.getElementById('hitName').textContent = pin.name; document.getElementById('hitBy').textContent = pin.artist + ' ／ ' + pin.trait + '　→ 次の玉は ' + pin.name;
     document.getElementById('hitBuy').href = `${PINS_URL}?k=${key}&utm_source=smartball&utm_medium=hit`;
     setTimeout(() => { document.getElementById('ovHit').classList.add('open'); }, 500);
   }
