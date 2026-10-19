@@ -212,7 +212,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     // ギミック: バンパー(当たると弾いて+1玉)・風車(回っている)・星(3つ点けるとFEVER=払い出し2倍)
     [[118, 318], [250, 318]].forEach(([x, y]) => { const bp = Bodies.circle(x, y, 17, { isStatic:true, restitution:1.1, collisionFilter:F_FIELD }); bp.plugin = { kind:'bumper', hitT:0 }; S.bumpers.push(bp); st.push(bp); });
     // ドロップターゲット×3(左上の壁ぎわ)。当てると倒れて+3玉、3枚全部で BANK +20玉。3秒で復活
-    [[FIELD_R - 8, 236], [FIELD_R - 8, 266], [FIELD_R - 8, 296]].forEach(([x, y], i) => { const dt = Bodies.rectangle(x, y, 10, 24,   // レーンの出口(y<190)より下に。上にあると発射のたびに当たって+3になっていた { isStatic:true, collisionFilter:F_FIELD, restitution:.6 }); dt.plugin = { kind:'drop', i, down:false }; S.drops.push(dt); st.push(dt); });
+    // ドロップターゲットはレーンの出口(y<190)より下に。上にあると発射のたびに当たって+3になっていた
+    [[FIELD_R - 8, 236], [FIELD_R - 8, 266], [FIELD_R - 8, 296]].forEach(([x, y], i) => { const dt = Bodies.rectangle(x, y, 10, 24, { isStatic:true, collisionFilter:F_FIELD, restitution:.6 }); dt.plugin = { kind:'drop', i, down:false }; S.drops.push(dt); st.push(dt); });
     // スピナー(右上)。通ると回って+1玉×3
     S.spinner = Bodies.rectangle(318, 214, 40, 5, { isStatic:true, collisionFilter:F_FIELD, restitution:.2 }); S.spinner.plugin = { kind:'spinner', spin:0 }; st.push(S.spinner);
     // 上部の振り分け: アーチを降りた玉は左の壁ぎわを通るので、斜めの板で中央へ飛ばし、回転する羽根と上段バンパーで左右に散らす
