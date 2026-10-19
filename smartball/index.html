@@ -79,6 +79,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   .btn:active{ transform:scale(.97); }
   .btn.y{ background:var(--yellow); color:#000; border-color:#fff; box-shadow:0 0 18px rgba(255,228,77,.7); } .btn.p{ background:var(--pink); color:#fff; border-color:#fff; box-shadow:0 0 18px rgba(255,47,168,.8); } .btn.s{ font-size:13px; min-height:40px; }
   .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .row3 .btn{ font-size:12px; line-height:1.25; padding:8px 4px; }
   .got{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:8px 0; }
   .got .g{ width:78px; text-align:center; }
   .got .g img{ width:64px; height:64px; display:block; margin:0 auto; filter:drop-shadow(0 0 6px rgba(255,255,255,.5)); }
@@ -317,10 +319,11 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     if (full) h += `<a class="btn p" href="${PINS_URL}?set=${S.tray.join(',')}${cq}&utm_source=smartball&utm_medium=set" target="_blank" rel="noopener" data-ev="set">🛒 この4個セットを買う ${S.coupon ? '¥3,900（クーポン適用）' : '¥4,400'}</a>`;
     else if (S.coupon) h += `<a class="btn p" href="${PINS_URL}?set=${[...S.tray, ...PINS.map(p => p.key).filter(k => !S.tray.includes(k))].slice(0, 4).join(',')}${cq}&utm_source=smartball&utm_medium=setcp" target="_blank" rel="noopener" data-ev="set">🛒 クーポンで4個セットを買う ¥3,900</a>`;
     h += `<button class="btn y" id="btnRetry">もう一回（玉${BALLS}発）</button>`;
-    h += `<div class="row2"><button class="btn s" id="btnShare">📷 画像でシェア</button><a class="btn s" href="${PINS_URL}?utm_source=smartball&utm_medium=over2" target="_blank" rel="noopener">🛒 ピンズのページ</a></div>`;
+    h += `<div class="row3"><button class="btn s" data-share="x">𝕏 Xで<br>シェア</button><button class="btn s" data-share="ig">📷 Instagramで<br>シェア</button><button class="btn s" data-share="other">📲 その他</button></div>`;
+    h += `<a class="btn s" href="${PINS_URL}?utm_source=smartball&utm_medium=over2" target="_blank" rel="noopener">🛒 ピンズのページ</a>`;
     bt.innerHTML = h;
     document.getElementById('btnRetry').addEventListener('click', () => { document.getElementById('ovOver').classList.remove('open'); document.getElementById('ovTitle').classList.add('open'); });
-    document.getElementById('btnShare').addEventListener('click', share);
+    bt.querySelectorAll('[data-share]').forEach(b => b.addEventListener('click', () => share(b.dataset.share)));
     bt.querySelectorAll('a[data-ev="set"]').forEach(a => a.addEventListener('click', () => { drEvent('smb_set_click', { pins:S.tray.join(',') }); beacon('shop'); }));
     document.getElementById('cardPrev').style.display = 'none'; cardBlob = null;
     drEvent('smb_over', { pins:n, full: full ? 1 : 0, ball:S.char }); beacon('over');
@@ -489,15 +492,25 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     return c;
   }
   async function prepareCard(){ const prev = document.getElementById('cardPrev'); cardBlob = null; prev.style.display = 'none'; try{ if (document.fonts && document.fonts.load) await document.fonts.load('900 40px "M PLUS Rounded 1c"'); }catch(e){} try{ const c = makeCard(); cardBlob = await new Promise(res => c.toBlob(res, 'image/png')); prev.src = URL.createObjectURL(cardBlob); prev.style.display = 'inline-block'; }catch(e){} }
-  async function share(){
+  // シェア: X / Instagram / その他。画像(結果カード)付き。スマホは端末の共有シートで相手を選ぶ(Instagramはそこで選ぶ)、PCは画像を保存して投稿画面を開く
+  async function share(kind){
     const url = 'https://charamarl.com/smartball/'; const names = S.tray.map(k => byKey(k).name).join('・');
     const text = `ピンズスマートボールで ${S.tray.length}つ あつめた（${names}） #CHARAMARL`;
-    drEvent('smb_share', { pins:S.tray.length }); beacon('share');
+    drEvent('smb_share', { pins:S.tray.length, method:kind }); beacon('share');
     if (!cardBlob) await prepareCard();
-    if (!cardBlob){ window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank'); return; }
-    const file = new File([cardBlob], `charamarl_smartball_${S.tray.length}.png`, { type:'image/png' });
-    if (navigator.canShare && navigator.canShare({ files:[file] })){ try{ await navigator.share({ files:[file], text: text + ' ' + url }); }catch(e){} }
-    else { const a = document.createElement('a'); a.href = URL.createObjectURL(cardBlob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank'); }
+    const file = cardBlob ? new File([cardBlob], `charamarl_smartball_${S.tray.length}.png`, { type:'image/png' }) : null;
+    const canFiles = file && navigator.canShare && navigator.canShare({ files:[file] });
+    const saveImg = () => { if (!cardBlob) return; const a = document.createElement('a'); a.href = URL.createObjectURL(cardBlob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); };
+    if (kind === 'x'){
+      if (canFiles){ try{ await navigator.share({ files:[file], text: text + ' ' + url }); return; }catch(e){} }
+      saveImg(); window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank'); toast(cardBlob ? '画像を保存。Xに添付してね' : 'Xを開いた');
+    } else if (kind === 'ig'){
+      if (canFiles){ try{ await navigator.share({ files:[file], text }); return; }catch(e){} }   // 共有シートで Instagram を選ぶ
+      saveImg(); toast('画像を保存。Instagramに貼ってね'); window.open('https://www.instagram.com/', '_blank');
+    } else {
+      if (navigator.share){ try{ await navigator.share(canFiles ? { files:[file], text: text + ' ' + url } : { text, url }); return; }catch(e){} }
+      try{ await navigator.clipboard.writeText(url); toast('リンクをコピーした'); }catch(e){ prompt('URLをコピー', url); }
+    }
   }
 
   // ---- キャラ選択 ----
