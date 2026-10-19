@@ -92,6 +92,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   .card b{ font-size:16px; display:block; }
   .card small{ font-size:12px; color:#b9b6d6; font-weight:800; display:block; }
   .card .pr{ font-size:14px; font-weight:900; margin-top:2px; color:var(--yellow); }
+  .cp{ margin-top:10px; background:#0b0a1a; border:2px dashed var(--yellow); border-radius:14px; padding:10px 12px; font-size:12px; font-weight:800; color:#fff; line-height:1.6; box-shadow:0 0 16px rgba(255,228,77,.5); }
+  .cp b{ color:var(--yellow); font-size:15px; letter-spacing:.06em; }
 </style>
 </head>
 <body>
@@ -117,6 +119,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   <div class="ov" id="ovHit"><div class="panel">
     <h1 id="hitTtl">🎯 入った！</h1>
     <div class="card"><img id="hitImg" alt=""><div><b id="hitName"></b><small id="hitBy"></small><div class="pr">単品 ¥1,800（税込・送料込）</div></div></div>
+    <div class="cp" id="cpHit" hidden></div>
     <div class="btns">
       <button class="btn y" id="btnNext">つぎの玉 →</button>
       <a class="btn s" id="hitBuy" href="#" target="_blank" rel="noopener">🛒 このピンズを単品で買う</a>
@@ -145,18 +148,18 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
 
   // ---- ピンズ12種(characters/pins.html の DESIGNS と同じ順・同じ名前) と、玉になったときのクセ ----
   const PINS = [
-    { key:'sue',          name:'スー',         artist:'DinoRenny',      trait:'重い玉',     p:{ density:.012, restitution:.15, frictionAir:.004 } },
-    { key:'mossun',       name:'モッスン',      artist:'DinoRenny',      trait:'つるつる',   p:{ density:.006, restitution:.45, friction:0, frictionAir:.002 } },
-    { key:'putti',        name:'プッチィ',      artist:'DinoRenny',      trait:'ふわっと',   p:{ density:.004, restitution:.4, frictionAir:.02, lift:.45 } },
+    { key:'sue',          name:'スー',         artist:'DinoRenny',      trait:'重い玉',     p:{ density:.012, restitution:.15, frictionAir:.003 } },
+    { key:'mossun',       name:'モッスン',      artist:'DinoRenny',      trait:'つるつる',   p:{ density:.006, restitution:.45, friction:0, frictionAir:.0015 } },
+    { key:'putti',        name:'プッチィ',      artist:'DinoRenny',      trait:'ふわっと',   p:{ density:.004, restitution:.4, frictionAir:.008, lift:.33 } },
     { key:'yurucrazy',    name:'ユルクレイジー', artist:'CRAZY',          trait:'よく跳ねる', p:{ density:.006, restitution:.95 } },
-    { key:'danna',        name:'だんな',        artist:'赤猫かるま',       trait:'まっすぐ',   p:{ density:.008, restitution:.25, frictionAir:.012 } },
+    { key:'danna',        name:'だんな',        artist:'赤猫かるま',       trait:'まっすぐ',   p:{ density:.008, restitution:.25, frictionAir:.005 } },
     { key:'inkumo',       name:'インクモ',      artist:"Ink'z Monster",  trait:'大きい',     p:{ density:.006, restitution:.4, r:15 } },
     { key:'mony',         name:'モニィ',        artist:'morry',          trait:'気まぐれ',   p:{ density:.006, restitution:.4, wobble:1 } },
     { key:'kg_kagechiyo', name:'カゲチヨ',      artist:'カゲチヨ',        trait:'速い',       p:{ density:.006, restitution:.5, power:1.3 } },
     { key:'kg_kimi',      name:'キミ',          artist:'カゲチヨ',        trait:'小さい',     p:{ density:.006, restitution:.4, r:9 } },
     { key:'kg_shigure',   name:'シグレ',        artist:'カゲチヨ',        trait:'しっとり',   p:{ density:.008, restitution:.03 } },
     { key:'kg_promu',     name:'プロム',        artist:'カゲチヨ',        trait:'くるくる',   p:{ density:.006, restitution:.4, friction:.6, spin:1 } },
-    { key:'kg_muchiko',   name:'ムチコ',        artist:'カゲチヨ',        trait:'ねばる',     p:{ density:.006, restitution:.2, friction:1, frictionAir:.012, power:1.1 } },
+    { key:'kg_muchiko',   name:'ムチコ',        artist:'カゲチヨ',        trait:'ねばる',     p:{ density:.006, restitution:.2, friction:.6, frictionAir:.006, power:1.15 } },
   ];
   const byKey = k => PINS.find(p => p.key === k);
   const PRICE_SINGLE = 1800, PRICE_SET = 4400, BALLS = 5;
@@ -174,7 +177,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   // ---- 盤面 ----
   const engine = Engine.create({ positionIterations:8, velocityIterations:6 }); engine.gravity.y = 1.0;
   const world = engine.world;
-  const S = { state:'title', char:null, balls:BALLS, ball:null, tray:[], got:[], combo:0, power:0, charging:false, t:0, flash:0, shake:0, lastHit:null, fx:[], captureCool:0, trayBalls:[], payQueue:[], pop:null, score:0, stuckT:0, fever:0, stars:[false,false,false], bumpers:[], mill:null, topMill:null, starBodies:[], drops:[], spinner:null, extra:[] };
+  const S = { state:'title', char:null, balls:BALLS, ball:null, tray:[], got:[], combo:0, power:0, charging:false, t:0, flash:0, shake:0, lastHit:null, fx:[], captureCool:0, trayBalls:[], payQueue:[], pop:null, score:0, stuckT:0, fever:0, coupon:null, couponBusy:false, stars:[false,false,false], bumpers:[], mill:null, topMill:null, gate:null, starBodies:[], drops:[], spinner:null, extra:[] };
   const LANE_X = 394, DIV_X = 372, FIELD_R = 369;   // 発射レーンの玉の中心 / レーンと盤面の仕切りの中心 / 盤面の右端。レーンは 375〜412 の37px(玉の直径は最大30)
   const TOP_C = { x:(8 + 412) / 2, y:200 }, TOP_R = 202;   // 上のアーチ
   const TRAY_Y = 662;                                        // 受け皿の上端(ここから下は玉がたまる)
@@ -186,13 +189,15 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     st.push(wall(4, LH/2, 8, LH*2)); st.push(wall(416, LH/2, 8, LH*2));                    // 外壁
     st.push(wall(DIV_X, (LH + 190) / 2, 6, LH - 190));                                  // レーンと盤面の仕切り(y>190)。受け皿の右端でもある
     // 上のアーチ(多角形の静的セグメント)。右のレーンから上を回って左へ
-    const n = 26; for (let i = 0; i < n; i++){ const a0 = Math.PI * (i / n), a1 = Math.PI * ((i + 1) / n); const p0 = { x:TOP_C.x + TOP_R * Math.cos(a0), y:TOP_C.y - TOP_R * Math.sin(a0) }, p1 = { x:TOP_C.x + TOP_R * Math.cos(a1), y:TOP_C.y - TOP_R * Math.sin(a1) };
+    // 🔴 アーチは「内側の面」が半径 TOP_R になるように、厚みの分だけ外側に置く。内側に厚くするとレーンの出口(x=412付近)にはみ出し、大きい玉が正面衝突して止まる(10/19)
+    const RA = TOP_R + 7, RG = TOP_R + 25;
+    const n = 26; for (let i = 0; i < n; i++){ const a0 = Math.PI * (i / n), a1 = Math.PI * ((i + 1) / n); const p0 = { x:TOP_C.x + RA * Math.cos(a0), y:TOP_C.y - RA * Math.sin(a0) }, p1 = { x:TOP_C.x + RA * Math.cos(a1), y:TOP_C.y - RA * Math.sin(a1) };
       const mx = (p0.x + p1.x) / 2, my = (p0.y + p1.y) / 2, len = Math.hypot(p1.x - p0.x, p1.y - p0.y) + 3, ang = Math.atan2(p1.y - p0.y, p1.x - p0.x); st.push(wall(mx, my, len, 14, ang));
       // 外側のガード(すり抜けた玉を止める)
-      const q0 = { x:TOP_C.x + (TOP_R + 18) * Math.cos(a0), y:TOP_C.y - (TOP_R + 18) * Math.sin(a0) }, q1 = { x:TOP_C.x + (TOP_R + 18) * Math.cos(a1), y:TOP_C.y - (TOP_R + 18) * Math.sin(a1) }; st.push(wall((q0.x + q1.x) / 2, (q0.y + q1.y) / 2, Math.hypot(q1.x - q0.x, q1.y - q0.y) + 3, 12, Math.atan2(q1.y - q0.y, q1.x - q0.x))); }
+      const q0 = { x:TOP_C.x + RG * Math.cos(a0), y:TOP_C.y - RG * Math.sin(a0) }, q1 = { x:TOP_C.x + RG * Math.cos(a1), y:TOP_C.y - RG * Math.sin(a1) }; st.push(wall((q0.x + q1.x) / 2, (q0.y + q1.y) / 2, Math.hypot(q1.x - q0.x, q1.y - q0.y) + 3, 12, Math.atan2(q1.y - q0.y, q1.x - q0.x))); }
     // 釘(段違いの格子)
     const addPeg = (x, y) => { const peg = Bodies.circle(x, y, 5, { isStatic:true, restitution:.6, friction:.05, collisionFilter:F_FIELD }); peg.plugin = { kind:'peg' }; st.push(peg); };
-    const near = (x, y) => [[118, 318], [250, 318], [184, 260], [FIELD_R - 8, 266], [318, 214], [184, 178], [92, 232], [276, 232], [40, 232]].some(([bx, by]) => Math.hypot(x - bx, y - by) < 44);
+    const near = (x, y) => [[118, 318], [250, 318], [184, 260], [FIELD_R - 8, 266], [318, 214], [184, 178], [92, 232], [276, 232], [50, 218]].some(([bx, by]) => Math.hypot(x - bx, y - by) < 44);
     for (let row = 0; row < 5; row++){ const y = 236 + row * 42; const off = row % 2 ? 24 : 0; for (let x = 22 + off; x < FIELD_R - 12; x += 48) if (!near(x, y)) addPeg(x, y); }
     // 左右の壁ぎわを玉が素通りしないように、壁のすぐ内側にも釘(アーチから降りてきた玉を盤面の中へ散らす)
     [310, 400].forEach(y => { addPeg(22, y); });   // 右の壁ぎわには釘を置かない(仕切りとの間に玉が乗って止まる)
@@ -217,9 +222,10 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     // スピナー(右上)。通ると回って+1玉×3
     S.spinner = Bodies.rectangle(318, 214, 40, 5, { isStatic:true, collisionFilter:F_FIELD, restitution:.2 }); S.spinner.plugin = { kind:'spinner', spin:0 }; st.push(S.spinner);
     // 上部の振り分け: アーチを降りた玉は左の壁ぎわを通るので、斜めの板で中央へ飛ばし、回転する羽根と上段バンパーで左右に散らす
-    st.push(wall(36, 232, 62, 7, Math.atan2(36, 50)));
+    // アーチの出口(左上)に回転する振り分け羽根。固定の板だと毎回同じ方向に飛んで右端の穴に集まった
+    S.gate = Bodies.rectangle(50, 218, 60, 7, { isStatic:true, collisionFilter:F_FIELD, restitution:.6 }); S.gate.plugin = { kind:'mill' }; st.push(S.gate);
     S.topMill = Bodies.rectangle(184, 178, 96, 7, { isStatic:true, collisionFilter:F_FIELD, restitution:.8 }); S.topMill.plugin = { kind:'mill' }; st.push(S.topMill);
-    [[92, 232], [276, 232]].forEach(([x, y]) => { const bp = Bodies.circle(x, y, 14, { isStatic:true, restitution:1.1, collisionFilter:F_FIELD }); bp.plugin = { kind:'bumper', hitT:0, small:true }; S.bumpers.push(bp); st.push(bp); });
+    [[92, 232], [276, 232]].forEach(([x, y]) => { const bp = Bodies.circle(x, y, 14, { isStatic:true, restitution:.85, collisionFilter:F_FIELD }); bp.plugin = { kind:'bumper', hitT:0, small:true }; S.bumpers.push(bp); st.push(bp); });
     S.mill = Bodies.rectangle(184, 260, 76, 7, { isStatic:true, collisionFilter:F_FIELD, restitution:.7 }); S.mill.plugin = { kind:'mill' }; st.push(S.mill);
     [[90, 140], [184, 112], [278, 140]].forEach(([x, y], i) => { const sb = Bodies.circle(x, y, 12, { isStatic:true, isSensor:true, collisionFilter:F_FIELD }); sb.plugin = { kind:'star', i }; S.starBodies.push(sb); st.push(sb); });
     // ボーナスホール(右下。ここに流れた玉は+15玉と玉1つおまけ)
@@ -231,14 +237,14 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   }
   function makeBall(){
     const c = byKey(S.char); const p = c.p; const r = p.r || 12;
-    const b = Bodies.circle(LANE_X, LH - 70, r, { restitution: p.restitution ?? .4, friction: p.friction ?? .05, frictionAir: p.frictionAir ?? .006, density: p.density || .006, collisionFilter:F_BALL });
+    const b = Bodies.circle(LANE_X, LH - 70, r, { restitution: p.restitution ?? .4, friction: p.friction ?? .05, frictionAir: p.frictionAir ?? .004, density: p.density || .006, collisionFilter:F_BALL });
     b.plugin = { kind:'ball', key:S.char, r }; return b;
   }
 
   function start(charKey){
     S.char = charKey; S.state = 'play'; S.balls = BALLS; S.tray = []; S.got = []; S.combo = 0; S.power = 0; S.charging = false; S.fx = []; S.t = 0;
     if (S.ball){ Composite.remove(world, S.ball); S.ball = null; }
-    S.trayBalls.forEach(b => Composite.remove(world, b)); S.trayBalls = []; S.payQueue = []; S.pop = null; S.score = 0; S.fever = 0; S.stars = [false, false, false]; S.stuckT = 0; S.lamps = 0;
+    S.trayBalls.forEach(b => Composite.remove(world, b)); S.trayBalls = []; S.payQueue = []; S.pop = null; S.score = 0; S.fever = 0; S.coupon = null; S.couponBusy = false; document.getElementById('cpHit').hidden = true; S.stars = [false, false, false]; S.stuckT = 0; S.lamps = 0;
     S.extra.forEach(b => Composite.remove(world, b)); S.extra = []; S.drops.forEach(d => { if (d.plugin.down){ d.plugin.down = false; Composite.add(world, d); } });
     newBall(); renderTray(); document.getElementById('hBalls').textContent = S.balls;
     document.getElementById('ovTitle').classList.remove('open'); document.getElementById('ovOver').classList.remove('open'); document.getElementById('ovHit').classList.remove('open');
@@ -247,7 +253,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   function newBall(){ if (S.ball) Composite.remove(world, S.ball); S.ball = makeBall(); Composite.add(world, S.ball); S.launched = false; S.ballT = 0; }
   function launch(){
     if (S.state !== 'play' || !S.ball || S.launched) return;
-    const c = byKey(S.char); const pw = Math.min(22, (16 + 9 * S.power) * (c.p.power || 1));   // 上限22(速すぎるとアーチをすり抜けて盤外へ出た)。弱いと届かず戻ってくる
+    const c = byKey(S.char); const pw = Math.min(22.5, (12.5 + 10.5 * S.power) * (c.p.power || 1));   // 11〜23。弱い(4割以下)と上まで届かず戻る、中くらいで右寄りに落ちる、強いと左まで回る。上限22.5(速すぎるとアーチをすり抜ける)
     Body.setVelocity(S.ball, { x:0, y:-pw }); if (c.p.spin) Body.setAngularVelocity(S.ball, .6);
     S.launched = true; S.balls--; document.getElementById('hBalls').textContent = S.balls; S.power = 0; powerBar.style.height = '0%';
     document.getElementById('hint').style.opacity = 0;
@@ -270,6 +276,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     if (!dup && S.tray.length < 4){ S.tray.push(key); S.combo++; renderTray(); toast(S.combo >= 2 ? `COMBO ×${S.combo}!! +${n}玉` : `+${n}玉！`); if (S.tray.length === 4){ payout(key, 50, pk.x, pk.y - 20); S.lamps = 120; } }
     else { S.balls++; document.getElementById('hBalls').textContent = S.balls; toast('もう持ってる！ +1玉'); }
     S.got.push({ key, dup });
+    // ゾロ目: 同じピンズに3回入ったら 4個セット¥500引きのクーポン(1端末1日1枚)
+    if (S.got.filter(g => g.key === key).length === 3 && !S.coupon && !S.couponBusy) zorome(key, pk);
     if (quiet) return;   // 追加の玉(マルチボール)は画面を止めない
     drEvent('smb_hit', { pin:key, dup: dup ? 1 : 0 });
     document.getElementById('hitTtl').textContent = dup ? '🎯 もう持ってる！ 玉を1つおまけ' : (S.tray.length === 4 ? '🎉 4つそろった！' : '🎯 入った！');
@@ -279,6 +287,18 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   }
   function miss(bb){ const b = bb || S.ball; const quiet = b !== S.ball; if (!quiet){ S.combo = 0; S.ball = null; } else S.extra = S.extra.filter(x => x !== b); b.collisionFilter = F_TRAY; b.plugin = { kind:'tray', key:b.plugin.key }; S.trayBalls.push(b); if (!quiet){ toast('はずれ…'); setTimeout(nextBall, 500); } }
   function nextBall(){ document.getElementById('ovHit').classList.remove('open'); if (S.tray.length >= 4 || S.balls <= 0) return gameOver(); newBall(); }
+  // ゾロ目クーポン(サーバーが Stripe のプロモーションコードを発行)
+  function deviceId(){ try{ let d = localStorage.getItem('cm_smb_d'); if (!d){ d = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(x => x.toString(16).padStart(2, '0')).join(''); localStorage.setItem('cm_smb_d', d); } return d; }catch(e){ return 'nostorage' + Date.now().toString(16); } }
+  async function zorome(key, pk){
+    S.couponBusy = true; S.flash = 14; S.shake = 16; S.lamps = 150; toast('ゾロ目!!'); payout(key, 30, pk.x, pk.y - 20); S.pop = { text:'ZORO!', x:pk.x, y:pk.y - 10, t:0 };
+    drEvent('smb_zorome', { pin:key });
+    try{ const r = await fetch('/api/smartball', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'zorome', d: deviceId() }) }); const j = await r.json();
+      if (j && j.code){ S.coupon = j; renderCoupon(); drEvent('smb_coupon', { code:j.code, again: j.again ? 1 : 0 }); }
+    }catch(e){}
+    S.couponBusy = false;
+  }
+  function couponHtml(){ const c = S.coupon; if (!c) return ''; const exp = new Date(c.expires); return `🎟 <b>ゾロ目クーポン ${c.code}</b><br>4個セットが <b>¥${c.amount_off}引き</b>（決済画面の「プロモーションコード」に入力・${exp.getMonth()+1}/${exp.getDate()} ${String(exp.getHours()).padStart(2,'0')}:${String(exp.getMinutes()).padStart(2,'0')}まで・1回）`; }
+  function renderCoupon(){ const el = document.getElementById('cpHit'); el.innerHTML = couponHtml(); el.hidden = !S.coupon; }
   // マルチボール: FEVER開始で追加の玉を2つ放つ(穴に入れば普通に取れる)
   function multiball(){ for (let i = 0; i < 2; i++){ const c = byKey(S.char); const r = c.p.r || 12; const eb = Bodies.circle(60 + i * 260, 110, r, { restitution:.5, friction:.05, frictionAir:.006, density:.006, collisionFilter:F_BALL }); eb.plugin = { kind:'ball', key:S.char, r }; Body.setVelocity(eb, { x:(i ? -1 : 1) * 4, y:2 }); S.extra.push(eb); Composite.add(world, eb); } }
   function toast(t){ const el = document.getElementById('toast'); el.textContent = t; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
@@ -290,7 +310,10 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     document.getElementById('ovSub').textContent = full ? '作家をまたいでOK。このままセットで買える' : (n ? `あと${4 - n}つでセット（1個 ¥1,100）` : 'もう一回どうぞ');
     const gl = document.getElementById('gotList'); gl.innerHTML = S.tray.map(k => { const p = byKey(k); return `<div class="g"><img src="/img/pins/${k}.png" alt=""><b>${p.name}</b><a href="${PINS_URL}?k=${k}&utm_source=smartball&utm_medium=over" target="_blank" rel="noopener">単品 ¥1,800</a></div>`; }).join('');
     const bt = document.getElementById('ovBtns'); let h = '';
-    if (full) h += `<a class="btn p" href="${PINS_URL}?set=${S.tray.join(',')}&utm_source=smartball&utm_medium=set" target="_blank" rel="noopener" data-ev="set">🛒 この4個セットを買う ¥4,400</a>`;
+    const cq = S.coupon ? `&coupon=${encodeURIComponent(S.coupon.code)}` : '';
+    if (S.coupon) h += `<div class="cp">${couponHtml()}</div>`;
+    if (full) h += `<a class="btn p" href="${PINS_URL}?set=${S.tray.join(',')}${cq}&utm_source=smartball&utm_medium=set" target="_blank" rel="noopener" data-ev="set">🛒 この4個セットを買う ${S.coupon ? '¥3,900（クーポン適用）' : '¥4,400'}</a>`;
+    else if (S.coupon) h += `<a class="btn p" href="${PINS_URL}?set=${[...S.tray, ...PINS.map(p => p.key).filter(k => !S.tray.includes(k))].slice(0, 4).join(',')}${cq}&utm_source=smartball&utm_medium=setcp" target="_blank" rel="noopener" data-ev="set">🛒 クーポンで4個セットを買う ¥3,900</a>`;
     h += `<button class="btn y" id="btnRetry">もう一回（玉5発）</button>`;
     h += `<div class="row2"><button class="btn s" id="btnShare">📷 画像でシェア</button><a class="btn s" href="${PINS_URL}?utm_source=smartball&utm_medium=over2" target="_blank" rel="noopener">🛒 ピンズのページ</a></div>`;
     bt.innerHTML = h;
@@ -307,7 +330,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   function tick(){
     S.t++;
     if (S.state !== 'play') return;
-    if (S.charging && !S.launched){ S.power = Math.min(1, S.power + .018); powerBar.style.height = (S.power * 100) + '%'; }
+    if (S.charging && !S.launched){ S.power = Math.min(1, S.power + .014); powerBar.style.height = (S.power * 100) + '%'; }
     const b = S.ball; const c = byKey(S.char);
     if (b && S.launched){
       S.ballT++;
@@ -317,6 +340,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     }
     if (S.mill) Body.setAngle(S.mill, S.t * (S.fever > 0 ? .09 : .045));
     if (S.topMill) Body.setAngle(S.topMill, -S.t * (S.fever > 0 ? .07 : .032));
+    if (S.gate) Body.setAngle(S.gate, S.t * .041);
     if (S.spinner){ const sp = S.spinner.plugin; if (sp.spin > 0){ sp.spin--; Body.setAngle(S.spinner, S.spinner.angle + .35); if (sp.spin % 20 === 0) payout(S.char, 1, S.spinner.position.x, S.spinner.position.y); } }
     if (S.lamps > 0) S.lamps--;
     pockets.forEach(pk => { if (pk.hitT > 0) pk.hitT--; });
@@ -342,7 +366,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
       if (b.position.y > LH + 10 || (b.position.y > TRAY_Y + 6 && b.position.x < DIV_X)) return miss();
       // 上まで届かずレーンに戻ってきたら、玉を返して打ち直し
       if (b.position.x > DIV_X && b.position.y > LH - 90 && S.ballT > 40 && Math.hypot(b.velocity.x, b.velocity.y) < .6){ S.launched = false; S.balls++; document.getElementById('hBalls').textContent = S.balls; toast('届かない… もう一回'); return; }
-      if (S.ballT > 60 * 20) return miss();   // 20秒詰まったら流す
+      if (S.ballT > 60 * 8 && b.position.y < 450 && S.ballT % 30 === 0) Body.applyForce(b, b.position, { x:0, y:b.mass * .012 });   // 8秒以上上で跳ね続けたら下へ
+      if (S.ballT > 60 * 15) return miss();   // 15秒跳ね続けたら流す
     }
     S.fx.forEach(f => f.t++); S.fx = S.fx.filter(f => f.t < 40);
     if (S.flash > 0) S.flash--; if (S.shake > 0) S.shake--;
@@ -367,7 +392,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     ctx.save(); fieldPath(); ctx.clip(); ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 2; for (let i = 0; i < 12; i++){ const a = Math.PI + i * Math.PI / 11; ctx.beginPath(); ctx.moveTo(TOP_C.x, TOP_C.y + 120); ctx.lineTo(TOP_C.x + Math.cos(a) * 600, TOP_C.y + 120 + Math.sin(a) * 600); ctx.stroke(); } ctx.restore();
     // アーチのランプ(追いかけ点灯。FEVER中は虹で高速)
     const NL = 26, speed = S.fever > 0 ? 2 : 5, lit = Math.floor(S.t / speed) % NL;
-    for (let i = 0; i < NL; i++){ const a = Math.PI * (i + .5) / NL; const x = TOP_C.x + (TOP_R + 7) * Math.cos(a), y = TOP_C.y - (TOP_R + 7) * Math.sin(a); const d = (i - lit + NL) % NL; const on = d < 4 || S.flash > 0 || (S.lamps > 0 && (S.t % 8) < 4); const col = S.fever > 0 ? `hsl(${(i * 30 + S.t * 8) % 360},100%,65%)` : (i % 2 ? NEON.pink : NEON.cyan); if (on) glowCircle(x, y, 5, col, 14); else { ctx.fillStyle = 'rgba(255,255,255,.16)'; ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill(); } }
+    for (let i = 0; i < NL; i++){ const a = Math.PI * (i + .5) / NL; const x = TOP_C.x + (TOP_R + 17) * Math.cos(a), y = TOP_C.y - (TOP_R + 17) * Math.sin(a); const d = (i - lit + NL) % NL; const on = d < 4 || S.flash > 0 || (S.lamps > 0 && (S.t % 8) < 4); const col = S.fever > 0 ? `hsl(${(i * 30 + S.t * 8) % 360},100%,65%)` : (i % 2 ? NEON.pink : NEON.cyan); if (on) glowCircle(x, y, 5, col, 14); else { ctx.fillStyle = 'rgba(255,255,255,.16)'; ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill(); } }
     // 看板とLED(払い出した玉の数)
     neonText('PINZ', TOP_C.x, 46, 44, NEON.pink); neonText('SMART BALL', TOP_C.x, 88, 24, NEON.cyan);
     ctx.save(); ctx.fillStyle = '#000'; ctx.fillRect(TOP_C.x - 80, 112, 160, 32); ctx.strokeStyle = '#3a3a55'; ctx.lineWidth = 2; ctx.strokeRect(TOP_C.x - 80, 112, 160, 32); ctx.font = '900 24px "Courier New", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.shadowColor = NEON.orange; ctx.shadowBlur = 10; ctx.fillStyle = NEON.orange; ctx.fillText(String(S.score).padStart(5, '0') + ' 玉', TOP_C.x, 129); ctx.restore();
@@ -386,6 +411,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     if (S.spinner){ const sp = S.spinner; ctx.save(); ctx.translate(sp.position.x, sp.position.y); ctx.rotate(sp.angle); ctx.shadowColor = NEON.cyan; ctx.shadowBlur = sp.plugin.spin ? 18 : 6; ctx.fillStyle = sp.plugin.spin ? '#fff' : NEON.cyan; ctx.fillRect(-20, -2.5, 40, 5); ctx.restore(); }
     // ギミック
     for (const bp of S.bumpers){ const h = bp.plugin.hitT; const R0 = bp.plugin.small ? 14 : 17; const pulse = 1 + .08 * Math.sin(S.t * .2); glowCircle(bp.position.x, bp.position.y, (R0 + (h ? 5 : 0)) * pulse, h ? NEON.yellow : (bp.plugin.small ? NEON.cyan : NEON.pink), h ? 30 : 16); ctx.beginPath(); ctx.arc(bp.position.x, bp.position.y, R0 - 6, 0, 7); ctx.fillStyle = '#fff'; ctx.fill(); ctx.fillStyle = '#0d0b1e'; ctx.font = '900 12px "M PLUS Rounded 1c", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('+1', bp.position.x, bp.position.y); }
+    if (S.gate){ ctx.save(); ctx.translate(S.gate.position.x, S.gate.position.y); ctx.rotate(S.gate.angle); ctx.shadowColor = NEON.orange; ctx.shadowBlur = 12; ctx.fillStyle = NEON.orange; ctx.fillRect(-30, -3.5, 60, 7); ctx.restore(); glowCircle(S.gate.position.x, S.gate.position.y, 6, '#fff', 8); }
     if (S.topMill){ ctx.save(); ctx.translate(S.topMill.position.x, S.topMill.position.y); ctx.rotate(S.topMill.angle); ctx.shadowColor = NEON.purple; ctx.shadowBlur = 14; ctx.fillStyle = NEON.purple; ctx.fillRect(-48, -3.5, 96, 7); ctx.restore(); glowCircle(S.topMill.position.x, S.topMill.position.y, 7, '#fff', 8); }
     if (S.mill){ ctx.save(); ctx.translate(S.mill.position.x, S.mill.position.y); ctx.rotate(S.mill.angle); ctx.shadowColor = NEON.lime; ctx.shadowBlur = 14; ctx.fillStyle = NEON.lime; ctx.fillRect(-38, -3.5, 76, 7); ctx.fillRect(-3.5, -38, 7, 76); ctx.restore(); glowCircle(S.mill.position.x, S.mill.position.y, 7, '#fff', 8); }
     S.starBodies.forEach((sb, i) => { ctx.save(); if (S.stars[i]){ ctx.shadowColor = NEON.yellow; ctx.shadowBlur = 18; ctx.fillStyle = NEON.yellow; } else { ctx.fillStyle = 'rgba(255,255,255,.22)'; } star(sb.position.x, sb.position.y, 13); ctx.restore(); });
@@ -427,7 +453,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   const plunger = document.getElementById('plunger');
   const down = e => { e.preventDefault(); if (S.state === 'play' && !S.launched){ S.charging = true; S.power = 0; } };
   const up = e => { e.preventDefault(); if (S.charging){ S.charging = false; launch(); } };
-  plunger.addEventListener('pointerdown', down); plunger.addEventListener('pointerup', up); plunger.addEventListener('pointercancel', up); plunger.addEventListener('pointerleave', up);
+  plunger.addEventListener('pointerdown', e => { try{ plunger.setPointerCapture(e.pointerId); }catch(_){} down(e); }); plunger.addEventListener('pointerup', up); plunger.addEventListener('pointercancel', up);
   window.addEventListener('keydown', e => { if (e.code === 'Space' && !e.repeat) down(e); });
   window.addEventListener('keyup', e => { if (e.code === 'Space') up(e); });
   document.getElementById('btnNext').addEventListener('click', nextBall);

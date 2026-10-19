@@ -103,6 +103,9 @@
   .buy-bar-info strong{color:var(--text);font-size:16px;display:block;}
   .buy-btn{background:var(--accent);color:#111;border:none;border-radius:32px;padding:14px 34px;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:.06em;white-space:nowrap;}
   .buy-btn:disabled{background:#333;color:var(--muted);cursor:default;}
+  .coupon-bar{margin:0 auto 18px;max-width:960px;background:#fff8dc;color:#111;border:2px dashed #e0b400;border-radius:14px;padding:12px 16px;font-size:14px;font-weight:700;line-height:1.6;}
+  .coupon-bar b{font-size:16px;letter-spacing:.06em;}
+  .coupon-bar button{margin-left:8px;border:2px solid #111;background:#fff;border-radius:999px;padding:4px 12px;font-weight:900;font-family:inherit;cursor:pointer;}
   .buy-btn:not(:disabled):hover{opacity:.85;}
   #addCartBtn{background:#fff;border:2px solid var(--accent);color:var(--accent);border-radius:32px;padding:13px 20px;font-size:14px;font-weight:900;cursor:pointer;white-space:nowrap;}
   #addCartBtn:disabled{opacity:.4;cursor:default;}
@@ -423,6 +426,15 @@ $('#buyBtn').addEventListener('click', async function(){
 // 「ユルクレイジーのピンズを見に来た人」に、また探させない。
 (function(){
   // スマートボール(/smartball/)から ?set=a,b,c,d で来たら、4個セットをその絵柄で最初から選んでおく
+  // スマートボールのゾロ目クーポン(?coupon=ZORO****)。決済画面の「プロモーションコード」欄に入れてもらう
+  var cpq = new URLSearchParams(location.search).get('coupon');
+  if (cpq && /^ZORO[A-Z0-9]{4}$/.test(cpq)){
+    var bn = document.createElement('div'); bn.className = 'coupon-bar';
+    bn.innerHTML = '🎟 ゾロ目クーポン <b>' + cpq + '</b>：4個セットが <b>¥500引き</b>。決済画面の「プロモーションコード」に入力してください <button type="button" id="cpCopy">コピー</button>';
+    var hero = document.querySelector('.hero'); if (hero) hero.insertAdjacentElement('afterend', bn);
+    document.getElementById('cpCopy').addEventListener('click', function(){ try{ navigator.clipboard.writeText(cpq); this.textContent = 'コピーしました'; }catch(e){ prompt('クーポンコード', cpq); } });
+    if (window.cmEvent) cmEvent('pins_coupon_view', { code: cpq });
+  }
   var setq = new URLSearchParams(location.search).get('set');
   if (setq){
     var keys = setq.split(',').filter(function(x, i, arr){ return DESIGNS.some(function(d){ return d.key === x; }) && arr.indexOf(x) === i; }).slice(0, SET_SIZE);
