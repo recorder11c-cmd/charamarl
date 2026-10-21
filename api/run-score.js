@@ -59,6 +59,20 @@ async function boardOf(char, key, pid) {
   }
   return { top, me, total: Number(total) || 0 };
 }
+// JUNKeeeeS FES(10/24-25)の会場ランキング: 4体共通の ZSET run:rank:fes:junk。名前とキャラは run:fesplayer:{pid}
+const FES_KEY = 'run:rank:fes:junk';
+async function fesBoard(pid) {
+  const raw = await redis('ZREVRANGE', FES_KEY, 0, 19, 'WITHSCORES');
+  const top = [];
+  for (let i = 0; i < raw.length; i += 2) {
+    const h = await redis('HGETALL', `run:fesplayer:${raw[i]}`); const o = {}; for (let j = 0; j < (h || []).length; j += 2) o[h[j]] = h[j + 1];
+    top.push({ rank: top.length + 1, name: o.name || '', char: o.char || '', score: Number(raw[i + 1]) });
+  }
+  const total = Number(await redis('ZCARD', FES_KEY)) || 0;
+  let me = null;
+  if (pid) { const r = await redis('ZREVRANK', FES_KEY, pid); const sc = await redis('ZSCORE', FES_KEY, pid); if (r !== null && r !== undefined) me = { rank: Number(r) + 1, score: Number(sc) }; }
+  return { top, total, me };
+}
 // 累計(top/me/total)＋今週(week:{key,top,me,total})＋所有者だけ(own:{top,me,total,week})を返す
 async function board(char, pid) {
   const wk = weekKey();
@@ -82,6 +96,9 @@ module.exports = async (req, res) => {
       if (q.owner !== undefined) {           // 所有者トークン検証
         const ok = !!ownerToken(char) && String(q.owner) === ownerToken(char);
         return res.status(200).json({ owner: ok });
+      }
+      if (q.fes !== undefined) {             // JUNKeeeeS FES 会場ランキング(4体共通・pid単位のベスト)。GET /api/run-score?char=JUNK_AGERU&fes=1
+        return res.status(200).json(await fesBoard(PID_RE.test(String(q.pid || '')) ? String(q.pid) : null));
       }
       if (q.stats !== undefined) {           // 管理用: 日別のプレイ数・ゲームオーバー数(直近14日)
         if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
@@ -159,10 +176,18 @@ module.exports = async (req, res) => {
         if (score > prev) cmds.push(['ZADD', key, score, pid], ['HSET', pkey, 'score', score, 'at', Date.now()]);
         if (score > prevW) cmds.push(['ZADD', wkey, score, pid], ['EXPIRE', wkey, 60 * 86400]);   // 週間キーは60日で自然消滅
       }
+      // JUNKeeeeS FES の会場モード(?fes=1 で開いたページから fes:1 が付く)。4体共通の順位表に入れる(通常の順位表にも入る)
+      let fes = null;
+      if (b.fes && char.startsWith('JUNK_') && !ownerMode) {
+        const prevF = Number(await redis('ZSCORE', FES_KEY, pid)) || 0;
+        cmds.push(['HSET', `run:fesplayer:${pid}`, 'name', name, 'char', char]);
+        if (score > prevF) cmds.push(['ZADD', FES_KEY, score, pid]);
+      }
       await pipeline(cmds);
+      if (b.fes && char.startsWith('JUNK_')) fes = await fesBoard(pid);
       const out = await board(char, pid);
       return res.status(200).json({ mode: ownerMode ? 'owner' : 'normal', rank: out.me ? out.me.rank : null, best: Math.max(prev, ownerMode ? 0 : score), total: out.total, top: out.top, week: out.week, weekBest: Math.max(prevW, ownerMode ? 0 : score),
-        own: out.own, ownRank: out.own && out.own.me ? out.own.me.rank : null, ownBest: Math.max(prevO, ownerMode ? score : 0), owner });
+        own: out.own, ownRank: out.own && out.own.me ? out.own.me.rank : null, ownBest: Math.max(prevO, ownerMode ? score : 0), owner, fes });
     }
 
     if (req.method === 'DELETE') {

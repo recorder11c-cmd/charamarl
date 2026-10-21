@@ -169,7 +169,10 @@
   .zu-big{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:900;display:none;
     align-items:center;justify-content:center;padding:16px;}
   .zu-big.open{display:flex;}
-  .zu-big img{max-width:min(560px,94vw);max-height:88vh;border-radius:12px;}
+  .zu-big img{max-width:min(560px,94vw);max-height:78vh;border-radius:12px;}
+  .zu-big{flex-direction:column;gap:12px;}
+  .zu-big-btns{display:flex;gap:10px;}
+  .zb{background:#fff;color:#111;border:none;border-radius:999px;padding:10px 18px;font-weight:900;font-size:14px;font-family:inherit;text-decoration:none;cursor:pointer;}
   .share-ic{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -268,7 +271,7 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
   <div class="zu-grid" id="zuGrid"></div>
 </div>
 <div class="spot-toast" id="spotToast"></div>
-<div class="zu-big" id="zuBig"><img id="zuBigImg" src="" alt=""></div>
+<div class="zu-big" id="zuBig"><img id="zuBigImg" src="" alt=""><div class="zu-big-btns" id="zuBigBtns" hidden><a class="zb" id="zuSave" href="#" download="junkeeees_legendary.jpg">💾 画像を保存</a><button class="zb" id="zuShareX" type="button">𝕏 Xでシェア</button></div></div>
 
 <div id="fin" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true">
@@ -726,6 +729,16 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
 (function(){
   const ov=document.getElementById("zuOverlay"), grid=document.getElementById("zuGrid");
   const big=document.getElementById("zuBig"), bigImg=document.getElementById("zuBigImg");
+  (function(){ const bb=document.getElementById("zuBigBtns"); if(!bb) return; bb.addEventListener("click",e=>e.stopPropagation());
+    document.getElementById("zuSave").addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_legendary_save",{}); });
+    document.getElementById("zuShareX").addEventListener("click",async()=>{
+      const text="JUNKeeeeS FES 2026 会場スタンプ 3/3 コンプリート！レジェンダリーカードもらった🍟 #JUNKeeeeS #CHARAMARL";
+      const url="https://charamarl.com/tap/junkeeees.html";
+      if(window.cmEvent)cmEvent("fes_legendary_share",{});
+      try{ const r=await fetch(bigImg.src); const blob=await r.blob(); const file=new File([blob],"junkeeees_legendary.jpg",{type:"image/jpeg"});
+        if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:text+" "+url}); return; } }catch(e){}
+      window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(url),"_blank");
+    }); })();
   const btn=document.getElementById("zuBtn"), close=document.getElementById("zuClose");
   if(!ov||!grid||!btn) return;
   // そろうまでは「みつけた分だけ」を並べる。？を並べると壁のようになって分かりにくい。
@@ -747,7 +760,7 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
       if(isFes){ const t=document.createElement("span"); t.className="fesx"; t.textContent="会場限定"; cell.appendChild(t); }
       const im=document.createElement("img"); im.src=c.img; im.loading="lazy"; im.alt="";
       cell.appendChild(im);
-      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); });
+      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; if(isFes){ document.getElementById("zuSave").href=c.img; if(window.cmEvent)cmEvent("fes_legendary_view",{day:fesDay()}); } });
       grid.appendChild(cell);
     });
     if(!list.length){
@@ -776,7 +789,10 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
 // 3つそろうと、図鑑に「会場限定」の1枚が増える。ウォレットもアプリも要らない。
 const SPOT_KEY="junk_fes_spots", SPOTS=["a","b","c"];
 // 会場限定カード。ROKUさんから絵をもらえたら img を差し替える（いまはFES面を仮に使う）
-const FES_CARD={ key:"fes_only", name:"会場限定カード", img:"art/junkeeees_fes1.jpg" };
+// 会場限定＝レジェンダリーカード。3/3をそろえた日で金(10/24)か銀(10/25)。絵はROKUさんがFES用に了承済みの新アゲル(ar/fes/ageru_point.png)
+const FES_DAY_KEY="junk_fes_day";
+function fesDay(){ let d=""; try{ d=localStorage.getItem(FES_DAY_KEY)||""; }catch(e){} if(!d){ const now=new Date(Date.now()+9*3600e3); d=String(now.getUTCDate()); } return d==="25" ? "25" : "24"; }
+const FES_CARD={ key:"fes_only", get name(){ return "レジェンダリー "+(fesDay()==="25"?"SILVER":"GOLD"); }, get img(){ return "art/junkeeees_legendary_10"+fesDay()+".jpg"; } };
 const spotSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(SPOT_KEY)||"[]"));}catch(e){return new Set();}};
 const spotDone=()=>spotSet().size>=SPOTS.length;
 function toast(msg){
@@ -791,7 +807,8 @@ function toast(msg){
   s.add(q); try{ localStorage.setItem(SPOT_KEY, JSON.stringify([...s])); }catch(e){}
   if(window.cmEvent)cmEvent("fes_spot",{spot:q,found:s.size,is_new:isNew});
   if(s.size>=SPOTS.length){
-    toast("🎉 会場スタンプ 3/3 コンプリート！図鑑に1枚ふえました");
+    if(isNew){ try{ if(!localStorage.getItem(FES_DAY_KEY)){ const now=new Date(Date.now()+9*3600e3); localStorage.setItem(FES_DAY_KEY, String(now.getUTCDate())); } }catch(e){} }
+    toast("🎉 会場スタンプ 3/3 コンプリート！レジェンダリーカードをプレゼント（図鑑の最後）");
     if(isNew && window.cmEvent)cmEvent("fes_complete",{});
   }else{
     toast("会場スタンプ "+s.size+" / 3 ・ あと"+(SPOTS.length-s.size)+"か所");
