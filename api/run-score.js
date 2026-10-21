@@ -42,8 +42,13 @@ const PID_RE = /^[a-f0-9]{16,32}$/;
 const MAX_SCORE = 999999;
 const TOP_N = 20;
 
+// 名前: 制御文字を除き12文字まで。子どもも入れるので、連絡先らしきもの(数字7桁以上・@・URL)と不適切語は伏せる(2026-10-21)
+const NG_WORDS = ['死ね', 'しね', '殺す', 'ころす', 'きもい', 'キモい', 'ブス', 'バカ', 'ばか', 'アホ', 'あほ', 'うんこ', 'ちんこ', 'まんこ', 'セックス', 'sex', 'fuck', 'shit'];
 function cleanName(n) {
-  return String(n || '').replace(/[\x00-\x1f\x7f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 12);
+  let v = String(n || '').replace(/[\x00-\x1f\x7f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 12);
+  if (/\d{7,}|@|https?:|\.com|\.jp/i.test(v)) return '';
+  for (const w of NG_WORDS) if (v.toLowerCase().includes(w.toLowerCase())) return '';
+  return v;
 }
 
 async function boardOf(char, key, pid) {
@@ -66,11 +71,11 @@ async function fesBoard(pid) {
   const top = [];
   for (let i = 0; i < raw.length; i += 2) {
     const h = await redis('HGETALL', `run:fesplayer:${raw[i]}`); const o = {}; for (let j = 0; j < (h || []).length; j += 2) o[h[j]] = h[j + 1];
-    top.push({ rank: top.length + 1, name: o.name || '', char: o.char || '', score: Number(raw[i + 1]) });
+    top.push({ rank: top.length + 1, name: o.name || '', char: o.char || '', score: Math.floor(Number(raw[i + 1])) });
   }
   const total = Number(await redis('ZCARD', FES_KEY)) || 0;
   let me = null;
-  if (pid) { const r = await redis('ZREVRANK', FES_KEY, pid); const sc = await redis('ZSCORE', FES_KEY, pid); if (r !== null && r !== undefined) me = { rank: Number(r) + 1, score: Number(sc) }; }
+  if (pid) { const r = await redis('ZREVRANK', FES_KEY, pid); const sc = await redis('ZSCORE', FES_KEY, pid); if (r !== null && r !== undefined) me = { rank: Number(r) + 1, score: Math.floor(Number(sc)) }; }
   return { top, total, me };
 }
 // 累計(top/me/total)＋今週(week:{key,top,me,total})＋所有者だけ(own:{top,me,total,week})を返す
@@ -181,7 +186,8 @@ module.exports = async (req, res) => {
       if (b.fes && char.startsWith('JUNK_') && !ownerMode) {
         const prevF = Number(await redis('ZSCORE', FES_KEY, pid)) || 0;
         cmds.push(['HSET', `run:fesplayer:${pid}`, 'name', name, 'char', char]);
-        if (score > prevF) cmds.push(['ZADD', FES_KEY, score, pid]);
+        // 同点は先着が上: 点 + (1 - 登録時刻/1e13) を順位の値にする(表示は整数に戻す)
+        if (score > Math.floor(prevF)) cmds.push(['ZADD', FES_KEY, score + (1 - Date.now() / 1e13), pid]);
       }
       await pipeline(cmds);
       if (b.fes && char.startsWith('JUNK_')) fes = await fesBoard(pid);

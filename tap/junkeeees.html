@@ -163,6 +163,7 @@
     padding:10px 20px;border-radius:22px;box-shadow:0 6px 0 rgba(0,0,0,.22);
     opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;}
   .spot-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .spot-next{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#FFE000;color:#111;border:3px solid #111;border-radius:999px;padding:10px 16px;font-weight:900;font-size:14px;text-decoration:none;z-index:950;box-shadow:4px 4px 0 #111;white-space:nowrap;}
   .zu-cell.fes{outline:2px solid #FF8A00;outline-offset:-2px;}
   .zu-cell .fesx{position:absolute;right:3px;top:3px;font-size:8.5px;font-weight:900;color:#111;
     background:#FF8A00;border-radius:4px;padding:1px 4px;letter-spacing:.02em;z-index:2;}
@@ -271,6 +272,7 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
   <div class="zu-grid" id="zuGrid"></div>
 </div>
 <div class="spot-toast" id="spotToast"></div>
+<a class="spot-next" id="spotNext" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=fes_complete" hidden>🏆 レジェンダリー獲得！ 次は会場RUNに挑戦 →</a>
 <div class="zu-big" id="zuBig"><img id="zuBigImg" src="" alt=""><div class="zu-big-btns" id="zuBigBtns" hidden><a class="zb" id="zuSave" href="#" download="junkeeees_legendary.jpg">💾 画像を保存</a><button class="zb" id="zuShareX" type="button">𝕏 Xでシェア</button></div></div>
 
 <div id="fin" aria-hidden="true">
@@ -729,6 +731,7 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
 (function(){
   const ov=document.getElementById("zuOverlay"), grid=document.getElementById("zuGrid");
   const big=document.getElementById("zuBig"), bigImg=document.getElementById("zuBigImg");
+  (function(){ const nx=document.getElementById("spotNext"); if(nx){ nx.addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_to_run",{}); }); } })();   // 表示の判定は下の会場スタンプの処理の後で(spotDone はそこで定義)
   (function(){ const bb=document.getElementById("zuBigBtns"); if(!bb) return; bb.addEventListener("click",e=>e.stopPropagation());
     document.getElementById("zuSave").addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_legendary_save",{}); });
     document.getElementById("zuShareX").addEventListener("click",async()=>{
@@ -748,7 +751,7 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
     const complete = got.size>=CARDS.length;
     grid.innerHTML="";
     let list = complete ? CARDS.slice() : CARDS.filter(c=>got.has(c.key));
-    if(typeof spotDone==="function" && spotDone()) list = list.concat([FES_CARD]);
+    if(typeof spotDone==="function" && spotDone()) list = list.concat(fesCards());
     document.getElementById("zuDone").hidden = !complete;
     document.getElementById("zuTtl").textContent = complete ? "JUNKeeeeS 図鑑" : "みつけたJUNKeeeeS";
     list.forEach((c)=>{
@@ -757,7 +760,7 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
       cell.type="button"; cell.className="zu-cell got"+(isFes?" fes":"");
       const idx = CARDS.indexOf(c);
       if(idx>=0){ const no=document.createElement("span"); no.className="n"; no.textContent=idx+1; cell.appendChild(no); }
-      if(isFes){ const t=document.createElement("span"); t.className="fesx"; t.textContent="会場限定"; cell.appendChild(t); }
+      if(isFes){ const t=document.createElement("span"); t.className="fesx"; t.textContent=c.day==="25"?"会場限定 SILVER":"会場限定 GOLD"; cell.appendChild(t); }
       const im=document.createElement("img"); im.src=c.img; im.loading="lazy"; im.alt="";
       cell.appendChild(im);
       cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; if(isFes){ document.getElementById("zuSave").href=c.img; if(window.cmEvent)cmEvent("fes_legendary_view",{day:fesDay()}); } });
@@ -788,17 +791,22 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
 // FES会場に置いたNFCを読むと ?spot=a|b|c でこのページが開く。
 // 3つそろうと、図鑑に「会場限定」の1枚が増える。ウォレットもアプリも要らない。
 const SPOT_KEY="junk_fes_spots", SPOTS=["a","b","c"];
+// スポットの名前(会場のエリアに合わせる。入口/出口ではなく、FESの各エリアを回る体験に)
+const SPOT_NAME={ a:"PLAYスポット", b:"ARTスポット", c:"FOODスポット" };
+const SPOT_HINT={ a:"遊びが生まれる場所へ", b:"アートが生まれる場所へ", c:"おいしいものがある場所へ" };
 // 会場限定カード。ROKUさんから絵をもらえたら img を差し替える（いまはFES面を仮に使う）
 // 会場限定＝レジェンダリーカード。3/3をそろえた日で金(10/24)か銀(10/25)。絵はROKUさんがFES用に了承済みの新アゲル(ar/fes/ageru_point.png)
-const FES_DAY_KEY="junk_fes_day";
-function fesDay(){ let d=""; try{ d=localStorage.getItem(FES_DAY_KEY)||""; }catch(e){} if(!d){ const now=new Date(Date.now()+9*3600e3); d=String(now.getUTCDate()); } return d==="25" ? "25" : "24"; }
-const FES_CARD={ key:"fes_only", get name(){ return "レジェンダリー "+(fesDay()==="25"?"SILVER":"GOLD"); }, get img(){ return "art/junkeeees_legendary_10"+fesDay()+".jpg"; } };
+const FES_DAY_KEY="junk_fes_days";   // 3/3の状態で会場のスポットを読んだ日(24/25)。両日なら GOLD と SILVER の2枚
+function jstDay(){ const now=new Date(Date.now()+9*3600e3); return String(now.getUTCDate()); }
+function fesDays(){ let d=[]; try{ d=JSON.parse(localStorage.getItem(FES_DAY_KEY)||"[]"); }catch(e){} if(!d.length) d=[jstDay()==="25"?"25":"24"]; return d.filter(x=>x==="24"||x==="25"); }
+function fesCards(){ return fesDays().map(d=>({ key:"fes_only", day:d, name:"レジェンダリー "+(d==="25"?"SILVER":"GOLD"), img:"art/junkeeees_legendary_10"+d+".jpg" })); }
+const FES_CARD=fesCards()[0];
 const spotSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(SPOT_KEY)||"[]"));}catch(e){return new Set();}};
 const spotDone=()=>spotSet().size>=SPOTS.length;
 function toast(msg){
   const el=document.getElementById("spotToast"); if(!el)return;
   el.textContent=msg; el.classList.add("show");
-  setTimeout(()=>el.classList.remove("show"), 3600);
+  setTimeout(()=>el.classList.remove("show"), 5200);
 }
 (function(){
   let q=""; try{ q=(new URLSearchParams(location.search).get("spot")||"").toLowerCase(); }catch(e){}
@@ -807,14 +815,18 @@ function toast(msg){
   s.add(q); try{ localStorage.setItem(SPOT_KEY, JSON.stringify([...s])); }catch(e){}
   if(window.cmEvent)cmEvent("fes_spot",{spot:q,found:s.size,is_new:isNew});
   if(s.size>=SPOTS.length){
-    if(isNew){ try{ if(!localStorage.getItem(FES_DAY_KEY)){ const now=new Date(Date.now()+9*3600e3); localStorage.setItem(FES_DAY_KEY, String(now.getUTCDate())); } }catch(e){} }
+    // 3/3の日を記録(24日と25日の両方でそろえた/読んだ人は2枚)
+    try{ const days=new Set(JSON.parse(localStorage.getItem(FES_DAY_KEY)||"[]")); const d=jstDay(); if(d==="24"||d==="25"){ const before=days.size; days.add(d); localStorage.setItem(FES_DAY_KEY, JSON.stringify([...days])); if(days.size>before && before>0) toast("🎉 2日目も！レジェンダリーカードが2枚目になりました"); } }catch(e){}
+    const bar=document.getElementById("spotNext"); if(bar) bar.hidden=false;
     toast("🎉 会場スタンプ 3/3 コンプリート！レジェンダリーカードをプレゼント（図鑑の最後）");
     if(isNew && window.cmEvent)cmEvent("fes_complete",{});
   }else{
-    toast("会場スタンプ "+s.size+" / 3 ・ あと"+(SPOTS.length-s.size)+"か所");
+    const left=SPOTS.filter(x=>!s.has(x)); const hint=left.length?"　次のヒント：「"+SPOT_HINT[left[0]]+"」":"";
+    toast("会場スタンプ "+s.size+" / 3（"+SPOT_NAME[q]+"）・あと"+left.length+"か所"+hint);
   }
   if(typeof updateCounter==="function") updateCounter();
 })();
+(function(){ const nx=document.getElementById("spotNext"); if(nx && spotDone()) nx.hidden=false; })();
 </script>
 
 </body>
