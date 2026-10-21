@@ -792,8 +792,9 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
 // 3つそろうと、図鑑に「会場限定」の1枚が増える。ウォレットもアプリも要らない。
 const SPOT_KEY="junk_fes_spots", SPOTS=["a","b","c"];
 // スポットの名前(会場のエリアに合わせる。入口/出口ではなく、FESの各エリアを回る体験に)
-const SPOT_NAME={ a:"PLAYスポット", b:"ARTスポット", c:"FOODスポット" };
-const SPOT_HINT={ a:"遊びが生まれる場所へ", b:"アートが生まれる場所へ", c:"おいしいものがある場所へ" };
+// スポットはキャラの名前で(PLAY/ART/FOODだと分かりにくい、とユーザー判断 10/21)。掲示にもそのキャラの絵を出す
+const SPOT_NAME={ a:"PATTY", b:"ホットドッグブルドッグ", c:"ジョーカー" };
+const SPOT_HINT={ a:"次は PATTY をさがせ", b:"次は ホットドッグブルドッグ をさがせ", c:"次は ジョーカー をさがせ" };
 // 会場限定カード。ROKUさんから絵をもらえたら img を差し替える（いまはFES面を仮に使う）
 // 会場限定＝レジェンダリーカード。3/3をそろえた日で金(10/24)か銀(10/25)。絵はROKUさんがFES用に了承済みの新アゲル(ar/fes/ageru_point.png)
 const FES_DAY_KEY="junk_fes_days";   // 3/3の状態で会場のスポットを読んだ日(24/25)。両日なら GOLD と SILVER の2枚
@@ -821,8 +822,8 @@ function toast(msg){
     toast("🎉 会場スタンプ 3/3 コンプリート！レジェンダリーカードをプレゼント（図鑑の最後）");
     if(isNew && window.cmEvent)cmEvent("fes_complete",{});
   }else{
-    const left=SPOTS.filter(x=>!s.has(x)); const hint=left.length?"　次のヒント：「"+SPOT_HINT[left[0]]+"」":"";
-    toast("会場スタンプ "+s.size+" / 3（"+SPOT_NAME[q]+"）・あと"+left.length+"か所"+hint);
+    const left=SPOTS.filter(x=>!s.has(x)); const hint=left.length?"　"+SPOT_HINT[left[0]]+"！":"";
+    toast(SPOT_NAME[q]+" みっけ！ 会場スタンプ "+s.size+" / 3"+hint);
   }
   if(typeof updateCounter==="function") updateCounter();
 })();
