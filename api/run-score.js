@@ -194,7 +194,7 @@ module.exports = async (req, res) => {
       if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
       const char = String(q.char || ''), pid = String(q.pid || '');
       if (!charOk(char) || !PID_RE.test(pid)) return res.status(400).json({ error: 'bad id' });
-      await pipeline([['ZREM', `run:rank:${char}`, pid], ['ZREM', `run:rank:${char}:w:${weekKey()}`, pid], ['ZREM', `run:rank:${char}:own`, pid], ['ZREM', `run:rank:${char}:own:w:${weekKey()}`, pid], ['DEL', `run:player:${char}:${pid}`]]);
+      await pipeline([['ZREM', `run:rank:${char}`, pid], ['ZREM', `run:rank:${char}:w:${weekKey()}`, pid], ['ZREM', `run:rank:${char}:own`, pid], ['ZREM', `run:rank:${char}:own:w:${weekKey()}`, pid], ['DEL', `run:player:${char}:${pid}`], ['ZREM', FES_KEY, pid], ['DEL', `run:fesplayer:${pid}`]]);
       return res.status(200).json({ ok: true });
     }
 
