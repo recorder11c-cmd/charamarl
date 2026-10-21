@@ -203,8 +203,10 @@
   .zu-big.open{display:flex;}
   .zu-big img{max-width:min(560px,94vw);max-height:78vh;border-radius:12px;}
   .zu-big{flex-direction:column;gap:12px;}
-  .zu-big-btns{display:flex;gap:10px;}
-  .zb{background:#fff;color:#111;border:none;border-radius:999px;padding:10px 18px;font-weight:900;font-size:14px;font-family:inherit;text-decoration:none;cursor:pointer;}
+  .zu-big-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:min(560px,94vw);}
+  .zb{background:#fff;color:#111;border:none;border-radius:999px;padding:12px 10px;font-weight:900;font-size:14px;font-family:inherit;text-decoration:none;cursor:pointer;text-align:center;white-space:nowrap;}
+  .zb.y{background:#FFE000;grid-column:1 / -1;}
+  body:has(.zu-big.open) .spot-next, body:has(.stamp-ov.open) .spot-next, body:has(#fin.open) .spot-next{display:none;}
   .share-ic{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
@@ -315,7 +317,7 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
   <div class="stamp-btns" id="stampBtns"></div>
 </div>
 <a class="spot-next" id="spotNext" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=fes_complete" hidden>🏆 レジェンダリー獲得！ 次は会場RUNに挑戦 →</a>
-<div class="zu-big" id="zuBig"><img id="zuBigImg" src="" alt=""><div class="zu-big-btns" id="zuBigBtns" hidden><a class="zb" id="zuSave" href="#" download="junkeeees_legendary.jpg">💾 画像を保存</a><button class="zb" id="zuShareX" type="button">𝕏 Xでシェア</button></div></div>
+<div class="zu-big" id="zuBig"><img id="zuBigImg" src="" alt=""><div class="zu-big-btns" id="zuBigBtns" hidden><a class="zb" id="zuSave" href="#" download="junkeeees_legendary.jpg">💾 画像を保存</a><button class="zb" id="zuShareX" type="button">𝕏 Xでシェア</button><a class="zb y" id="zuRun" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=legendary">🏃 会場RUNに挑戦</a></div></div>
 
 <div id="fin" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true">
@@ -806,7 +808,7 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
       if(isFes){ const t=document.createElement("span"); t.className="fesx"; t.textContent=c.day==="25"?"会場限定 SILVER":"会場限定 GOLD"; cell.appendChild(t); }
       const im=document.createElement("img"); im.src=c.img; im.loading="lazy"; im.alt="";
       cell.appendChild(im);
-      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; if(isFes){ document.getElementById("zuSave").href=c.img; if(window.cmEvent)cmEvent("fes_legendary_view",{day:fesDay()}); } });
+      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const nx=document.getElementById("spotNext"); if(nx) nx.style.display="none"; const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; if(isFes){ document.getElementById("zuSave").href=c.img; if(window.cmEvent)cmEvent("fes_legendary_view",{day:fesDay()}); } });
       grid.appendChild(cell);
     });
     if(!list.length){
@@ -827,7 +829,7 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
   close.addEventListener("click",shut);
   ov.addEventListener("click",e=>{ if(e.target===ov) shut(); });
   big.addEventListener("pointerdown",e=>e.stopPropagation());
-  big.addEventListener("click",()=>big.classList.remove("open"));
+  big.addEventListener("click",()=>{ big.classList.remove("open"); const nx=document.getElementById("spotNext"); if(nx) nx.style.display=""; });
 })();
 
 // ===== 会場スタンプ（NFC 3か所） =====
