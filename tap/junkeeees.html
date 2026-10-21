@@ -163,6 +163,37 @@
     padding:10px 20px;border-radius:22px;box-shadow:0 6px 0 rgba(0,0,0,.22);
     opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;}
   .spot-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  /* 会場スタンプカード: 表=見つけたキャラ、タップで裏返ってスタンプが押される */
+  .stamp-ov{position:fixed;inset:0;z-index:980;background:rgba(8,8,16,.94);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px;}
+  .stamp-ov.open{display:flex;}
+  .stamp-ttl{color:#fff;font-weight:900;font-size:15px;letter-spacing:.04em;}
+  .stamp-scene{perspective:1200px;width:min(320px,86vw);aspect-ratio:3/4.2;}
+  .stamp-card{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.8,.2,1);cursor:pointer;}
+  .stamp-card.flip{transform:rotateY(180deg);}
+  .stamp-card .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:22px;border:4px solid #fff;box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+  .stamp-card .front{background:radial-gradient(circle at 50% 30%,#FFE000,#FF7A00 70%);}
+  .stamp-card .front img{width:70%;height:auto;filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));animation:bob 1.6s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .stamp-card .front .nm{font-weight:900;font-size:22px;color:#111;margin-top:10px;text-shadow:0 1px 0 #fff;}
+  .stamp-card .front .tap{position:absolute;bottom:14px;font-weight:900;font-size:13px;color:#111;background:rgba(255,255,255,.85);border-radius:999px;padding:6px 14px;animation:blink 1.2s ease-in-out infinite;}
+  @keyframes blink{50%{opacity:.4}}
+  .stamp-card .back{background:#FFF6E5;transform:rotateY(180deg);padding:16px;justify-content:center;}
+  .bk-ttl{font-weight:900;font-size:13px;color:#111;margin:4px 0 14px;}
+  .slots{display:flex;gap:10px;width:100%;justify-content:center;}
+  .slot{width:86px;height:86px;border-radius:50%;border:3px dashed #c9bfae;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;background:#fff;}
+  .slot img{width:52px;height:52px;object-fit:contain;opacity:.25;filter:grayscale(1);}
+  .slot span{font-size:9px;font-weight:900;color:#9a8f7c;margin-top:2px;}
+  .slot.got{border:3px solid #E5484D;}
+  .slot.got img{opacity:1;filter:none;}
+  .slot.got::after{content:"済";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:rgba(229,72,77,.85);border-radius:50%;transform:rotate(-14deg);}
+  .slot.new{animation:stamp .55s cubic-bezier(.2,1.4,.3,1) both;}
+  @keyframes stamp{0%{transform:scale(2.6) rotate(-20deg);opacity:0}60%{transform:scale(.92) rotate(-14deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+  .stamp-ov.shake .stamp-scene{animation:shk .5s;}
+  @keyframes shk{0%,100%{transform:translate(0,0)}20%{transform:translate(-6px,2px)}40%{transform:translate(6px,-2px)}60%{transform:translate(-4px,1px)}80%{transform:translate(4px,0)}}
+  .bk-msg{margin-top:18px;font-weight:900;font-size:15px;color:#111;text-align:center;line-height:1.5;}
+  .stamp-btns{display:flex;flex-direction:column;gap:8px;width:min(320px,86vw);}
+  .stamp-btns .sb{display:block;text-align:center;background:#fff;color:#111;border:none;border-radius:999px;padding:12px 16px;font-weight:900;font-size:14px;font-family:inherit;text-decoration:none;cursor:pointer;}
+  .stamp-btns .sb.y{background:#FFE000;}
   .spot-next{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#FFE000;color:#111;border:3px solid #111;border-radius:999px;padding:10px 16px;font-weight:900;font-size:14px;text-decoration:none;z-index:950;box-shadow:4px 4px 0 #111;white-space:nowrap;}
   .zu-cell.fes{outline:2px solid #FF8A00;outline-offset:-2px;}
   .zu-cell .fesx{position:absolute;right:3px;top:3px;font-size:8.5px;font-weight:900;color:#111;
@@ -272,6 +303,17 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
   <div class="zu-grid" id="zuGrid"></div>
 </div>
 <div class="spot-toast" id="spotToast"></div>
+<div class="stamp-ov" id="stampOv" aria-hidden="true">
+  <div class="stamp-ttl" id="stampTtl">会場スタンプ</div>
+  <div class="stamp-scene"><div class="stamp-card" id="stampCard">
+    <div class="face front" id="stampFront"><img id="stampArt" src="" alt=""><div class="nm" id="stampName"></div><div class="tap">タップしてスタンプを押す</div></div>
+    <div class="face back"><div class="bk-ttl">JUNKeeeeS FES 2026 会場スタンプ</div>
+      <div class="slots"><div class="slot" data-spot="a"><img src="../run-junkeees/art/patty.png" alt=""><span>PATTY</span></div><div class="slot" data-spot="b"><img src="../run-junkeees/art/bull.png" alt=""><span>ブルドッグ</span></div><div class="slot" data-spot="c"><img src="../run-junkeees/art/clown.png" alt=""><span>ジョーカー</span></div></div>
+      <div class="bk-msg" id="stampMsg"></div>
+    </div>
+  </div></div>
+  <div class="stamp-btns" id="stampBtns"></div>
+</div>
 <a class="spot-next" id="spotNext" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=fes_complete" hidden>🏆 レジェンダリー獲得！ 次は会場RUNに挑戦 →</a>
 <div class="zu-big" id="zuBig"><img id="zuBigImg" src="" alt=""><div class="zu-big-btns" id="zuBigBtns" hidden><a class="zb" id="zuSave" href="#" download="junkeeees_legendary.jpg">💾 画像を保存</a><button class="zb" id="zuShareX" type="button">𝕏 Xでシェア</button></div></div>
 
@@ -516,6 +558,7 @@ function drawCard(){
 // 36枚そろったときの画面。図鑑は勝手に開かず、ここのボタンから開く。
 function openFin(){
   const el = document.getElementById("fin"); if(!el) return;
+  try{ const sp=(new URLSearchParams(location.search).get("spot")||"").toLowerCase(); if(["a","b","c"].includes(sp)) return; }catch(e){}   // 会場スタンプで開いた時はスタンプカードを優先
   // 会期が終わったら文言を変える
   if(new Date() > FES_END){
     el.querySelector(".lead").textContent = "ご来場ありがとうございました。";
@@ -809,6 +852,33 @@ function toast(msg){
   el.textContent=msg; el.classList.add("show");
   setTimeout(()=>el.classList.remove("show"), 5200);
 }
+const SPOT_ART={ a:"../run-junkeees/art/patty.png", b:"../run-junkeees/art/bull.png", c:"../run-junkeees/art/clown.png" };
+// 会場スタンプカード: 表(見つけたキャラ)→タップで裏返す→スタンプがドンと押される→残りの案内 or 3/3でレジェンダリーへ
+function showStampCard(q, s, isNew){
+  const ov=document.getElementById("stampOv"), card=document.getElementById("stampCard"); if(!ov||!card) return;
+  document.getElementById("stampArt").src=SPOT_ART[q]; document.getElementById("stampName").textContent=SPOT_NAME[q]+" みっけ！";
+  document.getElementById("stampTtl").textContent="会場スタンプ "+s.size+" / 3";
+  ov.querySelectorAll(".slot").forEach(el=>{ el.classList.toggle("got", s.has(el.dataset.spot) && el.dataset.spot!==q); el.classList.remove("new"); });
+  const msg=document.getElementById("stampMsg"), btns=document.getElementById("stampBtns"); msg.textContent=""; btns.innerHTML="";
+  card.classList.remove("flip"); ov.classList.add("open"); ov.setAttribute("aria-hidden","false"); document.body.style.overflow="hidden";
+  let done=false;
+  const press=()=>{ if(done) return; done=true; card.classList.add("flip");
+    setTimeout(()=>{ const slot=ov.querySelector('.slot[data-spot="'+q+'"]'); slot.classList.add("got","new"); ov.classList.add("shake"); setTimeout(()=>ov.classList.remove("shake"),600);
+      const left=SPOTS.filter(x=>!s.has(x));
+      if(s.size>=SPOTS.length){
+        msg.innerHTML="🎉 3つそろった！<br>レジェンダリーカードをプレゼント";
+        btns.innerHTML='<button class="sb y" id="stampLeg" type="button">🏆 レジェンダリーカードを見る</button><a class="sb" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=stamp_complete">🏃 次は会場RUNに挑戦 →</a><button class="sb" id="stampClose" type="button">とじる</button>';
+        document.getElementById("stampLeg").addEventListener("click",()=>{ closeStamp(); if(window.openZukan) openZukan(); setTimeout(()=>{ const c=document.querySelector(".zu-cell.fes"); if(c) c.click(); },400); });
+      }else{
+        msg.innerHTML="あと "+left.length+" か所<br>"+SPOT_HINT[left[0]]+"！";
+        btns.innerHTML='<button class="sb y" id="stampClose" type="button">図鑑にもどる</button>';
+      }
+      document.getElementById("stampClose").addEventListener("click",closeStamp);
+      if(window.cmEvent)cmEvent("fes_stamp_press",{spot:q,found:s.size});
+    },750); };
+  const closeStamp=()=>{ ov.classList.remove("open"); ov.setAttribute("aria-hidden","true"); document.body.style.overflow=""; };
+  card.onclick=press; setTimeout(()=>{ if(!done) press(); }, 6000);   // 6秒触らなければ自動で押す
+}
 (function(){
   let q=""; try{ q=(new URLSearchParams(location.search).get("spot")||"").toLowerCase(); }catch(e){}
   if(!SPOTS.includes(q)) return;
@@ -819,12 +889,9 @@ function toast(msg){
     // 3/3の日を記録(24日と25日の両方でそろえた/読んだ人は2枚)
     try{ const days=new Set(JSON.parse(localStorage.getItem(FES_DAY_KEY)||"[]")); const d=jstDay(); if(d==="24"||d==="25"){ const before=days.size; days.add(d); localStorage.setItem(FES_DAY_KEY, JSON.stringify([...days])); if(days.size>before && before>0) toast("🎉 2日目も！レジェンダリーカードが2枚目になりました"); } }catch(e){}
     const bar=document.getElementById("spotNext"); if(bar) bar.hidden=false;
-    toast("🎉 会場スタンプ 3/3 コンプリート！レジェンダリーカードをプレゼント（図鑑の最後）");
     if(isNew && window.cmEvent)cmEvent("fes_complete",{});
-  }else{
-    const left=SPOTS.filter(x=>!s.has(x)); const hint=left.length?"　"+SPOT_HINT[left[0]]+"！":"";
-    toast(SPOT_NAME[q]+" みっけ！ 会場スタンプ "+s.size+" / 3"+hint);
   }
+  showStampCard(q, s, isNew);
   if(typeof updateCounter==="function") updateCounter();
 })();
 (function(){ const nx=document.getElementById("spotNext"); if(nx && spotDone()) nx.hidden=false; })();
