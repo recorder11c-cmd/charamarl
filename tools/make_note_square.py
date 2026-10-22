@@ -68,6 +68,11 @@ NOTES = [
          wide='自分の不得意な<br>分野では戦わない',
          works=['ぶろっくま'],
          contain=True),   # 作品は1点（ドット絵の正方形）。本人の言葉をそのままタイトルに
+    dict(no='08', artist='ガングリアン', sub='ソフビ',
+         title='自分が欲しい<br>怪獣を作りたい',
+         wide='自分が欲しい<br>怪獣を作りたい',
+         works=['ガングリアン', 'ガングリゴン', 'サウスブルーサンダー', 'レッドサンダー'],
+         portrait=True),   # 本人のフォーム回答の言葉をそのままタイトルに
 ]
 
 TPL = '''<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
