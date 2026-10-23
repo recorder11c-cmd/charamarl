@@ -823,7 +823,9 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
     const complete = got.size>=CARDS.length;
     grid.innerHTML="";
     let list = complete ? CARDS.slice() : CARDS.filter(c=>got.has(c.key));
+    // 会場スタンプ3/3ならレジェンダリー(＋PLATINUM)。3/3でなくてもPLATINUMを解放した端末にはPLATINUMだけ出す
     if(typeof spotDone==="function" && spotDone()) list = list.concat(fesCards());
+    else if(typeof hasPlatinum==="function" && hasPlatinum()) list = list.concat(fesCards().filter(c=>c.key==="fes_platinum"));
     document.getElementById("zuDone").hidden = !complete;
     document.getElementById("zuTtl").textContent = complete ? "JUNKeeeeS 図鑑" : "みつけたJUNKeeeeS";
     list.forEach((c)=>{
@@ -873,7 +875,9 @@ const FES_DAY_KEY="junk_fes_days";   // 3/3の状態で会場のスポットを�
 function jstDay(){ const now=new Date(Date.now()+9*3600e3); return String(now.getUTCDate()); }
 function fesDays(){ let d=[]; try{ d=JSON.parse(localStorage.getItem(FES_DAY_KEY)||"[]"); }catch(e){} if(!d.length) d=[jstDay()==="25"?"25":"24"]; return d.filter(x=>x==="24"||x==="25"); }
 const PT_KEY="junk_fes_platinum", PT_CODE="fes2026";   // ?platinum=fes2026 を開いた端末にPLATINUM(2DAYSの人へFESのあとに送る)
-try{ const q=new URLSearchParams(location.search); if(q.get("platinum")===PT_CODE){ localStorage.setItem(PT_KEY,"1"); if(window.cmEvent)cmEvent("fes_platinum_unlock",{}); } }catch(e){}
+try{ const q=new URLSearchParams(location.search); if(q.get("platinum")===PT_CODE){ localStorage.setItem(PT_KEY,"1"); if(window.cmEvent)cmEvent("fes_platinum_unlock",{});
+  // 開いたらすぐ見せる: 図鑑を開いてPLATINUMを表示
+  setTimeout(()=>{ try{ toast("✨ PLATINUMカードが図鑑に入りました"); const b=document.getElementById("zuBtn"); if(b) b.click(); setTimeout(()=>{ const cells=[...document.querySelectorAll(".zu-cell.fes")]; const pt=cells[cells.length-1]; if(pt) pt.click(); },400); }catch(e){} },700); } }catch(e){}
 function hasPlatinum(){ try{ return localStorage.getItem(PT_KEY)==="1"; }catch(e){ return false; } }
 function fesCards(){ const l=fesDays().map(d=>({ key:"fes_only", day:d, name:"レジェンダリー "+(d==="25"?"SILVER":"GOLD"), img:"art/junkeeees_legendary_10"+d+".jpg" })); if(hasPlatinum()) l.push({ key:"fes_platinum", day:"pt", name:"PLATINUM 2DAYS", img:"art/junkeeees_platinum_front.jpg", back:"art/junkeeees_platinum_back.jpg" }); return l; }
 const FES_CARD=fesCards()[0];
