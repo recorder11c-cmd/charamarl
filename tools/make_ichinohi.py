@@ -80,7 +80,7 @@ def main():
     since = a[a.index('--since') + 1] if '--since' in a else None
     if not since:
         raise SystemExit('--since YYYY-MM-DD（前回の市の日の翌日）を指定してください')
-    out = a[a.index('--out') + 1] if '--out' in a else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_ichinohi_new.png')
+    out = a[a.index('--out') + 1] if '--out' in a else os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_ichinohi_new.png')
     works = fetch(since)
     n = len(works)
     rows = ROWS.get(n)

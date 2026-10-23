@@ -250,7 +250,7 @@ def back_both(W, H):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     both = '--both' in sys.argv
-    outdir = os.path.expanduser(args[0]) if args else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_print')
+    outdir = os.path.expanduser(args[0]) if args else os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_print')
     os.makedirs(outdir, exist_ok=True)
     W, H = px(CARD_MM[0] + BLEED_MM * 2), px(CARD_MM[1] + BLEED_MM * 2)
 

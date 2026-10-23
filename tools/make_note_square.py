@@ -35,7 +35,7 @@
 import sys, os, json, html, subprocess, urllib.request, tempfile, base64
 
 API = 'https://charamarl.com/api/gallery'
-OUT = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/note_square')
+OUT = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/note_square')
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 
 # 連載の各回。works は「その作家の作品からどれを使うか」（空なら新しい順に4点）

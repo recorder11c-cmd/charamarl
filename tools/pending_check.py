@@ -31,8 +31,8 @@ import sys, os, io, json, glob, datetime, unicodedata, urllib.request
 from PIL import Image
 
 API = 'https://charamarl.com/api/gallery?status=all'
-INCOMING = os.path.expanduser('~/Downloads/CHARAMARL/00_受け取り/charamarl_incoming')
-IGNORE = os.path.expanduser('~/Downloads/CHARAMARL/01_記録/掲載台帳_対象外.txt')
+INCOMING = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/00_受け取り/charamarl_incoming')
+IGNORE = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/01_記録/掲載台帳_対象外.txt')
 CACHE = os.path.expanduser('~/.cache/charamarl_pending_hash.json')
 EXT = ('.jpg', '.jpeg', '.png', '.webp')
 HAMMING_MAX = 14   # 64bit中、これ以下なら同じ絵とみなす
@@ -160,7 +160,7 @@ def main():
         print('   [{}] {} 「{}」 {}'.format(w.get('status'), w['artist'], w['title'][:20], w['id']))
 
     # ④ 台帳の保留（未登録のまま止まっているもの）
-    ledger = os.path.expanduser('~/Downloads/CHARAMARL/01_記録/掲載予定台帳.md')
+    ledger = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/01_記録/掲載予定台帳.md')
     if os.path.exists(ledger):
         rows = [ln for ln in open(ledger, encoding='utf-8') if ln.startswith('## B.')]
         text = open(ledger, encoding='utf-8').read()

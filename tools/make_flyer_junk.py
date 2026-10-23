@@ -1,9 +1,9 @@
 # JUNKeeeeS FES 協賛チラシ(CHARAMARLの1枚・A5片面)。指示書: 04_企画/チラシ_JUNKeeeeS_指示書_20261007.md
-# 使い方: python3 tools/make_flyer_junk.py [A|B|both]   → ~/Downloads/CHARAMARL/03_画像/charamarl_print/charamarl_flyer_junk_A5_<案>.{png,pdf,html}
+# 使い方: python3 tools/make_flyer_junk.py [A|B|both]   → ~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_print/charamarl_flyer_junk_A5_<案>.{png,pdf,html}
 import os, io, base64, subprocess, sys, glob, segno
 from PIL import Image
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_print'); os.makedirs(OUT, exist_ok=True)
+OUT = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_print'); os.makedirs(OUT, exist_ok=True)
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 DPI = 300; TRIM = (148, 210); BLEED = 3
 W = round((TRIM[0] + BLEED*2) / 25.4 * DPI); H = round((TRIM[1] + BLEED*2) / 25.4 * DPI)   # 1819x2551
@@ -130,7 +130,7 @@ def pageBack():
     g, k, ap = BACK_QR
     # ピンタレスト風UI(図形だけ。作品は使わない)
     # 🔴 他作家の絵は使わない。自社キャラ(SUE/PUTTI/MOSSUN)の絵・アクキー・ピンズだけ
-    IMG = os.path.expanduser('~/Downloads/CHARAMARL/03_画像')
+    IMG = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像')
     def photo(path, box, crop=None, q=90):
         im = Image.open(os.path.join(IMG, path)).convert('RGB')
         if crop: im = im.crop(crop)

@@ -3,7 +3,7 @@
 
     python3 tools/make_rank.py --week=last [出力先] [--title=先週の1位]
 
-    例) python3 tools/make_rank.py --week=last ~/Downloads/CHARAMARL/03_画像/charamarl_run_rank
+    例) python3 tools/make_rank.py --week=last ~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_run_rank
 
 ■ なぜ画像を作るか
     この投稿の中身は「数字」なのに、run.html のリンクカード（og_run.png）は
@@ -35,7 +35,7 @@ KEY = _admin_key()
 API = 'https://charamarl.com/api/run-score'
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 W, H = 1200, 1200
-OUT_DEFAULT = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_run_rank')
+OUT_DEFAULT = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_run_rank')
 
 # run.html の CHARS と同じ並び・同じ表記
 CHARS = [('SUE', 'SUE'), ('GMC', 'レコマル'), ('UFOO', 'う〜ほ〜'), ('KAGECHIYO', 'カゲチヨ'),

@@ -35,7 +35,7 @@ body{{width:{W}px;height:{H}px;background:#14121c;font-family:'Zen Kaku Gothic N
 
 def main():
     a = sys.argv
-    out = a[a.index('--out') + 1] if '--out' in a else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_pinned.png')
+    out = a[a.index('--out') + 1] if '--out' in a else os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_pinned.png')
     seed = int(a[a.index('--seed') + 1]) if '--seed' in a else 1
     L = json.load(urllib.request.urlopen(urllib.request.Request(API, headers={'User-Agent': 'Mozilla/5.0'}), timeout=60))['list']
     works = [w for w in L if w.get('cat') not in ('INTERVIEW', 'EVENT')]

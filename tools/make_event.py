@@ -4,7 +4,7 @@
     python3 tools/make_event.py <イベントキー> [出力先ディレクトリ]
 
     例)  python3 tools/make_event.py culturesnack
-         python3 tools/make_event.py kanazawa ~/Downloads/CHARAMARL/03_画像/charamarl_event
+         python3 tools/make_event.py kanazawa ~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_event
 
 ■ なぜ作るか
     イベント告知の画像は**保存されて当日に見返される**。
@@ -25,7 +25,7 @@ import sys, os, json, subprocess, urllib.request, html
 API = 'https://charamarl.com/api/gallery'
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 W, H = 1200, 1500
-OUT_DEFAULT = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_event')
+OUT_DEFAULT = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_event')
 
 EVENTS = {
     'culturesnack': dict(

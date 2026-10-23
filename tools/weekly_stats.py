@@ -10,7 +10,7 @@ CHARAMARL 週次の作家別集計
     python3 tools/weekly_stats.py --dry    # 表示だけ（保存しない）
 
 ■ 保存先
-    ~/Downloads/CHARAMARL/01_記録/charamarl_baseline_YYYYMMDD.json
+    ~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/01_記録/charamarl_baseline_YYYYMMDD.json
     いちばん新しいものを自動で前回分として読む。
 
 ■ 何を見るか
@@ -24,7 +24,7 @@ CHARAMARL 週次の作家別集計
 """
 import json, urllib.request, collections, datetime, glob, os, sys
 
-BASE_DIR = os.path.expanduser('~/Downloads/CHARAMARL/01_記録')
+BASE_DIR = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/01_記録')
 API = 'https://charamarl.com/api'
 
 def fetch(url):

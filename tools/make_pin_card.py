@@ -29,7 +29,7 @@ import sys, os, html, subprocess
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 W, H = 1200, 1500
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PHOTO_DIR = os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_pins_実物')
+PHOTO_DIR = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_pins_実物')
 OUT_DEFAULT = PHOTO_DIR
 
 # 商品ページ characters/pins.html の文言（2026-10-02 時点）
@@ -289,14 +289,14 @@ def main():
     key = sys.argv[1]
     if key == 'akey':
         cid = sys.argv[2] if len(sys.argv) > 2 else 'all'
-        out = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_akey_cards')
+        out = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_akey_cards')
         os.makedirs(out, exist_ok=True)
         for k in (AKEY if cid == 'all' else [cid]):
             render_akey(k, out)
         return
     if key == 'pin':
         k = sys.argv[2] if len(sys.argv) > 2 else 'all'
-        out = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser('~/Downloads/CHARAMARL/03_画像/charamarl_pin_cards')
+        out = sys.argv[3] if len(sys.argv) > 3 else os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_pin_cards')
         os.makedirs(out, exist_ok=True)
         for kk in (PINCARD if k == 'all' else [k]):
             render_pin(kk, out)
