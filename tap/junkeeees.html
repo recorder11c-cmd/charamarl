@@ -174,7 +174,10 @@
   .stamp-card .front{background:radial-gradient(circle at 50% 30%,#FFE000,#FF7A00 70%);}
   .stamp-card .front img{width:70%;height:auto;filter:drop-shadow(0 8px 12px rgba(0,0,0,.35));animation:bob 1.6s ease-in-out infinite;}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-  .stamp-card .front .nm{font-weight:900;font-size:22px;color:#111;margin-top:10px;text-shadow:0 1px 0 #fff;}
+  .stamp-card .front .nm{font-weight:900;font-size:22px;color:#111;margin-top:10px;text-shadow:0 1px 0 #fff;text-align:center;line-height:1.25;padding:0 14px;}
+  .stamp-card .front .nm .who{display:block;white-space:nowrap;}
+  .stamp-card .front .nm .who.long{font-size:18px;letter-spacing:-.02em;}
+  .stamp-card .front .nm .got{display:block;font-size:20px;margin-top:2px;}
   .stamp-card .front .tap{position:absolute;bottom:14px;font-weight:900;font-size:13px;color:#111;background:rgba(255,255,255,.85);border-radius:999px;padding:6px 14px;animation:blink 1.2s ease-in-out infinite;}
   @keyframes blink{50%{opacity:.4}}
   .stamp-card .back{background:#FFF6E5;transform:rotateY(180deg);padding:16px;justify-content:center;}
@@ -858,7 +861,7 @@ const SPOT_ART={ a:"../run-junkeees/art/patty.png", b:"../run-junkeees/art/bull.
 // 会場スタンプカード: 表(見つけたキャラ)→タップで裏返す→スタンプがドンと押される→残りの案内 or 3/3でレジェンダリーへ
 function showStampCard(q, s, isNew){
   const ov=document.getElementById("stampOv"), card=document.getElementById("stampCard"); if(!ov||!card) return;
-  document.getElementById("stampArt").src=SPOT_ART[q]; document.getElementById("stampName").textContent=SPOT_NAME[q]+" みっけ！";
+  document.getElementById("stampArt").src=SPOT_ART[q]; { const nmEl=document.getElementById("stampName"); nmEl.textContent=""; const who=document.createElement("span"); who.className="who"+(SPOT_NAME[q].length>=9?" long":""); who.textContent=SPOT_NAME[q]; const got=document.createElement("span"); got.className="got"; got.textContent="みっけ！"; nmEl.append(who,got); }
   document.getElementById("stampTtl").textContent="会場スタンプ "+s.size+" / 3";
   ov.querySelectorAll(".slot").forEach(el=>{ el.classList.toggle("got", s.has(el.dataset.spot) && el.dataset.spot!==q); el.classList.remove("new"); });
   const msg=document.getElementById("stampMsg"), btns=document.getElementById("stampBtns"); msg.textContent=""; btns.innerHTML="";
