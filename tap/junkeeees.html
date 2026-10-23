@@ -210,6 +210,20 @@
   .zu-2days{display:none;background:linear-gradient(90deg,#FFD700,#fff,#C0C0C0);color:#111;font-weight:900;font-size:15px;letter-spacing:.04em;border-radius:999px;padding:8px 18px;box-shadow:0 6px 24px rgba(255,215,0,.35);}
   .zu-big.twodays .zu-2days{display:block;}
   .zu-big.twodays img{max-height:62vh;}
+  .pt-wrap{display:none;perspective:1400px;width:min(430px,86vw);aspect-ratio:5/7;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .zu-big.pt .pt-wrap{display:block;}
+  .zu-big.pt #zuBigImg{display:none;}
+  .pt-card{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 1.6s cubic-bezier(.4,0,.2,1);animation:ptFloat 5s ease-in-out infinite;}
+  .pt-card.flipped{transform:rotateY(180deg);}
+  .pt-card.spin{animation:none;}
+  .pt-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(180,190,255,.35);}
+  .pt-face img{width:100%;height:100%;display:block;object-fit:cover;}
+  .pt-face.back{transform:rotateY(180deg);}
+  .pt-face::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 48%,rgba(255,255,255,.1) 52%,transparent 70%);transform:translateX(-120%);animation:ptGlint 4.5s ease-in-out infinite;pointer-events:none;}
+  @keyframes ptGlint{0%,60%{transform:translateX(-120%);}85%,100%{transform:translateX(120%);}}
+  @keyframes ptFloat{0%,100%{transform:rotateY(-7deg) rotateX(3deg);}50%{transform:rotateY(7deg) rotateX(-3deg);}}
+  .pt-hint{display:none;color:#cfd4ea;font-size:12.5px;font-weight:800;}
+  .zu-big.pt .pt-hint{display:block;}
   .zu-gift{display:none;grid-column:1 / -1;color:#fff;font-size:12.5px;font-weight:800;text-align:center;line-height:1.5;opacity:.95;}
   .zu-big.twodays .zu-gift.on{display:block;}
   .zb{background:#fff;color:#111;border:none;border-radius:999px;padding:12px 10px;font-weight:900;font-size:14px;font-family:inherit;text-decoration:none;cursor:pointer;text-align:center;white-space:nowrap;}
@@ -325,7 +339,7 @@ body.nx-open .ui{transform:translateY(calc(-1 * var(--nx-h, 250px)));}
   <div class="stamp-btns" id="stampBtns"></div>
 </div>
 <a class="spot-next" id="spotNext" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=fes_complete" hidden>🏆 レジェンダリー獲得！ 次は会場RUNに挑戦 →</a>
-<div class="zu-big" id="zuBig"><div class="zu-2days">🏆 2DAYS COMPLETE 🏆</div><img id="zuBigImg" src="" alt=""><div class="zu-big-btns" id="zuBigBtns" hidden><a class="zb" id="zuSave" href="#" download="junkeeees_legendary.jpg">💾 画像を保存</a><button class="zb" id="zuShareX" type="button">𝕏 Xでシェア</button><a class="zb y" id="zuRun" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=legendary">🏃 会場RUNに挑戦</a><div class="zu-gift" id="zuGift"></div></div></div>
+<div class="zu-big" id="zuBig"><div class="zu-2days">🏆 2DAYS COMPLETE 🏆</div><div class="pt-wrap" id="ptWrap"><div class="pt-card" id="ptCard"><div class="pt-face front"><img src="art/junkeeees_platinum_front.jpg" alt="PLATINUM カード 表"></div><div class="pt-face back"><img src="art/junkeeees_platinum_back.jpg" alt="PLATINUM カード 裏"></div></div></div><div class="pt-hint">タップでくるっと裏返る</div><img id="zuBigImg" src="" alt=""><div class="zu-big-btns" id="zuBigBtns" hidden><a class="zb" id="zuSave" href="#" download="junkeeees_legendary.jpg">💾 画像を保存</a><button class="zb" id="zuShareX" type="button">𝕏 Xでシェア</button><a class="zb y" id="zuRun" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=legendary">🏃 会場RUNに挑戦</a><div class="zu-gift" id="zuGift"></div></div></div>
 
 <div id="fin" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true">
@@ -785,15 +799,17 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
   const ov=document.getElementById("zuOverlay"), grid=document.getElementById("zuGrid");
   const big=document.getElementById("zuBig"), bigImg=document.getElementById("zuBigImg");
   (function(){ const nx=document.getElementById("spotNext"); if(nx){ nx.addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_to_run",{}); }); } })();   // 表示の判定は下の会場スタンプの処理の後で(spotDone はそこで定義)
+  (function(){ const w=document.getElementById("ptWrap"), pc=document.getElementById("ptCard"); if(!w) return;
+    w.addEventListener("click",e=>{ e.stopPropagation(); pc.classList.add("spin"); pc.classList.toggle("flipped"); if(window.cmEvent)cmEvent("fes_platinum_flip",{}); setTimeout(()=>pc.classList.remove("spin"),1700); }); })();
   (function(){ const bb=document.getElementById("zuBigBtns"); if(!bb) return; bb.addEventListener("click",e=>e.stopPropagation());
     document.getElementById("zuSave").addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_legendary_save",{}); });
     document.getElementById("zuShareX").addEventListener("click",async()=>{
-      const two = typeof fesTwoDays==="function" && fesTwoDays();
-      const text= two ? "JUNKeeeeS FES 2026 2日間コンプリート！レジェンダリーカード GOLD＆SILVER 両方ゲット🏆🍟 #JUNKeeeeS #CHARAMARL"
+      const two = typeof fesTwoDays==="function" && fesTwoDays(); const pt = big.classList.contains("pt");
+      const text= pt ? "JUNKeeeeS FES 2026 2DAYS の PLATINUM カードもらった✨ 裏返るやつ🏆🍟 #JUNKeeeeS #CHARAMARL" : two ? "JUNKeeeeS FES 2026 2日間コンプリート！レジェンダリーカード GOLD＆SILVER 両方ゲット🏆🍟 #JUNKeeeeS #CHARAMARL"
                       : "JUNKeeeeS FES 2026 会場スタンプ 3/3 コンプリート！レジェンダリーカードもらった🍟 #JUNKeeeeS #CHARAMARL";
       const url="https://charamarl.com/tap/junkeeees.html";
       if(window.cmEvent)cmEvent("fes_legendary_share",{two:two?1:0});
-      try{ const srcs = two ? fesCards().map(c=>c.img) : [bigImg.src]; const files=[];
+      try{ const srcs = pt ? ["art/junkeeees_platinum_front.jpg","art/junkeeees_platinum_back.jpg"] : two ? fesCards().filter(c=>c.key==="fes_only").map(c=>c.img) : [bigImg.src]; const files=[];
         for(const src of srcs){ const r=await fetch(src); const blob=await r.blob(); files.push(new File([blob],src.split("/").pop(),{type:"image/jpeg"})); }
         if(navigator.canShare && navigator.canShare({files})){ await navigator.share({files,text:text+" "+url}); return; } }catch(e){}
       window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(url),"_blank");
@@ -812,14 +828,14 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
     document.getElementById("zuTtl").textContent = complete ? "JUNKeeeeS 図鑑" : "みつけたJUNKeeeeS";
     list.forEach((c)=>{
       const cell=document.createElement("button");
-      const isFes = c.key==="fes_only";
+      const isFes = c.key==="fes_only" || c.key==="fes_platinum"; const isPt = c.key==="fes_platinum";
       cell.type="button"; cell.className="zu-cell got"+(isFes?" fes":"");
       const idx = CARDS.indexOf(c);
       if(idx>=0){ const no=document.createElement("span"); no.className="n"; no.textContent=idx+1; cell.appendChild(no); }
-      if(isFes){ const t=document.createElement("span"); t.className="fesx"; t.textContent=c.day==="25"?"会場限定 SILVER":"会場限定 GOLD"; cell.appendChild(t); }
+      if(isFes){ const t=document.createElement("span"); t.className="fesx"; t.textContent=isPt?"PLATINUM":(c.day==="25"?"会場限定 SILVER":"会場限定 GOLD"); cell.appendChild(t); }
       const im=document.createElement("img"); im.src=c.img; im.loading="lazy"; im.alt="";
       cell.appendChild(im);
-      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const nx=document.getElementById("spotNext"); if(nx) nx.style.display="none"; const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; const two=isFes && typeof fesTwoDays==="function" && fesTwoDays(); big.classList.toggle("twodays",!!two); const gf=document.getElementById("zuGift"); if(gf){ gf.textContent=FES_2DAYS_GIFT; gf.classList.toggle("on",!!(two && FES_2DAYS_GIFT)); } if(isFes){ document.getElementById("zuSave").href=c.img; if(window.cmEvent)cmEvent("fes_legendary_view",{day:c.day,two:two?1:0}); } });
+      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const nx=document.getElementById("spotNext"); if(nx) nx.style.display="none"; const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; const two=isFes && typeof fesTwoDays==="function" && fesTwoDays(); big.classList.toggle("twodays",!!two && !isPt); big.classList.toggle("pt",!!isPt); if(isPt){ const pc=document.getElementById("ptCard"); pc.classList.remove("flipped"); } const gf=document.getElementById("zuGift"); if(gf){ gf.textContent=FES_2DAYS_GIFT; gf.classList.toggle("on",!!(two && FES_2DAYS_GIFT)); } if(isFes){ document.getElementById("zuSave").href=c.img; document.getElementById("zuSave").setAttribute("download", isPt?"junkeeees_platinum.jpg":"junkeeees_legendary.jpg"); if(window.cmEvent)cmEvent("fes_legendary_view",{day:c.day,two:two?1:0}); } });
       grid.appendChild(cell);
     });
     if(!list.length){
@@ -856,10 +872,13 @@ const SPOT_HINT={ a:"次は PATTY をさがせ", b:"次は ホットドッグブ
 const FES_DAY_KEY="junk_fes_days";   // 3/3の状態で会場のスポットを読んだ日(24/25)。両日なら GOLD と SILVER の2枚
 function jstDay(){ const now=new Date(Date.now()+9*3600e3); return String(now.getUTCDate()); }
 function fesDays(){ let d=[]; try{ d=JSON.parse(localStorage.getItem(FES_DAY_KEY)||"[]"); }catch(e){} if(!d.length) d=[jstDay()==="25"?"25":"24"]; return d.filter(x=>x==="24"||x==="25"); }
-function fesCards(){ return fesDays().map(d=>({ key:"fes_only", day:d, name:"レジェンダリー "+(d==="25"?"SILVER":"GOLD"), img:"art/junkeeees_legendary_10"+d+".jpg" })); }
+const PT_KEY="junk_fes_platinum", PT_CODE="fes2026";   // ?platinum=fes2026 を開いた端末にPLATINUM(2DAYSの人へFESのあとに送る)
+try{ const q=new URLSearchParams(location.search); if(q.get("platinum")===PT_CODE){ localStorage.setItem(PT_KEY,"1"); if(window.cmEvent)cmEvent("fes_platinum_unlock",{}); } }catch(e){}
+function hasPlatinum(){ try{ return localStorage.getItem(PT_KEY)==="1"; }catch(e){ return false; } }
+function fesCards(){ const l=fesDays().map(d=>({ key:"fes_only", day:d, name:"レジェンダリー "+(d==="25"?"SILVER":"GOLD"), img:"art/junkeeees_legendary_10"+d+".jpg" })); if(hasPlatinum()) l.push({ key:"fes_platinum", day:"pt", name:"PLATINUM 2DAYS", img:"art/junkeeees_platinum_front.jpg", back:"art/junkeeees_platinum_back.jpg" }); return l; }
 const FES_CARD=fesCards()[0];
 function fesTwoDays(){ const d=fesDays(); return d.includes("24") && d.includes("25"); }
-const FES_2DAYS_GIFT = "";   // 2日間コンプリートの人への案内(例:「🎁 #JUNKeeeeS をつけてXに投稿した人に、FESのあとプレゼント」)。空なら表示しない
+const FES_2DAYS_GIFT = "🎁 この2枚を #JUNKeeeeS #CHARAMARL をつけてXに投稿すると、FESのあとに「PLATINUMカード」をプレゼント（保護者の方の投稿でOK・CHARAMARLからリプでご連絡）";   // 2日間コンプリートの人への案内(例:「🎁 #JUNKeeeeS をつけてXに投稿した人に、FESのあとプレゼント」)。空なら表示しない
 const spotSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(SPOT_KEY)||"[]"));}catch(e){return new Set();}};
 const spotDone=()=>spotSet().size>=SPOTS.length;
 function toast(msg){
