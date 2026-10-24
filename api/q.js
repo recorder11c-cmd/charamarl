@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
     const k = String(q.k || '').toLowerCase();
     const dest = DEST[k];
     if (!dest) return res.status(404).send('not found');
-    if (q.nc === undefined) {
+    if (req.method === 'GET' && q.nc === undefined) {   // HEAD(確認用)は数えない
       const day = jstDay();
       const dev = crypto.createHash('sha256').update(clientIp(req) + '|' + String(req.headers['user-agent'] || '')).digest('hex').slice(0, 16);
       const cmds = [['INCR', `q:cnt:${k}`], ['INCR', `q:cnt:${day}:${k}`], ['SADD', `q:dev:${k}`, dev], ['SADD', `q:dev:${day}:${k}`, dev], ['EXPIRE', `q:dev:${day}:${k}`, String(400 * 86400)]];
