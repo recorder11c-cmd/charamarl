@@ -868,7 +868,10 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
 const SPOT_KEY="junk_fes_spots", SPOTS=["a","b","c"];
 // 会場計測(サーバー側)。運営端末(cm_internal)は送らない。端末IDはランダム文字列だけ
 function fesDev(){ try{ let d=localStorage.getItem("junk_fes_dev"); if(!d){ d=Array.from(crypto.getRandomValues(new Uint8Array(8))).map(x=>x.toString(16).padStart(2,"0")).join(""); localStorage.setItem("junk_fes_dev",d); } return d; }catch(e){ return "anon"+Date.now(); } }
-function fesBeacon(t,extra){ try{ if(localStorage.getItem("cm_internal")==="1") return; const body=JSON.stringify(Object.assign({t:t,d:fesDev()},extra||{})); if(navigator.sendBeacon){ navigator.sendBeacon("/api/fes", new Blob([body],{type:"application/json"})); } else { fetch("/api/fes",{method:"POST",headers:{"Content-Type":"application/json"},body:body,keepalive:true}); } }catch(e){} }
+function fesBeacon(t,extra){ try{ if(localStorage.getItem("cm_internal")==="1") return; const body=JSON.stringify(Object.assign({t:t,d:fesDev()},extra||{}));
+  // Safari は sendBeacon に application/json の Blob を渡すと送らない(安全なtypeだけ)。文字列(text/plain)で送り、だめなら fetch
+  let ok=false; try{ if(navigator.sendBeacon) ok=navigator.sendBeacon("/api/fes", body); }catch(e){ ok=false; }
+  if(!ok){ fetch("/api/fes",{method:"POST",headers:{"Content-Type":"text/plain"},body:body,keepalive:true}).catch(()=>{}); } }catch(e){} }
 // スポットの名前(会場のエリアに合わせる。入口/出口ではなく、FESの各エリアを回る体験に)
 // スポットはキャラの名前で(PLAY/ART/FOODだと分かりにくい、とユーザー判断 10/21)。掲示にもそのキャラの絵を出す
 const SPOT_NAME={ a:"PATTY", b:"ホットドッグブルドッグ", c:"ジョーカー" };
