@@ -909,7 +909,7 @@ function showStampCard(q, s, isNew){
       const left=SPOTS.filter(x=>!s.has(x));
       if(s.size>=SPOTS.length){
         msg.innerHTML="🎉 3つそろった！<br>レジェンダリーカードをプレゼント";
-        btns.innerHTML='<button class="sb y" id="stampLeg" type="button">🏆 レジェンダリーカードを見る</button><a class="sb" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=stamp_complete" onclick="fesBeacon('to_run')">🏃 次は会場RUNに挑戦 →</a><button class="sb" id="stampClose" type="button">とじる</button>';
+        btns.innerHTML='<button class="sb y" id="stampLeg" type="button">🏆 レジェンダリーカードを見る</button><a class="sb" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=stamp_complete" onclick="fesBeacon(\'to_run\')">🏃 次は会場RUNに挑戦 →</a><button class="sb" id="stampClose" type="button">とじる</button>';
         document.getElementById("stampLeg").addEventListener("click",()=>{ closeStamp(); if(window.openZukan) openZukan(); setTimeout(()=>{ const c=document.querySelector(".zu-cell.fes"); if(c) c.click(); },400); });
       }else{
         msg.innerHTML="あと "+left.length+" か所<br>"+SPOT_HINT[left[0]]+"！";
