@@ -82,6 +82,27 @@ def targets(staged):
             and not any(f.startswith(d + '/') or ('/' + d + '/') in f for d in SKIP_DIRS)]
 
 
+def script_syntax_errors(html):
+    """<script>(srcなし)の中身を node --check にかける。[(行, メッセージ)]"""
+    import subprocess, tempfile, os
+    out = []
+    for m in re.finditer(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>', html, re.I):
+        body = m.group(1)
+        if not body.strip() or 'type="application/ld+json"' in m.group(0) or "type='application/ld+json'" in m.group(0):
+            continue
+        with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8') as t:
+            t.write(body); tmp = t.name
+        try:
+            r = subprocess.run(['node', '--check', tmp], capture_output=True, text=True)
+            if r.returncode != 0:
+                err = [l for l in r.stderr.splitlines() if 'SyntaxError' in l]
+                out.append((html[:m.start()].count('\n') + 1, (err[0] if err else r.stderr.strip().splitlines()[-1])[:120]))
+        except FileNotFoundError:
+            pass   # node が無い環境では見ない
+        finally:
+            os.unlink(tmp)
+    return out
+
 def main():
     staged = '--staged' in sys.argv
     hits = []
@@ -96,6 +117,9 @@ def main():
         spots = [('コメント', l, b) for l, b in comments(s, f)]
         if f.endswith('.html') and not f.startswith(NO_BODY_DIRS):
             spots += [('本文', l, b) for l, b in visible_text(s)]
+        if f.endswith('.html'):
+            for line, msg in script_syntax_errors(s):   # インラインscriptの構文(1か所壊れるとそのブロック全部が止まる・2026-10-24 図鑑が70分止まった)
+                hits.append(('JS構文', f, line, msg))
         for where, line, body in spots:
             for w in NEGOTIATION:
                 if w in body:
