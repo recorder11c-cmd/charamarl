@@ -934,6 +934,7 @@ function showStampCard(q, s, isNew){
     const bar=document.getElementById("spotNext"); if(bar) bar.hidden=false;
     if(isNew && window.cmEvent)cmEvent("fes_complete",{});
   }
+  fesBeacon("open",{spot:q,found:s.size});   // NFC/QRで開いた(スタンプを押す前)
   showStampCard(q, s, isNew);
   if(typeof updateCounter==="function") updateCounter();
 })();

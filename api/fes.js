@@ -5,7 +5,7 @@
 // 端末IDは図鑑がブラウザに作るランダムな文字列。名前・連絡先は持たない。会期後1か月で削除（11/25）。
 const { redis, clientIp, overLimit, serverError } = require('./_lib/admin.js');
 const DAYS = ['2026-10-24', '2026-10-25'];
-const TYPES = ['scan', 'legendary_view', 'legendary_save', 'legendary_share', 'to_run', 'platinum_unlock', 'run_open'];
+const TYPES = ['open', 'scan', 'legendary_view', 'legendary_save', 'legendary_share', 'to_run', 'platinum_unlock', 'run_open'];
 const jstDay = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
 
 module.exports = async (req, res) => {
@@ -16,10 +16,11 @@ module.exports = async (req, res) => {
       const out = { days: {}, devices_all: 0, spots_per_device: { 1: 0, 2: 0, 3: 0 } };
       for (const day of DAYS) {
         const o = { scans: {}, devices: {}, complete: 0 };
-        for (const s of ['a', 'b', 'c']) { o.scans[s] = Number(await redis('GET', `fes:cnt:${day}:scan:${s}`)) || 0; o.devices[s] = Number(await redis('SCARD', `fes:dev:${day}:${s}`)) || 0; }
+        o.opens = {}; for (const s of ['a', 'b', 'c']) { o.opens[s] = Number(await redis('GET', `fes:cnt:${day}:open:${s}`)) || 0; o.scans[s] = Number(await redis('GET', `fes:cnt:${day}:scan:${s}`)) || 0; o.devices[s] = Number(await redis('SCARD', `fes:dev:${day}:${s}`)) || 0; }
+        o.devices.opened = Number(await redis('SCARD', `fes:devo:${day}`)) || 0;
         o.devices.all = Number(await redis('SCARD', `fes:dev:${day}:all`)) || 0;
         o.complete = Number(await redis('SCARD', `fes:complete:${day}`)) || 0;
-        for (const t of TYPES.slice(1)) o[t] = Number(await redis('GET', `fes:cnt:${day}:${t}`)) || 0;
+        for (const t of TYPES.slice(2)) o[t] = Number(await redis('GET', `fes:cnt:${day}:${t}`)) || 0;
         out.days[day] = o;
       }
       const devs = (await redis('SMEMBERS', 'fes:devices')) || [];
@@ -36,7 +37,10 @@ module.exports = async (req, res) => {
     const ip = clientIp(req); if (await overLimit(`fes:post:${ip}`, 120, 600)) return res.status(429).json({ error: 'too many' });
     const day = jstDay();
     const cmds = [];
-    if (t === 'scan') {
+    if (t === 'open') {
+      const spot = String(b.spot || ''); if (!['a', 'b', 'c'].includes(spot)) return res.status(400).json({ error: 'bad spot' });
+      cmds.push(['INCR', `fes:cnt:${day}:open:${spot}`], ['SADD', `fes:devo:${day}`, d]);
+    } else if (t === 'scan') {
       const spot = String(b.spot || ''); if (!['a', 'b', 'c'].includes(spot)) return res.status(400).json({ error: 'bad spot' });
       cmds.push(['INCR', `fes:cnt:${day}:scan:${spot}`], ['SADD', `fes:dev:${day}:${spot}`, d], ['SADD', `fes:dev:${day}:all`, d], ['SADD', 'fes:devices', d], ['SADD', `fes:ds:${d}`, spot]);
       if (Number(b.found) >= 3) cmds.push(['SADD', `fes:complete:${day}`, d]);
