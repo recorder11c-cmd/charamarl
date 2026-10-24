@@ -799,17 +799,17 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
 (function(){
   const ov=document.getElementById("zuOverlay"), grid=document.getElementById("zuGrid");
   const big=document.getElementById("zuBig"), bigImg=document.getElementById("zuBigImg");
-  (function(){ const nx=document.getElementById("spotNext"); if(nx){ nx.addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_to_run",{}); }); } })();   // 表示の判定は下の会場スタンプの処理の後で(spotDone はそこで定義)
+  (function(){ const nx=document.getElementById("spotNext"); if(nx){ nx.addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_to_run",{}); fesBeacon("to_run"); }); } })();   // 表示の判定は下の会場スタンプの処理の後で(spotDone はそこで定義)
   (function(){ const w=document.getElementById("ptWrap"), pc=document.getElementById("ptCard"); if(!w) return;
     w.addEventListener("click",e=>{ e.stopPropagation(); pc.classList.add("spin"); pc.classList.toggle("flipped"); if(window.cmEvent)cmEvent("fes_platinum_flip",{}); setTimeout(()=>pc.classList.remove("spin"),1700); }); })();
   (function(){ const bb=document.getElementById("zuBigBtns"); if(!bb) return; bb.addEventListener("click",e=>e.stopPropagation());
-    document.getElementById("zuSave").addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_legendary_save",{}); });
+    document.getElementById("zuSave").addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_legendary_save",{}); fesBeacon("legendary_save"); });
     document.getElementById("zuShareX").addEventListener("click",async()=>{
       const two = typeof fesTwoDays==="function" && fesTwoDays(); const pt = big.dataset.key==="fes_platinum"; const is3d = big.classList.contains("pt");
       const text= pt ? "JUNKeeeeS FES 2026 2DAYS の PLATINUM カードもらった✨ 裏返るやつ🏆🍟 #JUNKeeeeS #CHARAMARL" : two ? "JUNKeeeeS FES 2026 2日間コンプリート！レジェンダリーカード GOLD＆SILVER 両方ゲット🏆🍟 #JUNKeeeeS #CHARAMARL"
                       : "JUNKeeeeS FES 2026 会場スタンプ 3/3 コンプリート！レジェンダリーカードもらった🍟 #JUNKeeeeS #CHARAMARL";
       const url="https://charamarl.com/tap/junkeeees.html";
-      if(window.cmEvent)cmEvent("fes_legendary_share",{two:two?1:0});
+      if(window.cmEvent)cmEvent("fes_legendary_share",{two:two?1:0}); fesBeacon("legendary_share");
       try{ const srcs = pt ? ["art/junkeeees_platinum_front.jpg","art/junkeeees_platinum_back.jpg"] : two ? fesCards().filter(c=>c.key==="fes_only").map(c=>c.img) : is3d ? [document.getElementById("ptFront").src, document.getElementById("ptBack").src] : [bigImg.src]; const files=[];
         for(const src of srcs){ const r=await fetch(src); const blob=await r.blob(); files.push(new File([blob],src.split("/").pop(),{type:"image/jpeg"})); }
         if(navigator.canShare && navigator.canShare({files})){ await navigator.share({files,text:text+" "+url}); return; } }catch(e){}
@@ -838,7 +838,7 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
       if(isFes){ const t=document.createElement("span"); t.className="fesx"; t.textContent=isPt?"PLATINUM":(c.day==="25"?"会場限定 SILVER":"会場限定 GOLD"); cell.appendChild(t); }
       const im=document.createElement("img"); im.src=c.img; im.loading="lazy"; im.alt="";
       cell.appendChild(im);
-      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const nx=document.getElementById("spotNext"); if(nx) nx.style.display="none"; const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; const two=isFes && typeof fesTwoDays==="function" && fesTwoDays(); big.classList.toggle("twodays",!!two && !isPt); big.classList.toggle("pt",!!isFes); big.dataset.key=c.key||""; if(isFes){ const pc=document.getElementById("ptCard"); pc.classList.remove("flipped"); document.getElementById("ptFront").src=c.img; document.getElementById("ptBack").src=c.back||c.img; } const gf=document.getElementById("zuGift"); if(gf){ gf.textContent=FES_2DAYS_GIFT; gf.classList.toggle("on",!!(two && FES_2DAYS_GIFT)); } if(isFes){ document.getElementById("zuSave").href=c.img; document.getElementById("zuSave").setAttribute("download", isPt?"junkeeees_platinum.jpg":"junkeeees_legendary.jpg"); if(window.cmEvent)cmEvent("fes_legendary_view",{day:c.day,two:two?1:0}); } });
+      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const nx=document.getElementById("spotNext"); if(nx) nx.style.display="none"; const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; const two=isFes && typeof fesTwoDays==="function" && fesTwoDays(); big.classList.toggle("twodays",!!two && !isPt); big.classList.toggle("pt",!!isFes); big.dataset.key=c.key||""; if(isFes){ const pc=document.getElementById("ptCard"); pc.classList.remove("flipped"); document.getElementById("ptFront").src=c.img; document.getElementById("ptBack").src=c.back||c.img; } const gf=document.getElementById("zuGift"); if(gf){ gf.textContent=FES_2DAYS_GIFT; gf.classList.toggle("on",!!(two && FES_2DAYS_GIFT)); } if(isFes){ document.getElementById("zuSave").href=c.img; document.getElementById("zuSave").setAttribute("download", isPt?"junkeeees_platinum.jpg":"junkeeees_legendary.jpg"); if(window.cmEvent)cmEvent("fes_legendary_view",{day:c.day,two:two?1:0}); if(!isPt) fesBeacon("legendary_view"); } });
       grid.appendChild(cell);
     });
     if(!list.length){
@@ -866,6 +866,9 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
 // FES会場に置いたNFCを読むと ?spot=a|b|c でこのページが開く。
 // 3つそろうと、図鑑に「会場限定」の1枚が増える。ウォレットもアプリも要らない。
 const SPOT_KEY="junk_fes_spots", SPOTS=["a","b","c"];
+// 会場計測(サーバー側)。運営端末(cm_internal)は送らない。端末IDはランダム文字列だけ
+function fesDev(){ try{ let d=localStorage.getItem("junk_fes_dev"); if(!d){ d=Array.from(crypto.getRandomValues(new Uint8Array(8))).map(x=>x.toString(16).padStart(2,"0")).join(""); localStorage.setItem("junk_fes_dev",d); } return d; }catch(e){ return "anon"+Date.now(); } }
+function fesBeacon(t,extra){ try{ if(localStorage.getItem("cm_internal")==="1") return; const body=JSON.stringify(Object.assign({t:t,d:fesDev()},extra||{})); if(navigator.sendBeacon){ navigator.sendBeacon("/api/fes", new Blob([body],{type:"application/json"})); } else { fetch("/api/fes",{method:"POST",headers:{"Content-Type":"application/json"},body:body,keepalive:true}); } }catch(e){} }
 // スポットの名前(会場のエリアに合わせる。入口/出口ではなく、FESの各エリアを回る体験に)
 // スポットはキャラの名前で(PLAY/ART/FOODだと分かりにくい、とユーザー判断 10/21)。掲示にもそのキャラの絵を出す
 const SPOT_NAME={ a:"PATTY", b:"ホットドッグブルドッグ", c:"ジョーカー" };
@@ -876,7 +879,7 @@ const FES_DAY_KEY="junk_fes_days";   // 3/3の状態で会場のスポットを�
 function jstDay(){ const now=new Date(Date.now()+9*3600e3); return String(now.getUTCDate()); }
 function fesDays(){ let d=[]; try{ d=JSON.parse(localStorage.getItem(FES_DAY_KEY)||"[]"); }catch(e){} if(!d.length) d=[jstDay()==="25"?"25":"24"]; return d.filter(x=>x==="24"||x==="25"); }
 const PT_KEY="junk_fes_platinum", PT_CODE="fes2026";   // ?platinum=fes2026 を開いた端末にPLATINUM(2DAYSの人へFESのあとに送る)
-try{ const q=new URLSearchParams(location.search); if(q.get("platinum")===PT_CODE){ localStorage.setItem(PT_KEY,"1"); if(window.cmEvent)cmEvent("fes_platinum_unlock",{});
+try{ const q=new URLSearchParams(location.search); if(q.get("platinum")===PT_CODE){ localStorage.setItem(PT_KEY,"1"); if(window.cmEvent)cmEvent("fes_platinum_unlock",{}); setTimeout(()=>{ try{ fesBeacon("platinum_unlock"); }catch(e){} },0);
   // 開いたらすぐ見せる: 図鑑を開いてPLATINUMを表示
   setTimeout(()=>{ try{ toast("✨ PLATINUMカードが図鑑に入りました"); const b=document.getElementById("zuBtn"); if(b) b.click(); setTimeout(()=>{ const cells=[...document.querySelectorAll(".zu-cell.fes")]; const pt=cells[cells.length-1]; if(pt) pt.click(); },400); }catch(e){} },700); } }catch(e){}
 function hasPlatinum(){ try{ return localStorage.getItem(PT_KEY)==="1"; }catch(e){ return false; } }
@@ -906,7 +909,7 @@ function showStampCard(q, s, isNew){
       const left=SPOTS.filter(x=>!s.has(x));
       if(s.size>=SPOTS.length){
         msg.innerHTML="🎉 3つそろった！<br>レジェンダリーカードをプレゼント";
-        btns.innerHTML='<button class="sb y" id="stampLeg" type="button">🏆 レジェンダリーカードを見る</button><a class="sb" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=stamp_complete">🏃 次は会場RUNに挑戦 →</a><button class="sb" id="stampClose" type="button">とじる</button>';
+        btns.innerHTML='<button class="sb y" id="stampLeg" type="button">🏆 レジェンダリーカードを見る</button><a class="sb" href="https://charamarl.com/run-junkeees/?fes=1&utm_source=zukan&utm_medium=stamp_complete" onclick="fesBeacon('to_run')">🏃 次は会場RUNに挑戦 →</a><button class="sb" id="stampClose" type="button">とじる</button>';
         document.getElementById("stampLeg").addEventListener("click",()=>{ closeStamp(); if(window.openZukan) openZukan(); setTimeout(()=>{ const c=document.querySelector(".zu-cell.fes"); if(c) c.click(); },400); });
       }else{
         msg.innerHTML="あと "+left.length+" か所<br>"+SPOT_HINT[left[0]]+"！";
@@ -923,6 +926,7 @@ function showStampCard(q, s, isNew){
   if(!SPOTS.includes(q)) return;
   const s=spotSet(); const isNew=!s.has(q);
   s.add(q); try{ localStorage.setItem(SPOT_KEY, JSON.stringify([...s])); }catch(e){}
+  fesBeacon("scan",{spot:q,found:s.size});
   if(window.cmEvent)cmEvent("fes_spot",{spot:q,found:s.size,is_new:isNew});
   if(s.size>=SPOTS.length){
     // 3/3の日を記録(24日と25日の両方でそろえた/読んだ人は2枚)
