@@ -1,31 +1,6 @@
 {
   "redirects": [
     {
-      "source": "/q/j",
-      "destination": "https://charamarl.com/tap/junkeeees.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag",
-      "permanent": false
-    },
-    {
-      "source": "/q/a",
-      "destination": "https://charamarl.com/ar/fes/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=ar",
-      "permanent": false
-    },
-    {
-      "source": "/q/g",
-      "destination": "https://charamarl.com/?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=gallery#discover",
-      "permanent": false
-    },
-    {
-      "source": "/q/k",
-      "destination": "https://charamarl.com/characters/keyrings.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=keyrings",
-      "permanent": false
-    },
-    {
-      "source": "/q/b",
-      "destination": "https://charamarl.com/join.html?utm_source=flyer&utm_medium=print&utm_campaign=junk_fes_bag&utm_content=join",
-      "permanent": false
-    },
-    {
       "source": "/ig",
       "destination": "https://charamarl.com/?utm_source=ig&utm_medium=bio",
       "permanent": false
@@ -78,6 +53,10 @@
     ]
   },
   "rewrites": [
+    {
+      "source": "/q/:k([a-z])",
+      "destination": "/api/q?k=:k"
+    },
     {
       "source": "/n/:c([A-Za-z0-9_-]+)",
       "destination": "/api/n?c=:c"
