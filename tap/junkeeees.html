@@ -806,8 +806,8 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
     document.getElementById("zuSave").addEventListener("click",()=>{ if(window.cmEvent)cmEvent("fes_legendary_save",{}); fesBeacon("legendary_save"); });
     document.getElementById("zuShareX").addEventListener("click",async()=>{
       const two = typeof fesTwoDays==="function" && fesTwoDays(); const pt = big.dataset.key==="fes_platinum"; const is3d = big.classList.contains("pt");
-      const text= pt ? "JUNKeeeeS FES 2026 2DAYS の PLATINUM カードもらった✨ 裏返るやつ🏆🍟 #JUNKeeeeS #CHARAMARL" : two ? "JUNKeeeeS FES 2026 2日間コンプリート！レジェンダリーカード GOLD＆SILVER 両方ゲット🏆🍟 #JUNKeeeeS #CHARAMARL"
-                      : "JUNKeeeeS FES 2026 会場スタンプ 3/3 コンプリート！レジェンダリーカードもらった🍟 #JUNKeeeeS #CHARAMARL";
+      const text= pt ? "JUNKeeeeS FES 2026 2DAYS の PLATINUM カードもらった✨ 裏返るやつ🏆🍟 #JUNFES #CHARAMARL" : two ? "JUNKeeeeS FES 2026 2日間コンプリート！レジェンダリーカード GOLD＆SILVER 両方ゲット🏆🍟 #JUNFES #CHARAMARL"
+                      : "JUNKeeeeS FES 2026 会場スタンプ 3/3 コンプリート！レジェンダリーカードもらった🍟 #JUNFES #CHARAMARL";
       const url="https://charamarl.com/tap/junkeeees.html";
       if(window.cmEvent)cmEvent("fes_legendary_share",{two:two?1:0}); fesBeacon("legendary_share");
       try{ const srcs = pt ? ["art/junkeeees_platinum_front.jpg","art/junkeeees_platinum_back.jpg"] : two ? fesCards().filter(c=>c.key==="fes_only").map(c=>c.img) : is3d ? [document.getElementById("ptFront").src, document.getElementById("ptBack").src] : [bigImg.src]; const files=[];
@@ -886,7 +886,7 @@ function hasPlatinum(){ try{ return localStorage.getItem(PT_KEY)==="1"; }catch(e
 function fesCards(){ const l=fesDays().map(d=>({ key:"fes_only", day:d, name:"レジェンダリー "+(d==="25"?"SILVER":"GOLD"), img:"art/junkeeees_legendary_10"+d+".jpg", back:"art/junkeeees_legendary_back_10"+d+".jpg" })); if(hasPlatinum()) l.push({ key:"fes_platinum", day:"pt", name:"PLATINUM 2DAYS", img:"art/junkeeees_platinum_front.jpg", back:"art/junkeeees_platinum_back.jpg" }); return l; }
 const FES_CARD=fesCards()[0];
 function fesTwoDays(){ const d=fesDays(); return d.includes("24") && d.includes("25"); }
-const FES_2DAYS_GIFT = "🎁 この2枚を #JUNKeeeeS #CHARAMARL をつけてXに投稿すると、FESのあとに「PLATINUMカード」をプレゼント（保護者の方の投稿でOK・CHARAMARLからリプでご連絡）";   // 2日間コンプリートの人への案内(例:「🎁 #JUNKeeeeS をつけてXに投稿した人に、FESのあとプレゼント」)。空なら表示しない
+const FES_2DAYS_GIFT = "🎁 この2枚を #JUNFES #CHARAMARL をつけてXに投稿すると、FESのあとに「PLATINUMカード」をプレゼント（保護者の方の投稿でOK・CHARAMARLからリプでご連絡）";   // 2日間コンプリートの人への案内(例:「🎁 #JUNKeeeeS をつけてXに投稿した人に、FESのあとプレゼント」)。空なら表示しない
 const spotSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(SPOT_KEY)||"[]"));}catch(e){return new Set();}};
 const spotDone=()=>spotSet().size>=SPOTS.length;
 function toast(msg){

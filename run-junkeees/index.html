@@ -1020,7 +1020,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   document.querySelectorAll('.share-opt').forEach(btn => btn.addEventListener('click', async () => {
     const url = location.origin + location.pathname;
     const m = rankMsg.hidden ? null : rankMsg.textContent.match(/(\d+)位/);
-    const text = `JUNKeeeeS RUN（${CHAR.name}）で ${S.score} 点${m ? `（${m[1]}位）` : ''}！ #JUNKeeeeS`;
+    const text = `JUNKeeeeS RUN（${CHAR.name}）で ${S.score} 点${m ? `（${m[1]}位）` : ''}！ ${typeof FES_MODE!=='undefined' && FES_MODE ? '#JUNFES ' : ''}#JUNKeeeeS`;
     const kind = btn.dataset.sh;
     drEvent('share', { method: kind, score: S.score }); beacon('share');
     if (kind === 'x') window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
