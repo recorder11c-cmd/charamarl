@@ -86,11 +86,13 @@ def script_syntax_errors(html):
     """<script>(srcなし)の中身を node --check にかける。[(行, メッセージ)]"""
     import subprocess, tempfile, os
     out = []
-    for m in re.finditer(r'<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)</script>', html, re.I):
-        body = m.group(1)
-        if not body.strip() or 'type="application/ld+json"' in m.group(0) or "type='application/ld+json'" in m.group(0):
+    for m in re.finditer(r'<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)</script>', html, re.I):
+        attrs, body = m.group(1), m.group(2)
+        tm = re.search(r'type\s*=\s*["\']?([^"\'\s>]+)', attrs, re.I)
+        typ = (tm.group(1).lower() if tm else 'text/javascript')
+        if not body.strip() or typ not in ('text/javascript', 'module'):   # importmap / ld+json / テンプレートは見ない
             continue
-        with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8') as t:
+        with tempfile.NamedTemporaryFile('w', suffix=('.mjs' if typ == 'module' else '.js'), delete=False, encoding='utf-8') as t:
             t.write(body); tmp = t.name
         try:
             r = subprocess.run(['node', '--check', tmp], capture_output=True, text=True)
