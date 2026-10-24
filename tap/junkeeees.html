@@ -226,7 +226,7 @@
   .pt-hint{display:none;color:#cfd4ea;font-size:12.5px;font-weight:800;}
   .zu-big.pt .pt-hint{display:block;}
   .zu-gift{display:none;grid-column:1 / -1;color:#fff;font-size:12.5px;font-weight:800;text-align:center;line-height:1.5;opacity:.95;}
-  .zu-big.twodays .zu-gift.on{display:block;}
+  .zu-big .zu-gift.on{display:block;}
   .zb{background:#fff;color:#111;border:none;border-radius:999px;padding:12px 10px;font-weight:900;font-size:14px;font-family:inherit;text-decoration:none;cursor:pointer;text-align:center;white-space:nowrap;}
   .zb.y{background:#FFE000;grid-column:1 / -1;}
   body:has(.zu-big.open) .spot-next, body:has(.stamp-ov.open) .spot-next, body:has(#fin.open) .spot-next{display:none;}
@@ -838,7 +838,7 @@ const CM_NEXT = {"artist": "ROKU", "out": "g9769aa4b0d9b", "goods": ""};
       if(isFes){ const t=document.createElement("span"); t.className="fesx"; t.textContent=isPt?"PLATINUM":(c.day==="25"?"会場限定 SILVER":"会場限定 GOLD"); cell.appendChild(t); }
       const im=document.createElement("img"); im.src=c.img; im.loading="lazy"; im.alt="";
       cell.appendChild(im);
-      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const nx=document.getElementById("spotNext"); if(nx) nx.style.display="none"; const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; const two=isFes && typeof fesTwoDays==="function" && fesTwoDays(); big.classList.toggle("twodays",!!two && !isPt); big.classList.toggle("pt",!!isFes); big.dataset.key=c.key||""; if(isFes){ const pc=document.getElementById("ptCard"); pc.classList.remove("flipped"); document.getElementById("ptFront").src=c.img; document.getElementById("ptBack").src=c.back||c.img; } const gf=document.getElementById("zuGift"); if(gf){ gf.textContent=FES_2DAYS_GIFT; gf.classList.toggle("on",!!(two && FES_2DAYS_GIFT)); } if(isFes){ document.getElementById("zuSave").href=c.img; document.getElementById("zuSave").setAttribute("download", isPt?"junkeeees_platinum.jpg":"junkeeees_legendary.jpg"); if(window.cmEvent)cmEvent("fes_legendary_view",{day:c.day,two:two?1:0}); if(!isPt) fesBeacon("legendary_view"); } });
+      cell.addEventListener("click",()=>{ bigImg.src=c.img; big.classList.add("open"); const nx=document.getElementById("spotNext"); if(nx) nx.style.display="none"; const bb=document.getElementById("zuBigBtns"); bb.hidden=!isFes; const two=isFes && typeof fesTwoDays==="function" && fesTwoDays(); big.classList.toggle("twodays",!!two && !isPt); big.classList.toggle("pt",!!isFes); big.dataset.key=c.key||""; if(isFes){ const pc=document.getElementById("ptCard"); pc.classList.remove("flipped"); document.getElementById("ptFront").src=c.img; document.getElementById("ptBack").src=c.back||c.img; } const gf=document.getElementById("zuGift"); if(gf){ gf.textContent=FES_2DAYS_GIFT; gf.classList.toggle("on",!!(isFes && !isPt && FES_2DAYS_GIFT)); } if(isFes){ document.getElementById("zuSave").href=c.img; document.getElementById("zuSave").setAttribute("download", isPt?"junkeeees_platinum.jpg":"junkeeees_legendary.jpg"); if(window.cmEvent)cmEvent("fes_legendary_view",{day:c.day,two:two?1:0}); if(!isPt) fesBeacon("legendary_view"); } });
       grid.appendChild(cell);
     });
     if(!list.length){
@@ -889,7 +889,7 @@ function hasPlatinum(){ try{ return localStorage.getItem(PT_KEY)==="1"; }catch(e
 function fesCards(){ const l=fesDays().map(d=>({ key:"fes_only", day:d, name:"レジェンダリー "+(d==="25"?"SILVER":"GOLD"), img:"art/junkeeees_legendary_10"+d+".jpg", back:"art/junkeeees_legendary_back_10"+d+".jpg" })); if(hasPlatinum()) l.push({ key:"fes_platinum", day:"pt", name:"PLATINUM 2DAYS", img:"art/junkeeees_platinum_front.jpg", back:"art/junkeeees_platinum_back.jpg" }); return l; }
 const FES_CARD=fesCards()[0];
 function fesTwoDays(){ const d=fesDays(); return d.includes("24") && d.includes("25"); }
-const FES_2DAYS_GIFT = "🎁 この2枚を #JUNFES #CHARAMARL をつけてXに投稿すると、FESのあとに「PLATINUMカード」をプレゼント（保護者の方の投稿でOK・CHARAMARLからリプでご連絡）";   // 2日間コンプリートの人への案内(例:「🎁 #JUNKeeeeS をつけてXに投稿した人に、FESのあとプレゼント」)。空なら表示しない
+const FES_2DAYS_GIFT = "🎁 このカードを #JUNFES #CHARAMARL をつけてXに投稿すると、FESのあとに「PLATINUMカード」をプレゼント（保護者の方の投稿でOK・CHARAMARLからリプでご連絡）";   // 10/24夜: 条件を「2日間」から「3/3そろえた人」に（初日コンプ0で2DAYSの該当者が出ないため・運営指摘）   // 2日間コンプリートの人への案内(例:「🎁 #JUNKeeeeS をつけてXに投稿した人に、FESのあとプレゼント」)。空なら表示しない
 const spotSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(SPOT_KEY)||"[]"));}catch(e){return new Set();}};
 const spotDone=()=>spotSet().size>=SPOTS.length;
 function toast(msg){
