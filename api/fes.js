@@ -26,6 +26,7 @@ module.exports = async (req, res) => {
       const devs = (await redis('SMEMBERS', 'fes:devices')) || [];
       out.devices_all = devs.length;
       for (const d of devs) { const n = Number(await redis('SCARD', `fes:ds:${d}`)) || 0; if (n >= 1 && n <= 3) out.spots_per_device[n]++; }
+      if (q.log !== undefined) { const raw = (await redis('LRANGE', 'fes:log', '0', '499')) || []; out.log = raw.map(x => { try { const o = JSON.parse(x); o.jst = new Date(o.ts + 9 * 3600e3).toISOString().replace('T', ' ').slice(5, 16); return o; } catch (_) { return null; } }).filter(Boolean); }
       try { const r = await fetch('https://charamarl.com/api/run-score?char=JUNK_AGERU&fes=1'); const j = await r.json(); out.run_fes_players = j.total || 0; } catch (_) { out.run_fes_players = null; }
       return res.status(200).json(out);
     }
@@ -47,6 +48,7 @@ module.exports = async (req, res) => {
     } else {
       cmds.push(['INCR', `fes:cnt:${day}:${t}`]);
     }
+    cmds.push(['LPUSH', 'fes:log', JSON.stringify({ ts: Date.now(), t, spot: b.spot || null, found: Number(b.found) || null })], ['LTRIM', 'fes:log', '0', '4999']);   // 時刻つきの記録(10/26〜。端末IDは入れない)
     for (const c of cmds) await redis(...c);
     return res.status(200).json({ ok: true });
   } catch (e) { return serverError(res, e, 'fes.js'); }
