@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
   const q = req.query || {};
   try {
     if (q.summary !== undefined) {
-      const days = []; const start = Date.parse('2026-10-24T00:00:00+09:00');
+      const days = []; const start = Date.parse('2026-10-24T00:00:00+09:00') + 9 * 3600e3;   // JSTの日付ラベル(前はUTCになっていて当日分が出なかった)
       for (let t = start; t <= Date.now() + 9 * 3600e3; t += 864e5) days.push(new Date(t).toISOString().slice(0, 10));
       const out = { label: LABEL, days: {}, total: {} };
       for (const k of Object.keys(DEST)) out.total[k] = { hits: Number(await redis('GET', `q:cnt:${k}`)) || 0, devices: Number(await redis('SCARD', `q:dev:${k}`)) || 0 };
