@@ -251,7 +251,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   function start(charKey){
     S.char = charKey; S.state = 'play'; S.balls = BALLS; S.tray = []; S.got = []; S.combo = 0; S.power = 0; S.charging = false; S.fx = []; S.t = 0;
     if (S.ball){ Composite.remove(world, S.ball); S.ball = null; }
-    S.trayBalls.forEach(b => Composite.remove(world, b)); S.trayBalls = []; S.payQueue = []; S.pop = null; S.score = 0; S.fever = 0; S.coupon = null; S.couponBusy = false; document.getElementById('cpHit').hidden = true; S.stars = [false, false, false]; S.stuckT = 0; S.lamps = 0;
+    S.trayBalls.forEach(b => Composite.remove(world, b)); S.trayBalls = []; S.payQueue = []; S.pop = null; S.score = 0; S.fever = 0; S.coupon = null; S.couponBusy = false; S.quadPending = null; document.getElementById('cpHit').hidden = true; S.stars = [false, false, false]; S.stuckT = 0; S.lamps = 0;
     S.extra.forEach(b => Composite.remove(world, b)); S.extra = []; S.drops.forEach(d => { if (d.plugin.down){ d.plugin.down = false; Composite.add(world, d); } });
     newBall(); renderTray(); document.getElementById('hBalls').textContent = S.balls;
     document.getElementById('ovTitle').classList.remove('open'); document.getElementById('ovOver').classList.remove('open'); document.getElementById('ovHit').classList.remove('open');
@@ -288,8 +288,10 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     if (!dup && S.tray.length < 4){ S.tray.push(key); S.combo++; renderTray(); toast(S.combo >= 2 ? `COMBO ×${S.combo}!! +${n}玉` : `+${n}玉！`); if (S.tray.length === 4){ payout(key, 50, pk.x, pk.y - 20); S.lamps = 120; } }
     else { S.balls++; document.getElementById('hBalls').textContent = S.balls; toast('もう持ってる！ +1玉'); }
     S.got.push({ key, dup });
-    // ゾロ目: 同じピンズに3回入ったら 4個セット¥500引きのクーポン(1端末1日1枚)
-    if (S.got.filter(g => g.key === key).length === 3 && !S.coupon && !S.couponBusy) zorome(key, pk);
+    // ゾロ目: 同じピンズに3回入ったら 4個セット¥500引きのクーポン(1端末1日1枚)。4回なら¥1,000引きに差し替え(QUAD)
+    const same = S.got.filter(g => g.key === key).length;
+    if (same === 3 && !S.coupon && !S.couponBusy) zorome(key, pk, 3);
+    else if (same === 4 && (!S.coupon || (S.coupon.amount_off || 0) < 1000)){ if (S.couponBusy) S.quadPending = { key, pk }; else zorome(key, pk, 4); }   // 3回目の発行中に4回目が来たら(マルチボール)あとで差し替え
     if (quiet) return;   // 追加の玉(マルチボール)は画面を止めない
     S.char = key;   // 入った穴のピンズが、次の玉になる(キャラのクセも変わる)
     drEvent('smb_hit', { pin:key, dup: dup ? 1 : 0 });
@@ -303,15 +305,18 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   function nextBall(){ document.getElementById('ovHit').classList.remove('open'); if (S.tray.length >= 4 || S.balls <= 0) return gameOver(); newBall(); }
   // ゾロ目クーポン(サーバーが Stripe のプロモーションコードを発行)
   function deviceId(){ try{ let d = localStorage.getItem('cm_smb_d'); if (!d){ d = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(x => x.toString(16).padStart(2, '0')).join(''); localStorage.setItem('cm_smb_d', d); } return d; }catch(e){ return 'nostorage' + Date.now().toString(16); } }
-  async function zorome(key, pk){
-    S.couponBusy = true; S.flash = 14; S.shake = 16; S.lamps = 150; toast('ゾロ目!!'); payout(key, 30, pk.x, pk.y - 20); S.pop = { text:'ZORO!', x:pk.x, y:pk.y - 10, t:0 };
-    drEvent('smb_zorome', { pin:key });
-    try{ const r = await fetch('/api/smartball', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'zorome', d: deviceId() }) }); const j = await r.json();
-      if (j && j.code){ S.coupon = j; renderCoupon(); drEvent('smb_coupon', { code:j.code, again: j.again ? 1 : 0 }); }
+  async function zorome(key, pk, level){
+    level = level || 3; const quad = level === 4;
+    S.couponBusy = true; S.flash = quad ? 20 : 14; S.shake = quad ? 24 : 16; S.lamps = quad ? 240 : 150; toast(quad ? 'ゾロ目×4!! QUAD!!' : 'ゾロ目!!'); payout(key, quad ? 60 : 30, pk.x, pk.y - 20); S.pop = { text: quad ? 'QUAD!!' : 'ZORO!', x:pk.x, y:pk.y - 10, t:0 };
+    if (quad){ S.fx.push({ type:'burst', x:pk.x - 40, y:pk.y - 30, t:0 }); S.fx.push({ type:'burst', x:pk.x + 40, y:pk.y - 30, t:0 }); try{ navigator.vibrate && navigator.vibrate([60, 40, 60, 40, 120]); }catch(e){} }
+    drEvent('smb_zorome', { pin:key, level });
+    try{ const r = await fetch('/api/smartball', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ action:'zorome', d: deviceId(), level }) }); const j = await r.json();
+      if (j && j.code){ S.coupon = j; renderCoupon(); drEvent('smb_coupon', { code:j.code, level: j.level || 3, again: j.again ? 1 : 0, upgraded: j.upgraded ? 1 : 0 }); if (j.upgraded) toast('クーポンが ¥1,000引き にアップ！'); }
     }catch(e){}
     S.couponBusy = false;
+    if (S.quadPending && level < 4 && (!S.coupon || (S.coupon.amount_off || 0) < 1000)){ const q = S.quadPending; S.quadPending = null; zorome(q.key, q.pk, 4); } else S.quadPending = null;
   }
-  function couponHtml(){ const c = S.coupon; if (!c) return ''; const exp = new Date(c.expires); return `🎟 <b>ゾロ目クーポン ${c.code}</b><br>4個セットが <b>¥${c.amount_off}引き</b>（決済画面の「プロモーションコード」に入力・${exp.getMonth()+1}/${exp.getDate()} ${String(exp.getHours()).padStart(2,'0')}:${String(exp.getMinutes()).padStart(2,'0')}まで・1回）`; }
+  function couponHtml(){ const c = S.coupon; if (!c) return ''; const exp = new Date(c.expires); return `🎟 <b>${c.level === 4 ? '4つゾロ目 QUADクーポン' : 'ゾロ目クーポン'} ${c.code}</b><br>4個セットが <b>¥${c.amount_off.toLocaleString()}引き</b>（決済画面の「プロモーションコード」に入力・${exp.getMonth()+1}/${exp.getDate()} ${String(exp.getHours()).padStart(2,'0')}:${String(exp.getMinutes()).padStart(2,'0')}まで・1回）`; }
   function renderCoupon(){ const el = document.getElementById('cpHit'); el.innerHTML = couponHtml(); el.hidden = !S.coupon; }
   // マルチボール: FEVER開始で追加の玉を2つ放つ(穴に入れば普通に取れる)
   function multiball(){ if (S.extra.length) return; for (let i = 0; i < 2; i++){ const c = byKey(S.char); const r = c.p.r || 12; const eb = Bodies.circle(60 + i * 260, 110, r, { restitution:.5, friction:.05, frictionAir:.006, density:.006, collisionFilter:F_BALL }); eb.plugin = { kind:'ball', key:S.char, r }; Body.setVelocity(eb, { x:(i ? -1 : 1) * 4, y:2 }); S.extra.push(eb); Composite.add(world, eb); } }
@@ -326,8 +331,8 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     const bt = document.getElementById('ovBtns'); let h = '';
     const cq = S.coupon ? `&coupon=${encodeURIComponent(S.coupon.code)}` : '';
     if (S.coupon) h += `<div class="cp">${couponHtml()}</div>`;
-    if (full) h += `<a class="btn p" href="${PINS_URL}?set=${S.tray.join(',')}${cq}&utm_source=smartball&utm_medium=set" target="_blank" rel="noopener" data-ev="set">🛒 この4個セットを買う ${S.coupon ? '¥3,900（クーポン適用）' : '¥4,400'}</a>`;
-    else if (S.coupon) h += `<a class="btn p" href="${PINS_URL}?set=${[...S.tray, ...PINS.map(p => p.key).filter(k => !S.tray.includes(k))].slice(0, 4).join(',')}${cq}&utm_source=smartball&utm_medium=setcp" target="_blank" rel="noopener" data-ev="set">🛒 クーポンで4個セットを買う ¥3,900</a>`;
+    if (full) h += `<a class="btn p" href="${PINS_URL}?set=${S.tray.join(',')}${cq}&utm_source=smartball&utm_medium=set" target="_blank" rel="noopener" data-ev="set">🛒 この4個セットを買う ${S.coupon ? `¥${(4400 - S.coupon.amount_off).toLocaleString()}（クーポン適用）` : '¥4,400'}</a>`;
+    else if (S.coupon) h += `<a class="btn p" href="${PINS_URL}?set=${[...S.tray, ...PINS.map(p => p.key).filter(k => !S.tray.includes(k))].slice(0, 4).join(',')}${cq}&utm_source=smartball&utm_medium=setcp" target="_blank" rel="noopener" data-ev="set">🛒 クーポンで4個セットを買う ¥${(4400 - S.coupon.amount_off).toLocaleString()}</a>`;
     h += `<button class="btn y" id="btnRetry">もう一回（玉${BALLS}発）</button>`;
     h += `<div class="row3"><button class="btn s" data-share="x">𝕏 Xで<br>シェア</button><button class="btn s" data-share="ig">📷 Instagramで<br>シェア</button><button class="btn s" data-share="other">📲 その他</button></div>`;
     h += `<a class="btn s" href="${PINS_URL}?utm_source=smartball&utm_medium=over2" target="_blank" rel="noopener">🛒 ピンズのページ</a>`;

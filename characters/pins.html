@@ -426,11 +426,12 @@ $('#buyBtn').addEventListener('click', async function(){
 // 「ユルクレイジーのピンズを見に来た人」に、また探させない。
 (function(){
   // スマートボール(/smartball/)から ?set=a,b,c,d で来たら、4個セットをその絵柄で最初から選んでおく
-  // スマートボールのゾロ目クーポン(?coupon=ZORO****)。決済画面の「プロモーションコード」欄に入れてもらう
+  // スマートボールのゾロ目クーポン(?coupon=ZORO****=¥500 / QUAD****=¥1,000)。決済画面の「プロモーションコード」欄に入れてもらう
   var cpq = new URLSearchParams(location.search).get('coupon');
-  if (cpq && /^ZORO[A-Z0-9]{4}$/.test(cpq)){
+  if (cpq && /^(ZORO|QUAD)[A-Z0-9]{4}$/.test(cpq)){
+    var cpAmt = cpq.indexOf('QUAD') === 0 ? '1,000' : '500';   // QUAD=4つゾロ目(¥1,000引き) / ZORO=3つゾロ目(¥500引き)
     var bn = document.createElement('div'); bn.className = 'coupon-bar';
-    bn.innerHTML = '🎟 ゾロ目クーポン <b>' + cpq + '</b>：4個セットが <b>¥500引き</b>。決済画面の「プロモーションコード」に入力してください <button type="button" id="cpCopy">コピー</button>';
+    bn.innerHTML = '🎟 ゾロ目クーポン <b>' + cpq + '</b>：4個セットが <b>¥' + cpAmt + '引き</b>。決済画面の「プロモーションコード」に入力してください <button type="button" id="cpCopy">コピー</button>';
     var hero = document.querySelector('.hero'); if (hero) hero.insertAdjacentElement('afterend', bn);
     document.getElementById('cpCopy').addEventListener('click', function(){ try{ navigator.clipboard.writeText(cpq); this.textContent = 'コピーしました'; }catch(e){ prompt('クーポンコード', cpq); } });
     if (window.cmEvent) cmEvent('pins_coupon_view', { code: cpq });
