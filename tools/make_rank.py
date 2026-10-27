@@ -34,7 +34,7 @@ def _admin_key():
 KEY = _admin_key()
 API = 'https://charamarl.com/api/run-score'
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-W, H = 1200, 1500   # 2026-10-27 JUNKeeeeS RUN の4体を下に足したので縦長(4:5)に
+W, H = 1200, 1600   # 2026-10-27 JUNKeeeeS RUN の4体を下に足したので縦長(4:5)に
 OUT_DEFAULT = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_run_rank')
 
 # run.html の CHARS と同じ並び・同じ表記
@@ -142,7 +142,7 @@ tr.none .c{{color:#6E687C}}
   <table>{jtr}</table>
 </div>
 <div class="foot">
-  <div class="m">月曜0時にリセット。今週の1位はまだ空いています</div>
+  <div class="m">月曜0時にリセット。今週の1位は空席</div>
   <div class="u">charamarl.com/run.html ・ /run-junkeees/</div>
 </div>
 </body></html>'''
