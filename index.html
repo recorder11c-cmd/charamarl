@@ -1339,7 +1339,8 @@
         av.dataset.site=home.home; av.dataset.level='home';
       }else{ av.style.display='none'; av.dataset.site=''; }
       av.dataset.art=curArt; av.dataset.artistName=who;
-      var showHome=!!(a.site&&home&&home.home&&isG&&home.home.replace(/\/$/,'')!==String(a.site).replace(/\/$/,'').split('?')[0]);
+      // インタビュー記事（名義はCHARAMARL）は「作家の活動場所」を出さない。出すと CHARAMARL の note トップへ飛んでしまい、記事の作家の場所ではない（2026-10-27）
+      var showHome=!!(a.site&&home&&home.home&&isG&&a.cat!=='INTERVIEW'&&home.home.replace(/\/$/,'')!==String(a.site).replace(/\/$/,'').split('?')[0]);
       ah.hidden=!showHome;
       if(showHome){ ah.href='/api/out?a='+encodeURIComponent(who.toLowerCase()); ah.textContent=(home.homeLabel?home.homeLabel:'作家の活動場所を見る')+' ↗'; ah.dataset.site=home.home; ah.dataset.art=curArt; ah.dataset.artistName=who; }
     })();
@@ -1534,7 +1535,7 @@
   function addGalleryItem(a){
     if(ARTWORKS[a.id])return;
     const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    ARTWORKS[a.id]={img:a.img,title:a.title,artist:'by '+a.artist,site:a.link||'',linkLabel:a.linkLabel||'',desc:a.desc||'',likes:0};
+    ARTWORKS[a.id]={img:a.img,title:a.title,artist:'by '+a.artist,site:a.link||'',linkLabel:a.linkLabel||'',desc:a.desc||'',cat:a.cat||'',likes:0};
     const div=document.createElement('div');
     div.className='pin art';
     if(a.ts)div.dataset.ts=a.ts;
