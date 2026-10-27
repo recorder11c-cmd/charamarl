@@ -51,5 +51,5 @@ module.exports = async (req, res) => {
     cmds.push(['LPUSH', 'fes:log', JSON.stringify({ ts: Date.now(), t, spot: b.spot || null, found: Number(b.found) || null })], ['LTRIM', 'fes:log', '0', '4999']);   // 時刻つきの記録(10/26〜。端末IDは入れない)
     for (const c of cmds) await redis(...c);
     return res.status(200).json({ ok: true });
-  } catch (e) { return serverError(res, e, 'fes.js'); }
+  } catch (e) { if (req.method === 'GET' && q.dbg !== undefined) return res.status(500).json({ error: 'debug', message: String(e && e.message || e).slice(0, 300) }); return serverError(res, e, 'fes.js'); }
 };
