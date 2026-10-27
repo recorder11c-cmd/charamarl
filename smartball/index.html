@@ -260,7 +260,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
   function newBall(){ if (S.ball) Composite.remove(world, S.ball); S.ball = makeBall(); Composite.add(world, S.ball); S.launched = false; S.ballT = 0; }
   function launch(){
     if (S.state !== 'play' || !S.ball || S.launched) return;
-    const c = byKey(S.char); const pw = Math.min(25, (11.5 + 13.5 * S.power) * (c.p.power || 1));   // 2026-10-27 MAXを強く(23→25)・弱〜中は少し弱く、差をはっきり   // 11〜23。弱い(4割以下)と上まで届かず戻る、中くらいで右寄りに落ちる、強いと左まで回る。上限22.5(速すぎるとアーチをすり抜ける)
+    const c = byKey(S.char); const pw = Math.min(25, (11.5 + 13.5 * S.power) * (c.p.power || 1)) * (1 + (Math.random() - .5) * .04);   // ±2%のゆらぎ(2026-10-27): MAX連打で同じ軌道→同じ穴にはまり続け、ゾロ目が出すぎるのを防ぐ   // 2026-10-27 MAXを強く(23→25)・弱〜中は少し弱く、差をはっきり   // 11〜23。弱い(4割以下)と上まで届かず戻る、中くらいで右寄りに落ちる、強いと左まで回る。上限22.5(速すぎるとアーチをすり抜ける)
     Body.setVelocity(S.ball, { x:0, y:-pw }); if (c.p.spin) Body.setAngularVelocity(S.ball, .6);
     S.launched = true; S.balls--; document.getElementById('hBalls').textContent = S.balls;
     // 発射の爽快感: 強いほど派手(揺れ・白フラッシュ・レーン元の紙吹雪・SMASH!!・残像)。MAXはひときわ
