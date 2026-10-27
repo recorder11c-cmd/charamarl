@@ -4,7 +4,7 @@
 //   GET  ?summary=1  → 日別の集計（個人情報なし。端末IDは出さない）
 // 端末IDは図鑑がブラウザに作るランダムな文字列。名前・連絡先は持たない。会期後1か月で削除（11/25）。
 const { redis, clientIp, overLimit, serverError } = require('./_lib/admin.js');
-const DAYS = ['2026-10-24', '2026-10-25'];
+const DAYS = (() => { const a = []; for (let t = Date.parse('2026-10-24T00:00:00+09:00') + 9 * 3600e3; t <= Date.now() + 9 * 3600e3 && a.length < 14; t += 864e5) a.push(new Date(t).toISOString().slice(0, 10)); return a; })();   // 10/24〜今日(JST)。会期後にかざした分も見える
 const TYPES = ['open', 'scan', 'legendary_view', 'legendary_save', 'legendary_share', 'to_run', 'platinum_unlock', 'run_open'];
 const jstDay = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
 
