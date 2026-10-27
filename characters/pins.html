@@ -415,7 +415,7 @@ $('#buyBtn').addEventListener('click', async function(){
       items:[{item_id:'pins_'+c.id, item_name:c.label, character_id:CHAR_ID, price:c.price, quantity:1}]})); }catch(e){}
     const res = await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ items:[{ name:`${c.label}（${c.detail}）`, price:c.price, quantity:1,
-        images:[`https://charamarl.com${c.img}`] }] })});
+        images:[`https://charamarl.com${c.img}`] }], coupon: window.__cmCoupon || null })});
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
     else { alert('エラー: ' + (data.error || '不明')); this.textContent = '今すぐ購入 →'; this.disabled = false; }
@@ -430,10 +430,19 @@ $('#buyBtn').addEventListener('click', async function(){
   var cpq = new URLSearchParams(location.search).get('coupon');
   if (cpq && /^(ZORO|QUAD)[A-Z0-9]{4}$/.test(cpq)){
     var cpAmt = cpq.indexOf('QUAD') === 0 ? '1,000' : '500';   // QUAD=4つゾロ目(¥1,000引き) / ZORO=3つゾロ目(¥500引き)
+    window.__cmCoupon = cpq;   // 「今すぐ購入」で決済に渡し、決済画面で自動適用(api/checkout.js)
     var bn = document.createElement('div'); bn.className = 'coupon-bar';
-    bn.innerHTML = '🎟 ゾロ目クーポン <b>' + cpq + '</b>：4個セットが <b>¥' + cpAmt + '引き</b>。決済画面の「プロモーションコード」に入力してください <button type="button" id="cpCopy">コピー</button>';
+    bn.innerHTML = '🎟 ' + (cpq.indexOf('QUAD') === 0 ? '4つゾロ目 QUAD' : 'ゾロ目') + 'クーポン <b id="cpCode">' + cpq + '</b>：4個セットが <b>¥' + cpAmt + '引き</b>。4個えらんで「今すぐ購入」に進むと決済画面で自動で引かれます（コピー不要）。あとで使うときはこのコードを決済画面の「プロモーションコード」欄へ <button type="button" id="cpCopy">コードをコピー</button>';
     var hero = document.querySelector('.hero'); if (hero) hero.insertAdjacentElement('afterend', bn);
-    document.getElementById('cpCopy').addEventListener('click', function(){ try{ navigator.clipboard.writeText(cpq); this.textContent = 'コピーしました'; }catch(e){ prompt('クーポンコード', cpq); } });
+    // コピー: アプリ内ブラウザ(X/Instagram)ではクリップボードが使えないことがある → 旧方式(execCommand)→ それも駄目なら文字を選択して「長押しでコピー」
+    document.getElementById('cpCopy').addEventListener('click', async function(){
+      var btn = this, ok = false;
+      try{ if (navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(cpq); ok = true; } }catch(e){}
+      if (!ok){ try{ var ta = document.createElement('textarea'); ta.value = cpq; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px'; document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0, cpq.length); ok = document.execCommand('copy'); document.body.removeChild(ta); }catch(e){ ok = false; } }
+      if (ok){ btn.textContent = 'コピーしました ✓'; }
+      else { btn.textContent = 'コピーできませんでした。コードを長押しで選択してください'; try{ var r = document.createRange(); r.selectNodeContents(document.getElementById('cpCode')); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); }catch(e){} }
+      if (window.cmEvent) cmEvent('pins_coupon_copy', { code: cpq, ok: ok ? 1 : 0 });
+    });
     if (window.cmEvent) cmEvent('pins_coupon_view', { code: cpq });
   }
   var setq = new URLSearchParams(location.search).get('set');

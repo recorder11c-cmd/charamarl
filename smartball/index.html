@@ -316,7 +316,7 @@ window.drEvent=function(name,params){ try{ if(window.gtag) window.gtag('event',n
     S.couponBusy = false;
     if (S.quadPending && level < 4 && (!S.coupon || (S.coupon.amount_off || 0) < 1000)){ const q = S.quadPending; S.quadPending = null; zorome(q.key, q.pk, 4); } else S.quadPending = null;
   }
-  function couponHtml(){ const c = S.coupon; if (!c) return ''; const exp = new Date(c.expires); return `🎟 <b>${c.level === 4 ? '4つゾロ目 QUADクーポン' : 'ゾロ目クーポン'} ${c.code}</b><br>4個セットが <b>¥${c.amount_off.toLocaleString()}引き</b>（決済画面の「プロモーションコード」に入力・${exp.getMonth()+1}/${exp.getDate()} ${String(exp.getHours()).padStart(2,'0')}:${String(exp.getMinutes()).padStart(2,'0')}まで・1回）`; }
+  function couponHtml(){ const c = S.coupon; if (!c) return ''; const exp = new Date(c.expires); return `🎟 <b>${c.level === 4 ? '4つゾロ目 QUADクーポン' : 'ゾロ目クーポン'} ${c.code}</b><br>4個セットが <b>¥${c.amount_off.toLocaleString()}引き</b>（下の「買う」ボタンから進むと決済で自動適用・${exp.getMonth()+1}/${exp.getDate()} ${String(exp.getHours()).padStart(2,'0')}:${String(exp.getMinutes()).padStart(2,'0')}まで・1回）`; }
   function renderCoupon(){ const el = document.getElementById('cpHit'); el.innerHTML = couponHtml(); el.hidden = !S.coupon; }
   // マルチボール: FEVER開始で追加の玉を2つ放つ(穴に入れば普通に取れる)
   function multiball(){ if (S.extra.length) return; for (let i = 0; i < 2; i++){ const c = byKey(S.char); const r = c.p.r || 12; const eb = Bodies.circle(60 + i * 260, 110, r, { restitution:.5, friction:.05, frictionAir:.006, density:.006, collisionFilter:F_BALL }); eb.plugin = { kind:'ball', key:S.char, r }; Body.setVelocity(eb, { x:(i ? -1 : 1) * 4, y:2 }); S.extra.push(eb); Composite.add(world, eb); } }
