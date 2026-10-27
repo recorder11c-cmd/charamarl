@@ -10,6 +10,7 @@ const jstDay = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10
 
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
+  const q = req.query || {};   // 🔴 10/26の log 追加で q を使ったのに定義していなかった → 集計(GET)が 10/26 08:30〜10/27 11:00 落ちていた
   try {
     if (req.method === 'GET') {
       const ip = clientIp(req); if (await overLimit(`fes:sum:${ip}`, 60, 600)) return res.status(429).json({ error: 'too many' });
