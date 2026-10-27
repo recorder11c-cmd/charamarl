@@ -34,13 +34,15 @@ def _admin_key():
 KEY = _admin_key()
 API = 'https://charamarl.com/api/run-score'
 CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-W, H = 1200, 1200
+W, H = 1200, 1500   # 2026-10-27 JUNKeeeeS RUN の4体を下に足したので縦長(4:5)に
 OUT_DEFAULT = os.path.expanduser('~/Library/Mobile Documents/com~apple~CloudDocs/CHARAMARL/03_画像/charamarl_run_rank')
 
 # run.html の CHARS と同じ並び・同じ表記
 CHARS = [('SUE', 'SUE'), ('GMC', 'レコマル'), ('UFOO', 'う〜ほ〜'), ('KAGECHIYO', 'カゲチヨ'),
          ('YURUCRAZY', 'ユルクレイジー'), ('DOGOOOOO', 'ドグー'), ('INKUMO', 'インクモ'),
          ('DANNA', 'だんな'), ('BLOCKMA', 'ぶろっくま'), ('MONY', 'モニィ')]
+# JUNKeeeeS RUN（run-junkeees/ の CHARS と同じ並び）。FES会場モードの点も通常の週間ランキングに入る
+JUNK = [('JUNK_AGERU', 'アゲル'), ('JUNK_PATTY', 'PATTY'), ('JUNK_HOTDOG', 'ホットドッグブルドッグ'), ('JUNK_JOKER', 'ジョーカー')]
 
 
 def top1(cid, week):
@@ -85,19 +87,26 @@ def main():
         t = top1(cid, week)
         rows.append((jp, (t or {}).get('name'), (t or {}).get('score')))
 
-    scored = [r for r in rows if r[2] is not None]
-    best = max(scored, key=lambda r: r[2]) if scored else None
+    jrows = []
+    for cid, jp in JUNK:
+        t = top1(cid, week)
+        jrows.append((jp, (t or {}).get('name'), (t or {}).get('score')))
 
-    tr = ''
-    for jp, name, score in rows:
-        if score is None:
-            tr += (f'<tr class="none"><td class="c">{html.escape(jp)}</td>'
-                   f'<td class="n" colspan="2">まだ登録がありません</td></tr>')
-            continue
-        crown = ' top' if best and (jp, name, score) == best else ''
-        tr += (f'<tr class="{crown.strip()}"><td class="c">{html.escape(jp)}</td>'
-               f'<td class="n">{html.escape(str(name))}</td>'
-               f'<td class="s">{score:,}</td></tr>')
+    def table_rows(rs):
+        scored = [r for r in rs if r[2] is not None]
+        best = max(scored, key=lambda r: r[2]) if scored else None
+        out = ''
+        for jp, name, score in rs:
+            if score is None:
+                out += (f'<tr class="none"><td class="c">{html.escape(jp)}</td>'
+                        f'<td class="n" colspan="2">まだ登録がありません</td></tr>')
+                continue
+            crown = ' top' if best and (jp, name, score) == best else ''
+            out += (f'<tr class="{crown.strip()}"><td class="c">{html.escape(jp)}</td>'
+                    f'<td class="n">{html.escape(str(name))}</td>'
+                    f'<td class="s">{score:,}</td></tr>')
+        return out
+    tr = table_rows(rows); jtr = table_rows(jrows)
 
     doc = f'''<!doctype html><html lang="ja"><head><meta charset="utf-8"><style>
 *{{margin:0;padding:0;box-sizing:border-box}}
@@ -109,7 +118,10 @@ h1{{color:#fff;font-size:52px;font-weight:800;letter-spacing:.01em}}
 h1 b{{color:#FFD400}}
 .sub{{color:#9B96A6;font-size:26px;font-weight:600;margin-top:10px}}
 table{{width:100%;border-collapse:collapse;margin-top:30px}}
-td{{padding:15px 0;border-bottom:1px solid #2C2A34;font-variant-numeric:tabular-nums}}
+td{{padding:13px 0;border-bottom:1px solid #2C2A34;font-variant-numeric:tabular-nums}}
+h2{{color:#fff;font-size:36px;font-weight:800;margin-top:34px}}
+h2 b{{color:#FFD400}}
+h2 small{{color:#9B96A6;font-size:22px;font-weight:600;margin-left:14px}}
 .c{{color:#fff;font-size:33px;font-weight:700;width:38%}}
 .n{{color:#CFC9DA;font-size:30px;font-weight:600}}
 .s{{color:#fff;font-size:34px;font-weight:800;text-align:right;width:24%}}
@@ -126,10 +138,12 @@ tr.none .c{{color:#6E687C}}
   <h1>CHARAMARL <b>RUN</b></h1>
   <div class="sub">{html.escape(title)}　{week_label(week)}</div>
   <table>{tr}</table>
+  <h2>JUNKeeeeS <b>RUN</b><small>FES会場の記録も入ります</small></h2>
+  <table>{jtr}</table>
 </div>
 <div class="foot">
   <div class="m">月曜0時にリセット。今週の1位はまだ空いています</div>
-  <div class="u">charamarl.com/run.html</div>
+  <div class="u">charamarl.com/run.html ・ /run-junkeees/</div>
 </div>
 </body></html>'''
 
@@ -144,7 +158,7 @@ tr.none .c{{color:#6E687C}}
     Image.open(base + '.png').convert('RGB').save(base + '.jpg', quality=92, optimize=True)
     os.remove(base + '.png'); os.remove(tmp)
     print(f'{base}.jpg')
-    for jp, name, score in rows:
+    for jp, name, score in rows + [('— JUNKeeeeS —', None, None)] + jrows:
         print(f'  {jp:<12}{(name or "—"):<16}{("" if score is None else f"{score:,}"):>9}')
 
 
