@@ -105,6 +105,45 @@ module.exports = async (req, res) => {
       if (q.fes !== undefined) {             // JUNKeeeeS FES 会場ランキング(4体共通・pid単位のベスト)。GET /api/run-score?char=JUNK_AGERU&fes=1
         return res.status(200).json(await fesBoard(PID_RE.test(String(q.pid || '')) ? String(q.pid) : null));
       }
+      if (q.audit !== undefined) {           // 管理用: 監査。?audit=1&name=<名前> または &pid=<pid> → 全キャラのベスト・登録時刻・週間ベスト(端末IDは短い符号にして返す)
+        if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
+        const byName = String(q.name || ''), byPid = PID_RE.test(String(q.pid || '')) ? String(q.pid) : null;
+        if (!byName && !byPid) return res.status(400).json({ error: 'name or pid' });
+        const tag = pid => 'dev-' + crypto.createHash('sha256').update('audit:' + pid).digest('hex').slice(0, 6);
+        const weeks = []; for (let i = 0; i < 9; i++) weeks.push(weekKey(new Date(Date.now() - i * 7 * 864e5)));
+        const rows = [];
+        for (const c of ALLOWED_CHARS) {
+          const raw = await redis('ZRANGE', `run:rank:${c}`, 0, -1, 'WITHSCORES');
+          const pids = []; for (let i = 0; i < (raw || []).length; i += 2) pids.push({ pid: raw[i], score: Number(raw[i + 1]) });
+          const cand = byPid ? pids.filter(x => x.pid === byPid) : pids;
+          if (!cand.length) continue;
+          const hs = await pipeline(cand.map(x => ['HGETALL', `run:player:${c}:${x.pid}`]));
+          cand.forEach((x, i) => {
+            const h = {}; const a = hs[i] || []; for (let k = 0; k < a.length; k += 2) h[a[k]] = a[k + 1];
+            if (byName && h.name !== byName) return;
+            rows.push({ char: c, dev: tag(x.pid), name: h.name || '', score: x.score, at: h.at ? new Date(Number(h.at) + 9 * 3600e3).toISOString().replace('T', ' ').slice(0, 19) + ' JST' : null, owner: h.owner === '1', oscore: h.oscore ? Number(h.oscore) : null, pid: x.pid });
+          });
+        }
+        const wk = rows.length ? await pipeline(rows.flatMap(r => weeks.map(w => ['ZSCORE', `run:rank:${r.char}:w:${w}`, r.pid]))) : [];
+        rows.forEach((r, i) => { r.weeks = {}; weeks.forEach((w, j) => { const v = wk[i * weeks.length + j]; if (v !== null && v !== undefined) r.weeks[w] = Number(v); }); delete r.pid; });
+        const devs = [...new Set(rows.map(r => r.dev))];
+        return res.status(200).json({ query: byName ? { name: byName } : { pid: 'given' }, devices: devs.length, rows });
+      }
+      if (q.week !== undefined && q.all !== undefined) {   // 管理用: 指定週を全キャラ横断で名前ごとに合算(各キャラのその週のベストの合計)。?week=YYYY-MM-DD&all=1 / week=last
+        if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
+        let wk = String(q.week); if (wk === 'last') wk = weekKey(new Date(Date.now() - 7 * 864e5));
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(wk)) return res.status(400).json({ error: 'bad week' });
+        const agg = {};
+        for (const c of ALLOWED_CHARS) {
+          const raw = await redis('ZRANGE', `run:rank:${c}:w:${wk}`, 0, -1, 'WITHSCORES');
+          const pids = []; for (let i = 0; i < (raw || []).length; i += 2) pids.push({ pid: raw[i], score: Number(raw[i + 1]) });
+          if (!pids.length) continue;
+          const names = await pipeline(pids.map(x => ['HGET', `run:player:${c}:${x.pid}`, 'name']));
+          pids.forEach((x, i) => { const nm = names[i] || '???'; const a = agg[nm] || (agg[nm] = { name: nm, total: 0, chars: {}, devs: new Set() }); a.total += x.score; a.chars[c] = Math.max(a.chars[c] || 0, x.score); a.devs.add(x.pid); });
+        }
+        const list = Object.values(agg).map(a => ({ name: a.name, total: a.total, chars: a.chars, devices: a.devs.size })).sort((x, y) => y.total - x.total);
+        return res.status(200).json({ week: wk, players: list.length, top: list.slice(0, Number(q.n) || 10) });
+      }
       if (q.stats !== undefined) {           // 管理用: 日別のプレイ数・ゲームオーバー数(直近14日)
         if (!(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
         const days = []; const d = new Date();
