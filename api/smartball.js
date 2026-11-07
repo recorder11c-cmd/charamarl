@@ -26,6 +26,18 @@ function pub(rec){ const { promo_id, ...o } = rec; return o; }   // promo_id は
 
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
+  if (req.method === 'GET') {
+    // 管理用: GET /api/smartball?summary=1 (X-Admin-Key) → 今月/先月の発行枚数と直近のログ(端末ID・IPは出さない)
+    const { isAdminReq } = require('./_lib/admin.js');
+    if ((req.query || {}).summary === undefined || !(await isAdminReq(req))) return res.status(403).json({ error: 'forbidden' });
+    try {
+      const now = new Date(Date.now() + 9 * 3600e3), m0 = now.toISOString().slice(0, 7);
+      const prev = new Date(now); prev.setUTCDate(1); prev.setUTCMonth(prev.getUTCMonth() - 1); const m1 = prev.toISOString().slice(0, 7);
+      const [c0, c1, raw] = await Promise.all([redis('GET', `smb:cp:month:${m0}`), redis('GET', `smb:cp:month:${m1}`), redis('LRANGE', 'smb:cp:log', '0', '99')]);
+      const log = (raw || []).map(x => { try { const j = JSON.parse(x); return { ts: new Date(j.ts + 9 * 3600e3).toISOString().replace('T', ' ').slice(0, 16) + ' JST', level: j.level || 3, amount_off: j.amount_off, code: j.code, upgraded: !!j.upgraded, expires: j.expires }; } catch (_) { return null; } }).filter(Boolean);
+      return res.status(200).json({ month: { [m0]: Number(c0) || 0, [m1]: Number(c1) || 0 }, month_max: MONTH_MAX, log });
+    } catch (e) { return serverError(res, e, 'smartball.js'); }
+  }
   if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
   let b = req.body || {}; if (typeof b === 'string') { try { b = JSON.parse(b); } catch (_) { b = {}; } }
   if (b.action !== 'zorome') return res.status(400).json({ error: 'bad action' });
