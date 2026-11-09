@@ -73,6 +73,11 @@ NOTES = [
          wide='自分が欲しい<br>怪獣を作りたい',
          works=['ガングリアン', 'ガングリゴン', 'サウスブルーサンダー', 'レッドサンダー'],
          portrait=True),   # 本人のフォーム回答の言葉をそのままタイトルに
+    dict(no='09', artist='ちゅい', sub='う〜ほ〜',
+         title='ここから全てが<br>始まるというのが<br>わくわくする',
+         wide='ここから全てが<br>始まるというのが<br>わくわくする',
+         works=['う〜ほ〜（UFOO）'],
+         contain=True),   # 本人のフォーム回答（思い入れの1枚）の言葉。作品は1点（正方形）
 ]
 
 TPL = '''<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
