@@ -9,9 +9,9 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CHARAMARL">
 <meta property="og:title" content="CHARAMARL — キャラクターたちが集まる小さな市場">
-<meta property="og:description" content="眺めて、見つけて、♥で応援できるボード型の作品ギャラリー。39組のアーティストが参加中。遊べて、買えます。">
+<meta property="og:description" content="眺めて、見つけて、♥で応援できるボード型の作品ギャラリー。41組のアーティストが参加中。遊べて、買えます。">
 <meta property="og:url" content="https://charamarl.com/">
-<meta property="og:image" content="https://charamarl.com/img/og.png">
+<meta property="og:image" content="https://charamarl.com/img/og.png?v=20261118">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="/site.webmanifest">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
@@ -149,6 +149,8 @@
   .artist-social a:hover{background:var(--purple);color:#fff;transform:translateY(-2px);}
   .btn-follow{display:inline-flex;align-items:center;gap:6px;background:var(--black);color:#fff;border:none;border-radius:24px;padding:11px 28px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;transition:.2s;}
   .btn-follow:hover{background:var(--purple);transform:translateY(-2px);}
+  .btn-follow.btn-share{background:#fff;color:var(--black);box-shadow:inset 0 0 0 1.5px var(--line);padding:11px 20px;margin-left:8px;}
+  .btn-follow.btn-share:hover{background:var(--purple);color:#fff;box-shadow:none;}
   .artist-works{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
   .artist-works .w{aspect-ratio:1;border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;position:relative;}
   .artist-works .w img{width:86%;height:86%;object-fit:contain;}
@@ -1046,11 +1048,20 @@
         <div class="artist-role">${esc(a.role)}</div>
         <p class="artist-bio">${esc(a.bio)}</p>
         <div class="artist-social">${soc}</div>
-        <a class="btn-follow" href="${esc(primary)}" target="_blank" rel="noopener">＋ フォローする</a>
+        <a class="btn-follow" href="${esc(primary)}" target="_blank" rel="noopener">＋ フォローする</a><button class="btn-follow btn-share" id="faShare" type="button">🚀 シェア</button>
       </div>
       <div class="artist-works">${works}</div>`;
   }
   renderArtistCard();
+  // 注目アーティストのシェア。シェア用ページ（/a/<符号>.html・tools/build_seo.py が作る）があればそちらを貼る
+  //（貼ったときに作家さんの作品が画像で出る）。まだ無い作家は、作家ページのURLを貼る
+  const cmArtistSlug=function(s){var h=0x811c9dc5,b=new TextEncoder().encode(String(s).trim());for(var i=0;i<b.length;i++){h=Math.imul(h^b[i],0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);};
+  document.getElementById('artistCard').addEventListener('click',e=>{
+    if(!e.target.closest('#faShare')||!ARTIST)return;
+    const name=ARTIST.name, sl=cmArtistSlug(name), fb='https://charamarl.com/artist.html?a='+encodeURIComponent(name);
+    if(window.cmEvent)cmEvent('share_featured_artist',{artist:name});
+    fetch('/a/'+sl+'.html',{method:'HEAD'}).then(r=>r.ok?'https://charamarl.com/a/'+sl+'.html':fb).catch(()=>fb).then(u=>openShare(name+' の作品',u));
+  });
 
   const FEATURED = [
     { id:'kagechiyo_hoodie', price:14800, name:'メカニャンパーカー', creator:'カゲチヨ', desc:'カゲチヨさんのメカニャンをまとった、フルグラフィックパーカー。前面から背面まで全面プリントの一点物のような一着です。受注生産・Mワンサイズ。', color:'flat', page:'./characters/kagechiyo-hoodie.html', drop:'メカニャンパーカー', photos:true },
@@ -1201,6 +1212,18 @@
 
   // 通知ベル（サイトのお知らせ・最新未読は赤ドット）
   const NEWS=[
+    {d:'2026-11-18',t:'🚀 作家ページのリンクをXなどに貼ると、その作家さんの作品が画像で出るようになりました。「今日の注目アーティスト」にもシェアボタンが付いています',href:'#artist'},
+    {d:'2026-11-18',t:'🌟 「今日の注目アーティスト」が日替わりになりました。参加している作家さん全員が、1日1組ずつ順番に登場します',href:'#artist'},
+    {d:'2026-11-18',t:'📌 トップページからピンズ（丸25mm・12種）へ行けるようになりました。グッズのタブと、中段の大きな枠にあります',href:'./characters/pins.html'},
+    {d:'2026-11-11',t:'🎮 CHARAMARL RUN に PUTTI と MOSSUN が加わりました。走れるキャラクターは12体です',href:'./run.html'},
+    {d:'2026-10-24',t:'📱 アクキーとピンズの台紙にスマホをかざすと、キャラクターがとびだすARが付いています。台紙のうらのQRからどうぞ',href:'./ar/'},
+    {d:'2026-10-19',t:'🎱 ピンズスマートボール公開。玉を打って、落ちた穴のピンズをあつめるゲームです。ゾロ目が出ると、4個セットに使えるクーポンがもらえます',href:'./smartball/'},
+    {d:'2026-10-19',t:'🎨 あめいメアさんの「アルとエル」が COLOR TAP に登場。タップで6色に変わります',href:'./tap/arueru.html'},
+    {d:'2026-10-05',t:'🎮 CHARAMARL RUN に CHARA MODE。★を取るとCOMBO・FEVERが始まり、2個目で二段ジャンプが使えます',href:'./run.html'},
+    {d:'2026-10-03',t:'↗ 作品から、作家さんの活動場所（SNSやショップ）へ行けるボタンを付けました。作品カードの作家名を押すと、作家ページが開きます',href:'#discover'},
+    {d:'2026-09-30',t:'🎮 CHARAMARL RUN の結果を、スコアカードの画像つきでシェアできるようになりました',href:'./run.html'},
+    {d:'2026-09-28',t:'📦 ピンズも受注生産になりました（毎月末締め・翌月中旬ごろのお届け）',href:'./characters/pins.html'},
+    {d:'2026-09-23',t:'🎨 PHAGYさんの「MOJA」が COLOR TAP に登場しました',href:'./tap/moja.html'},
     {d:'2026-09-21',t:'🔑 アクリルキーホルダーの一覧ページができました。全11種を1枚で見比べられます。裏のNFCタグでCHARAMARL RUNの★オーナーモードも使えます',href:'./characters/keyrings.html'},
     {d:'2026-09-18',t:'📌 ピンズ発売。丸25mm・12種の絵柄から選べます。4個セットは作家さんをまたいで混ぜられます',href:'./characters/pins.html'},
     {d:'2026-09-18',t:'🎮 CHARAMARL RUN 公開。アクキーになったキャラ10体で走るゲーム。キャラごとに今週のランキングがあります',href:'./run.html'},

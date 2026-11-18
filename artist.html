@@ -288,8 +288,20 @@
     });
 
     var xa=document.getElementById('shX');
-    if(xa) xa.href='https://twitter.com/intent/tweet?text='+encodeURIComponent(shareText)
-      +'&url='+encodeURIComponent(shareUrl)+'&hashtags=CHARAMARL';
+    var setX=function(){ if(xa) xa.href='https://twitter.com/intent/tweet?text='+encodeURIComponent(shareText)
+      +'&url='+encodeURIComponent(shareUrl)+'&hashtags=CHARAMARL'; };
+    setX();
+    // シェア用ページ（/a/<符号>.html）があれば、そちらを貼る。Xなどに貼ったとき、この作家さんの作品が画像で出る
+    //（このページは中身をJSで入れるので、そのまま貼ると画像が出ない）。開くとこのページへ移る。
+    // 符号は tools/build_seo.py の slug() と同じ計算。まだページが無い作家は、これまでどおりのURLを貼る
+    var cmArtistSlug=function(s){var h=0x811c9dc5,b=new TextEncoder().encode(String(s).trim());for(var i=0;i<b.length;i++){h=Math.imul(h^b[i],0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);};
+    var sl=cmArtistSlug(name);
+    fetch('/a/'+sl+'.html',{method:'HEAD'}).then(function(r){
+      if(!r.ok) return;
+      pageUrl='https://charamarl.com/a/'+sl+'.html';
+      shareUrl=pageUrl+'?utm_source=x&utm_medium=social&utm_campaign=artist_page&utm_content=artist';
+      setX();
+    }).catch(function(){});
     var cp=document.getElementById('shCopy');
     if(cp) cp.addEventListener('click',function(){
       var done=function(){cp.textContent='✓ コピーしました';cp.classList.add('done');
