@@ -46,7 +46,9 @@
   .noti{position:relative;display:flex;align-items:center;}
   .noti-btn{background:none;border:none;font-family:inherit;position:relative;padding:4px;}
   .noti-dot{position:absolute;top:2px;right:0;width:9px;height:9px;border-radius:50%;background:#e0245e;border:2px solid #fff;}
-  .noti-panel{position:absolute;right:-8px;top:calc(100% + 12px);width:300px;max-width:calc(100vw - 24px);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 34px rgba(0,0,0,.14);padding:8px;z-index:60;}
+  .noti-panel{position:absolute;right:-8px;top:calc(100% + 12px);width:300px;max-width:calc(100vw - 24px);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 34px rgba(0,0,0,.14);padding:8px;z-index:60;max-height:calc(100vh - 90px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  /* スマホ: ベルの位置から左へ300px出すと画面の外にはみ出して左端が切れる。画面の幅に合わせて出す */
+  @media(max-width:560px){ .noti-panel{position:fixed;left:12px;right:12px;top:66px;width:auto;max-width:none;} }
   .noti-head{font-size:11px;font-weight:900;letter-spacing:.1em;color:var(--muted);padding:8px 10px 6px;}
   .noti-item{display:block;text-decoration:none;color:var(--text);padding:9px 10px;border-radius:11px;}
   .noti-item:hover{background:#f6f6f6;}
