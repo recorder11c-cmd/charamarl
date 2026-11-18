@@ -859,7 +859,8 @@
 <script>
   // ===== HERO カルーセル =====
   // ===== 注目アーティスト設定（tools/artist-form.html で生成したJSONをここに貼り替え）=====
-  // 週替わりで自動ローテーション（参加アーティストは全員ここに載る）
+  // 週替わりで自動ローテーション。下の組は紹介文つき。ここに無い作家も、ギャラリーの掲載作品から
+  // カードを自動で作って順番に出す（全員が回る。作家が増えても、ここに足さなくてよい）
   const FEATURED_ARTISTS = [
     {
       name: "DinoRenny",
@@ -950,7 +951,52 @@
       moreUrl: "#discover"
     },
   ];
-  const ARTIST = FEATURED_ARTISTS[Math.floor(Date.now()/(7*86400*1000)) % FEATURED_ARTISTS.length];
+  // 入れ替えは毎週 木曜 9:00（日本時間）。順番は「上の組 → それ以外の作家を参加順 → 先頭に戻る」。
+  const FA_WEEK = Math.floor(Date.now()/(7*86400*1000));
+  const FA_START = { week: 2967, pos: 7 };   // 2026-11-12 の週 = 8番目（それまでの順番を引き継ぐ）
+  // 週ごとに1つ進め、その週の頭にいた組数で折り返す（途中で作家が増えても、その週の人は変わらない）
+  function pickFeatured(order){
+    let p = FA_START.pos;
+    for(let w = FA_START.week+1; w <= FA_WEEK; w++){
+      p++;
+      if(p >= order.filter(a => (a.joinWeek||0) < w).length) p = 0;
+    }
+    return order[p] || order[0];
+  }
+  // 作家が登録しているリンク（ギャラリーの artists）を、カードのSNS欄の形にする
+  function homeSocial(name, d){
+    const home = ((d.artists||{})[String(name).toLowerCase()]||{}).home || '';
+    const kind = /\/\/(www\.)?(x|twitter)\.com\//.test(home) ? 'x' : /instagram\.com\//.test(home) ? 'instagram' : 'web';
+    return home ? { [kind]: home } : {};
+  }
+  // 紹介文の無い作家のカード（掲載作品・作家のリンクだけで組む。作風の説明は書かない）
+  function autoArtist(name, joinedAt, d){
+    const mine = d.list.filter(x => x.artist === name);
+    const CAT = { CHARACTER:'キャラクター', ARTWORK:'アートワーク', PRODUCT:'グッズ', MAKING:'制作風景', EVENT:'イベント' };
+    const cats = [...new Set(mine.map(m => CAT[m.cat]).filter(Boolean))];
+    const titles = [...new Set(mine.map(m => m.title).filter(Boolean))].slice(0,3);
+    const rest = mine.length - titles.length;
+    return { name, joinWeek: Math.floor(joinedAt/(7*86400*1000)), role: cats.join(' / '),
+      bio: '掲載中の作品：' + titles.map(t => '「'+(t.length>20 ? t.slice(0,20)+'…' : t)+'」').join('') + (rest>0 ? ' ほか'+rest+'点' : ''),
+      social: homeSocial(name, d), worksFrom: 'gallery',
+      moreUrl: './artist.html?a=' + encodeURIComponent(name) };
+  }
+  function featuredFromGallery(d){
+    const hand = new Set(FEATURED_ARTISTS.map(a => a.name)), first = {};
+    d.list.forEach(x => {
+      if(!x.artist || x.artist === 'CHARAMARL' || hand.has(x.artist)) return;
+      const t = Number(x.publishAt) || Number(x.ts) || 0;
+      if(!(x.artist in first) || t < first[x.artist]) first[x.artist] = t;
+    });
+    const autos = Object.keys(first).sort((a,b) => first[a]-first[b] || (a<b?-1:1)).map(n => autoArtist(n, first[n], d));
+    return pickFeatured(FEATURED_ARTISTS.concat(autos));
+  }
+  // 読み込み直後: 上の組の番ならすぐ出す。それ以外は、今週いちど出したカードがあればそれを出し、無ければギャラリーの読み込みを待つ
+  const FA_POS0 = FA_START.pos + (FA_WEEK - FA_START.week);
+  let ARTIST = (FA_POS0 >= 0 && FA_POS0 < FEATURED_ARTISTS.length) ? FEATURED_ARTISTS[FA_POS0] : null;
+  if(!ARTIST){ try{ const c = JSON.parse(localStorage.getItem('cm_featured')||'null'); if(c && c.week === FA_WEEK && c.artist && c.artist.name) ARTIST = c.artist; }catch(e){} }
+  // ギャラリーが読めなかったとき: 上の組だけで回す
+  function featuredFallback(){ if(!ARTIST){ ARTIST = FEATURED_ARTISTS[FA_WEEK % FEATURED_ARTISTS.length]; renderArtistCard(); } }
   // シンプルな単色SVGアイコン
   const SOCIAL_ICONS = {
     x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.3 8.3L23.3 22h-6.8l-5.3-6.9L4.9 22H1.8l7.8-8.9L.9 2h6.9l4.8 6.4L18.9 2Zm-1.2 18h1.7L7.4 3.8H5.6L17.7 20Z"/></svg>',
@@ -959,6 +1005,7 @@
     web:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.5 2.6 15.5 0 18M12 3c-2.6 2.5-2.6 15.5 0 18"/></svg>'
   };
   function renderArtistCard(){
+    if(!ARTIST){ document.getElementById('artistCard').innerHTML='<div style="grid-column:1/-1;min-height:170px;"></div>'; return; }
     const a=ARTIST, esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     const label={x:'X',instagram:'Instagram',music:'TikTok',web:'Web'};
     const soc=['x','instagram','music','web']
@@ -968,7 +1015,7 @@
     const shown=(a.works||[]).slice(0,3);
     const total=[...document.querySelectorAll('#discover .pin .pin-sub')].filter(el=>el.textContent.trim()===a.name).length;
     const moreCount=Math.max(total-shown.length,0);
-    const inPage=a.moreUrl&&a.moreUrl.startsWith('#');
+    const inPage=a.moreUrl&&(a.moreUrl.startsWith('#')||a.moreUrl.startsWith('./'));
     const works=shown.map(w=>`<div class="w"><img src="${esc(w)}" alt=""></div>`).join('')
       + (a.moreUrl&&moreCount>0?`<a class="w more" href="${esc(a.moreUrl)}"${inPage?'':' target="_blank" rel="noopener"'} title="ほかの作品を見る">+${moreCount}</a>`:'');
     const primary=(a.social&&(a.social.x||a.social.instagram||a.social.music||a.social.web))||'#';
@@ -1623,7 +1670,7 @@
   }
   fetch('/api/gallery').then(r=>r.ok?r.json():{list:[]}).then(d=>{
     window.ARTISTS=d.artists||{}; // 作家のホームリンク(キー=作家名の小文字)
-    if(!d.list||!d.list.length){openDeepLink();return;}
+    if(!d.list||!d.list.length){featuredFallback();openDeepLink();return;}
     galleryList=d.list;
     renderRanking();          // 候補が揃ったので人気順を出し直す
     renderCtaChars();         // CTAの作品もギャラリーから
@@ -1637,7 +1684,10 @@
     decoratePins();
     applyFilters();
     openDeepLink();
-    // 注目アーティストカードを再描画（投稿作品でプロフィールを補完し「+N」も再計算）
+    // 注目アーティストを全作家から選び直してカードを再描画（投稿作品でプロフィールを補完し「+N」も再計算）
+    try{ ARTIST=featuredFromGallery(d)||ARTIST; }catch(e){}
+    featuredFallback();
+    if(!ARTIST.social||!Object.keys(ARTIST.social).length)ARTIST.social=homeSocial(ARTIST.name,d);  // リンク未記入の組は、作家の登録リンクで補う
     if(ARTIST.worksFrom==='gallery'){
       const mine=d.list.filter(x=>x.artist===ARTIST.name);
       if(mine.length){
@@ -1646,7 +1696,8 @@
       }
     }
     renderArtistCard();
-  }).catch(()=>{});
+    try{ localStorage.setItem('cm_featured', JSON.stringify({week:FA_WEEK, artist:ARTIST})); }catch(e){}
+  }).catch(()=>{ featuredFallback(); });
 
   // ===== TRENDING 人気キャラクターランキング =====
   // 候補は固定しない。掲載作品ぜんぶ＋グッズ化キャラの♥を集めて上位10件を出す。
