@@ -614,7 +614,7 @@
 <!-- TRENDING -->
 <!-- FEATURED ARTIST -->
 <section class="blk" id="artist">
-  <div class="sec-head"><div><div class="sec-eyebrow">FEATURED ARTIST</div><h2 class="sec-title">今週の注目アーティスト</h2></div></div>
+  <div class="sec-head"><div><div class="sec-eyebrow">FEATURED ARTIST</div><h2 class="sec-title">今日の注目アーティスト</h2></div></div>
   <div class="artist-card" id="artistCard"></div>
 </section>
 
@@ -859,7 +859,7 @@
 <script>
   // ===== HERO カルーセル =====
   // ===== 注目アーティスト設定（tools/artist-form.html で生成したJSONをここに貼り替え）=====
-  // 週替わりで自動ローテーション。下の組は紹介文つき。ここに無い作家も、ギャラリーの掲載作品から
+  // 日替わりで自動ローテーション。下の組は紹介文つき。ここに無い作家も、ギャラリーの掲載作品から
   // カードを自動で作って順番に出す（全員が回る。作家が増えても、ここに足さなくてよい）
   const FEATURED_ARTISTS = [
     {
@@ -951,17 +951,35 @@
       moreUrl: "#discover"
     },
   ];
-  // 入れ替えは毎週 木曜 9:00（日本時間）。順番は「上の組 → それ以外の作家を参加順 → 先頭に戻る」。
-  const FA_WEEK = Math.floor(Date.now()/(7*86400*1000));
-  const FA_START = { week: 2967, pos: 7 };   // 2026-11-12 の週 = 8番目（それまでの順番を引き継ぐ）
-  // 週ごとに1つ進め、その週の頭にいた組数で折り返す（途中で作家が増えても、その週の人は変わらない）
-  function pickFeatured(order){
-    let p = FA_START.pos;
-    for(let w = FA_START.week+1; w <= FA_WEEK; w++){
-      p++;
-      if(p >= order.filter(a => (a.joinWeek||0) < w).length) p = 0;
+  // 入れ替えは毎日 0:00（日本時間）。全作家を1巡ごとに並べ替えて、1日1組ずつ出す。
+  // ただのくじ引きではなく「並べ替えた順に全員」なので、1巡（＝作家の数だけの日数）のあいだ同じ人は出ず、出ない人もいない。
+  const FA_DAY = Math.floor((Date.now()+9*3600*1000)/86400000);   // 日本時間の日付の通し番号
+  const FA_DAY_START = FA_DAY*86400000 - 9*3600*1000;             // 今日の 0:00（日本時間）
+  function faShuffle(n, seed){   // 0..n-1 を seed で決まる順に並べ替える（誰が開いても同じ順）
+    let x = Math.imul(seed, 2654435761) >>> 0;
+    const rnd = () => { x = (x + 0x6D2B79F5) >>> 0; let t = x; t = Math.imul(t ^ (t>>>15), t | 1); t ^= t + Math.imul(t ^ (t>>>7), t | 61); return ((t ^ (t>>>14)) >>> 0) / 4294967296; };
+    const a = [...Array(n).keys()];
+    for(let i = n-1; i > 0; i--){ const j = Math.floor(rnd()*(i+1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+  const FA_EPOCH = 20775;   // 2026-11-18。この日から1巡目を数える
+  // 1巡 = その巡の初日にいた全作家を並べ替えた順。巡の途中で加わった作家は、その巡の最後に足す（次の巡まで待たせない）。
+  // 並びは「その日の0時より前に決まっていること」だけで決まるので、日中に作家が増えても今日の人は変わらない。
+  function pickFeatured(order, day){
+    if(day == null) day = FA_DAY;
+    const startOf = n => n*86400000 - 9*3600*1000;
+    let d0 = FA_EPOCH, prevLast = null;
+    for(let pass = 1; pass < 5000; pass++){
+      const base = order.filter(a => (a.joinedAt||0) < startOf(d0));
+      if(!base.length) return order[0];
+      const seq = faShuffle(base.length, pass).map(i => base[i]);
+      if(prevLast && seq.length > 1 && seq[0] === prevLast) [seq[0], seq[1]] = [seq[1], seq[0]];   // 巡の変わり目で2日続けて同じ人にしない
+      let end = d0 + seq.length;
+      order.forEach(a => { if((a.joinedAt||0) >= startOf(d0) && a.joinedAt < startOf(end)){ seq.push(a); end++; } });
+      if(day < end) return seq[Math.max(day - d0, 0)];
+      prevLast = seq[seq.length-1]; d0 = end;
     }
-    return order[p] || order[0];
+    return order[0];
   }
   // 作家が登録しているリンク（ギャラリーの artists）を、カードのSNS欄の形にする
   function homeSocial(name, d){
@@ -976,12 +994,12 @@
     const cats = [...new Set(mine.map(m => CAT[m.cat]).filter(Boolean))];
     const titles = [...new Set(mine.map(m => m.title).filter(Boolean))].slice(0,3);
     const rest = mine.length - titles.length;
-    return { name, joinWeek: Math.floor(joinedAt/(7*86400*1000)), role: cats.join(' / '),
+    return { name, joinedAt, role: cats.join(' / '),
       bio: '掲載中の作品：' + titles.map(t => '「'+(t.length>20 ? t.slice(0,20)+'…' : t)+'」').join('') + (rest>0 ? ' ほか'+rest+'点' : ''),
       social: homeSocial(name, d), worksFrom: 'gallery',
       moreUrl: './artist.html?a=' + encodeURIComponent(name) };
   }
-  function featuredFromGallery(d){
+  function featuredFromGallery(d, day){
     const hand = new Set(FEATURED_ARTISTS.map(a => a.name)), first = {};
     d.list.forEach(x => {
       if(!x.artist || x.artist === 'CHARAMARL' || hand.has(x.artist)) return;
@@ -989,14 +1007,13 @@
       if(!(x.artist in first) || t < first[x.artist]) first[x.artist] = t;
     });
     const autos = Object.keys(first).sort((a,b) => first[a]-first[b] || (a<b?-1:1)).map(n => autoArtist(n, first[n], d));
-    return pickFeatured(FEATURED_ARTISTS.concat(autos));
+    return pickFeatured(FEATURED_ARTISTS.concat(autos), day);
   }
-  // 読み込み直後: 上の組の番ならすぐ出す。それ以外は、今週いちど出したカードがあればそれを出し、無ければギャラリーの読み込みを待つ
-  const FA_POS0 = FA_START.pos + (FA_WEEK - FA_START.week);
-  let ARTIST = (FA_POS0 >= 0 && FA_POS0 < FEATURED_ARTISTS.length) ? FEATURED_ARTISTS[FA_POS0] : null;
-  if(!ARTIST){ try{ const c = JSON.parse(localStorage.getItem('cm_featured')||'null'); if(c && c.week === FA_WEEK && c.artist && c.artist.name) ARTIST = c.artist; }catch(e){} }
+  // 読み込み直後: 今日いちど出したカードがあればそれを出し、無ければギャラリーの読み込みを待つ（全作家の一覧はギャラリーにあるため）
+  let ARTIST = null;
+  try{ const c = JSON.parse(localStorage.getItem('cm_featured')||'null'); if(c && c.day === FA_DAY && c.artist && c.artist.name) ARTIST = c.artist; }catch(e){}
   // ギャラリーが読めなかったとき: 上の組だけで回す
-  function featuredFallback(){ if(!ARTIST){ ARTIST = FEATURED_ARTISTS[FA_WEEK % FEATURED_ARTISTS.length]; renderArtistCard(); } }
+  function featuredFallback(){ if(!ARTIST){ ARTIST = pickFeatured(FEATURED_ARTISTS); renderArtistCard(); } }
   // シンプルな単色SVGアイコン
   const SOCIAL_ICONS = {
     x:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.3 8.3L23.3 22h-6.8l-5.3-6.9L4.9 22H1.8l7.8-8.9L.9 2h6.9l4.8 6.4L18.9 2Zm-1.2 18h1.7L7.4 3.8H5.6L17.7 20Z"/></svg>',
@@ -1067,7 +1084,7 @@
     // 入口ごとのクリックを数える項目（ev）があるときだけ送る（2026-11-18 ピンズ）
     document.getElementById('heroShop').onclick=()=>{ if(f.ev&&window.cmEvent)cmEvent(f.ev,{from:'hero'}); };
     // 🔴 VIEW ARTIST は、いま表示しているキャラの作家ページへ（2026-10-08。以前は #artist 固定で、
-    //    ヒーローの作家とは別の「今週の注目アーティスト」へ飛ぶだけだった）。
+    //    ヒーローの作家とは別の「注目アーティスト」へ飛ぶだけだった）。
     //    ヒーローの creator と掲載名が違う作家だけ読み替える。
     const HERO_ARTIST_NAME={ 'MARU':'MARU_GMC' };
     document.getElementById('heroArtist').href='./artist.html?a='+encodeURIComponent(HERO_ARTIST_NAME[f.creator]||f.creator);
@@ -1696,7 +1713,7 @@
       }
     }
     renderArtistCard();
-    try{ localStorage.setItem('cm_featured', JSON.stringify({week:FA_WEEK, artist:ARTIST})); }catch(e){}
+    try{ localStorage.setItem('cm_featured', JSON.stringify({day:FA_DAY, artist:ARTIST})); }catch(e){}
   }).catch(()=>{ featuredFallback(); });
 
   // ===== TRENDING 人気キャラクターランキング =====
