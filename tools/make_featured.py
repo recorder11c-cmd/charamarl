@@ -48,6 +48,7 @@ HANDLES = {
     'みやもとさぶろう': 'chatoramesuneko', 'AKIRA': 'tkchan_official', 'ガングリアン': 'gangurien', 'あめいメア': 'amei_mea',
     'らすべっと': 'rassvet_oekaki', '海音': 'NK_kanon_', '恋するウツウツ': 'koiutuforchild', 'がんぐりお': 'gangxxlion',
     'theM.U.G': 'shitsugyou_otou',
+    'トゥインキィー（TWINKII）': 'twinkii_project',   # 11/19 このアカウントとDMでやり取り済み
 }
 
 
