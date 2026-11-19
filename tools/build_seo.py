@@ -29,6 +29,11 @@
     符号は作家名のFNV-1a（8桁）。artist.html / index.html の cmArtistSlug() と同じ計算。
     ⚠️ 作品が増えたら、このスクリプトを回すまで絵は古いまま（ページが無い作家は従来のURLでシェアされる）。
 
+■ 作品のシェア用ページ（2026-11-19）
+    g/<作品ID>.html         作品の🚀ボタンが貼るURL。OGPだけ持っていて、開くと /?g=<作品ID>（本編）へ移る。
+    img/og/g/<作品ID>_*.jpg  その作品1点を、切らずに収めた絵（1200×630）。
+    w/<id>.html（検索用の固有ページ）とは別物。w/ は検索から来た人が読むページなので移動させない。
+
 ■ 作らない理由があるもの
     ・ログイン後の画面（mypage/login/success/cancel/apply-admin）は noindex 相当なので入れない
     ・`characters/kagechiyo-acrylic.html` は委託分で未販売。noindex なので入れない
@@ -179,13 +184,17 @@ def og_image(name, picks, out):
     while size > 28 and d.textlength(name, font=ImageFont.truetype(FONT, size)) > 760:
         size -= 2
     f_name = ImageFont.truetype(FONT, size)
-    d.text((W - 44, 70), name, font=f_name, fill=(26, 26, 38), anchor='rm')
-    lab = ImageFont.truetype(FONT, 20)
-    d.text((W - 44 - d.textlength(name, font=f_name) - 18, 72), 'ARTIST', font=lab, fill=(255, 138, 0), anchor='rm')
+    if name:
+        d.text((W - 44, 70), name, font=f_name, fill=(26, 26, 38), anchor='rm')
+        lab = ImageFont.truetype(FONT, 20)
+        d.text((W - 44 - d.textlength(name, font=f_name) - 18, 72), 'ARTIST', font=lab, fill=(255, 138, 0), anchor='rm')
     # 下に作品を並べる（白い札の中に、絵の全体を収める。切らない）
     X0, X1, Y0, Y1, GAP, PAD = 40, 1160, 136, 596, 20, 14
     srcs = []
     for w in picks:
+        if not re.match(r'https?://', w['img']):   # 手元のファイル（商品写真など）
+            srcs.append(Image.open(w['img']).convert('RGBA'))
+            continue
         req = urllib.request.Request(w['img'], headers={'User-Agent': 'Mozilla/5.0'})
         srcs.append(Image.open(io.BytesIO(urllib.request.urlopen(req, timeout=60).read())).convert('RGBA'))
     n, ih = len(srcs), Y1 - Y0 - PAD * 2
@@ -201,11 +210,8 @@ def og_image(name, picks, out):
         x += tw + GAP
     im.save(out, 'JPEG', quality=88)
 
-def artist_page(name, n_works, img_url):
-    q = urllib.parse.quote(name, safe='')
-    dest = f'/artist.html?a={q}'
-    title = f'{name} の作品 — CHARAMARL'
-    desc = f'{name} さんの作品を CHARAMARL で見られます。♥で応援できて、作家さんのページやお店へそのまま行けます。'
+def share_page(dest, title, desc, og_url, img_url, link_text, og_type='website'):
+    """OGPだけ持っていて、開くと dest（サイト内のパス）へ移るページ。"""
     return f'''<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -215,9 +221,9 @@ def artist_page(name, n_works, img_url):
 <meta name="description" content="{esc(desc)}">
 <meta name="robots" content="noindex,follow">
 <link rel="canonical" href="{ROOT}{esc(dest)}">
-<meta property="og:type" content="profile">
+<meta property="og:type" content="{og_type}">
 <meta property="og:site_name" content="CHARAMARL">
-<meta property="og:url" content="{ROOT}/{A_DIR}/{slug(name)}.html">
+<meta property="og:url" content="{esc(og_url)}">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:image" content="{esc(img_url)}">
@@ -232,15 +238,58 @@ def artist_page(name, n_works, img_url):
     try{{var h=document.referrer?new URL(document.referrer).hostname:'';
       if(h&&h!=='charamarl.com')q+=(q?'&':'')+'utm_source='+encodeURIComponent(h)+'&utm_medium=referral';}}catch(e){{}}
   }}
-  location.replace(d+(q?'&'+q:''));
+  location.replace(d+(q?(d.indexOf('?')<0?'?':'&')+q:''));
 }})();
 </script>
 </head>
 <body style="font-family:sans-serif;background:#fffdf5;color:#1a1a26;text-align:center;padding:60px 20px;">
-<p><a href="{esc(dest)}" style="color:inherit;font-weight:bold;">{esc(name)} の作品を見る →</a></p>
+<p><a href="{esc(dest)}" style="color:inherit;font-weight:bold;">{esc(link_text)}</a></p>
 </body>
 </html>
 '''
+
+def artist_page(name, n_works, img_url):
+    q = urllib.parse.quote(name, safe='')
+    return share_page(f'/artist.html?a={q}', f'{name} の作品 — CHARAMARL',
+                      f'{name} さんの作品を CHARAMARL で見られます。♥で応援できて、作家さんのページやお店へそのまま行けます。',
+                      f'{ROOT}/{A_DIR}/{slug(name)}.html', img_url, f'{name} の作品を見る →', 'profile')
+
+G_DIR, G_IMG = 'g', 'img/og/g'
+
+def build_work_shares(ws, check):
+    import hashlib
+    os.makedirs(G_DIR, exist_ok=True); os.makedirs(G_IMG, exist_ok=True)
+    made = same = 0
+    keep_html, keep_img = set(), set()
+    for w in ws:
+        wid, t, a = w['id'], w.get('title') or '', (w.get('artist') or '').strip()
+        if not w.get('img') or not re.fullmatch(r'[A-Za-z0-9_-]+', wid):
+            continue
+        ver = hashlib.sha1(w['img'].encode()).hexdigest()[:6]
+        img = f'{wid}_{ver}.jpg'
+        keep_html.add(f'{wid}.html'); keep_img.add(img)
+        ip, hp = os.path.join(G_IMG, img), os.path.join(G_DIR, f'{wid}.html')
+        if not os.path.exists(ip) and not check:
+            og_image('' if a == 'CHARAMARL' else a, [w], ip)
+        desc = re.sub(r'\s+', ' ', (w.get('desc') or '')).strip()
+        desc = (desc[:110] + '…') if len(desc) > 110 else desc
+        if not desc:
+            desc = f'{a} さんの作品「{t}」。CHARAMARL で見られます。' if a and a != 'CHARAMARL' else f'{t} — CHARAMARL'
+        title = f'{t} — {a}｜CHARAMARL' if a and a != 'CHARAMARL' else f'{t}｜CHARAMARL'
+        body = share_page(f'/?g={wid}', title, desc, f'{ROOT}/{G_DIR}/{wid}.html', f'{ROOT}/{G_IMG}/{img}', f'{t} を見る →', 'article')
+        old = open(hp, encoding='utf-8').read() if os.path.exists(hp) else None
+        if old == body:
+            same += 1
+            continue
+        made += 1
+        if not check:
+            open(hp, 'w', encoding='utf-8').write(body)
+    gone = [os.path.join(G_DIR, f) for f in os.listdir(G_DIR) if f.endswith('.html') and f not in keep_html] \
+         + [os.path.join(G_IMG, f) for f in os.listdir(G_IMG) if f.endswith('.jpg') and f not in keep_img]
+    if not check:
+        for f in gone:
+            os.remove(f)
+    print(f'作品のシェア用ページ  新規/更新 {made} ／ 変更なし {same} ／ 削除 {len(gone)}')
 
 def build_artists(ws, check):
     import hashlib
@@ -338,6 +387,7 @@ def main():
             os.remove(os.path.join(OUTD, f))
 
     build_artists(ws, check)
+    build_work_shares(ws, check)
 
     sm = sitemap(ws, artists)
     n_urls = sm.count('<url>')

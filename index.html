@@ -1466,6 +1466,11 @@
   let shPayload={title:'CHARAMARL',url:'https://charamarl.com/'};
   function openShare(title,url){
     shPayload={title,url};
+    // 作品のシェア: シェア用ページ（/g/<作品ID>.html・tools/build_seo.py が作る）があれば、そちらを貼る。
+    // 貼ったときにその作品の絵が出る（/?g= のままだとサイト共通の1枚になる）。開くと /?g= へ移る
+    const gm=/^https:\/\/charamarl\.com\/\?g=([A-Za-z0-9_-]+)$/.exec(url);
+    if(gm){ const pl=shPayload, su='https://charamarl.com/g/'+gm[1]+'.html';
+      fetch('/g/'+gm[1]+'.html',{method:'HEAD'}).then(r=>{ if(r.ok&&shPayload===pl)pl.url=su; }).catch(()=>{}); }
     document.getElementById('shNative').style.display=navigator.share?'':'none';
     document.getElementById('shCopyLb').textContent='リンクをコピー';
     shareOverlay.classList.add('open');

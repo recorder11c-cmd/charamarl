@@ -24,7 +24,7 @@
     try{var h=document.referrer?new URL(document.referrer).hostname:'';
       if(h&&h!=='charamarl.com')q+=(q?'&':'')+'utm_source='+encodeURIComponent(h)+'&utm_medium=referral';}catch(e){}
   }
-  location.replace(d+(q?'&'+q:''));
+  location.replace(d+(q?(d.indexOf('?')<0?'?':'&')+q:''));
 })();
 </script>
 </head>
