@@ -13,6 +13,15 @@ const { put, del } = require('@vercel/blob');
 const { isAdminReq } = require('./_lib/admin.js');
 const { loadArtists } = require('./artist.js'); // 作家ごとのホームリンク（公開一覧に同梱）
 
+// 新しい投稿に付ける表示名。
+// 管理側で表示名義を直した作家（例: アカウント名は会社名・表示はキャラクター名）が自分で追加投稿すると、
+// アカウント名に戻って名前が2つに割れる。掲載中の作品がすべて同じ1つの表示名ならそれを引き継ぐ。
+// 複数の名義で載せているアカウント（代行登録など）は、これまでどおりアカウント名。
+function shownName(mine, accountName) {
+  const names = [...new Set(mine.filter(a => a.status === 'approved' && a.artist).map(a => String(a.artist).trim()))];
+  return names.length === 1 ? names[0] : accountName;
+}
+
 const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const MAX_IMG_BYTES = 3.5 * 1024 * 1024;
@@ -141,7 +150,7 @@ module.exports = async (req, res) => {
         id, title, desc, link, linkLabel,
         img: blob.url,
         cat: CATS.includes(b.cat) ? b.cat : 'ARTWORK',
-        artist: u.name, artistKey: u.key,
+        artist: shownName(mine, u.name), artistKey: u.key,
         aiFree: true, // 生成AI不使用の宣言済み
         status: 'pending', ts: Date.now(),
       };

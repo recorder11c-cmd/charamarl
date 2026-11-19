@@ -162,7 +162,7 @@ def artist_url(a, ctx):
 def tile(w, size=256):
     t, a = w.get('title') or '', (w.get('artist') or '').strip()
     return (f'<a class="t" href="/w/{esc(w["id"])}.html"><span class="ti"><img loading="lazy" src="{esc(thumb(w["img"], size))}" '
-            f'alt="{esc(t)}（{esc(a)}）"></span><span class="tt">{esc(t)}</span></a>')
+            f'alt="{esc(t if t == a else t + "（" + a + "）")}"></span><span class="tt">{esc(t)}</span></a>')
 
 def work_text(w, ctx):
     """作品ページの説明（検索結果に出る120〜200字）と、本文に置く紹介文。
@@ -172,7 +172,7 @@ def work_text(w, ctx):
     prods = [p for p in ctx['prods'] if p['artist'] == a]
     cat = CAT_JA.get(w.get('cat'), '作品')
     ours = a == 'CHARAMARL'
-    s1 = f'CHARAMARLの連載{cat}「{t}」。' if ours else f'{a}さんの{cat}「{t}」。'
+    s1 = f'CHARAMARLの連載{cat}「{t}」。' if ours else (f'{cat}「{t}」。' if t == a else f'{a}さんの{cat}「{t}」。')
     if mine:
         names = '」「'.join(cut(x.get('title') or '', 16) for x in mine[:2])
         s2 = (f'ほかに「{names}」など{len(mine)}本を掲載しています。' if ours else
@@ -200,10 +200,10 @@ def page(w, ctx):
     ours = a == 'CHARAMARL'
     meta, about = work_text(w, ctx)
     url = f'{ROOT}/w/{w["id"]}.html'
-    title = f'{t}｜CHARAMARL' if ours or not a else f'{t} — {a}｜CHARAMARL'
+    title = f'{t}｜CHARAMARL' if ours or not a or t == a else f'{t} — {a}｜CHARAMARL'
     if 'CHARAMARL' in t:
         title = t if ours or not a else f'{t} — {a}'
-    alt = f'{t}（{a}）' if a else t
+    alt = f'{t}（{a}）' if a and a != t else t
     au = artist_url(a, ctx)
     others = sorted([x for x in ctx['by'].get(a, []) if x['id'] != w['id'] and x.get('img')], key=lambda x: -when(x))[:3]
     prods = [p for p in ctx['prods'] if p['artist'] == a]
@@ -481,6 +481,8 @@ def build_artist_static(ctx, check):
 
 # ---- 作家のシェア用ページ ----
 A_DIR, A_IMG = 'a', 'img/og/a'
+# 表示名を変えた作家:  前の名前 → 今の名前
+RENAMED = {'株式会社トゥインキィープロジェクト': 'トゥインキィー（TWINKII）'}
 FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mplus900.ttf')
 
 def slug(name):
@@ -600,7 +602,7 @@ def build_work_shares(ws, check):
         desc = (desc[:110] + '…') if len(desc) > 110 else desc
         if not desc:
             desc = f'{a} さんの作品「{t}」。CHARAMARL で見られます。' if a and a != 'CHARAMARL' else f'{t} — CHARAMARL'
-        title = f'{t} — {a}｜CHARAMARL' if a and a != 'CHARAMARL' else f'{t}｜CHARAMARL'
+        title = f'{t} — {a}｜CHARAMARL' if a and a not in ('CHARAMARL', t) else f'{t}｜CHARAMARL'
         body = share_page(f'/?g={wid}', title, desc, f'{ROOT}/{G_DIR}/{wid}.html', f'{ROOT}/{G_IMG}/{img}', f'{t} を見る →', 'article', f'/w/{wid}.html')
         old = open(hp, encoding='utf-8').read() if os.path.exists(hp) else None
         if old == body:
@@ -651,6 +653,13 @@ def build_artists(ws, check, slugs_nice=None):
         made += 1
         if not check:
             open(hp, 'w', encoding='utf-8').write(body)
+    # 表示名を変えた作家。前の名前で貼られたシェア用リンクが切れないよう、前の符号のページも残す（中身は今の名前）
+    for was, now in RENAMED.items():
+        if now in by and slug(now) in slugs and f'{slug(now)}.html' in keep_html:
+            body = open(os.path.join(A_DIR, f'{slug(now)}.html'), encoding='utf-8').read() if not check else ''
+            keep_html.add(f'{slug(was)}.html')
+            if not check:
+                open(os.path.join(A_DIR, f'{slug(was)}.html'), 'w', encoding='utf-8').write(body)
     gone = [os.path.join(A_DIR, f) for f in os.listdir(A_DIR) if f.endswith('.html') and f not in keep_html] \
          + [os.path.join(A_IMG, f) for f in os.listdir(A_IMG) if f.endswith('.jpg') and f not in keep_img]
     if not check:
