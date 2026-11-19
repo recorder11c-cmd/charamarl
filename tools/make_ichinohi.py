@@ -16,7 +16,11 @@ CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 W, H = 1200, 1500
 API = 'https://charamarl.com/api/gallery'
 SKIP_CAT = ('INTERVIEW', 'EVENT')
-ROWS = {17: [5, 4, 4, 4], 16: [4, 4, 4, 4], 15: [5, 5, 5], 18: [5, 5, 4, 4], 19: [5, 5, 5, 4], 20: [5, 5, 5, 5]}
+ROWS = {17: [5, 4, 4, 4], 16: [4, 4, 4, 4], 15: [5, 5, 5], 18: [5, 5, 4, 4], 19: [5, 5, 5, 4], 20: [5, 5, 5, 5],
+        # 12点以下は3段・大きい枠（2026-11：新作が少ない月）
+        7: [3, 2, 2], 8: [3, 3, 2], 9: [3, 3, 3], 10: [4, 3, 3], 11: [4, 4, 3], 12: [4, 4, 4],
+        13: [5, 4, 4], 14: [5, 5, 4]}
+BIG_TW = 258  # 12点以下のときの枠の幅（4列で1200pxに収まる）
 
 TPL = '''<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
 @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&display=swap');
@@ -88,8 +92,8 @@ def main():
         raise SystemExit(f'{n}点：行の割り付けが未定義（ROWS に追加）')
     tmp = os.path.join(os.path.dirname(out), '.ichinohi_tmp')
     os.makedirs(tmp, exist_ok=True)
-    tw = 192
-    rot = [-2.2, 1.6, -1.2, 2.4, -1.8, 1.2]
+    tw = BIG_TW if n <= 12 else 192
+    rot =[-2.2, 1.6, -1.2, 2.4, -1.8, 1.2]
     html_rows, i = '', 0
     for r in rows:
         cells = ''
