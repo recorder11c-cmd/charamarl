@@ -13,9 +13,15 @@
 ■ 商品名・作家名・説明・写真
     トップページ（index.html）の FEATURED と商品タイルから読む。ここに無い商品は EXTRA に書く。
     価格は絵にも説明にも入れない（変えたとき古くなるため）。
+
+■ 検索向け（2026-11-19 追加）
+    <title> を「<商品名>｜CHARAMARL」にして、canonical と構造化データ（Product・パンくず）を同じ枠の中に入れる。
+    構造化データの価格は**そのページの PRICE をそのまま読む**（ここで決めない）。
+    ⚠️ 価格を変えたら、このスクリプトを回し直す（回さないと検索結果に古い価格が出る。tools/check_public.py が食い違いを止める）。
+    一覧の keyrings / pins には canonical だけ入れる。
     ⚠️ characters/kagechiyo-acrylic.html は未販売（noindex）なので入れない。
 """
-import os, re, sys, html
+import os, re, sys, html, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_seo
 
@@ -64,8 +70,27 @@ def main():
             print('とばす（noindex）', pid); continue
         img = f'{OUT}/{pid}.jpg'
         build_seo.og_image(creator, [{'img': photo}], img)
-        title = f'{name} — CHARAMARL'
+        title = f'{name}｜CHARAMARL'
+        price = re.search(r'\bPRICE = (\d+)', s)
+        shown = re.search(r'🛒 <b>¥([\d,]+)</b>', s)
+        assert price and shown and int(shown.group(1).replace(',', '')) == int(price.group(1)), f'{pid}: 表示の価格と PRICE が合いません'
+        url = f'{ROOT}/{page}'
+        box = re.search(r'📦[^\n]*', s)   # 「📦 受注生産」「📦 約2〜3週間でお届け…受注生産」「📦 在庫ありは即発送…」
+        made_to_order = bool(box) and '受注生産' in box.group(0) and '在庫あり' not in box.group(0)
+        ld = {'@context': 'https://schema.org', '@type': 'Product', 'name': name, 'image': f'{ROOT}/{img}',
+              'description': desc, 'brand': {'@type': 'Brand', 'name': 'CHARAMARL'},
+              'offers': {'@type': 'Offer', 'url': url, 'priceCurrency': 'JPY', 'price': price.group(1),
+                         'availability': 'https://schema.org/' + ('PreOrder' if made_to_order else 'InStock'),
+                         'itemCondition': 'https://schema.org/NewCondition'}}
+        crumbs = [('CHARAMARL', f'{ROOT}/')]
+        if 'アクリルキーホルダー' in name:
+            crumbs.append(('アクリルキーホルダー', f'{ROOT}/characters/keyrings.html'))
+        crumbs.append((name, url))
+        bc = {'@context': 'https://schema.org', '@type': 'BreadcrumbList',
+              'itemListElement': [{'@type': 'ListItem', 'position': i + 1, 'name': n_, 'item': u_} for i, (n_, u_) in enumerate(crumbs)]}
+        jl = lambda d: '<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False).replace('</', '<\\/') + '</script>\n'
         tags = (f'{MARK_A}\n'
+                f'<link rel="canonical" href="{url}">\n'
                 f'<meta name="description" content="{esc(desc)}">\n'
                 f'<meta property="og:type" content="product">\n'
                 f'<meta property="og:site_name" content="CHARAMARL">\n'
@@ -76,8 +101,13 @@ def main():
                 f'<meta property="og:image:width" content="1200">\n'
                 f'<meta property="og:image:height" content="630">\n'
                 f'<meta name="twitter:card" content="summary_large_image">\n'
+                + jl(ld) + jl(bc) +
                 f'{MARK_B}')
+        s = re.sub(r'<title>[^<]*</title>', lambda m: f'<title>{esc(title)}</title>', s, count=1)
         if MARK_A in s:
+            # 枠の外にある description（もともとページにあった分）はそのまま。枠の中には重ねない
+            if re.search(r'<meta name="description"', s[:s.index(MARK_A)] + s[s.index(MARK_B):s.index(MARK_B) + 3000]):
+                tags = tags.replace(f'<meta name="description" content="{esc(desc)}">\n', '')
             s = s[:s.index(MARK_A)] + tags + s[s.index(MARK_B) + len(MARK_B):]
         else:
             if re.search(r'<meta name="description"', s[:3000]):   # 既にあるなら description は重ねない
@@ -87,6 +117,14 @@ def main():
         open(page, 'w', encoding='utf-8').write(s)
         n += 1
         print('OK', pid, '|', name, '|', creator)
+    for f in ('keyrings', 'pins'):   # 一覧は canonical だけ
+        page = f'characters/{f}.html'
+        s = open(page, encoding='utf-8').read()
+        if 'rel="canonical"' not in s:
+            i = s.index('</title>') + len('</title>')
+            s = s[:i] + f'\n<link rel="canonical" href="{ROOT}/{page}">' + s[i:]
+            open(page, 'w', encoding='utf-8').write(s)
+            print('canonical', f)
     print(f'{n} ページに入れました')
 
 

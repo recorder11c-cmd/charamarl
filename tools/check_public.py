@@ -119,6 +119,13 @@ def main():
         spots = [('コメント', l, b) for l, b in comments(s, f)]
         if f.endswith('.html') and not f.startswith(NO_BODY_DIRS):
             spots += [('本文', l, b) for l, b in visible_text(s)]
+        if f.startswith('characters/') and f.endswith('.html'):
+            # 構造化データ（検索結果に出る価格）が、ページの PRICE と食い違っていないか。
+            # 価格を変えたあと tools/make_og_products.py を回し忘れると、検索に古い価格が出る（2026-11-19 追加）
+            pr, ld = re.search(r'\bPRICE = (\d+)', s), re.search(r'"priceCurrency": "JPY", "price": "(\d+)"', s)
+            if pr and ld and pr.group(1) != ld.group(1):
+                hits.append(('価格', f, s[:ld.start()].count('\n') + 1,
+                             f'構造化データ ¥{ld.group(1)} ≠ ページ ¥{pr.group(1)}。tools/make_og_products.py を回してください'))
         if f.endswith('.html'):
             for line, msg in script_syntax_errors(s):   # インラインscriptの構文(1か所壊れるとそのブロック全部が止まる・2026-10-24 図鑑が70分止まった)
                 hits.append(('JS構文', f, line, msg))

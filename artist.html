@@ -291,6 +291,13 @@
     var setX=function(){ if(xa) xa.href='https://twitter.com/intent/tweet?text='+encodeURIComponent(shareText)
       +'&url='+encodeURIComponent(shareUrl)+'&hashtags=CHARAMARL'; };
     setX();
+    // 検索用の固有ページ（/artist/<名前>.html）を canonical に指す。このページは全作家で同じHTMLなので、
+    // 検索エンジンには作家ごとの固有ページのほうを見てもらう。表は tools/build_seo.py が作る
+    fetch('/artist/slugs.json').then(function(r){return r.ok?r.json():null;}).then(function(m){
+      if(!m||!m[name]) return;
+      var l=document.createElement('link'); l.rel='canonical';
+      l.href='https://charamarl.com/artist/'+m[name]+'.html'; document.head.appendChild(l);
+    }).catch(function(){});
     // シェア用ページ（/a/<符号>.html）があれば、そちらを貼る。Xなどに貼ったとき、この作家さんの作品が画像で出る
     //（このページは中身をJSで入れるので、そのまま貼ると画像が出ない）。開くとこのページへ移る。
     // 符号は tools/build_seo.py の slug() と同じ計算。まだページが無い作家は、これまでどおりのURLを貼る

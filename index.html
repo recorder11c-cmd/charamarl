@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noai, noimageai">
-<title>CHARAMARL — キャラクターIPマーケットプレイス</title>
-<meta name="description" content="CHARAMARL（キャラマール）— キャラクターやアート作品が集まる小さな市場。眺めて、見つけて、♥で応援できるボード型の作品ギャラリー。">
+<title>CHARAMARL（キャラマール）｜オリジナルキャラクターグッズとアートのマーケットプレイス</title>
+<meta name="description" content="独立系クリエイターのオリジナルキャラクターグッズ（NFCアクリルキーホルダー・ピンズ・キャンバスアート）が買えて、アート作品を眺められる小さな市場。42組のアーティストが参加中。タップで遊んで、♥で応援して、作品から作家の活動場所へ行けます。掲載は無料・1点から作家登録もできます。">
+<link rel="canonical" href="https://charamarl.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CHARAMARL">
-<meta property="og:title" content="CHARAMARL — キャラクターたちが集まる小さな市場">
-<meta property="og:description" content="眺めて、見つけて、♥で応援できるボード型の作品ギャラリー。41組のアーティストが参加中。遊べて、買えます。">
+<meta property="og:title" content="CHARAMARL（キャラマール）｜オリジナルキャラクターグッズとアートのマーケットプレイス">
+<meta property="og:description" content="独立系クリエイターのオリジナルキャラクターグッズ（NFCアクリルキーホルダー・ピンズ・キャンバスアート）が買えて、アート作品を眺められる小さな市場。42組のアーティストが参加中。タップで遊んで、♥で応援して、作品から作家の活動場所へ行けます。掲載は無料・1点から作家登録もできます。">
 <meta property="og:url" content="https://charamarl.com/">
 <meta property="og:image" content="https://charamarl.com/img/og.png?v=20261118">
 <meta name="twitter:card" content="summary_large_image">
@@ -118,6 +119,7 @@
 
   /* SECTION COMMON */
   section.blk{max-width:1180px;margin:46px auto 0;padding:0 24px;}
+  .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;}
   .sec-eyebrow{font-size:12px;font-weight:900;letter-spacing:.14em;color:var(--orange);}
   .sec-title{font-size:clamp(17px,4.6vw,22px);font-weight:900;margin:4px 0 0;}
   .sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;}
@@ -389,6 +391,8 @@
 <script src="/js/products.js"></script>
 <script src="/js/protect.js"></script>
 <script src="/js/works_legacy.js"></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "CHARAMARL", "alternateName": "キャラマール", "url": "https://charamarl.com/", "logo": "https://charamarl.com/img/icon-512.png", "sameAs": ["https://x.com/charamarl", "https://www.instagram.com/charamarlinfo", "https://note.com/charamarl"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "CHARAMARL", "alternateName": "キャラマール", "url": "https://charamarl.com/"}</script>
 </head>
 <body>
 
@@ -422,6 +426,7 @@
     </div>
   </div>
 </header>
+<h1 class="vh">オリジナルキャラクターとアートが集まる、小さな市場 CHARAMARL</h1>
 
 <div style="max-width:1180px;margin:18px auto 0;padding:0 24px;">
   <a id="shopEntry" class="shopbar" href="#discover">
@@ -636,7 +641,7 @@
         <a class="btn btn-fill" id="heroShop" href="./characters/sue.html">SHOP NOW →</a>
       </div>
     </div>
-    <div class="hero-char"><img id="heroImg" src="./img/t/colors/sue_red.webp" alt="SUE"></div>
+    <div class="hero-char"><img id="heroImg" src="./img/t/colors/sue_red.webp" alt="SUE" fetchpriority="high"></div>
     <div class="hero-right">
       <div class="drop-card">
         <div class="drop-text">
@@ -770,6 +775,10 @@
     <a href="#discover">ギャラリー</a><span>·</span>
     <a href="./about.html">ABOUT</a><span>·</span>
     <a href="./tap/sue.html" target="_blank" rel="noopener">COLOR TAP</a><span>·</span>
+    <a href="./characters/keyrings.html">アクリルキーホルダー</a><span>·</span>
+    <a href="./characters/pins.html">ピンズ</a><span>·</span>
+    <a href="./artist/">アーティスト一覧</a><span>·</span>
+    <a href="./join.html">作家登録</a><span>·</span>
     <a href="./apply.html">クリエイター募集</a><span>·</span>
     <a href="./mypage.html">マイページ</a><span>·</span>
     <a href="./terms.html">利用規約</a><span>·</span>

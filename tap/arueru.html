@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COLOR TAP — CHARAMARL</title>
+<title>アルとエル COLOR TAP｜タップで色が変わる｜CHARAMARL</title>
+<!-- META ここから（tools/make_tap_meta.py） -->
+<meta name="description" content="アルとエル（あめいメア）のCOLOR TAPページ。タップするたびに色が変わります。CHARAMARLで作品も見られます。">
+<link rel="canonical" href="https://charamarl.com/tap/arueru.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CHARAMARL">
+<meta property="og:url" content="https://charamarl.com/tap/arueru.html">
+<meta property="og:title" content="アルとエル COLOR TAP｜タップで色が変わる｜CHARAMARL">
+<meta property="og:description" content="アルとエル（あめいメア）のCOLOR TAPページ。タップするたびに色が変わります。CHARAMARLで作品も見られます。">
+<meta property="og:image" content="https://charamarl.com/img/og/tap/arueru.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<!-- META ここまで -->
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { height:100%; }
@@ -222,7 +235,6 @@ const CONFIG = {
 };
 /* ========================================================= */
 
-document.title = CONFIG.character + " COLOR TAP | CHARAMARL";
 document.body.style.setProperty("--bg", CONFIG.bg);
 document.getElementById("char").src = CONFIG.baseImage;
 // 商品未設定なら購入ボタンを隠す
