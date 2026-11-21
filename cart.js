@@ -68,7 +68,7 @@
     if (cp) {
       cp.hidden = !campaignOn();
       if (!cp.hidden) cp.innerHTML = total >= CAMPAIGN.min
-        ? `🖤 <b>${CAMPAIGN.name}</b>　次の決済画面でクーポンコード <b class="code">${CAMPAIGN.code}</b> を入れると <b>${yen(CAMPAIGN.off)}引き</b>（11/30まで）`
+        ? `🖤 <b>${CAMPAIGN.name}</b>　次の決済画面の「コードを追加」に <b class="code">${CAMPAIGN.code}</b> を入れると <b>${yen(CAMPAIGN.off)}引き</b>（11/30まで）`
         : `🖤 <b>${CAMPAIGN.name}</b>　あと <b>${yen(CAMPAIGN.min - total)}</b> で ${yen(CAMPAIGN.off)}引き（コード <b class="code">${CAMPAIGN.code}</b>・11/30まで）`;
     }
     itemsEl.innerHTML = cart.map(i=>`
@@ -139,7 +139,7 @@
   const strip = document.querySelector('[data-campaign-strip]');
   if (strip && campaignOn()) {
     strip.innerHTML = `<div class="campaign-strip"><span class="cs-t">🖤 ${CAMPAIGN.name}　<small>${CAMPAIGN.span}</small></span>`
-      + `<span class="cs-b">合計${yen(CAMPAIGN.min)}以上で<b>${yen(CAMPAIGN.off)}引き</b>。決済画面でクーポンコード <b class="code">${CAMPAIGN.code}</b> を入れてください</span>`
+      + `<span class="cs-b">合計${yen(CAMPAIGN.min)}以上で<b>${yen(CAMPAIGN.off)}引き</b>。決済画面の「コードを追加」に <b class="code">${CAMPAIGN.code}</b> を入れてください</span>`
       + `<span class="cs-n">${CAMPAIGN.note}</span></div>`;
     strip.hidden = false;
     if (window.cmEvent) cmEvent('view_campaign', { campaign: 'bf2026' });
