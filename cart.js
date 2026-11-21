@@ -7,6 +7,17 @@
 */
 (function(){
   const KEY = 'charamarl_cart';
+  // ===== 期間限定の企画 =====
+  // 期間の外では何も出ない（帯もカートの案内も）。終わったら自動で消えるので、消し忘れがない。
+  // クーポンは Stripe のプロモーションコード。決済画面の入力欄にお客さんが入れる（最低額と期限は Stripe 側で効く）。
+  // 公開前の見た目は、URLに ?bf=1 を付けると確認できる。
+  const CAMPAIGN = {
+    from: Date.parse('2026-11-27T00:00:00+09:00'), to: Date.parse('2026-12-01T00:00:00+09:00'),
+    name: 'BLACK FRIDAY', span: '11/27（金）〜11/30（月）', code: 'BLACK500', min: 3000, off: 500,
+    note: '11/30の締め切りぶんは、12月中旬ごろのお届けです'
+  };
+  const campaignOn = () => { const n = Date.now(); return (n >= CAMPAIGN.from && n < CAMPAIGN.to) || /[?&]bf=1(&|$)/.test(location.search); };
+  const yen = n => '¥' + n.toLocaleString();
   const PROD_BASE = 'https://charamarl.com';
   const img = (char,color) => `/img/colors_nobg/${char}_${color}.png`;          // サムネ(ルート相対)
   const imgAbs = (char,color) => `${PROD_BASE}/img/colors_nobg/${char}_${color}.png`; // 決済用(公開HTTPS)
@@ -28,6 +39,7 @@
       <div class="cart-head"><h3>🛍 カート</h3><button class="cart-close" id="cartClose" aria-label="閉じる">×</button></div>
       <div class="cart-items" id="cartItems"></div>
       <div class="cart-foot" id="cartFoot" style="display:none;">
+        <div class="cart-campaign" id="cartCampaign" hidden></div>
         <div class="cart-total"><span class="lbl">合計</span><span class="amt" id="cartTotal">¥0</span></div>
         <button class="cart-checkout" id="cartCheckout">まとめて購入する →</button>
       </div>
@@ -50,7 +62,15 @@
       foot.style.display='none'; return;
     }
     foot.style.display='block';
-    document.getElementById('cartTotal').textContent = '¥'+cart.reduce((s,i)=>s+i.price*i.qty,0).toLocaleString();
+    const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    document.getElementById('cartTotal').textContent = '¥'+total.toLocaleString();
+    const cp = document.getElementById('cartCampaign');
+    if (cp) {
+      cp.hidden = !campaignOn();
+      if (!cp.hidden) cp.innerHTML = total >= CAMPAIGN.min
+        ? `🖤 <b>${CAMPAIGN.name}</b>　次の決済画面でクーポンコード <b class="code">${CAMPAIGN.code}</b> を入れると <b>${yen(CAMPAIGN.off)}引き</b>（11/30まで）`
+        : `🖤 <b>${CAMPAIGN.name}</b>　あと <b>${yen(CAMPAIGN.min - total)}</b> で ${yen(CAMPAIGN.off)}引き（コード <b class="code">${CAMPAIGN.code}</b>・11/30まで）`;
+    }
     itemsEl.innerHTML = cart.map(i=>`
       <div class="cart-item">
         <img src="${i.img || img(i.char,i.color)}" alt="${i.name}">
@@ -114,6 +134,16 @@
     },
     open: openCart
   };
+
+  // ページに <div data-campaign-strip></div> があれば、期間中だけ帯を出す
+  const strip = document.querySelector('[data-campaign-strip]');
+  if (strip && campaignOn()) {
+    strip.innerHTML = `<div class="campaign-strip"><span class="cs-t">🖤 ${CAMPAIGN.name}　<small>${CAMPAIGN.span}</small></span>`
+      + `<span class="cs-b">合計${yen(CAMPAIGN.min)}以上で<b>${yen(CAMPAIGN.off)}引き</b>。決済画面でクーポンコード <b class="code">${CAMPAIGN.code}</b> を入れてください</span>`
+      + `<span class="cs-n">${CAMPAIGN.note}</span></div>`;
+    strip.hidden = false;
+    if (window.cmEvent) cmEvent('view_campaign', { campaign: 'bf2026' });
+  }
 
   render(); // 初期バッジ
 })();

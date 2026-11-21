@@ -429,6 +429,7 @@
 <h1 class="vh">オリジナルキャラクターとアートが集まる、小さな市場 CHARAMARL</h1>
 
 <div style="max-width:1180px;margin:18px auto 0;padding:0 24px;">
+  <div data-campaign-strip hidden></div>
   <a id="shopEntry" class="shopbar" href="#discover">
     <span class="shopbar-top">
       <span style="flex:1;min-width:0;line-height:1.4;">
@@ -1222,7 +1223,8 @@
   });
 
   // 通知ベル（サイトのお知らせ・最新未読は赤ドット）
-  const NEWS=[
+  const NEWS_ALL=[
+    {d:'2026-11-27',t:'🖤 BLACK FRIDAY（11/27〜11/30）合計¥3,000以上で¥500引き。11/30締め切りぶんは12月中旬ごろのお届け',href:'#discover'},
     {d:'2026-11-18',t:'🚀 作家ページのリンクをXなどに貼ると、その作家さんの作品が画像で出るようになりました。「今日の注目アーティスト」にもシェアボタンが付いています',href:'#artist'},
     {d:'2026-11-18',t:'🌟 「今日の注目アーティスト」が日替わりになりました。参加している作家さん全員が、1日1組ずつ順番に登場します',href:'#artist'},
     {d:'2026-11-18',t:'📌 トップページからピンズ（丸25mm・12種）へ行けるようになりました。グッズのタブと、中段の大きな枠にあります',href:'./characters/pins.html'},
@@ -1256,6 +1258,9 @@
     {d:'2026-07-11',t:'DinoRennyのアートギャラリー公開。♥いいね・🔖保存で応援できます',href:'#discover'},
     {d:'2026-07-01',t:'CHARAMARL プレオープン中。SUE / PUTTI / MOSSUN のアクキー販売中',href:'#discover'},
   ];
+  // 先の日付のお知らせは、その日（日本時間）が来てから出す
+  const NEWS_TODAY=new Date(Date.now()+9*3600*1000).toISOString().slice(0,10);
+  const NEWS=NEWS_ALL.filter(n=>n.d<=NEWS_TODAY);
   const notiBtn=document.getElementById('notiBtn'),notiPanel=document.getElementById('notiPanel'),notiDot=document.getElementById('notiDot');
   const NOTI_SEEN='charamarl_noti_seen';
   const newest=NEWS[0].d;
