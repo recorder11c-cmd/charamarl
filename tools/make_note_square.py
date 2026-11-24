@@ -78,6 +78,11 @@ NOTES = [
          wide='ここから全てが<br>始まるというのが<br>わくわくする',
          works=['う〜ほ〜（UFOO）'],
          contain=True),   # 本人のフォーム回答（思い入れの1枚）の言葉。作品は1点（正方形）
+    dict(no='10', artist='あめいメア', sub='',
+         title='可愛さの中に<br>少し毒のある表現',
+         wide='可愛さの中に<br>少し毒のある表現',
+         works=['Call me', 'アルとエル'],
+         pair=True),   # 本人のフォーム回答（作品の生まれ方）の言葉。作品は2点とも 3:4 の縦長 → 切らずに2枚並べる
 ]
 
 TPL = '''<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>
@@ -190,6 +195,11 @@ def main():
                 if S['tag'] == 'note':
                     ch = (S['h'] - S['pad'] * 2 - S['gg']) / 2.0
                     gw = 'flex:none;width:%dpx;' % int(ch * 4 / 5 * 2 + S['gg'])
+            # pair＝3:4 の縦長が2点。正方形のセルに入れると上下が切れるので、3:4 のまま横に2枚
+            if n.get('pair'):
+                ar = '3/4'
+                cols = 'repeat(2,1fr)'
+                gw = 'flex:none;width:600px;' if S['tag'] == 'note' else 'width:78%;align-self:center;'
             k = S['w'] / 1080.0
             htm = TPL.format(no=n['no'], title=title, artist=html.escape(artist),
                              cells=cells, fs=fs, cols=cols, ar=ar,
