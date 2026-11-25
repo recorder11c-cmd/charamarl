@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  <url><loc>https://charamarl.com/</loc><lastmod>2026-11-24</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://charamarl.com/</loc><lastmod>2026-11-25</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
   <url><loc>https://charamarl.com/characters/keyrings.html</loc><lastmod>2026-11-19</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://charamarl.com/characters/pins.html</loc><lastmod>2026-11-19</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://charamarl.com/run.html</loc><lastmod>2026-11-11</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
@@ -12,6 +12,7 @@
   <url><loc>https://charamarl.com/privacy.html</loc><lastmod>2026-09-13</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://charamarl.com/tokushoho.html</loc><lastmod>2026-09-28</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://charamarl.com/w/g40baecd3dea5.html</loc><lastmod>2026-11-21</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>https://nimk6htbpie0n8bh.public.blob.vercel-storage.com/gallery/g40baecd3dea5.png</image:loc><image:title>愛してやまない音楽 REGGAE（ahoyoung）</image:title></image:image></url>
+  <url><loc>https://charamarl.com/w/gb41c634b8ead.html</loc><lastmod>2026-11-25</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>https://nimk6htbpie0n8bh.public.blob.vercel-storage.com/gallery/gb41c634b8ead.jpg</image:loc><image:title>旅する恐竜スーさん＠大阪 たこ焼きコラボ（DinoRenny）</image:title></image:image></url>
   <url><loc>https://charamarl.com/w/gac57d0ebe2a3.html</loc><lastmod>2026-11-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>https://nimk6htbpie0n8bh.public.blob.vercel-storage.com/gallery/gac57d0ebe2a3.jpg</image:loc><image:title>漫画 第0話「あたちトゥインキィー」（トゥインキィー（TWINKII））</image:title></image:image></url>
   <url><loc>https://charamarl.com/w/g7840ec82ce1c.html</loc><lastmod>2026-11-21</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>https://nimk6htbpie0n8bh.public.blob.vercel-storage.com/gallery/g7840ec82ce1c.jpg</image:loc><image:title>旅するpuni（コジット）</image:title></image:image></url>
   <url><loc>https://charamarl.com/w/gcd4efb9046d5.html</loc><lastmod>2026-11-21</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>https://nimk6htbpie0n8bh.public.blob.vercel-storage.com/gallery/gcd4efb9046d5.jpg</image:loc><image:title>【ずんだスペシャル】ミチくろりあ（kurorias）</image:title></image:image></url>
@@ -182,14 +183,14 @@
   <url><loc>https://charamarl.com/w/g4df484fa9830.html</loc><lastmod>2026-11-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>https://nimk6htbpie0n8bh.public.blob.vercel-storage.com/gallery/g4df484fa9830_1795519389884.jpg</image:loc><image:title>Pizza Boy（CryptoSuperHeroes）</image:title></image:image></url>
   <url><loc>https://charamarl.com/w/g864afff63fcd.html</loc><lastmod>2026-08-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>https://nimk6htbpie0n8bh.public.blob.vercel-storage.com/gallery/g864afff63fcd_1786672728105.png</image:loc><image:title>Ultimate Man（CryptoSuperHeroes）</image:title></image:image></url>
   <url><loc>https://charamarl.com/w/g0f967f4079a7.html</loc><lastmod>2026-09-10</lastmod><changefreq>monthly</changefreq><priority>0.7</priority><image:image><image:loc>https://nimk6htbpie0n8bh.public.blob.vercel-storage.com/gallery/g0f967f4079a7.png</image:loc><image:title>no way（ahoyoung）</image:title></image:image></url>
-  <url><loc>https://charamarl.com/artist/</loc><lastmod>2026-11-24</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://charamarl.com/artist/</loc><lastmod>2026-11-25</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://charamarl.com/artist/akira.html</loc><lastmod>2026-09-15</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://charamarl.com/artist/beerno-mocca.html</loc><lastmod>2026-09-11</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://charamarl.com/artist/charamarl.html</loc><lastmod>2026-11-17</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://charamarl.com/artist/crazy.html</loc><lastmod>2026-09-17</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://charamarl.com/artist/cryptosuperheroes.html</loc><lastmod>2026-11-24</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://charamarl.com/artist/dreamer.html</loc><lastmod>2026-09-12</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://charamarl.com/artist/dinorenny.html</loc><lastmod>2026-10-16</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://charamarl.com/artist/dinorenny.html</loc><lastmod>2026-11-25</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://charamarl.com/artist/fz.html</loc><lastmod>2026-10-23</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://charamarl.com/artist/inkz-monster.html</loc><lastmod>2026-10-17</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://charamarl.com/artist/maru-gmc.html</loc><lastmod>2026-09-10</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
