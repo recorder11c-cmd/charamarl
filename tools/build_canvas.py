@@ -171,7 +171,7 @@ TEMPLATE = r'''<!DOCTYPE html>
   <div class="section-title">SAMPLE</div>
   <div class="section-heading">作りの見本</div>
   <div class="sample">
-    <img src="../img/canvas/photo_kyoto.jpg" alt="キャンバスアートの見本（旅する恐竜スーさん）" loading="lazy">
+    <img src="../img/canvas/photo_osaka.jpg" alt="キャンバスアートの見本（旅する恐竜スーさん）" loading="lazy">
     <div>
       <ul>
         <li><b>木枠に張ったキャンバス</b>です。厚みは37mm。立てて置けます</li>
