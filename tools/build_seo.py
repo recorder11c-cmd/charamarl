@@ -265,7 +265,9 @@ SLUG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'artist_slu
 # 商品ページの ARTIST_ID → ギャラリーの掲載名
 ARTIST_OF = {'dinorenny': 'DinoRenny', 'maru': 'MARU_GMC', 'chui': 'ちゅい', 'sayoooooh': 'SAYoooooh',
              'inkzmonster': "Ink'z Monster", 'calma': '赤猫かるま', 'crazy': 'CRAZY', 'morry': 'morry',
-             'chinchillo': 'チンチロ', 'kagechiyo': 'カゲチヨ'}
+             'chinchillo': 'チンチロ', 'kagechiyo': 'カゲチヨ',
+             'hanna': 'ハンナ', 'cryptosuperheroes': 'CryptoSuperHeroes', 'utsuutsu': '恋するウツウツ',
+             'akira': 'AKIRA', 'karuki': 'かるき', 'selfiebears': 'Selfie Bears'}
 
 def products():
     """販売中の商品ページ。名前・価格・作家は**ページに書いてあるもの**を読む（ここで決めない）。"""
