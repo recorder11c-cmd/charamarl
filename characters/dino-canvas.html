@@ -220,7 +220,7 @@ async function checkout() {
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
   if (!SALE_READY) return;
-    window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name+(selected.stock>0?'':'（受注生産）'), PRICE, `${IMG_ROOT}/photo_${selected.key}.jpg`);
+    window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name+(selected.stock>0?'':'（受注生産）'), PRICE, `${IMG_ROOT}/photo_${selected.key}.jpg`, 'キャンバスアート');
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
 
