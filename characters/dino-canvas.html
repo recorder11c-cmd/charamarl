@@ -142,6 +142,7 @@ const SALE_READY = true; // 本人承認済み(2026-08-14)
 const IMG_DIR = "../img/canvas";    // 表示用(相対)
 const IMG_ROOT = "/img/canvas";  // カート/決済用(ルート相対)
 // stock: 手元在庫（0 = 在庫切れ→受注生産で販売継続）。売れたら必ず0に更新すること
+// ここの colors は characters/canvas.html（全員ぶんの売り場）にも並ぶ。直したら tools/build_canvas.py を回す
 const MADE_TO_ORDER_NOTE = "受注生産｜約2〜3週間でお届け";
 const IN_STOCK_NOTE = "在庫あり｜ご注文後すぐ発送します";
 const colors = [

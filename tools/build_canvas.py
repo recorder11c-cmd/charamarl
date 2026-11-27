@@ -25,6 +25,16 @@
     js/products.js                   「CANVAS ここから〜ここまで」の間を入れ替える（作家ページの「買えるもの」に出る）
     index.html                       札の「◯組の作家」と、入口バナーの「作家◯組・◯点」の数だけ合わせる
 
+■ DinoRenny「旅する恐竜スーさん」（2026-11-27）
+    全員ぶんの売り場（canvas.html）のいちばん下に、スーさんのご当地も並べる。
+    出どころは characters/dino-canvas.html の colors（在庫・題・説明）。ここには書かない。
+    カートと決済の品名は dino-canvas.html と同じにしてある（同じ商品なので）。
+    「作家◯組・◯点」の数には入れない（作家さんの絵の数として告知に使っているため）。
+
+■ シェア用ページ（2026-11-27）
+    cv/<key>.html             🚀ボタンが貼るURL。OGPだけ持っていて、開くと売り場のその絵へ移る
+    img/og/cv/<key>_*.jpg     その絵1点を、切らずに収めた絵（1200×630）
+
 ■ 回したあと
     python3 tools/build_seo.py（sitemap と作家ページ） → python3 tools/check_public.py → push
 """
@@ -63,15 +73,28 @@ TEMPLATE = r'''<!DOCTYPE html>
   @media(max-width:640px){.strip-wrap{padding:14px 20px 0;}}
   .char-hero{display:grid;grid-template-columns:1fr 1fr;gap:48px;max-width:1000px;margin:0 auto;padding:44px 32px 40px;align-items:center;}
   @media(max-width:640px){.char-hero{grid-template-columns:1fr;gap:26px;padding:24px 20px 24px;}}
-  .char-visual{border-radius:24px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.4);}
+  .char-hero{scroll-margin-top:84px;}
+  .char-visual{border-radius:24px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.4);position:relative;}
+  .share-btn{position:absolute;right:12px;bottom:12px;background:#1a1a26;color:#fff;border:2px solid #fff;border-radius:24px;padding:9px 16px;font:inherit;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35);}
+  .share-btn:active{transform:scale(.96);}
+  .sh-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:none;align-items:flex-end;justify-content:center;}
+  .sh-ov.open{display:flex;}
+  .sh-box{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:20px 20px 26px;}
+  @media(min-width:641px){.sh-ov{align-items:center;}.sh-box{border-radius:22px;}}
+  .sh-h{font-size:15px;font-weight:900;margin-bottom:10px;}
+  .sh-tx{font-size:12.5px;line-height:1.7;color:var(--text);background:rgba(255,255,255,.06);border-radius:12px;padding:10px 12px;margin-bottom:14px;white-space:pre-wrap;word-break:break-all;}
+  .sh-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .sh-row button{background:#fff;color:#111;border:none;border-radius:14px;padding:13px 8px;font:inherit;font-size:13px;font-weight:900;cursor:pointer;}
+  .sh-row button.x{background:#000;color:#fff;border:1px solid rgba(255,255,255,.35);}
+  .sh-row button.line{background:#06c755;color:#fff;}
+  .sh-close{display:block;width:100%;margin-top:12px;background:none;border:none;color:var(--muted);font:inherit;font-size:13px;font-weight:700;padding:8px;cursor:pointer;}
   .char-visual img{width:88%;height:88%;object-fit:contain;}
   .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
   .tag{background:rgba(255,255,255,.07);color:var(--muted);font-size:11px;padding:4px 12px;border-radius:12px;letter-spacing:.04em;}
   .char-info h1{font-size:clamp(28px,6vw,44px);font-weight:900;letter-spacing:.02em;margin-bottom:8px;}
   .char-creator{color:var(--muted);font-size:13px;letter-spacing:.06em;margin-bottom:18px;}
   .char-creator a{color:var(--text);}
-  .jump{display:none;background:rgba(245,200,66,.14);border:1px solid rgba(245,200,66,.45);color:var(--accent);font-size:13px;font-weight:800;text-decoration:none;padding:9px 18px;border-radius:22px;margin-bottom:18px;}
-  @media(max-width:640px){.jump{display:inline-block;}}
+  .jump{display:inline-block;background:rgba(245,200,66,.14);border:1px solid rgba(245,200,66,.45);color:var(--accent);font-size:13px;font-weight:800;text-decoration:none;padding:9px 18px;border-radius:22px;margin-bottom:18px;}
   section[id]{scroll-margin-top:78px;}
   .char-desc{color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:16px;}
   .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 18px;font-size:11.5px;font-weight:700;line-height:1.6;}
@@ -100,6 +123,8 @@ TEMPLATE = r'''<!DOCTYPE html>
   .card .nm{font-size:12px;font-weight:800;line-height:1.45;margin-bottom:3px;}
   .card .by{font-size:10.5px;color:var(--muted);margin-bottom:4px;}
   .card .pr{font-size:13px;font-weight:900;color:var(--accent);}
+  .card .st{font-size:10px;font-weight:800;margin-top:3px;opacity:.6;}
+  .card .st.in{color:#2fbf6b;opacity:1;}
   .sample{display:grid;grid-template-columns:220px 1fr;gap:22px;align-items:center;background:var(--surface);border-radius:var(--radius);padding:20px;}
   @media(max-width:640px){.sample{grid-template-columns:1fr;}}
   .sample img{width:100%;border-radius:12px;background:#fff;display:block;}
@@ -140,7 +165,8 @@ TEMPLATE = r'''<!DOCTYPE html>
 </header>
 <div class="strip-wrap"><div data-campaign-strip hidden></div></div>
 <div class="char-hero">
-  <div class="char-visual"><img src="../{{FIRST_IMG}}" alt="{{FIRST_ALT}}" id="charImg"></div>
+  <div class="char-visual"><img src="../{{FIRST_IMG}}" alt="{{FIRST_ALT}}" id="charImg">
+    <button class="share-btn" id="shareBtn" type="button" aria-label="この絵をシェア">🚀 シェア</button></div>
   <div class="char-info">
     <div class="tag-row">{{TAGS}}</div>
     <h1>キャンバスアート</h1>
@@ -198,6 +224,19 @@ TEMPLATE = r'''<!DOCTYPE html>
     <button class="buy-btn" id="buyBtn" type="button">今すぐ購入 →</button>
   </div>
 </div>
+<div class="sh-ov" id="shOv">
+  <div class="sh-box" role="dialog" aria-label="この絵をシェア">
+    <div class="sh-h">🚀 この絵をシェア</div>
+    <div class="sh-tx" id="shTx"></div>
+    <div class="sh-row">
+      <button type="button" class="x" data-sh="x">𝕏 でポスト</button>
+      <button type="button" class="line" data-sh="line">LINE で送る</button>
+      <button type="button" data-sh="copy" id="shCopy">🔗 文とリンクをコピー</button>
+      <button type="button" data-sh="native" id="shNative">📲 その他</button>
+    </div>
+    <button type="button" class="sh-close" id="shClose">とじる</button>
+  </div>
+</div>
 <script>
 const PRICE = 3300, KIND = "キャンバスアート";
 {{ARTIST_ID_LINE}}
@@ -216,7 +255,9 @@ WORKS.forEach((w, i) => {
   if (!grid || (GROUPED && w.artist !== lastArtist)) {
     if (GROUPED) {
       const h = document.createElement('div'); h.className = 'grp';
-      h.innerHTML = '<b>' + esc(w.artist) + '</b><a href="./canvas-' + esc(w.slug) + '.html">この作家のキャンバスだけ見る</a>';
+      h.innerHTML = w.d
+        ? '<b>DinoRenny「旅する恐竜スーさん」</b><a href="./dino-canvas.html">スーさんのページを見る</a>'
+        : '<b>' + esc(w.artist) + '</b><a href="./canvas-' + esc(w.slug) + '.html">この作家のキャンバスだけ見る</a>';
       list.appendChild(h);
     }
     grid = document.createElement('div'); grid.className = 'grid'; list.appendChild(grid);
@@ -225,9 +266,10 @@ WORKS.forEach((w, i) => {
   const card = document.createElement('button');
   card.type = 'button'; card.className = 'card'; card.dataset.key = w.key;
   card.innerHTML = '<div class="pv"><img src="../' + esc(w.thumb) + '" alt="' + esc(w.title) + '" loading="lazy"></div>'
-    + '<div class="nm">' + esc(w.title) + '</div>'
-    + '<div class="by">' + esc(w.no) + '</div>'
-    + '<div class="pr">' + yen(PRICE) + '</div>';
+    + '<div class="nm">' + esc(w.d ? w.d.name : w.title) + '</div>'
+    + '<div class="by">' + esc(w.d ? '旅する恐竜スーさん' : w.no) + '</div>'
+    + '<div class="pr">' + yen(PRICE) + '</div>'
+    + (w.d ? '<div class="st' + (w.d.stock > 0 ? ' in' : '') + '">' + (w.d.stock > 0 ? '在庫あり' : '受注生産') + '</div>' : '');
   card.addEventListener('click', () => pick(i, true));
   grid.appendChild(card);
 });
@@ -238,21 +280,29 @@ function pick(i, byUser){
   document.querySelectorAll('.card').forEach(c => c.classList.toggle('selected', c.dataset.key === w.key));
   const im = document.getElementById('charImg'); im.src = '../' + w.img; im.alt = w.title;
   document.getElementById('selTitle').textContent = w.title;
-  document.getElementById('selBy').textContent = 'by ' + w.artist + '　品番 ' + w.no;
+  document.getElementById('selBy').textContent = w.d ? 'by DinoRenny　' + (w.d.stock > 0 ? '在庫あり' : '受注生産') : 'by ' + w.artist + '　品番 ' + w.no;
   const n = document.getElementById('selNote'); n.hidden = !w.note; n.textContent = w.note || '';
   const a = document.getElementById('selLink');
-  const open = !w.linkFrom || Date.now() >= Date.parse(w.linkFrom);
+  const open = !!w.gid && (!w.linkFrom || Date.now() >= Date.parse(w.linkFrom));
   a.hidden = !open; if (open) a.href = '../?g=' + encodeURIComponent(w.gid) + '&utm_source=charamarl_canvas';
   document.getElementById('barName').textContent = w.title;
   document.getElementById('barBy').textContent = w.artist + '｜';
-  document.getElementById('barNote').textContent = SHIP_NOTE;
+  document.getElementById('barNote').textContent = shipNote(w);
   if (byUser) {
     try { history.replaceState(null, '', location.pathname + '?w=' + encodeURIComponent(w.key)); } catch (e) {}
-    if (window.innerWidth <= 640) document.querySelector('.char-hero').scrollIntoView({behavior:'smooth', block:'start'});
+    // 選んだ絵は上に大きく出るので、そこまで動かす（動きを減らす設定の人には、動かさずに移る）
+    const calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelector('.char-hero').scrollIntoView({behavior: calm ? 'auto' : 'smooth', block:'start'});
     track('view_product');
   }
 }
-function item(w){ return {item_id:'cv_' + w.key, item_name:w.title + ' ' + KIND, character_id:'cv_' + w.key, artist_id:w.aid, price:PRICE, quantity:1, currency:'JPY'}; }
+// スーさん（w.d がある行）は dino-canvas.html と同じ商品。品名・符号・発送の文をそろえる
+const DINO = 'dino_canvas', DINO_NAME = '旅する恐竜スーさん';
+const shipNote = w => !w.d ? SHIP_NOTE : (w.d.stock > 0 ? '在庫あり｜ご注文後すぐ発送します' : '受注生産｜約2〜3週間でお届け');
+const dSuffix = w => w.d.name + (w.d.stock > 0 ? '' : '（受注生産）');
+function item(w){
+  if (w.d) return {item_id:DINO + '_canvas', item_name:DINO_NAME + ' ' + KIND, character_id:DINO, artist_id:'dinorenny', price:PRICE, quantity:1, currency:'JPY'};
+  return {item_id:'cv_' + w.key, item_name:w.title + ' ' + KIND, character_id:'cv_' + w.key, artist_id:w.aid, price:PRICE, quantity:1, currency:'JPY'}; }
 function track(ev, extra){ if (window.cmEvent) cmEvent(ev, Object.assign(item(selected), extra || {})); }
 const lineName = w => w.artist + '（' + w.no + '・受注生産）';
 
@@ -268,13 +318,16 @@ document.getElementById('buyBtn').addEventListener('click', async function(){
   btn.textContent = '処理中...'; btn.disabled = true;
   const back = () => { btn.textContent = '今すぐ購入 →'; btn.disabled = false; };
   try {
-    try { fetch('/api/react', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id:'cv_' + w.key + '_buy', type:'like', op:'add'})}); } catch (e) {}
+    try { fetch('/api/react', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id:(w.d ? DINO : 'cv_' + w.key) + '_buy', type:'like', op:'add'})}); } catch (e) {}
     track('begin_checkout', {checkout_type:'buynow'});
     try { localStorage.setItem('cm_pending', JSON.stringify({value:PRICE, type:'buynow', ts:Date.now(),
-      items:[{item_id:'cv_' + w.key, item_name:w.title + ' ' + KIND, character_id:'cv_' + w.key, price:PRICE, quantity:1}]})); } catch (e) {}
+      items:[w.d ? {item_id:DINO + '_item', item_name:DINO_NAME, character_id:DINO, price:PRICE, quantity:1}
+                 : {item_id:'cv_' + w.key, item_name:w.title + ' ' + KIND, character_id:'cv_' + w.key, price:PRICE, quantity:1}]})); } catch (e) {}
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: [{ name: w.title + ' ' + KIND + ' ' + lineName(w), price:PRICE, quantity:1, images:['https://charamarl.com/' + w.img] }] }),
+      body: JSON.stringify({ items: [w.d
+        ? { name: DINO_NAME + ' ' + KIND + ' ' + dSuffix(w), price:PRICE, quantity:1, images:['https://charamarl.com/' + w.d.pic] }
+        : { name: w.title + ' ' + KIND + ' ' + lineName(w), price:PRICE, quantity:1, images:['https://charamarl.com/' + w.img] }] }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
@@ -283,9 +336,38 @@ document.getElementById('buyBtn').addEventListener('click', async function(){
 });
 document.getElementById('addCartBtn').addEventListener('click', function(){
   const w = selected;
-  window.CHARAMARL_CART.add('cv_' + w.key, 'canvas', w.title, lineName(w), PRICE, '/' + w.img, KIND);
-  const o = this.textContent; this.textContent = '✓ 追加しました'; setTimeout(() => this.textContent = o, 1200);
+  if (w.d) window.CHARAMARL_CART.add(DINO, w.d.k, DINO_NAME, dSuffix(w), PRICE, '/' + w.d.pic, KIND);
+  else window.CHARAMARL_CART.add('cv_' + w.key, 'canvas', w.title, lineName(w), PRICE, '/' + w.img, KIND);
+  this.textContent = '✓ 追加しました'; setTimeout(() => this.textContent = '🛍 カートに追加', 1200);  // 続けて押しても、元の字に戻る
 });
+
+// 🚀 いま上に出ている絵をシェアする。貼るのはシェア用ページ（/cv/<key>.html）＝その絵が出て、開くと売り場のその絵へ移る
+const shOv = document.getElementById('shOv');
+const shText = w => w.artist + '「' + w.title + '」のキャンバスアート、絶賛販売中！🎪\n#CHARAMARL';
+const shUrl = w => 'https://charamarl.com/cv/' + encodeURIComponent(w.key) + '.html';
+document.getElementById('shareBtn').addEventListener('click', () => {
+  document.getElementById('shTx').textContent = shText(selected) + '\n' + shUrl(selected);
+  document.getElementById('shNative').style.display = navigator.share ? '' : 'none';
+  document.getElementById('shCopy').textContent = '🔗 文とリンクをコピー';
+  shOv.classList.add('open');
+});
+document.getElementById('shClose').addEventListener('click', () => shOv.classList.remove('open'));
+shOv.addEventListener('click', e => { if (e.target === shOv) shOv.classList.remove('open'); });
+shOv.querySelectorAll('[data-sh]').forEach(b => b.addEventListener('click', () => {
+  const w = selected, text = shText(w), url = shUrl(w), kind = b.dataset.sh;
+  track('share', {method: kind});
+  if (kind === 'x') window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+  else if (kind === 'line') window.open('https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank');
+  else if (kind === 'native' && navigator.share) navigator.share({text: text, url: url}).catch(() => {});
+  else if (kind === 'copy') {
+    const all = text + '\n' + url;
+    (navigator.clipboard ? navigator.clipboard.writeText(all) : Promise.reject()).then(() => {
+      b.textContent = '✓ コピーしました'; setTimeout(() => shOv.classList.remove('open'), 800);
+    }).catch(() => { prompt('この文をコピーしてください', all); });
+    return;
+  }
+  shOv.classList.remove('open');
+}));
 </script>
 <script src="../cart.js"></script>
 </body>
@@ -325,7 +407,7 @@ def js(v):
 
 
 def render(page, works, title, desc, og_img, name, tags, by, lead, more, artist_id, grouped):
-    keep = ('no', 'key', 'artist', 'slug', 'aid', 'title', 'gid', 'img', 'thumb', 'note', 'linkFrom')
+    keep = ('no', 'key', 'artist', 'slug', 'aid', 'title', 'gid', 'img', 'thumb', 'note', 'linkFrom', 'd')
     s = TEMPLATE
     for k, v in {
         'TITLE': esc(title), 'OGP': ogp(page, title, desc, og_img, name),
@@ -360,6 +442,50 @@ def mosaic(works, out, size, cols, cell, pad, head=None):
     im.save(out, 'JPEG', quality=88)
 
 
+def dino_works():
+    """characters/dino-canvas.html の colors から、スーさんの行を作る（在庫・題・説明はあちらが出どころ）。"""
+    src = open('characters/dino-canvas.html', encoding='utf-8').read()
+    m = re.search(r'const colors = (\[.*?\]);', src, re.S)
+    out = []
+    for c in json.loads(m.group(1)):
+        k = c['key']
+        img, thumb = f'img/canvas/dino_{k}.jpg', f'img/t/canvas/dino_{k}.webp'
+        pic = img if c.get('photo') is False else f'img/canvas/photo_{k}.jpg'
+        for f in (img, thumb, pic):
+            assert os.path.exists(f), f
+        out.append({'key': 'dino_' + k, 'artist': 'DinoRenny', 'aid': 'dinorenny', 'title': c['title'],
+                    'img': img, 'thumb': thumb, 'note': c['desc'],
+                    'd': {'k': k, 'name': c['name'], 'stock': c['stock'], 'pic': pic}})
+    return out
+
+
+SHARE_DIR, SHARE_IMG = 'cv', 'img/og/cv'
+
+def share_pages(rows):
+    """🚀ボタンが貼るページ。rows = [(絵の行, 開いたあとに移る先)]"""
+    import hashlib
+    os.makedirs(SHARE_DIR, exist_ok=True); os.makedirs(SHARE_IMG, exist_ok=True)
+    keep_html, keep_img, made = set(), set(), 0
+    for w, dest in rows:
+        ver = hashlib.sha1(open(w['img'], 'rb').read()).hexdigest()[:6]
+        img = f"{w['key']}_{ver}.jpg"
+        keep_html.add(w['key'] + '.html'); keep_img.add(img)
+        ip, hp = f'{SHARE_IMG}/{img}', f"{SHARE_DIR}/{w['key']}.html"
+        if not os.path.exists(ip):
+            build_seo.og_image(w['artist'], [{'img': w['img']}], ip)
+        title = f"{w['title']} キャンバスアート — {w['artist']}｜CHARAMARL"
+        desc = f"{w['artist']}「{w['title']}」を、100mm角の木枠キャンバスに。3,300円（税込・送料込）。絵は切り取らず、そのままプリントします。"
+        body = build_seo.share_page(dest, title, desc, f"{ROOT}/{SHARE_DIR}/{w['key']}.html", f'{ROOT}/{ip}',
+                                    f"{w['title']} のキャンバスを見る →", 'product', dest.split('?')[0])
+        if not os.path.exists(hp) or open(hp, encoding='utf-8').read() != body:
+            open(hp, 'w', encoding='utf-8').write(body); made += 1
+    for d, keep, ext in ((SHARE_DIR, keep_html, '.html'), (SHARE_IMG, keep_img, '.jpg')):
+        for f in os.listdir(d):
+            if f.endswith(ext) and f not in keep:
+                os.remove(os.path.join(d, f))
+    print(f'シェア用ページ {len(rows)} 枚（新規/更新 {made}）')
+
+
 def main():
     works = json.load(open('characters/canvas.json', encoding='utf-8'))
     slugs = json.load(open('tools/artist_slugs.json', encoding='utf-8'))
@@ -381,12 +507,14 @@ def main():
             '各3,300円（税込・送料込）・受注生産。絵は切り取らず、そのままプリントします。')
     mosaic(works, 'img/og/p/canvas.jpg', (1200, 630), 10, 104, 10, head='キャンバスアート')
     mosaic(works, 'img/canvas/all_tile.jpg', (600, 500), 6, 94, 5)
-    render('characters/canvas.html', works, 'キャンバスアート｜CHARAMARL', desc, 'img/og/p/canvas.jpg', 'キャンバスアート',
-           [f'{len(artists)}組の作家', 'キャンバスアート', '100×100×37mm', f'{len(works)}点'],
+    dino = dino_works()
+    assert not ({w['key'] for w in dino} & {w['key'] for w in works})
+    render('characters/canvas.html', works + dino, 'キャンバスアート｜CHARAMARL', desc, 'img/og/p/canvas.jpg', 'キャンバスアート',
+           [f'{len(artists)}組の作家', 'キャンバスアート', '100×100×37mm', f'{len(works)}点', f'＋ 旅する恐竜スーさん {len(dino)}種'],
            f'by {len(artists)}組の作家',
            'CHARAMARLに並ぶ作家さんの絵を、木枠張りのミニキャンバスにしました。',
            '', None, True)
-    print('OK characters/canvas.html', len(works), '点', len(artists), '組')
+    print('OK characters/canvas.html', len(works), '点', len(artists), '組 ＋ スーさん', len(dino), '種')
 
     # 作家ごと
     for a in artists:
@@ -403,6 +531,10 @@ def main():
                f'{a}さんの絵を、木枠張りのミニキャンバスにしました。',
                '<a class="more" href="./canvas.html">ほかの作家さんのキャンバスも見る →</a>', mine[0]['aid'], False)
         print('OK', page, len(mine), '点')
+
+    # 🚀 シェア用ページ（作家さんの絵は作家ごとの売り場へ、スーさんは全員ぶんの売り場へ移る）
+    share_pages([(w, f"/characters/canvas-{w['slug']}.html?w={w['key']}") for w in works]
+                + [(w, f"/characters/canvas.html?w={w['key']}") for w in dino])
 
     # 作家ページの「買えるもの」（js/products.js）
     rows = '\n'.join(
