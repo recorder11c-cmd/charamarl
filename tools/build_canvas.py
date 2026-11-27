@@ -23,7 +23,7 @@
     img/og/p/canvas*.jpg             リンクを貼ったとき出る絵
     img/canvas/all_tile.jpg          トップページの札の絵（全点を並べたもの）
     js/products.js                   「CANVAS ここから〜ここまで」の間を入れ替える（作家ページの「買えるもの」に出る）
-    index.html                       札の「◯組の作家」の数だけ合わせる
+    index.html                       札の「◯組の作家」と、入口バナーの「作家◯組・◯点」の数だけ合わせる
 
 ■ 回したあと
     python3 tools/build_seo.py（sitemap と作家ページ） → python3 tools/check_public.py → push
@@ -422,6 +422,8 @@ def main():
     # トップページの札の数
     s = open('index.html', encoding='utf-8').read()
     s2 = re.sub(r'(<div class="pin-sub" data-canvas-artists><span class="av"></span>)[^<]*', lambda m: m.group(1) + f'{len(artists)}組の作家', s)
+    # トップページの入口バナーの数
+    s2 = re.sub(r'(<span data-canvas-count>)[^<]*', lambda m: m.group(1) + f'作家{len(artists)}組・{len(works)}点', s2)
     if s2 != s:
         open('index.html', 'w', encoding='utf-8').write(s2)
     print(f'{1 + len(artists)} ページ・products.js {len(works)} 行')

@@ -276,6 +276,18 @@
   .shopbar-row img{width:100%;aspect-ratio:1;border-radius:50%;object-fit:cover;
     border:2px solid rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.22);background:#fff;}
   @media(min-width:720px){ .shopbar{padding:13px 16px;} .shopbar-row{display:grid;grid-template-columns:repeat(13,1fr);gap:9px;} }
+  /* キャンバスアートの入口（スマホは1行ぶんの高さ。写真は切らない） */
+  .cvbar{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #1a1a26;border-radius:18px;
+    padding:9px 14px 9px 9px;margin-bottom:12px;color:#1a1a26;text-decoration:none;}
+  .cvbar img{flex:none;width:86px;height:auto;border-radius:10px;display:block;}
+  .cvbar-tx{flex:1;min-width:0;line-height:1.45;}
+  .cvbar-t{display:block;font-size:clamp(14px,4vw,17px);font-weight:900;white-space:nowrap;}
+  .cvbar-t i{font-style:normal;display:inline-block;background:#ffd60a;font-size:10px;font-weight:900;letter-spacing:.06em;
+    border-radius:9px;padding:1px 7px;margin-right:6px;vertical-align:2px;}
+  .cvbar-s{display:block;font-size:clamp(10.5px,3vw,12.5px);font-weight:700;color:#555;white-space:nowrap;}
+  .cvbar-x{display:none;}
+  .cvbar-go{flex:none;font-size:19px;font-weight:900;}
+  @media(min-width:720px){ .cvbar{padding:11px 18px 11px 11px;gap:16px;} .cvbar img{width:128px;} .cvbar-x{display:inline;} }
   .pin.coming .pin-img{background:linear-gradient(150deg,#fff3e6,#f3e9ff);border:1px dashed #e0c9f0;}
   .pin.coming .ct{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;text-align:center;}
   .pin.coming .ct .ic{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--orange));display:flex;align-items:center;justify-content:center;font-size:20px;}
@@ -430,6 +442,14 @@
 
 <div style="max-width:1180px;margin:18px auto 0;padding:0 24px;">
   <div data-campaign-strip hidden></div>
+  <a id="canvasEntry" class="cvbar" href="./characters/canvas.html" onclick="if(window.cmEvent)cmEvent('click_canvas_entry',{from:'top_banner'})">
+    <img src="./img/t/canvas/photo_osaka.webp" alt="" width="600" height="338">
+    <span class="cvbar-tx">
+      <span class="cvbar-t"><i>NEW</i>キャンバスアート<span class="cvbar-x">、はじめました</span></span>
+      <span class="cvbar-s"><span data-canvas-count>作家12組・30点</span>・¥3,300<span class="cvbar-x">（税込・送料込）　100mm角・木枠張り</span></span>
+    </span>
+    <span class="cvbar-go">→</span>
+  </a>
   <a id="shopEntry" class="shopbar" href="#discover">
     <span class="shopbar-top">
       <span style="flex:1;min-width:0;line-height:1.4;">
@@ -785,6 +805,7 @@
     <a href="./tap/sue.html" target="_blank" rel="noopener">COLOR TAP</a><span>·</span>
     <a href="./characters/keyrings.html">アクリルキーホルダー</a><span>·</span>
     <a href="./characters/pins.html">ピンズ</a><span>·</span>
+    <a href="./characters/canvas.html">キャンバスアート</a><span>·</span>
     <a href="./artist/">アーティスト一覧</a><span>·</span>
     <a href="./join.html">作家登録</a><span>·</span>
     <a href="./apply.html">クリエイター募集</a><span>·</span>
@@ -1231,6 +1252,7 @@
 
   // 通知ベル（サイトのお知らせ・最新未読は赤ドット）
   const NEWS_ALL=[
+    {d:'2026-11-27',t:'🖼 キャンバスアート、はじめました。作家さんの絵を100mm角の木枠キャンバスに。¥3,300（税込・送料込）・受注生産',href:'./characters/canvas.html'},
     {d:'2026-11-27',t:'🖤 BLACK FRIDAY（11/27〜11/30）合計¥3,000以上で¥500引き。11/30締め切りぶんは12月中旬ごろのお届け',href:'#discover'},
     {d:'2026-11-18',t:'🚀 作家ページのリンクをXなどに貼ると、その作家さんの作品が画像で出るようになりました。「今日の注目アーティスト」にもシェアボタンが付いています',href:'#artist'},
     {d:'2026-11-18',t:'🌟 「今日の注目アーティスト」が日替わりになりました。参加している作家さん全員が、1日1組ずつ順番に登場します',href:'#artist'},
