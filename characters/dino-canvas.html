@@ -89,21 +89,22 @@
     <img src="../img/canvas/photo_kyoto.jpg" alt="旅する恐竜スーさん キャンバスアート" id="charImg">
   </div>
   <div class="char-info">
-    <div class="tag-row"><span class="tag">DinoRenny</span><span class="tag">キャンバスアート</span><span class="tag">100×100×37mm</span><span class="tag">6種</span></div>
+    <div class="tag-row"><span class="tag">DinoRenny</span><span class="tag">キャンバスアート</span><span class="tag">100×100×37mm</span><span class="tag">7種</span></div>
     <h1>旅する恐竜スーさん</h1>
     <div class="char-creator">by DinoRenny</div>
-    <p class="char-desc">DinoRennyの看板恐竜「SUE」が、日本各地をめぐるシリーズ。<br>その土地の名物や文化をまとった姿を、木枠張りのミニキャンバスにプリントしました。<br><br>W100×H100×D37mm。厚みがあるので、置いても掛けても飾れます。<br>現在は関西6県。順次エリアを増やしていきます。</p>
+    <p class="char-desc">DinoRennyの看板恐竜「SUE」が、日本各地をめぐるシリーズ。<br>その土地の名物や文化をまとった姿を、木枠張りのミニキャンバスにプリントしました。<br><br>W100×H100×D37mm。厚みがあるので、置いても掛けても飾れます。<br>関西6県に、鹿児島が加わりました。順次エリアを増やしていきます。</p>
     <div class="asr-block" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 16px;font-size:11.5px;font-weight:700;line-height:1.6;">
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🛒 <b>¥3,300</b> 税込・送料込<br><span style="opacity:.7;">追加費用なし・そのままのお値段です</span></div>
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">📦 在庫ありは即発送<br><span style="opacity:.7;">完売分は受注生産／約2〜3週間でお届け</span></div>
       <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🖼 木枠張りキャンバス<br><span style="opacity:.7;">100×100×37mm・置いても掛けても</span></div>
-      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🗾 ご当地シリーズ<br><span style="opacity:.7;">関西6県から順次拡大予定</span></div>
+      <div style="background:rgba(255,138,0,.08);border-radius:12px;padding:9px 12px;">🗾 ご当地シリーズ<br><span style="opacity:.7;">関西6県＋鹿児島・順次拡大予定</span></div>
     </div>
     <div class="selected-color-label" id="selectedLabel">京都</div>
     <div id="selDetail" style="margin-top:10px;border-left:3px solid var(--accent);padding:2px 0 2px 12px;">
       <div id="selTitle" style="font-size:14.5px;font-weight:900;line-height:1.5;"></div>
       <div id="selLead" style="font-size:11.5px;font-weight:700;color:var(--accent);letter-spacing:.02em;margin-top:4px;"></div>
       <div id="selDesc" style="font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:6px;"></div>
+      <div id="selNote" style="font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:6px;"></div>
     </div>
         <div style="margin-top:12px;"><button class="like-btn" id="likeBtn" type="button" aria-pressed="false"><span id="likeIc">♡</span><span>いいね</span><b class="num" id="likeCt"></b></button></div>
   </div>
@@ -161,8 +162,17 @@ const colors = [
   "desc":"恐竜が、忍者に変身。手裏剣を構えて、音もなく現れます。"},
  {"key":"wakayama","name":"和歌山","accent":"#ff5aa8","stock":1,
   "title":"旅する恐竜スーさん＠和歌山 みかんコラボ","lead":"和歌山の実り × 恐竜 × ポップアート",
-  "desc":"恐竜が、みかんの箱をかかえてる。頭にもひとつ、のせています。"}];
+  "desc":"恐竜が、みかんの箱をかかえてる。頭にもひとつ、のせています。"},
+ {"key":"kagoshima","name":"鹿児島","accent":"#6fd14f","stock":0,"photo":false,
+  "title":"旅する恐竜スーさん＠鹿児島 黒豚コラボ","lead":"鹿児島の大地 × 恐竜 × ポップアート",
+  "desc":"黒い恐竜が、黒豚に変身。鼻息あらく、うしろでは山がもくもくと煙をあげています。",
+  "note":"※ 新作のため、いまは絵柄を載せています。キャンバスの作りは、ほかのご当地と同じです。"}];
+// 実物の写真があるものは写真を、まだ無いもの（photo:false）は絵柄を見せる
+const pic = c => (c.photo === false ? 'dino_' : 'photo_') + c.key + '.jpg';
 const HERO_COLOR = null; // 全種販売（リクエスト制なし）
+// ?p= で開いたときに下の updateBuyBar が先に呼ばれるので、ここで用意しておく
+const REQ_KEY='charamarl_color_req';
+const reqSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(REQ_KEY)||'[]'));}catch(e){return new Set();}};
 let selected = colors[0];
 const grid = document.getElementById('colorGrid');
 const yen = n => '¥'+n.toLocaleString();
@@ -178,7 +188,7 @@ colors.forEach((c, i) => {
     document.querySelectorAll('.color-card').forEach(x => x.classList.remove('selected'));
     card.classList.add('selected');
     selected = colors[i];
-    document.getElementById('charImg').src = `${IMG_DIR}/photo_${c.key}.jpg`;
+    document.getElementById('charImg').src = `${IMG_DIR}/${pic(c)}`;
     document.getElementById('selectedLabel').textContent = c.name;
     document.getElementById('barName').textContent = c.name;
     renderDetail(c);
@@ -191,6 +201,7 @@ function renderDetail(c){
   document.getElementById('selTitle').textContent = c.title || '';
   document.getElementById('selLead').textContent  = c.lead  || '';
   document.getElementById('selDesc').textContent  = c.desc  || '';
+  document.getElementById('selNote').textContent  = c.note  || '';
 }
 // COLOR TAPから ?p=キー で来たら、その県を初期選択（無ければ先頭のまま）
 (function(){
@@ -211,7 +222,7 @@ async function checkout() {
       items:[{item_id:CHAR_ID+'_item', item_name:CHAR_NAME, character_id:CHAR_ID, price:PRICE, quantity:1}]})); }catch(e){}
     const res = await fetch('/api/checkout', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} キャンバスアート ${selected.name}${selected.stock>0?'':'（受注生産）'}`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_ROOT}/photo_${selected.key}.jpg`] }] }),
+      body: JSON.stringify({ items: [{ name:`${CHAR_NAME} キャンバスアート ${selected.name}${selected.stock>0?'':'（受注生産）'}`, price:PRICE, quantity:1, images:[`https://charamarl.com${IMG_ROOT}/${pic(selected)}`] }] }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
@@ -220,14 +231,12 @@ async function checkout() {
 }
 document.getElementById('addCartBtn').addEventListener('click', function(){
   if (!SALE_READY) return;
-    window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name+(selected.stock>0?'':'（受注生産）'), PRICE, `${IMG_ROOT}/photo_${selected.key}.jpg`, 'キャンバスアート');
+    window.CHARAMARL_CART.add(CHAR_ID, selected.key, CHAR_NAME, selected.name+(selected.stock>0?'':'（受注生産）'), PRICE, `${IMG_ROOT}/${pic(selected)}`, 'キャンバスアート');
   const o=this.textContent; this.textContent='✓ 追加しました'; setTimeout(()=>this.textContent=o, 1200);
 });
 
 
 // ===== 定番色のみ販売・他の色は🗳リクエスト制 =====
-const REQ_KEY='charamarl_color_req';
-const reqSet=()=>{try{return new Set(JSON.parse(localStorage.getItem(REQ_KEY)||'[]'));}catch(e){return new Set();}};
 function updateBuyBar(){
   const hero=true;
   document.getElementById('addCartBtn').style.display=(hero&&SALE_READY)?'':'none';

@@ -267,7 +267,7 @@ ARTIST_OF = {'dinorenny': 'DinoRenny', 'maru': 'MARU_GMC', 'chui': 'ちゅい', 
              'inkzmonster': "Ink'z Monster", 'calma': '赤猫かるま', 'crazy': 'CRAZY', 'morry': 'morry',
              'chinchillo': 'チンチロ', 'kagechiyo': 'カゲチヨ',
              'hanna': 'ハンナ', 'cryptosuperheroes': 'CryptoSuperHeroes', 'utsuutsu': '恋するウツウツ',
-             'akira': 'AKIRA', 'karuki': 'かるき', 'selfiebears': 'Selfie Bears'}
+             'akira': 'AKIRA', 'karuki': 'かるき', 'selfiebears': 'Selfie Bears', 'tosakamami': 'トサカマミ'}
 
 def products():
     """販売中の商品ページ。名前・価格・作家は**ページに書いてあるもの**を読む（ここで決めない）。"""

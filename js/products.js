@@ -62,6 +62,7 @@ window.CM_PRODUCTS = [
   { id:"cv_selfie_human_03", name:"Selfie...Human? 03 キャンバス", creator:"Selfie Bears", price:3300, kind:'キャンバスアート', img:"./img/t/canvas/a/selfie_human_03.webp", page:"./characters/canvas-selfie-bears.html?w=selfie_human_03&utm_source=charamarl_artist" },
   { id:"cv_selfie_human_04", name:"Selfie...Human? 04 キャンバス", creator:"Selfie Bears", price:3300, kind:'キャンバスアート', img:"./img/t/canvas/a/selfie_human_04.webp", page:"./characters/canvas-selfie-bears.html?w=selfie_human_04&utm_source=charamarl_artist" },
   { id:"cv_selfie_human_05", name:"Selfie...Human? 05 キャンバス", creator:"Selfie Bears", price:3300, kind:'キャンバスアート', img:"./img/t/canvas/a/selfie_human_05.webp", page:"./characters/canvas-selfie-bears.html?w=selfie_human_05&utm_source=charamarl_artist" },
+  { id:"cv_tosakamami_moni", name:"moni キャンバス", creator:"トサカマミ", price:3300, kind:'キャンバスアート', img:"./img/t/canvas/a/tosakamami_moni.webp", page:"./characters/canvas-tosakamami.html?w=tosakamami_moni&utm_source=charamarl_artist" },
   // CANVAS ここまで
 ];
 
