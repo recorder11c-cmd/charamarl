@@ -394,6 +394,8 @@
   .art-goods img{width:112px;height:112px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:14px;display:block;}
   .art-goods .ag-n{font-size:11px;font-weight:800;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .art-goods .ag-p{font-size:11px;color:var(--orange);font-weight:900;}
+  .art-goods a.me img{border:2px solid var(--orange);}
+  .art-goods a.me .ag-n{color:var(--orange);}
   .art-visit:hover{background:var(--orange);color:#fff;}
   .art-desc-h{font-size:15px;font-weight:900;margin-bottom:8px;}
 </style>
@@ -1459,14 +1461,19 @@
       var g=document.getElementById('aGoods'); if(!g)return;
       var who=String(a.artistName||a.artist||'').replace(/^by\s+/,'').trim();
       var nm=function(t){return String(t||'').trim().toLowerCase().replace(/[\s'’.\-_+]/g,'');};
-      var goods=(window.CM_PRODUCTS||[]).filter(function(p){return who&&nm(p.creator)===nm(who);}).slice(0,8);
+      var all=(window.CM_PRODUCTS||[]).filter(function(p){return who&&nm(p.creator)===nm(who);});
+      var mine=all.filter(function(p){return p.gid&&p.gid===curArt;});
+      var goods=mine.concat(all.filter(function(p){return mine.indexOf(p)<0;})).slice(0,8);
       if(!goods.length){g.hidden=true;g.innerHTML='';return;}
       var esc=function(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');};
       g.innerHTML='<div class="ag-h">🛒 '+esc(who)+'さんのグッズ</div><div class="ag-row">'+goods.map(function(p){
         var pg=String(p.page||'').replace(/^\.\//,'./').replace(/[?&]utm_[a-z]+=[^&]*/g,'').replace(/&/,'?');
-        return '<a href="'+esc(pg+(pg.indexOf('?')>=0?'&':'?')+'utm_source=artwork_modal')+'"><img src="'+esc(p.img)+'" alt="" loading="lazy"><div class="ag-n">'+esc(p.name)+'</div><div class="ag-p">¥'+Number(p.price).toLocaleString()+'</div></a>';
+        var me=mine.indexOf(p)>=0;
+        return '<a'+(me?' class="me" data-cv="1"':'')+' href="'+esc(pg+(pg.indexOf('?')>=0?'&':'?')+'utm_source=artwork_modal')+'"><img src="'+esc(p.img)+'" alt="" loading="lazy"><div class="ag-n">'+(me?'この絵のキャンバス':esc(p.name))+'</div><div class="ag-p">¥'+Number(p.price).toLocaleString()+'</div></a>';
       }).join('')+'</div>';
       g.hidden=false;
+      var cv=g.querySelector('a[data-cv]');
+      if(cv)cv.addEventListener('click',function(){if(window.cmEvent)cmEvent('click_canvas_entry',{from:'artwork_modal'});});
     })();
     // 送客ボタン: 主=作品固有リンク(link)、無ければ作家のホーム(ARTISTS[作家名小文字].home)。副=主が作品固有のとき作家のホーム
     (function(){

@@ -538,9 +538,10 @@ def main():
 
     # 作家ページの「買えるもの」（js/products.js）
     rows = '\n'.join(
-        "  { id:%s, name:%s, creator:%s, price:%d, kind:'キャンバスアート', img:%s, page:%s }," % (
+        "  { id:%s, name:%s, creator:%s, price:%d, kind:'キャンバスアート', img:%s, page:%s, gid:%s }," % (
             js('cv_' + w['key']), js(w['title'] + ' キャンバス'), js(w['artist']), PRICE,
-            js('./' + w['thumb']), js(f"./characters/canvas-{w['slug']}.html?w={w['key']}&utm_source=charamarl_artist"))
+            js('./' + w['thumb']), js(f"./characters/canvas-{w['slug']}.html?w={w['key']}&utm_source=charamarl_artist"),
+            js(w.get('gid') or ''))
         for w in works)
     p = open('js/products.js', encoding='utf-8').read()
     block = f'{PJS_A}\n{rows}\n{PJS_B}\n'
