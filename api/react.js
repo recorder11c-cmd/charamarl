@@ -14,7 +14,9 @@ const ART_IDS = [
 const COLOR_REQ = /^(sue|putti|mossun|gmc|ufoo|dogooooo)_[a-z]{2,15}$/;
 const EXTRA_TAP = /^(crazy_tap|gotochi_tap|mony_tap)$/;
 const FUNNEL = /^(sue|putti|mossun|gmc|ufoo|dogooooo|inkumo|danna|blockma|yurucrazy|kagechiyo_hoodie|dino_canvas|mony|pins)_(cart|buy|paid)$/; // 購入ファネル計測（paid=決済完了）
-const INTEREST = /^(sue|putti|mossun|gmc|ufoo|dogooooo|inkumo|danna|blockma|yurucrazy|kagechiyo_hoodie|pins)_interest$/;
+// 作家さんのキャンバス（characters/canvas*.html）の「今すぐ購入」。key は characters/canvas.json のもの（英小文字・数字・_）
+const CANVAS_BUY = /^cv_[a-z0-9_]{2,40}_buy$/;
+const INTEREST =/^(sue|putti|mossun|gmc|ufoo|dogooooo|inkumo|danna|blockma|yurucrazy|kagechiyo_hoodie|pins)_interest$/;
 const COLOR_IDS = ['sue','putti','mossun','gmc'].flatMap(c =>
   ['red','yellow','green','cyan','blue','pink'].map(k => `${c}_${k}`));
 // 投稿ギャラリー(api/gallery.js)で承認された作品IDは react:extra 集合で許可
@@ -24,6 +26,7 @@ async function isAllowedId(id) {
   if (INTEREST.test(String(id))) return true;
   if (EXTRA_TAP.test(String(id))) return true;
   if (FUNNEL.test(String(id))) return true;
+  if (CANVAS_BUY.test(String(id))) return true;
   if (!/^g[a-f0-9]{12}$/.test(String(id))) return false;
   return Number(await redis('SISMEMBER', 'react:extra', id)) === 1;
 }
